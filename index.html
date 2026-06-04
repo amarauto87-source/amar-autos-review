@@ -79,18 +79,28 @@
     const stars = document.querySelectorAll('.stars span');
     const reviewBox = document.getElementById('review-box');
 
-    // Star Click Logic
+    // Star Click Logic - Now with no repeats!
     stars.forEach(star => {
         star.addEventListener('click', function() {
             const rating = this.getAttribute('data-value');
 
+            // Stars ko highlight karna
             stars.forEach(s => s.classList.remove('active'));
             for(let i = 0; i < rating; i++) {
                 stars[i].classList.add('active');
             }
 
             const availableReviews = reviewsDatabase[rating];
-            const randomIndex = Math.floor(Math.random() * availableReviews.length);
+            let randomIndex;
+            
+            // Ye check karega ki naya review pehle wale jaisa na ho
+            if (availableReviews.length > 1) {
+                do {
+                    randomIndex = Math.floor(Math.random() * availableReviews.length);
+                } while (availableReviews[randomIndex] === reviewBox.value);
+            } else {
+                randomIndex = 0;
+            }
             
             reviewBox.value = availableReviews[randomIndex];
         });
@@ -112,6 +122,5 @@
         window.open("https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA", "_blank");
     }
 </script>
-
 </body>
 </html>
