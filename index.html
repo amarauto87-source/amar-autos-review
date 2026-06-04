@@ -1,178 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amar Autos Review</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f5f5f5;
-padding:15px;
-}
-
-.container{
-max-width:500px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:15px;
-box-shadow:0 0 15px rgba(0,0,0,.1);
-}
-
-.logo{
-text-align:center;
-font-size:24px;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-.sub{
-text-align:center;
-color:#666;
-margin-bottom:20px;
-}
-
-.stars{
-display:flex;
-justify-content:center;
-gap:10px;
-margin:20px 0;
-}
-
-.star{
-font-size:55px;
-cursor:pointer;
-color:#ccc;
-}
-
-.active{
-color:#f7b500;
-}
-
-textarea{
-width:100%;
-min-height:180px;
-padding:15px;
-font-size:16px;
-border-radius:10px;
-border:1px solid #ddd;
-resize:none;
-}
-
-button{
-width:100%;
-padding:15px;
-margin-top:15px;
-font-size:18px;
-font-weight:bold;
-border:none;
-border-radius:10px;
-background:#f7b500;
-cursor:pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amar Autos - Leave a Review</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding-top: 50px; background-color: #f8f9fa; margin: 0;}
+        .review-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 90%;}
+        h2 { margin-bottom: 5px; color: #333;}
+        p { color: #666; margin-bottom: 20px;}
+        
+        .stars { font-size: 40px; cursor: pointer; color: #e0e0e0; margin-bottom: 20px; user-select: none;}
+        .stars span:hover, .stars span.active { color: #ffc107; } 
+        
+        textarea { width: 100%; height: 120px; padding: 15px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.5;}
+        
+        .button-group { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;}
+        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;}
+        .btn-copy { background: #000; color: #fff; }
+        .btn-copy:hover { background: #333; }
+        .btn-google { background: #ffc107; color: #000; }
+        .btn-google:hover { background: #ffb300; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="review-card">
+    <h2>Royal Enfield - Amar Autos</h2>
+    <p>Please rate your experience</p>
 
-<div class="logo">
-Royal Enfield Showroom<br>
-Amar Autos
-</div>
+    <div class="stars" id="star-container">
+        <span data-value="1">★</span>
+        <span data-value="2">★</span>
+        <span data-value="3">★</span>
+        <span data-value="4">★</span>
+        <span data-value="5">★</span>
+    </div>
 
-<div class="sub">
-How was your experience today?
-</div>
+    <textarea id="review-box" placeholder="Select stars to generate a review..."></textarea>
 
-<div class="stars">
-<span class="star" onclick="setRating(1)">★</span>
-<span class="star" onclick="setRating(2)">★</span>
-<span class="star" onclick="setRating(3)">★</span>
-<span class="star" onclick="setRating(4)">★</span>
-<span class="star" onclick="setRating(5)">★</span>
-</div>
-
-<textarea id="reviewBox" readonly>
-Please select a rating.
-</textarea>
-
-<button onclick="submitReview()">
-Submit Review
-</button>
-
+    <div class="button-group">
+        <button class="btn-copy" onclick="copyReview()">Copy Review</button>
+        <button class="btn-google" onclick="openGoogle()">Open Google Review</button>
+    </div>
 </div>
 
 <script>
+    // Reviews Database
+    const reviewsDatabase = {
+        1: [
+            "Disappointed with the service. Needs a lot of improvement.",
+            "Not a good experience. The staff was not helpful.",
+            "Very poor service and delayed delivery. Not recommended."
+        ],
+        2: [
+            "Below average experience. Expected better from Amar Autos.",
+            "Service was okay, but the process took way too long.",
+            "Could be much better. Communication needs improvement."
+        ],
+        3: [
+            "Average experience. Nothing extraordinary.",
+            "It was decent. Got the bike but the paperwork was a bit slow.",
+            "Okay service. Room for improvement in customer handling."
+        ],
+        4: [
+            "Good buying experience! The staff was polite and helpful.",
+            "Nice showroom and smooth process. Very happy with my new Royal Enfield.",
+            "Great service by the Amar Autos team. Definitely recommended!"
+        ],
+        5: [
+            "Excellent buying experience. The staff was professional, supportive, and explained everything clearly. Highly recommended.",
+            "Best Royal Enfield showroom! Smooth delivery and great customer support from start to finish.",
+            "Five stars! Completely hassle-free process and an amazing team at Amar Autos. Loved the delivery experience!",
+            "Fantastic service! They made buying my dream bike so easy and special. Thank you Amar Autos."
+        ]
+    };
 
-let selectedPrompt = "";
+    const stars = document.querySelectorAll('.stars span');
+    const reviewBox = document.getElementById('review-box');
 
-const prompts = [
+    // Star Click Logic
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-value');
 
-"Describe your overall experience at Amar Autos.",
-"What did you like most about your visit today?",
-"How was your interaction with the showroom staff?",
-"Was the booking and delivery process smooth?",
-"How well were the motorcycle features explained to you?",
-"How was the behaviour of the team during your visit?",
-"Did you receive timely updates regarding your booking?",
-"What made your experience memorable?",
-"How was the showroom environment and hospitality?",
-"Would you recommend Amar Autos to your friends and family? Why?",
-"How satisfied are you with the guidance provided during your purchase?",
-"How was your experience with documentation and paperwork?",
-"Did the staff answer your questions clearly?",
-"How was your delivery day experience?",
-"How did the team help you choose the right motorcycle?",
-"How was your overall Royal Enfield buying experience?",
-"How helpful was the sales process from start to finish?",
-"What impressed you most during your visit?",
-"How was your experience compared to other dealerships?",
-"Share your honest feedback about your experience at Amar Autos."
+            stars.forEach(s => s.classList.remove('active'));
+            for(let i = 0; i < rating; i++) {
+                stars[i].classList.add('active');
+            }
 
-];
+            const availableReviews = reviewsDatabase[rating];
+            const randomIndex = Math.floor(Math.random() * availableReviews.length);
+            
+            reviewBox.value = availableReviews[randomIndex];
+        });
+    });
 
-function setRating(rating){
+    // Copy Button Logic
+    function copyReview() {
+        if(reviewBox.value.trim() === "") {
+            alert("Please select a rating first!");
+            return;
+        }
+        reviewBox.select();
+        document.execCommand("copy");
+        alert("Review copied! Now paste it on Google.");
+    }
 
-document.querySelectorAll('.star').forEach((s,index)=>{
-if(index<rating){
-s.classList.add('active');
-}else{
-s.classList.remove('active');
-}
-});
-
-selectedPrompt =
-prompts[Math.floor(Math.random()*prompts.length)];
-
-document.getElementById("reviewBox").value =
-selectedPrompt;
-}
-
-function submitReview(){
-
-if(selectedPrompt===""){
-alert("Please select a rating first.");
-return;
-}
-
-navigator.clipboard.writeText(selectedPrompt);
-
-window.open(
-"https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA",
-"_blank"
-);
-
-}
+    // Google Review Open Logic
+    function openGoogle() {
+        window.open("https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA", "_blank");
+    }
 </script>
 
 </body>
