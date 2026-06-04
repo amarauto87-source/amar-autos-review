@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amar Autos - Leave a Review</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:600px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+h1{
+    color:#222;
+}
+
+.stars{
+    font-size:40px;
+    cursor:pointer;
+    margin:20px 0;
+}
+
+.star{
+    color:#ccc;
+}
+
+.star.active{
+    color:#f4b400;
+}
+
+#reviewBox{
+    width:100%;
+    min-height:140px;
+    padding:15px;
+    font-size:15px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+}
+
+.btn{
+    display:inline-block;
+    margin:10px;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.copy{
+    background:#000;
+    color:#fff;
+}
+
+.review{
+    background:#f4b400;
+    color:#000;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Royal Enfield Showroom - Amar Autos</h1>
+
+<p>Please rate your experience</p>
+
+<div class="stars">
+    <span class="star" onclick="setRating(1)">★</span>
+    <span class="star" onclick="setRating(2)">★</span>
+    <span class="star" onclick="setRating(3)">★</span>
+    <span class="star" onclick="setRating(4)">★</span>
+    <span class="star" onclick="setRating(5)">★</span>
+</div>
+
+<textarea id="reviewBox" readonly>
+Select a rating above to get a suggested review.
+</textarea>
+
+<br>
+
+<button class="btn copy" onclick="copyReview()">
+Copy Review
+</button>
+
+<a class="btn review"
+href="https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA"
+target="_blank">
+Open Google Review
+</a>
+
+</div>
+
+<script>
+
+const reviews = {
+1:"Please share your feedback so we can improve our service.",
+2:"Thank you for your feedback. We will work on improving your experience.",
+3:"Overall experience was satisfactory. Thank you for visiting Amar Autos.",
+4:"Good experience overall. Staff was helpful and the process was smooth.",
+5:"Excellent buying experience. The staff was professional, supportive, and explained everything clearly. Delivery process was smooth and hassle-free. Highly recommended."
+};
+
+function setRating(rating){
+
+let stars=document.querySelectorAll('.star');
+
+stars.forEach((star,index)=>{
+    if(index < rating){
+        star.classList.add('active');
+    }else{
+        star.classList.remove('active');
+    }
+});
+
+document.getElementById('reviewBox').value=reviews[rating];
+}
+
+function copyReview(){
+
+let text=document.getElementById('reviewBox');
+
+text.select();
+text.setSelectionRange(0,99999);
+
+navigator.clipboard.writeText(text.value);
+
+alert("Review copied successfully!");
+}
+
+</script>
+
+</body>
+</html>
