@@ -3,73 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amar Autos - Leave a Review</title>
+<title>Amar Autos Review</title>
 
 <style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
 body{
-    font-family: Arial, sans-serif;
-    background:#f5f5f5;
-    margin:0;
-    padding:20px;
+background:#f5f5f5;
+padding:15px;
 }
 
 .container{
-    max-width:600px;
-    margin:auto;
-    background:#fff;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    text-align:center;
+max-width:500px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:15px;
+box-shadow:0 0 15px rgba(0,0,0,.1);
 }
 
-h1{
-    color:#222;
+.logo{
+text-align:center;
+font-size:24px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.sub{
+text-align:center;
+color:#666;
+margin-bottom:20px;
 }
 
 .stars{
-    font-size:40px;
-    cursor:pointer;
-    margin:20px 0;
+display:flex;
+justify-content:center;
+gap:10px;
+margin:20px 0;
 }
 
 .star{
-    color:#ccc;
+font-size:55px;
+cursor:pointer;
+color:#ccc;
 }
 
-.star.active{
-    color:#f4b400;
+.active{
+color:#f7b500;
 }
 
-#reviewBox{
-    width:100%;
-    min-height:140px;
-    padding:15px;
-    font-size:15px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    box-sizing:border-box;
+textarea{
+width:100%;
+min-height:180px;
+padding:15px;
+font-size:16px;
+border-radius:10px;
+border:1px solid #ddd;
+resize:none;
 }
 
-.btn{
-    display:inline-block;
-    margin:10px;
-    padding:12px 20px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-}
-
-.copy{
-    background:#000;
-    color:#fff;
-}
-
-.review{
-    background:#f4b400;
-    color:#000;
-    text-decoration:none;
+button{
+width:100%;
+padding:15px;
+margin-top:15px;
+font-size:18px;
+font-weight:bold;
+border:none;
+border-radius:10px;
+background:#f7b500;
+cursor:pointer;
 }
 </style>
 </head>
@@ -78,73 +85,94 @@ h1{
 
 <div class="container">
 
-<h1>Royal Enfield Showroom - Amar Autos</h1>
+<div class="logo">
+Royal Enfield Showroom<br>
+Amar Autos
+</div>
 
-<p>Please rate your experience</p>
+<div class="sub">
+How was your experience today?
+</div>
 
 <div class="stars">
-    <span class="star" onclick="setRating(1)">★</span>
-    <span class="star" onclick="setRating(2)">★</span>
-    <span class="star" onclick="setRating(3)">★</span>
-    <span class="star" onclick="setRating(4)">★</span>
-    <span class="star" onclick="setRating(5)">★</span>
+<span class="star" onclick="setRating(1)">★</span>
+<span class="star" onclick="setRating(2)">★</span>
+<span class="star" onclick="setRating(3)">★</span>
+<span class="star" onclick="setRating(4)">★</span>
+<span class="star" onclick="setRating(5)">★</span>
 </div>
 
 <textarea id="reviewBox" readonly>
-Select a rating above to get a suggested review.
+Please select a rating.
 </textarea>
 
-<br>
-
-<button class="btn copy" onclick="copyReview()">
-Copy Review
+<button onclick="submitReview()">
+Submit Review
 </button>
-
-<a class="btn review"
-href="https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA"
-target="_blank">
-Open Google Review
-</a>
 
 </div>
 
 <script>
 
-const reviews = {
-1:"Please share your feedback so we can improve our service.",
-2:"Thank you for your feedback. We will work on improving your experience.",
-3:"Overall experience was satisfactory. Thank you for visiting Amar Autos.",
-4:"Good experience overall. Staff was helpful and the process was smooth.",
-5:"Excellent buying experience. The staff was professional, supportive, and explained everything clearly. Delivery process was smooth and hassle-free. Highly recommended."
-};
+let selectedPrompt = "";
+
+const prompts = [
+
+"Describe your overall experience at Amar Autos.",
+"What did you like most about your visit today?",
+"How was your interaction with the showroom staff?",
+"Was the booking and delivery process smooth?",
+"How well were the motorcycle features explained to you?",
+"How was the behaviour of the team during your visit?",
+"Did you receive timely updates regarding your booking?",
+"What made your experience memorable?",
+"How was the showroom environment and hospitality?",
+"Would you recommend Amar Autos to your friends and family? Why?",
+"How satisfied are you with the guidance provided during your purchase?",
+"How was your experience with documentation and paperwork?",
+"Did the staff answer your questions clearly?",
+"How was your delivery day experience?",
+"How did the team help you choose the right motorcycle?",
+"How was your overall Royal Enfield buying experience?",
+"How helpful was the sales process from start to finish?",
+"What impressed you most during your visit?",
+"How was your experience compared to other dealerships?",
+"Share your honest feedback about your experience at Amar Autos."
+
+];
 
 function setRating(rating){
 
-let stars=document.querySelectorAll('.star');
-
-stars.forEach((star,index)=>{
-    if(index < rating){
-        star.classList.add('active');
-    }else{
-        star.classList.remove('active');
-    }
+document.querySelectorAll('.star').forEach((s,index)=>{
+if(index<rating){
+s.classList.add('active');
+}else{
+s.classList.remove('active');
+}
 });
 
-document.getElementById('reviewBox').value=reviews[rating];
+selectedPrompt =
+prompts[Math.floor(Math.random()*prompts.length)];
+
+document.getElementById("reviewBox").value =
+selectedPrompt;
 }
 
-function copyReview(){
+function submitReview(){
 
-let text=document.getElementById('reviewBox');
-
-text.select();
-text.setSelectionRange(0,99999);
-
-navigator.clipboard.writeText(text.value);
-
-alert("Review copied successfully!");
+if(selectedPrompt===""){
+alert("Please select a rating first.");
+return;
 }
 
+navigator.clipboard.writeText(selectedPrompt);
+
+window.open(
+"https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA",
+"_blank"
+);
+
+}
 </script>
 
 </body>
