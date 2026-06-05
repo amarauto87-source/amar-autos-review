@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,11 +33,13 @@
         .stars span:hover { transform: scale(1.1); }
         .stars span.active { color: #E5A93C; } 
         
-        /* Inputs */
+        /* Inputs & Select */
         .input-group { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; text-align: left; animation: fadeIn 0.4s ease;}
-        .input-group input { flex: 1; min-width: 45%; padding: 12px; background: #222222; color: #ffffff; border: 1px solid #444444; border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: 0.3s;}
+        .input-group input, .input-group select { flex: 1; min-width: 45%; padding: 12px; background: #222222; color: #ffffff; border: 1px solid #444444; border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: 0.3s; appearance: none; -webkit-appearance: none;}
         .input-group input::placeholder { color: #777777; }
-        .input-group input:focus { border-color: #E5A93C; outline: none; box-shadow: 0 0 5px rgba(229, 169, 60, 0.3); }
+        .input-group input:focus, .input-group select:focus { border-color: #E5A93C; outline: none; box-shadow: 0 0 5px rgba(229, 169, 60, 0.3); }
+        .input-group select { cursor: pointer; background-image: url('data:image/svg+xml;utf8,<svg fill="%23aaaaaa" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; }
+        .input-group select option { background: #222222; color: #ffffff; }
 
         /* Tags */
         .tags-container { display: none; margin-bottom: 20px; text-align: center; animation: fadeIn 0.4s ease;}
@@ -88,7 +91,24 @@
     </div>
 
     <div class="input-group" id="input-group">
-        <input type="text" id="model-name" placeholder="Bike Model (e.g. Classic 350)" oninput="updateReviewBox()">
+        <select id="model-name" onchange="updateReviewBox()">
+            <option value="" disabled selected id="model-placeholder">Select Bike Model</option>
+            <option value="Bullet 350">Bullet 350</option>
+            <option value="Classic 350">Classic 350</option>
+            <option value="Goan Classic 350">Goan Classic 350</option>
+            <option value="Hunter 350">Hunter 350</option>
+            <option value="Meteor 350">Meteor 350</option>
+            <option value="Classic 650">Classic 650</option>
+            <option value="Scram 440">Scram 440</option>
+            <option value="Super Meteor 650">Super Meteor 650</option>
+            <option value="Himalayan 450">Himalayan 450</option>
+            <option value="GT 650">GT 650</option>
+            <option value="Bear 650">Bear 650</option>
+            <option value="Shotgun 650">Shotgun 650</option>
+            <option value="Guerrilla 450">Guerrilla 450</option>
+            <option value="Other">Other</option>
+        </select>
+
         <input type="text" id="sales-person" placeholder="Sales Person Name (Optional)" oninput="updateReviewBox()">
     </div>
 
@@ -152,7 +172,7 @@
         document.getElementById('lang-hi').classList.toggle('active');
 
         document.getElementById('subtitle-text').innerText = isHindi ? "अपना अनुभव रेटिंग द्वारा बताएं" : "Please rate your experience";
-        modelInput.placeholder = isHindi ? "बाइक का मॉडल (जैसे: Classic 350)" : "Bike Model (e.g. Classic 350)";
+        document.getElementById('model-placeholder').innerText = isHindi ? "बाइक का मॉडल चुनें" : "Select Bike Model";
         salesInput.placeholder = isHindi ? "सेल्स पर्सन का नाम (ऐच्छिक)" : "Sales Person Name (Optional)";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy";
         btnGoogle.innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
@@ -249,7 +269,7 @@
     function updateReviewBox() {
         if(currentRating === 0) return;
 
-        let mName = modelInput.value.trim();
+        let mName = modelInput.value;
         let sName = salesInput.value.trim();
         let finalReview = "";
 
@@ -257,8 +277,8 @@
             let firstTag = selectedTagsData[0];
             let opening = isHindi ? firstTag.openHi : firstTag.openEn;
 
-            // SMART SENTENCE BLENDING: {MODEL} को नाम या "bike/बाइक" से बदलना
-            let modelReplacement = mName !== "" ? mName : (isHindi ? "बाइक" : "bike");
+            // SMART SENTENCE BLENDING
+            let modelReplacement = mName !== "" && mName !== "Other" ? mName : (isHindi ? "बाइक" : "bike");
             opening = opening.replace("{MODEL}", modelReplacement);
             
             finalReview += opening;
@@ -281,7 +301,7 @@
         if (dataSaved || currentRating === 0) return;
         dataSaved = true;
 
-        const mName = modelInput.value.trim();
+        const mName = modelInput.value;
         const sName = salesInput.value.trim();
         const tagsString = selectedTagsData.map(item => isHindi ? item.tagHi : item.tagEn).join(", ");
         const rText = reviewBox.value;
