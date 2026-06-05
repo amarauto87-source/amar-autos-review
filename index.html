@@ -1,52 +1,85 @@
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amar Autos - Leave a Review</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0316SQQD2S"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0316SQQD2S');
+    </script>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; padding-top: 20px; padding-bottom: 30px; background-color: #f8f9fa; margin: 0;}
-        .review-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 90%;}
-        h2 { margin-bottom: 5px; color: #333; font-size: 22px;}
-        p { color: #666; margin-bottom: 15px; font-size: 14px;}
+        /* Royal Enfield Premium Dark Theme */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; padding: 20px 10px; background-color: #e5e5e5; margin: 0; transition: 0.3s;}
+        
+        .review-card { background: #121212; padding: 30px 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; max-width: 500px; width: 100%; position: relative; border-top: 6px solid #E5A93C;} 
+        
+        /* Language Toggle */
+        .lang-toggle { position: absolute; top: 20px; right: 20px; background: #333; border-radius: 20px; display: flex; overflow: hidden; cursor: pointer; border: 1px solid #444;}
+        .lang-btn { padding: 5px 12px; font-size: 12px; font-weight: bold; color: #aaa; transition: 0.3s; user-select: none;}
+        .lang-btn.active { background: #E5A93C; color: #000; } 
+
+        h2 { margin-top: 15px; margin-bottom: 5px; color: #ffffff; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;}
+        p { color: #aaaaaa; margin-bottom: 15px; font-size: 14px;}
         
         /* Stars Styling */
-        .stars { font-size: 35px; cursor: pointer; color: #e0e0e0; margin-bottom: 15px; user-select: none;}
-        .stars span:hover, .stars span.active { color: #ffc107; } 
+        .stars { font-size: 42px; cursor: pointer; color: #333333; margin-bottom: 15px; user-select: none; transition: 0.2s;}
+        .stars span { transition: color 0.2s, transform 0.1s; display: inline-block; }
+        .stars span:hover { transform: scale(1.1); }
+        .stars span.active { color: #E5A93C; } 
         
-        /* Input Fields for Model & Sales Person */
-        .input-group { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; text-align: left; }
-        .input-group input { flex: 1; min-width: 45%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;}
-        .input-group input:focus { border-color: #ffc107; outline: none; }
+        /* Inputs */
+        .input-group { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; text-align: left; animation: fadeIn 0.4s ease;}
+        .input-group input { flex: 1; min-width: 45%; padding: 12px; background: #222222; color: #ffffff; border: 1px solid #444444; border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: 0.3s;}
+        .input-group input::placeholder { color: #777777; }
+        .input-group input:focus { border-color: #E5A93C; outline: none; box-shadow: 0 0 5px rgba(229, 169, 60, 0.3); }
 
-        /* Tags (Keywords) Styling */
-        .tags-container { display: none; margin-bottom: 20px; text-align: center;}
-        .tags-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #444; }
+        /* Tags */
+        .tags-container { display: none; margin-bottom: 20px; text-align: center; animation: fadeIn 0.4s ease;}
+        .tags-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #dddddd; }
         .tags-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .tag { padding: 8px 12px; background: #f1f1f1; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; color: #333; user-select: none;}
-        .tag.active { background: #ffc107; color: #000; border-color: #ffc107; font-weight: bold;}
-        .show-more-btn { width: 100%; margin-top: 10px; font-weight: bold; color: #007bff; cursor: pointer; font-size: 14px; user-select: none; }
-        .show-more-btn:hover { text-decoration: underline; }
+        .tag { padding: 8px 14px; background: #222222; border: 1px solid #444444; border-radius: 25px; cursor: pointer; font-size: 13px; transition: all 0.2s ease; color: #bbbbbb; user-select: none;}
+        .tag:hover { background: #333333; }
+        .tag.active { background: #E5A93C; color: #000; border-color: #E5A93C; font-weight: bold; transform: scale(1.05); box-shadow: 0 2px 8px rgba(229, 169, 60, 0.4);}
+        .show-more-btn { width: 100%; margin-top: 10px; font-weight: bold; color: #E5A93C; cursor: pointer; font-size: 14px; user-select: none; transition: 0.2s;}
+        .show-more-btn:hover { color: #c48c2c; text-decoration: underline; }
 
         /* Textarea */
-        textarea { width: 100%; height: 120px; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.5; background-color: #fafafa;}
+        textarea { width: 100%; height: 130px; padding: 12px; margin-bottom: 20px; border: 1px solid #444444; border-radius: 6px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.5; background-color: #222222; color: #ffffff; transition: 0.3s;}
+        textarea::placeholder { color: #777777; }
+        textarea:focus { outline: none; border-color: #E5A93C; background-color: #1a1a1a;}
         
         /* Buttons */
         .button-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
-        button { padding: 12px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;}
-        .btn-copy { background: #000; color: #fff; }
-        .btn-copy:hover { background: #333; }
-        .btn-google { background: #ffc107; color: #000; }
-        .btn-google:hover { background: #ffb300; }
+        button { padding: 14px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; flex: 1; min-width: 140px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn-copy { background: #333333; color: #ffffff; }
+        .btn-copy:hover { background: #444444; transform: translateY(-2px);}
+        .btn-google { background: #E5A93C; color: #000; display: none; }
+        .btn-google:hover { background: #d49a34; transform: translateY(-2px);}
+        
+        /* Highlighted WhatsApp Button */
+        .btn-whatsapp { background: #25D366; color: #ffffff; display: none; width: 100%; font-size: 16px; padding: 18px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
+        .btn-whatsapp:hover { background: #1ebe57; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);}
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="review-card">
-    <h2>Royal Enfield - Amar Autos</h2>
-    <p>Please rate your experience</p>
+    <div class="lang-toggle" onclick="toggleLanguage()">
+        <div class="lang-btn active" id="lang-en">ENG</div>
+        <div class="lang-btn" id="lang-hi">हिंदी</div>
+    </div>
 
-    <!-- Star Rating -->
+    <h2 id="title-text">Amar Autos</h2>
+    <p id="subtitle-text">Please rate your experience</p>
+
     <div class="stars" id="star-container">
         <span data-value="1">★</span>
         <span data-value="2">★</span>
@@ -55,213 +88,251 @@
         <span data-value="5">★</span>
     </div>
 
-    <!-- Manual Inputs: Model & Salesperson -->
     <div class="input-group" id="input-group">
         <input type="text" id="model-name" placeholder="Bike Model (e.g. Classic 350)" oninput="updateReviewBox()">
         <input type="text" id="sales-person" placeholder="Sales Person Name (Optional)" oninput="updateReviewBox()">
     </div>
 
-    <!-- Tags / Keywords Options -->
     <div class="tags-container" id="tags-container">
-        <div class="tags-title">What did you like? (Select options)</div>
-        <div class="tags-list" id="tags-list">
-            <!-- Tags dynamically generated here -->
-        </div>
+        <div class="tags-title" id="tags-title">What did you like?</div>
+        <div class="tags-list" id="tags-list"></div>
     </div>
 
-    <!-- Review Text Box -->
-    <textarea id="review-box" placeholder="Select stars to start generating a review..." readonly></textarea>
+    <textarea id="review-box" placeholder="Select stars to start..." readonly></textarea>
 
-    <!-- Buttons -->
     <div class="button-group">
-        <button class="btn-copy" onclick="copyReview()">Copy Review</button>
-        <button class="btn-google" onclick="openGoogle()">Open Google Review</button>
+        <button class="btn-copy" id="btn-copy" onclick="copyReview()">Copy</button>
+        <button class="btn-google" id="btn-google" onclick="openGoogle()">Open Google Review</button>
+        <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsApp()">Send to Review Manager</button>
     </div>
 </div>
 
 <script>
-    // Keyword Database
+    let isHindi = false;
+    let currentRating = 0;
+    let selectedTagsData = [];
+    let dataSaved = false;
+
+    // Advanced Tag Database with {MODEL} placeholder for natural sentence flow
     const reviewData = {
-        positive: {
-            prefix: "I had a wonderful experience at Amar Autos! ",
-            options: [
-                { keyword: "Friendly Staff", sentence: "The staff was very friendly and welcoming." },
-                { keyword: "Product Knowledge", sentence: "They have excellent product knowledge and answered all my queries." },
-                { keyword: "Helpful Guidance", sentence: "I received helpful guidance in choosing the right bike for me." },
-                { keyword: "Quick Response", sentence: "The team was quick to respond to all my questions." },
-                { keyword: "Test Ride Experience", sentence: "The test ride experience was fantastic and well-organized." },
-                { keyword: "Smooth Purchase Experience", sentence: "The entire purchase experience was incredibly smooth." },
-                { keyword: "On-Time Delivery", sentence: "The delivery was right on time as promised." },
-                { keyword: "Bike Features Explained Well", sentence: "All the bike features were explained to me very clearly." },
-                { keyword: "Accessories Guidance", sentence: "They provided great guidance on selecting the best accessories." },
-                { keyword: "Finance Support", sentence: "The finance support was excellent and made the process easy." },
-                { keyword: "Hassle-Free Paperwork", sentence: "The paperwork was completely hassle-free." },
-                { keyword: "Excellent Customer Service", sentence: "I experienced excellent customer service throughout." },
-                { keyword: "Great Buying Experience", sentence: "Overall, it was a great buying experience." },
-                { keyword: "Highly Recommended", sentence: "I highly recommend Amar Autos to everyone." },
-                { keyword: "Exceeded Expectations", sentence: "The service totally exceeded my expectations." }
-            ]
-        },
-        neutral: {
-            prefix: "My experience at Amar Autos was okay. ",
-            options: [
-                { keyword: "Decent Staff", sentence: "The staff behavior was decent." },
-                { keyword: "Slow Paperwork", sentence: "The documentation process took more time than expected." },
-                { keyword: "Got the Bike", sentence: "I got my bike delivered, but waiting time was long." }
-            ]
-        },
-        negative: {
-            prefix: "I am disappointed with the service at Amar Autos. ",
-            options: [
-                { keyword: "Rude Behavior", sentence: "The sales team was quite unprofessional." },
-                { keyword: "Delayed Delivery", sentence: "My bike delivery was delayed." },
-                { keyword: "Poor Support", sentence: "After-sales support needs improvement." }
-            ]
-        }
+        positive: [
+            { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", openEn: "Buying my {MODEL} from Amar Autos was a delight! ", openHi: "अमर ऑटोस से {MODEL} खरीदना एक शानदार अनुभव रहा! ", bodyEn: "The staff was very friendly and welcoming. ", bodyHi: "स्टाफ का व्यवहार बहुत ही दोस्ताना और स्वागत करने वाला था। " },
+            { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", openEn: "Had an amazing {MODEL} delivery day at Amar Autos! ", openHi: "अमर ऑटोस पर मेरी {MODEL} की डिलीवरी का दिन बहुत खास रहा! ", bodyEn: "The delivery process was completely smooth and on time. ", bodyHi: "डिलीवरी का प्रोसेस बिल्कुल स्मूथ और समय पर था। " },
+            { tagEn: "Good Knowledge", tagHi: "सटीक जानकारी", openEn: "Highly impressed with the Amar Autos team while checking out the {MODEL}! ", openHi: "अमर ऑटोस की टीम ने मुझे {MODEL} के बारे में बहुत अच्छी जानकारी दी! ", bodyEn: "They have excellent product knowledge and answered all my queries. ", bodyHi: "उन्हें बाइक्स की बेहतरीन जानकारी है और उन्होंने मेरे सभी सवालों के जवाब दिए। " },
+            { tagEn: "Helpful Guidance", tagHi: "सही मार्गदर्शन", openEn: "A truly premium experience getting my {MODEL} at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} लेते वक्त एकदम प्रीमियम अनुभव मिला। ", bodyEn: "I received helpful guidance in choosing the right bike. ", bodyHi: "मुझे सही बाइक चुनने में बहुत अच्छा मार्गदर्शन मिला। " },
+            { tagEn: "Fast Process", tagHi: "तेज़ काम", openEn: "Loved the quick service for my {MODEL} at Amar Autos! ", openHi: "अमर ऑटोस पर {MODEL} की तेज़ सर्विस मुझे बहुत पसंद आई! ", bodyEn: "The paperwork and finance process was extremely fast. ", bodyHi: "पेपरवर्क और फाइनेंस का काम बहुत ही जल्दी पूरा हो गया। " },
+            { tagEn: "Great Showroom", tagHi: "शानदार शोरूम", openEn: "Got my {MODEL} from the best Royal Enfield showroom in town! ", openHi: "शहर के सबसे बेहतरीन शोरूम से मैंने अपनी {MODEL} ली! ", bodyEn: "The showroom is beautiful and well-maintained. ", bodyHi: "शोरूम बहुत सुंदर और अच्छी तरह से मेंटेन किया हुआ है। " },
+            { tagEn: "Test Ride", tagHi: "टेस्ट राइड", openEn: "Had a great {MODEL} test ride experience at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} की टेस्ट राइड का अनुभव बहुत अच्छा रहा। ", bodyEn: "The test ride experience was fantastic and well-organized. ", bodyHi: "टेस्ट राइड का अनुभव बहुत ही शानदार और व्यवस्थित था। " }
+        ],
+        neutral: [
+            { tagEn: "Decent Staff", tagHi: "ठीक-ठाक स्टाफ", openEn: "My visit to Amar Autos for the {MODEL} was average. ", openHi: "अमर ऑटोस पर {MODEL} के लिए मेरा अनुभव साधारण रहा। ", bodyEn: "The staff behavior was decent. ", bodyHi: "स्टाफ का व्यवहार ठीक-ठाक था। " },
+            { tagEn: "Slow Process", tagHi: "धीमा काम", openEn: "Got my {MODEL} from Amar Autos, but it took time. ", openHi: "अमर ऑटोस से {MODEL} मिल गई, लेकिन समय लगा। ", bodyEn: "The documentation process was a bit slow. ", bodyHi: "पेपरवर्क और डॉक्यूमेंट का काम थोड़ा धीमा था। " },
+            { tagEn: "Delayed Delivery", tagHi: "डिलीवरी में देरी", openEn: "Expected better service for my {MODEL} delivery at Amar Autos. ", openHi: "अमर ऑटोस से {MODEL} की डिलीवरी के लिए बेहतर सर्विस की उम्मीद थी। ", bodyEn: "My delivery was slightly delayed. ", bodyHi: "मेरी बाइक की डिलीवरी में थोड़ी देरी हुई। " }
+        ],
+        negative: [
+            { tagEn: "Rude Staff", tagHi: "खराब व्यवहार", openEn: "Extremely disappointed with Amar Autos while getting my {MODEL}. ", openHi: "{MODEL} लेते वक़्त अमर ऑटोस की सर्विस से बेहद निराश हूँ। ", bodyEn: "The sales team was quite unprofessional and rude. ", bodyHi: "सेल्स टीम का व्यवहार बहुत ही अनप्रोफेशनल और खराब था। " },
+            { tagEn: "Hidden Charges", tagHi: "छिपे हुए खर्चे", openEn: "Not a good experience purchasing my {MODEL} at Amar Autos. ", openHi: "अमर ऑटोस से {MODEL} खरीदने का अनुभव बिल्कुल अच्छा नहीं रहा। ", bodyEn: "There was a lack of transparency regarding pricing. ", bodyHi: "कीमतों को लेकर बिल्कुल भी पारदर्शिता नहीं थी। " },
+            { tagEn: "Poor Support", tagHi: "खराब सपोर्ट", openEn: "Would not recommend Amar Autos for getting a {MODEL}. ", openHi: "मैं {MODEL} के लिए अमर ऑटोस की सलाह किसी को नहीं दूँगा। ", bodyEn: "After-sales support and communication is very poor. ", bodyHi: "बाइक बेचने के बाद इनका सपोर्ट और बातचीत का तरीका बहुत खराब है। " }
+        ]
     };
 
     const stars = document.querySelectorAll('.stars span');
     const tagsContainer = document.getElementById('tags-container');
     const tagsList = document.getElementById('tags-list');
-    const tagsTitle = document.querySelector('.tags-title');
+    const tagsTitle = document.getElementById('tags-title');
     const inputGroup = document.getElementById('input-group');
     const modelInput = document.getElementById('model-name');
     const salesInput = document.getElementById('sales-person');
     const reviewBox = document.getElementById('review-box');
+    const btnGoogle = document.getElementById('btn-google');
+    const btnWhatsapp = document.getElementById('btn-whatsapp');
 
-    let currentPrefix = "";
-    let selectedSentences = [];
-    let isPositive = false;
+    function toggleLanguage() {
+        isHindi = !isHindi;
+        document.getElementById('lang-en').classList.toggle('active');
+        document.getElementById('lang-hi').classList.toggle('active');
 
-    // Star Click Logic
+        document.getElementById('subtitle-text').innerText = isHindi ? "अपना अनुभव रेटिंग द्वारा बताएं" : "Please rate your experience";
+        modelInput.placeholder = isHindi ? "बाइक का मॉडल (जैसे: Classic 350)" : "Bike Model (e.g. Classic 350)";
+        salesInput.placeholder = isHindi ? "सेल्स पर्सन का नाम (ऐच्छिक)" : "Sales Person Name (Optional)";
+        document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy";
+        btnGoogle.innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
+        btnWhatsapp.innerText = isHindi ? "रिव्यु मैनेजर को भेजें" : "Send to Review Manager";
+
+        if(currentRating > 0) renderTags(currentRating);
+        updateReviewBox();
+    }
+
     stars.forEach(star => {
         star.addEventListener('click', function() {
-            const rating = parseInt(this.getAttribute('data-value'));
-
-            // Highlight stars
+            currentRating = parseInt(this.getAttribute('data-value'));
+            selectedTagsData = []; 
+            dataSaved = false; 
+            
             stars.forEach(s => s.classList.remove('active'));
-            for(let i = 0; i < rating; i++) {
+            for(let i = 0; i < currentRating; i++) {
                 stars[i].classList.add('active');
             }
 
-            // Show Inputs
             inputGroup.style.display = "flex";
-
-            // Decide which category to load
-            let categoryData;
-            if (rating >= 4) {
-                categoryData = reviewData.positive;
-                tagsTitle.innerText = "What did you like the most? (Select options)";
-                isPositive = true;
-            } else if (rating === 3) {
-                categoryData = reviewData.neutral;
-                tagsTitle.innerText = "What could be better? (Select options)";
-                isPositive = false;
-            } else {
-                categoryData = reviewData.negative;
-                tagsTitle.innerText = "What went wrong? (Select options)";
-                isPositive = false;
-            }
-
-            currentPrefix = categoryData.prefix;
-            selectedSentences = [];
+            renderTags(currentRating);
+            updateButtons(currentRating);
             updateReviewBox();
-
-            // Render Tags
-            tagsContainer.style.display = "block";
-            tagsList.innerHTML = ""; 
-
-            let isExpanded = false;
-
-            categoryData.options.forEach((opt, index) => {
-                const tagBtn = document.createElement('div');
-                tagBtn.className = 'tag';
-                
-                // Pehle sirf 6 options dikhayenge
-                if(index >= 6) {
-                    tagBtn.style.display = 'none';
-                    tagBtn.classList.add('hidden-tag');
-                }
-
-                tagBtn.innerText = opt.keyword;
-                
-                tagBtn.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                    if (this.classList.contains('active')) {
-                        selectedSentences.push(opt.sentence);
-                    } else {
-                        selectedSentences = selectedSentences.filter(s => s !== opt.sentence);
-                    }
-                    updateReviewBox();
-                });
-
-                tagsList.appendChild(tagBtn);
-            });
-
-            // Show More Options Button 
-            if(categoryData.options.length > 6) {
-                const showMoreBtn = document.createElement('div');
-                showMoreBtn.className = 'show-more-btn';
-                showMoreBtn.innerText = '☐ Show More Options';
-                showMoreBtn.onclick = function() {
-                    isExpanded = !isExpanded;
-                    document.querySelectorAll('.hidden-tag').forEach(el => {
-                        el.style.display = isExpanded ? 'block' : 'none';
-                    });
-                    this.innerText = isExpanded ? '☑ Show Less Options' : '☐ Show More Options';
-                };
-                tagsList.appendChild(showMoreBtn);
-            }
         });
     });
 
-    // Smart Box Updater
-    function updateReviewBox() {
-        let finalReview = "";
-        const mName = modelInput.value.trim();
-        const sName = salesInput.value.trim();
-
-        // Agar 4 ya 5 star hai aur Model name likha hai
-        if (isPositive) {
-            if (mName !== "") {
-                finalReview = `I had a wonderful experience buying my ${mName} at Amar Autos! `;
-            } else {
-                finalReview = currentPrefix;
-            }
+    function renderTags(rating) {
+        let category;
+        if (rating >= 4) {
+            category = reviewData.positive;
+            tagsTitle.innerText = isHindi ? "आपको सबसे अच्छा क्या लगा? (विकल्प चुनें)" : "What did you like the most? (Select options)";
+        } else if (rating === 3) {
+            category = reviewData.neutral;
+            tagsTitle.innerText = isHindi ? "क्या बेहतर हो सकता था? (विकल्प चुनें)" : "What could be better? (Select options)";
         } else {
-            finalReview = currentPrefix;
-            if (mName !== "") {
-                finalReview += `(Model: ${mName}) `;
-            }
+            category = reviewData.negative;
+            tagsTitle.innerText = isHindi ? "क्या समस्या आई? (विकल्प चुनें)" : "What went wrong? (Select options)";
         }
 
-        // Tags ke sentences add karna (Bina faltu bracket text ke)
-        if (selectedSentences.length > 0) {
-            finalReview += selectedSentences.join(" ") + " ";
-        }
+        tagsContainer.style.display = "block";
+        tagsList.innerHTML = ""; 
+        let isExpanded = false;
 
-        // Agar Sales Person ka naam likha hai toh end me add karein
-        if (sName !== "") {
-            finalReview += `Special thanks to ${sName} for the excellent support and assistance.`;
-        }
+        category.forEach((opt, index) => {
+            const tagBtn = document.createElement('div');
+            tagBtn.className = 'tag';
+            if(index >= 5) tagBtn.style.display = 'none'; 
+            if(index >= 5) tagBtn.classList.add('hidden-tag');
 
-        reviewBox.value = finalReview.trim();
+            tagBtn.innerText = isHindi ? opt.tagHi : opt.tagEn;
+            
+            if(selectedTagsData.includes(opt)) tagBtn.classList.add('active');
+
+            tagBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                if (this.classList.contains('active')) {
+                    selectedTagsData.push(opt);
+                } else {
+                    selectedTagsData = selectedTagsData.filter(item => item !== opt);
+                }
+                updateReviewBox();
+            });
+            tagsList.appendChild(tagBtn);
+        });
+
+        if(category.length > 5) {
+            const showMoreBtn = document.createElement('div');
+            showMoreBtn.className = 'show-more-btn';
+            showMoreBtn.innerText = isHindi ? '☐ और विकल्प देखें' : '☐ Show More Options';
+            showMoreBtn.onclick = function() {
+                isExpanded = !isExpanded;
+                document.querySelectorAll('.hidden-tag').forEach(el => {
+                    el.style.display = isExpanded ? 'block' : 'none';
+                });
+                this.innerText = isExpanded ? (isHindi ? '☑ कम विकल्प दिखाएं' : '☑ Show Less Options') : (isHindi ? '☐ और विकल्प देखें' : '☐ Show More Options');
+            };
+            tagsList.appendChild(showMoreBtn);
+        }
     }
 
-    // Copy Button Logic
+    function updateButtons(rating) {
+        if (rating >= 4) {
+            btnGoogle.style.display = "block";
+            document.getElementById('btn-copy').style.display = "block";
+            btnWhatsapp.style.display = "none";
+        } else {
+            btnGoogle.style.display = "none";
+            document.getElementById('btn-copy').style.display = "none";
+            btnWhatsapp.style.display = "block";
+        }
+    }
+
+    function updateReviewBox() {
+        if(currentRating === 0) return;
+
+        let mName = modelInput.value.trim();
+        let sName = salesInput.value.trim();
+        let finalReview = "";
+
+        if (selectedTagsData.length > 0) {
+            let firstTag = selectedTagsData[0];
+            let opening = isHindi ? firstTag.openHi : firstTag.openEn;
+
+            // SMART SENTENCE BLENDING: {MODEL} को नाम या "bike/बाइक" से बदलना
+            let modelReplacement = mName !== "" ? mName : (isHindi ? "बाइक" : "bike");
+            opening = opening.replace("{MODEL}", modelReplacement);
+            
+            finalReview += opening;
+
+            selectedTagsData.forEach(tag => {
+                finalReview += (isHindi ? tag.bodyHi : tag.bodyEn);
+            });
+
+            if (sName !== "") {
+                finalReview += isHindi ? ` ${sName} को उनकी बेहतरीन मदद के लिए खास धन्यवाद।` : ` Special thanks to ${sName} for the excellent support.`;
+            }
+        } else {
+            finalReview = isHindi ? "कृपया अपने अनुभव के लिए ऊपर दिए गए विकल्प चुनें..." : "Please select options above to generate your review...";
+        }
+
+        reviewBox.value = finalReview;
+    }
+
+    function saveToGoogleSheets() {
+        if (dataSaved || currentRating === 0) return;
+        dataSaved = true;
+
+        const mName = modelInput.value.trim();
+        const sName = salesInput.value.trim();
+        const tagsString = selectedTagsData.map(item => isHindi ? item.tagHi : item.tagEn).join(", ");
+        const rText = reviewBox.value;
+
+        const payload = {
+            rating: currentRating,
+            model: mName || "N/A",
+            salesPerson: sName || "N/A",
+            tags: tagsString || "None",
+            reviewText: rText
+        };
+
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
+
+        fetch(scriptUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        }).catch(err => console.log("Data Save Error:", err));
+    }
+
     function copyReview() {
-        if(reviewBox.value.trim() === "") {
-            alert("Please select a rating first!");
+        if(selectedTagsData.length === 0) {
+            alert(isHindi ? "कृपया पहले कुछ विकल्प चुनें!" : "Please select some options first!");
             return;
         }
         reviewBox.select();
         document.execCommand("copy");
-        alert("Review copied! Now paste it on Google.");
+        saveToGoogleSheets(); 
+        alert(isHindi ? "रिव्यु कॉपी हो गया!" : "Review copied!");
     }
 
-    // Google Review Open Logic
     function openGoogle() {
+        if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले रिव्यु बनाएं!" : "Please complete your review first!"); return; }
+        copyReview();
+        saveToGoogleSheets(); 
         window.open("https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA", "_blank");
+    }
+
+    function sendToWhatsApp() {
+        if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले समस्या बताएं!" : "Please specify the issue first!"); return; }
+        
+        saveToGoogleSheets(); 
+        const managerNumber = "918448988950"; 
+        
+        const message = encodeURIComponent((isHindi ? "मैनेजर ध्यान दें, नया फीडबैक: \n\n" : "Manager Alert, New Feedback: \n\n") + reviewBox.value);
+        window.open(`https://wa.me/${managerNumber}?text=${message}`, "_blank");
     }
 </script>
 
