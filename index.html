@@ -12,6 +12,7 @@
       gtag('js', new Date());
       gtag('config', 'G-0316SQQD2S');
     </script>
+
     <style>
         /* Royal Enfield Premium Dark Theme */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; padding: 20px 10px; background-color: #e5e5e5; margin: 0; transition: 0.3s;}
@@ -47,24 +48,26 @@
         .tag { padding: 8px 14px; background: #222222; border: 1px solid #444444; border-radius: 25px; cursor: pointer; font-size: 13px; transition: all 0.2s ease; color: #bbbbbb; user-select: none;}
         .tag:hover { background: #333333; }
         .tag.active { background: #E5A93C; color: #000; border-color: #E5A93C; font-weight: bold; transform: scale(1.05); box-shadow: 0 2px 8px rgba(229, 169, 60, 0.4);}
-        .show-more-btn { width: 100%; margin-top: 10px; font-weight: bold; color: #E5A93C; cursor: pointer; font-size: 14px; user-select: none; transition: 0.2s;}
-        .show-more-btn:hover { color: #c48c2c; text-decoration: underline; }
+        
+        /* Hint Text */
+        .hint-text { color: #888; font-size: 12px; margin-bottom: 5px; text-align: left; display: none; }
 
-        /* Textarea */
-        textarea { width: 100%; height: 130px; padding: 12px; margin-bottom: 20px; border: 1px solid #444444; border-radius: 6px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.5; background-color: #222222; color: #ffffff; transition: 0.3s;}
+        /* Textarea - Editable */
+        textarea { width: 100%; height: 120px; padding: 12px; margin-bottom: 20px; border: 1px solid #444444; border-radius: 6px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.5; background-color: #1e1e1e; color: #ffffff; transition: 0.3s;}
         textarea::placeholder { color: #777777; }
-        textarea:focus { outline: none; border-color: #E5A93C; background-color: #1a1a1a;}
+        textarea:focus { outline: none; border-color: #E5A93C; background-color: #111;}
         
         /* Buttons */
-        .button-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
-        button { padding: 14px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; flex: 1; min-width: 140px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .btn-copy { background: #333333; color: #ffffff; }
+        .button-group { display: flex; flex-direction: column; gap: 10px;}
+        .top-buttons { display: flex; gap: 10px; width: 100%;}
+        button { padding: 14px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn-copy { background: #333333; color: #ffffff; display: none;}
         .btn-copy:hover { background: #444444; transform: translateY(-2px);}
-        .btn-google { background: #E5A93C; color: #000; display: none; }
+        .btn-google { background: #E5A93C; color: #000; display: none; width: 100%;}
         .btn-google:hover { background: #d49a34; transform: translateY(-2px);}
         
         /* Highlighted WhatsApp Button */
-        .btn-whatsapp { background: #25D366; color: #ffffff; display: none; width: 100%; font-size: 16px; padding: 18px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
+        .btn-whatsapp { background: #25D366; color: #ffffff; display: none; width: 100%; font-size: 15px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2); border: 1px solid #1ebe57;}
         .btn-whatsapp:hover { background: #1ebe57; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);}
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
@@ -125,12 +128,15 @@
         <div class="tags-list" id="tags-list"></div>
     </div>
 
-    <textarea id="review-box" placeholder="Select stars to start..." readonly></textarea>
+    <div class="hint-text" id="hint-text">📝 You can edit this text below:</div>
+    <textarea id="review-box" placeholder="Select stars and tap options above to build your review draft..." oninput="customEdit = true"></textarea>
 
     <div class="button-group">
-        <button class="btn-copy" id="btn-copy" onclick="copyReview()">Copy</button>
-        <button class="btn-google" id="btn-google" onclick="openGoogle()">Open Google Review</button>
-        <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsApp()">Send to Review Manager</button>
+        <div class="top-buttons">
+            <button class="btn-copy" id="btn-copy" onclick="copyReview()">Copy Draft</button>
+            <button class="btn-google" id="btn-google" onclick="openGoogle()">Open Google Review</button>
+        </div>
+        <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsApp()">Issue? Talk to Manager (WhatsApp)</button>
     </div>
 </div>
 
@@ -139,27 +145,121 @@
     let currentRating = 0;
     let selectedTagsData = [];
     let dataSaved = false;
+    let customEdit = false;
 
-    // Advanced Tag Database
+    function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
     const reviewData = {
         positive: [
-            { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", openEn: "Buying my {MODEL} from Amar Autos was a delight! ", openHi: "अमर ऑटोस से {MODEL} खरीदना एक शानदार अनुभव रहा! ", bodyEn: "The staff was very friendly and welcoming. ", bodyHi: "स्टाफ का व्यवहार बहुत ही दोस्ताना और स्वागत करने वाला था। " },
-            { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", openEn: "Had an amazing {MODEL} delivery day at Amar Autos! ", openHi: "अमर ऑटोस पर मेरी {MODEL} की डिलीवरी का दिन बहुत खास रहा! ", bodyEn: "The delivery process was completely smooth and on time. ", bodyHi: "डिलीवरी का प्रोसेस बिल्कुल स्मूथ और समय पर था। " },
-            { tagEn: "Good Knowledge", tagHi: "सटीक जानकारी", openEn: "Highly impressed with the Amar Autos team while checking out the {MODEL}! ", openHi: "अमर ऑटोस की टीम ने मुझे {MODEL} के बारे में बहुत अच्छी जानकारी दी! ", bodyEn: "They have excellent product knowledge and answered all my queries. ", bodyHi: "उन्हें बाइक्स की बेहतरीन जानकारी है और उन्होंने मेरे सभी सवालों के जवाब दिए। " },
-            { tagEn: "Helpful Guidance", tagHi: "सही मार्गदर्शन", openEn: "A truly premium experience getting my {MODEL} at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} लेते वक्त एकदम प्रीमियम अनुभव मिला। ", bodyEn: "I received helpful guidance in choosing the right bike. ", bodyHi: "मुझे सही बाइक चुनने में बहुत अच्छा मार्गदर्शन मिला। " },
-            { tagEn: "Fast Process", tagHi: "तेज़ काम", openEn: "Loved the quick service for my {MODEL} at Amar Autos! ", openHi: "अमर ऑटोस पर {MODEL} की तेज़ सर्विस मुझे बहुत पसंद आई! ", bodyEn: "The paperwork and finance process was extremely fast. ", bodyHi: "पेपरवर्क and फाइनेंस का काम बहुत ही जल्दी पूरा हो गया। " },
-            { tagEn: "Great Showroom", tagHi: "शानदार शोरूम", openEn: "Got my {MODEL} from the best Royal Enfield showroom in town! ", openHi: "शहर के सबसे बेहतरीन शोरूम से मैंने अपनी {MODEL} ली! ", bodyEn: "The showroom is beautiful and well-maintained. ", bodyHi: "शोरूम बहुत सुंदर और अच्छी तरह से मेंटेन किया हुआ है। " },
-            { tagEn: "Test Ride", tagHi: "टेस्ट राइड", openEn: "Had a great {MODEL} test ride experience at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} की टेस्ट राइड का अनुभव बहुत अच्छा रहा। ", bodyEn: "The test ride experience was fantastic and well-organized. ", bodyHi: "टेस्ट राइड का अनुभव बहुत ही शानदार और व्यवस्थित था। " }
+            { 
+                tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", 
+                openEn: ["Just got my {MODEL} from Amar Autos! ", "Super happy with my new {MODEL} from here. ", "Had an awesome experience buying my {MODEL} at Amar Autos. "], 
+                openHi: ["आज अमर ऑटोस से अपनी {MODEL} ली, मज़ा आ गया! ", "अमर ऑटोस से {MODEL} लेने का अनुभव बहुत शानदार रहा। ", "अपनी नई {MODEL} लेकर बहुत खुश हूँ! "], 
+                bodyEn: ["The staff is super friendly and polite. ", "Everyone here was really helpful and welcoming. ", "Loved the vibe and how nicely the team treated us. "], 
+                bodyHi: ["यहाँ का स्टाफ बहुत ही अच्छा और मददगार है। ", "सभी लोगों का व्यवहार बहुत ही बढ़िया था। ", "टीम ने हमारा बहुत अच्छे से स्वागत किया। "] 
+            },
+            { 
+                tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", 
+                openEn: ["Took delivery of my {MODEL} today from Amar Autos. ", "Finally got my hands on the {MODEL} from Amar Autos. ", "Amazing delivery day for my {MODEL}! "], 
+                openHi: ["अमर ऑटोस पर मेरी {MODEL} की डिलीवरी का दिन बहुत खास रहा! ", "आज अपनी {MODEL} की डिलीवरी ली। ", "डिलीवरी के दिन का अनुभव एकदम मस्त था। "], 
+                bodyEn: ["Delivery process was super smooth and right on time. ", "Got the bike without any hassle or delays. ", "Everything was kept ready for a perfect delivery. "], 
+                bodyHi: ["डिलीवरी का प्रोसेस बिल्कुल स्मूथ और समय पर था। ", "बिना किसी देरी के बहुत आराम से बाइक मिल गई। ", "डिलीवरी के लिए सब कुछ एकदम परफेक्ट तैयार था। "] 
+            },
+            { 
+                tagEn: "Good Knowledge", tagHi: "सटीक जानकारी", 
+                openEn: ["Highly impressed with the team while checking out the {MODEL}. ", "Visited Amar Autos to buy a {MODEL}. ", "Great experience getting my {MODEL} from here. "], 
+                openHi: ["अमर ऑटोस की टीम ने मुझे {MODEL} के बारे में बहुत अच्छी जानकारी दी। ", "शोरूम का स्टाफ बहुत जानकार है। ", "{MODEL} लेते वक़्त टीम का रिस्पॉन्स बहुत अच्छा था। "], 
+                bodyEn: ["The sales team cleared all my doubts very patiently. ", "They have excellent knowledge about the bikes. ", "Really appreciate how well they explained all the features. "], 
+                bodyHi: ["उन्हें बाइक्स की बेहतरीन जानकारी है और सब कुछ अच्छे से समझाया। ", "मेरे सारे सवालों के जवाब बहुत आराम से दिए। ", "फीचर्स के बारे में बहुत अच्छी तरह से बताया गया। "] 
+            },
+            { 
+                tagEn: "Fast Process", tagHi: "तेज़ काम", 
+                openEn: ["Got my {MODEL} sorted really fast at Amar Autos. ", "Loved the quick service for my {MODEL} here! ", "Bought my {MODEL} from Amar Autos today. "], 
+                openHi: ["अमर ऑटोस पर {MODEL} का सारा काम बहुत जल्दी हो गया। ", "{MODEL} की तेज़ सर्विस मुझे बहुत पसंद आई! ", "शोरूम का काम करने का तरीका बहुत फ़ास्ट है। "], 
+                bodyEn: ["The paperwork and finance process was completed very quickly. ", "Didn't have to wait much, documentation was super fast. ", "Very quick and efficient service by the team. "], 
+                bodyHi: ["पेपरवर्क और फाइनेंस का काम बहुत ही जल्दी पूरा हो गया। ", "डॉक्यूमेंटेशन में बिल्कुल भी ज़्यादा समय नहीं लगा। ", "टीम ने बहुत ही तेज़ और बढ़िया काम किया। "] 
+            },
+            { 
+                tagEn: "Great Showroom", tagHi: "शानदार शोरूम", 
+                openEn: ["Got my {MODEL} from the best Royal Enfield showroom in town! ", "Bought my {MODEL} from Amar Autos. ", "Awesome place to get a {MODEL}. "], 
+                openHi: ["शहर के सबसे बेहतरीन शोरूम से मैंने अपनी {MODEL} ली! ", "अमर ऑटोस शोरूम का माहौल बहुत अच्छा है। ", "अपनी {MODEL} लेने के लिए यह सबसे अच्छी जगह है। "], 
+                bodyEn: ["The showroom is very clean, premium, and well-maintained. ", "Really loved the ambiance of the showroom. ", "Great display of bikes and an amazing setup. "], 
+                bodyHi: ["शोरूम बहुत सुंदर, साफ़ और अच्छी तरह से मेंटेन किया हुआ है। ", "यहाँ का माहौल बहुत ही प्रीमियम लगता है। ", "बाइक्स का डिस्प्ले और पूरा सेटअप बहुत शानदार है। "] 
+            },
+            { 
+                tagEn: "Test Ride", tagHi: "टेस्ट राइड", 
+                openEn: ["Had a great {MODEL} test ride experience at Amar Autos. ", "Went to try out the {MODEL} here. "], 
+                openHi: ["अमर ऑटोस पर {MODEL} की टेस्ट राइड का अनुभव बहुत अच्छा रहा। ", "यहाँ {MODEL} की टेस्ट राइड लेने आया था। "], 
+                bodyEn: ["The test ride process was well-organized and bikes were in good condition. ", "Loved the test ride experience. "], 
+                bodyHi: ["टेस्ट राइड का प्रोसेस बहुत ही शानदार और व्यवस्थित था। ", "टेस्ट राइड की बाइक्स की कंडीशन बहुत अच्छी थी। "] 
+            }
         ],
         neutral: [
-            { tagEn: "Decent Staff", tagHi: "ठीक-ठाक स्टाफ", openEn: "My visit to Amar Autos for the {MODEL} was average. ", openHi: "अमर ऑटोस पर {MODEL} के लिए मेरा अनुभव साधारण रहा। ", bodyEn: "The staff behavior was decent. ", bodyHi: "स्टाफ का व्यवहार ठीक-ठाक था। " },
-            { tagEn: "Slow Process", tagHi: "धीमा काम", openEn: "Got my {MODEL} from Amar Autos, but it took time. ", openHi: "अमर ऑटोस से {MODEL} मिल गई, लेकिन समय लगा। ", bodyEn: "The documentation process was a bit slow. ", bodyHi: "पेपरवर्क और डॉक्यूमेंट का काम थोड़ा धीमा था। " },
-            { tagEn: "Delayed Delivery", tagHi: "डिलीवरी में देरी", openEn: "Expected better service for my {MODEL} delivery at Amar Autos. ", openHi: "अमर ऑटोस से {MODEL} की डिलीवरी के लिए बेहतर सर्विस की उम्मीद थी। ", bodyEn: "My delivery was slightly delayed. ", bodyHi: "मेरी बाइक की डिलीवरी में थोड़ी देरी हुई। " }
+            { 
+                tagEn: "Decent Staff", tagHi: "ठीक-ठाक स्टाफ", 
+                openEn: ["My visit to Amar Autos for the {MODEL} was average. ", "Got my {MODEL} from here. "], 
+                openHi: ["अमर ऑटोस पर {MODEL} के लिए मेरा अनुभव साधारण रहा। ", "मैंने अपनी {MODEL} यहाँ से ली है। "], 
+                bodyEn: ["The staff behavior was decent but could be more active. ", "Service was okay overall. "], 
+                bodyHi: ["स्टाफ का व्यवहार ठीक-ठाक था। ", "ओवरऑल सर्विस बस ठीक थी। "] 
+            },
+            { 
+                tagEn: "Slow Process", tagHi: "धीमा काम", 
+                openEn: ["Got my {MODEL} from Amar Autos, but it took time. ", "Purchased my {MODEL} here. "], 
+                openHi: ["अमर ऑटोस से {MODEL} मिल गई, लेकिन समय लगा। ", "यहाँ से {MODEL} खरीदी थी। "], 
+                bodyEn: ["The documentation process was a bit slow today. ", "Had to wait a bit longer for the paperwork. "], 
+                bodyHi: ["पेपरवर्क और डॉक्यूमेंट का काम थोड़ा धीमा था। ", "काम होने में उम्मीद से थोड़ा ज़्यादा समय लग गया। "] 
+            },
+            { 
+                tagEn: "Delayed Delivery", tagHi: "डिलीवरी में देरी", 
+                openEn: ["Expected better service for my {MODEL} delivery at Amar Autos. ", "Taking delivery of my {MODEL} today. "], 
+                openHi: ["अमर ऑटोस से {MODEL} की डिलीवरी के लिए बेहतर सर्विस की उम्मीद थी। ", "आज {MODEL} की डिलीवरी ली। "], 
+                bodyEn: ["My delivery was slightly delayed. ", "Had to wait more than promised for handover. "], 
+                bodyHi: ["मेरी बाइक की डिलीवरी में थोड़ी देरी हुई। ", "डिलीवरी के लिए मुझे इंतज़ार करना पड़ा। "] 
+            },
+            { 
+                tagEn: "Average Showroom", tagHi: "साधारण शोरूम", 
+                openEn: ["Visited Amar Autos for my {MODEL}. ", "Checked out the {MODEL} here. "], 
+                openHi: ["अमर ऑटोस से {MODEL} ली। ", "अपनी {MODEL} यहाँ से ली है। "], 
+                bodyEn: ["The showroom experience was just average. ", "Showroom ambiance could be better managed. "], 
+                bodyHi: ["शोरूम का अनुभव बहुत ही साधारण था। ", "शोरूम की व्यवस्था को थोड़ा और बेहतर किया जा सकता है। "] 
+            }
         ],
         negative: [
-            { tagEn: "Rude Staff", tagHi: "खराब व्यवहार", openEn: "Extremely disappointed with Amar Autos while getting my {MODEL}. ", openHi: "{MODEL} लेते वक़्त अमर ऑटोस की सर्विस से बेहद निराश हूँ। ", bodyEn: "The sales team was quite unprofessional and rude. ", bodyHi: "सेल्स टीम का व्यवहार बहुत ही अनप्रोफेशनल और खराब था। " },
-            { tagEn: "Hidden Charges", tagHi: "छिपे हुए खर्चे", openEn: "Not a good experience purchasing my {MODEL} at Amar Autos. ", openHi: "अमर ऑटोस से {MODEL} खरीदने का अनुभव बिल्कुल अच्छा नहीं रहा। ", bodyEn: "There was a lack of transparency regarding pricing. ", bodyHi: "कीमतों को लेकर बिल्कुल भी पारदर्शिता नहीं थी। " },
-            { tagEn: "Poor Support", tagHi: "खराब सपोर्ट", openEn: "Would not recommend Amar Autos for getting a {MODEL}. ", openHi: "मैं {MODEL} के लिए अमर ऑटोस की सलाह किसी को नहीं दूँगा। ", bodyEn: "After-sales support and communication is very poor. ", bodyHi: "बाइक बेचने के बाद इनका सपोर्ट और बातचीत का तरीका बहुत खराब है। " }
+            { 
+                tagEn: "Rude Staff", tagHi: "खराब व्यवहार", 
+                openEn: ["Extremely disappointed with Amar Autos while getting my {MODEL}. ", "Not a good experience. "], 
+                openHi: ["{MODEL} लेते वक़्त अमर ऑटोस की सर्विस से बेहद निराश हूँ। ", "मेरा अनुभव बहुत खराब रहा। "], 
+                bodyEn: ["The sales team was quite unprofessional and rude. ", "Staff behavior was not welcoming at all. "], 
+                bodyHi: ["सेल्स टीम का व्यवहार बहुत ही अनप्रोफेशनल और खराब था। ", "यहाँ स्टाफ का बात करने का तरीका सही नहीं है। "] 
+            },
+            { 
+                tagEn: "Hidden Charges", tagHi: "छिपे हुए खर्चे", 
+                openEn: ["Not a good experience purchasing my {MODEL} at Amar Autos. ", "Disappointed with the pricing transparency. "], 
+                openHi: ["अमर ऑटोस से {MODEL} खरीदने का अनुभव बिल्कुल अच्छा नहीं रहा। ", "खर्चों को लेकर यहाँ धोखा हुआ। "], 
+                bodyEn: ["There was a lack of transparency regarding pricing and hidden charges. ", "They added extra charges later which were not discussed. "], 
+                bodyHi: ["कीमतों को लेकर बिल्कुल भी पारदर्शिता नहीं थी और छिपे हुए खर्चे थे। ", "बाद में कुछ एक्स्ट्रा चार्ज जोड़ दिए गए जो पहले नहीं बताए थे। "] 
+            },
+            { 
+                tagEn: "Poor Support", tagHi: "खराब सपोर्ट", 
+                openEn: ["Would not recommend Amar Autos for getting a {MODEL}. ", "Regret my purchase from here. "], 
+                openHi: ["मैं {MODEL} के लिए अमर ऑटोस की सलाह किसी को नहीं दूँगा। ", "यहाँ से बाइक लेकर बहुत परेशानी हुई। "], 
+                bodyEn: ["After-sales support and communication is very poor. ", "The team is not responsive to queries. "], 
+                bodyHi: ["बाइक बेचने के बाद सपोर्ट और बातचीत का तरीका बहुत खराब है। ", "शिकायतों पर कोई ध्यान नहीं दिया जाता। "] 
+            },
+            { 
+                tagEn: "Bad Bike Condition", tagHi: "बाइक की खराब स्थिति", 
+                openEn: ["Terrible experience getting my {MODEL}. ", "Delivery condition of {MODEL} was bad. "], 
+                openHi: ["यहाँ से {MODEL} लेना बहुत खराब अनुभव रहा। ", "अमर ऑटोस से बाइक लेकर पछतावा हो रहा है। "], 
+                bodyEn: ["The bike was not properly cleaned and had minor issues on delivery. ", "Handover condition of the bike was very poor. "], 
+                bodyHi: ["डिलीवरी के वक़्त बाइक साफ़ नहीं थी। ", "बाइक सौंपने का तरीका और उसकी कंडीशन बहुत खराब थी। "] 
+            }
         ]
     };
 
@@ -173,6 +273,7 @@
     const reviewBox = document.getElementById('review-box');
     const btnGoogle = document.getElementById('btn-google');
     const btnWhatsapp = document.getElementById('btn-whatsapp');
+    const hintText = document.getElementById('hint-text');
 
     function updatePlaceholders() {
         document.getElementById('model-placeholder').innerText = isHindi ? "बाइक का मॉडल चुनें" : "Select Bike Model";
@@ -185,9 +286,10 @@
         document.getElementById('lang-hi').classList.toggle('active');
 
         document.getElementById('subtitle-text').innerText = isHindi ? "अपना अनुभव रेटिंग द्वारा बताएं" : "Please rate your experience";
-        document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy";
+        document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         btnGoogle.innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
-        btnWhatsapp.innerText = isHindi ? "रिव्यु मैनेजर को भेजें" : "Send to Review Manager";
+        btnWhatsapp.innerText = isHindi ? "समस्या है? मैनेजर से बात करें" : "Issue? Talk to Manager";
+        hintText.innerText = isHindi ? "📝 आप चाहें तो नीचे अपने शब्द लिख सकते हैं:" : "📝 You can edit this text below:";
 
         updatePlaceholders();
         if(currentRating > 0) renderTags(currentRating);
@@ -199,6 +301,7 @@
             currentRating = parseInt(this.getAttribute('data-value'));
             selectedTagsData = []; 
             dataSaved = false; 
+            customEdit = false; 
             
             stars.forEach(s => s.classList.remove('active'));
             for(let i = 0; i < currentRating; i++) {
@@ -206,6 +309,7 @@
             }
 
             inputGroup.style.display = "flex";
+            hintText.style.display = "block";
             updatePlaceholders();
             renderTags(currentRating);
             updateButtons(currentRating);
@@ -217,77 +321,70 @@
         let category;
         if (rating >= 4) {
             category = reviewData.positive;
-            tagsTitle.innerText = isHindi ? "आपको सबसे अच्छा क्या लगा? (विकल्प चुनें)" : "What did you like the most? (Select options)";
+            tagsTitle.innerText = isHindi ? "आपको सबसे अच्छा क्या लगा?" : "What did you like the most?";
         } else if (rating === 3) {
             category = reviewData.neutral;
-            tagsTitle.innerText = isHindi ? "क्या बेहतर हो सकता था? (विकल्प चुनें)" : "What could be better? (Select options)";
+            tagsTitle.innerText = isHindi ? "क्या बेहतर हो सकता था?" : "What could be better?";
         } else {
             category = reviewData.negative;
-            tagsTitle.innerText = isHindi ? "क्या समस्या आई? (विकल्प चुनें)" : "What went wrong? (Select options)";
+            tagsTitle.innerText = isHindi ? "क्या समस्या आई?" : "What went wrong?";
         }
 
         tagsContainer.style.display = "block";
         tagsList.innerHTML = ""; 
-        let isExpanded = false;
 
-        category.forEach((opt, index) => {
+        let shuffledCategory = shuffleArray(category);
+
+        shuffledCategory.forEach((opt) => {
             const tagBtn = document.createElement('div');
             tagBtn.className = 'tag';
-            if(index >= 5) tagBtn.style.display = 'none'; 
-            if(index >= 5) tagBtn.classList.add('hidden-tag');
-
             tagBtn.innerText = isHindi ? opt.tagHi : opt.tagEn;
             
-            if(selectedTagsData.includes(opt)) tagBtn.classList.add('active');
+            let isSelected = selectedTagsData.some(item => item.tagEn === opt.tagEn);
+            if(isSelected) tagBtn.classList.add('active');
 
             tagBtn.addEventListener('click', function() {
+                customEdit = false; 
                 this.classList.toggle('active');
+                
                 if (this.classList.contains('active')) {
-                    selectedTagsData.push(opt);
+                    let randOpen = Math.floor(Math.random() * opt.openEn.length);
+                    let randBody = Math.floor(Math.random() * opt.bodyEn.length);
+                    
+                    selectedTagsData.push({
+                        tagEn: opt.tagEn, tagHi: opt.tagHi,
+                        pickedOpenEn: opt.openEn[randOpen], pickedOpenHi: opt.openHi[randOpen],
+                        pickedBodyEn: opt.bodyEn[randBody], pickedBodyHi: opt.bodyHi[randBody]
+                    });
                 } else {
-                    selectedTagsData = selectedTagsData.filter(item => item !== opt);
+                    selectedTagsData = selectedTagsData.filter(item => item.tagEn !== opt.tagEn);
                 }
                 updateReviewBox();
             });
             tagsList.appendChild(tagBtn);
         });
-
-        if(category.length > 5) {
-            const showMoreBtn = document.createElement('div');
-            showMoreBtn.className = 'show-more-btn';
-            showMoreBtn.innerText = isHindi ? '☐ और विकल्प देखें' : '☐ Show More Options';
-            showMoreBtn.onclick = function() {
-                isExpanded = !isExpanded;
-                document.querySelectorAll('.hidden-tag').forEach(el => {
-                    el.style.display = isExpanded ? 'block' : 'none';
-                });
-                this.innerText = isExpanded ? (isHindi ? '☑ कम विकल्प दिखाएं' : '☑ Show Less Options') : (isHindi ? '☐ और विकल्प देखें' : '☐ Show More Options');
-            };
-            tagsList.appendChild(showMoreBtn);
-        }
     }
 
     function updateButtons(rating) {
-        if (rating >= 4) {
-            btnGoogle.style.display = "block";
-            document.getElementById('btn-copy').style.display = "block";
-            btnWhatsapp.style.display = "none";
-        } else {
-            btnGoogle.style.display = "none";
-            document.getElementById('btn-copy').style.display = "none";
+        btnGoogle.style.display = "block";
+        document.getElementById('btn-copy').style.display = "block";
+        
+        if (rating <= 3) {
             btnWhatsapp.style.display = "block";
+        } else {
+            btnWhatsapp.style.display = "none";
         }
     }
 
     function updateReviewBox() {
-        if(currentRating === 0) return;
+        if(currentRating === 0 || customEdit) return; 
 
         let mName = modelInput.value;
         let finalReview = "";
 
         if (selectedTagsData.length > 0) {
             let firstTag = selectedTagsData[0];
-            let opening = isHindi ? firstTag.openHi : firstTag.openEn;
+            let opening = isHindi ? firstTag.pickedOpenHi : firstTag.pickedOpenEn;
 
             let modelReplacement = mName !== "" && mName !== "Other" ? mName : (isHindi ? "बाइक" : "bike");
             opening = opening.replace("{MODEL}", modelReplacement);
@@ -295,7 +392,7 @@
             finalReview += opening;
 
             selectedTagsData.forEach(tag => {
-                finalReview += (isHindi ? tag.bodyHi : tag.bodyEn);
+                finalReview += (isHindi ? tag.pickedBodyHi : tag.pickedBodyEn);
             });
         } else {
             finalReview = isHindi ? "कृपया अपने अनुभव के लिए ऊपर दिए गए विकल्प चुनें..." : "Please select options above to generate your review...";
@@ -345,7 +442,6 @@
         }
         reviewBox.select();
         document.execCommand("copy");
-        // DATA WILL NOT SAVE ON COPY BUTTON NOW
         alert(isHindi ? "रिव्यु कॉपी हो गया!" : "Review copied!");
     }
 
@@ -356,17 +452,17 @@
             return;
         }
         if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले रिव्यु बनाएं!" : "Please complete your review first!"); return; }
+        
         copyReview();
-        saveToGoogleSheets(); // Data updates on Sheet only when clicking this final action button
+        saveToGoogleSheets(); 
         window.open("https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA", "_blank");
     }
 
     function sendToWhatsApp() {
         if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले समस्या बताएं!" : "Please specify the issue first!"); return; }
         
-        saveToGoogleSheets(); // Data updates on Sheet for 1-3 stars on submit
+        saveToGoogleSheets(); 
         const managerNumber = "918448988950"; 
-        
         const message = encodeURIComponent((isHindi ? "मैनेजर ध्यान दें, नया फीडबैक: \n\n" : "Manager Alert, New Feedback: \n\n") + reviewBox.value);
         window.open(`https://wa.me/${managerNumber}?text=${message}`, "_blank");
     }
