@@ -108,7 +108,16 @@
             <option value="Other">Other</option>
         </select>
 
-        <input type="text" id="sales-person" placeholder="Sales Person Name (Optional)" oninput="updateReviewBox()">
+        <select id="sales-person" onchange="updateReviewBox()">
+            <option value="" disabled selected id="sales-placeholder">Select Sales Person</option>
+            <option value="Aslam">Aslam</option>
+            <option value="Rakesh">Rakesh</option>
+            <option value="Sandeep">Sandeep</option>
+            <option value="Pooja Negi">Pooja Negi</option>
+            <option value="Simmi">Simmi</option>
+            <option value="Kashish">Kashish</option>
+            <option value="Not Remember">Not Remember / याद नहीं</option>
+        </select>
     </div>
 
     <div class="tags-container" id="tags-container">
@@ -131,14 +140,14 @@
     let selectedTagsData = [];
     let dataSaved = false;
 
-    // Advanced Tag Database with {MODEL} placeholder for natural sentence flow
+    // Advanced Tag Database
     const reviewData = {
         positive: [
             { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", openEn: "Buying my {MODEL} from Amar Autos was a delight! ", openHi: "अमर ऑटोस से {MODEL} खरीदना एक शानदार अनुभव रहा! ", bodyEn: "The staff was very friendly and welcoming. ", bodyHi: "स्टाफ का व्यवहार बहुत ही दोस्ताना और स्वागत करने वाला था। " },
             { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", openEn: "Had an amazing {MODEL} delivery day at Amar Autos! ", openHi: "अमर ऑटोस पर मेरी {MODEL} की डिलीवरी का दिन बहुत खास रहा! ", bodyEn: "The delivery process was completely smooth and on time. ", bodyHi: "डिलीवरी का प्रोसेस बिल्कुल स्मूथ और समय पर था। " },
             { tagEn: "Good Knowledge", tagHi: "सटीक जानकारी", openEn: "Highly impressed with the Amar Autos team while checking out the {MODEL}! ", openHi: "अमर ऑटोस की टीम ने मुझे {MODEL} के बारे में बहुत अच्छी जानकारी दी! ", bodyEn: "They have excellent product knowledge and answered all my queries. ", bodyHi: "उन्हें बाइक्स की बेहतरीन जानकारी है और उन्होंने मेरे सभी सवालों के जवाब दिए। " },
             { tagEn: "Helpful Guidance", tagHi: "सही मार्गदर्शन", openEn: "A truly premium experience getting my {MODEL} at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} लेते वक्त एकदम प्रीमियम अनुभव मिला। ", bodyEn: "I received helpful guidance in choosing the right bike. ", bodyHi: "मुझे सही बाइक चुनने में बहुत अच्छा मार्गदर्शन मिला। " },
-            { tagEn: "Fast Process", tagHi: "तेज़ काम", openEn: "Loved the quick service for my {MODEL} at Amar Autos! ", openHi: "अमर ऑटोस पर {MODEL} की तेज़ सर्विस मुझे बहुत पसंद आई! ", bodyEn: "The paperwork and finance process was extremely fast. ", bodyHi: "पेपरवर्क और फाइनेंस का काम बहुत ही जल्दी पूरा हो गया। " },
+            { tagEn: "Fast Process", tagHi: "तेज़ काम", openEn: "Loved the quick service for my {MODEL} at Amar Autos! ", openHi: "अमर ऑटोस पर {MODEL} की तेज़ सर्विस मुझे बहुत पसंद आई! ", bodyEn: "The paperwork and finance process was extremely fast. ", bodyHi: "पेपरवर्क and फाइनेंस का काम बहुत ही जल्दी पूरा हो गया। " },
             { tagEn: "Great Showroom", tagHi: "शानदार शोरूम", openEn: "Got my {MODEL} from the best Royal Enfield showroom in town! ", openHi: "शहर के सबसे बेहतरीन शोरूम से मैंने अपनी {MODEL} ली! ", bodyEn: "The showroom is beautiful and well-maintained. ", bodyHi: "शोरूम बहुत सुंदर और अच्छी तरह से मेंटेन किया हुआ है। " },
             { tagEn: "Test Ride", tagHi: "टेस्ट राइड", openEn: "Had a great {MODEL} test ride experience at Amar Autos. ", openHi: "अमर ऑटोस पर {MODEL} की टेस्ट राइड का अनुभव बहुत अच्छा रहा। ", bodyEn: "The test ride experience was fantastic and well-organized. ", bodyHi: "टेस्ट राइड का अनुभव बहुत ही शानदार और व्यवस्थित था। " }
         ],
@@ -165,18 +174,22 @@
     const btnGoogle = document.getElementById('btn-google');
     const btnWhatsapp = document.getElementById('btn-whatsapp');
 
+    function updatePlaceholders() {
+        document.getElementById('model-placeholder').innerText = isHindi ? "बाइक का मॉडल चुनें" : "Select Bike Model";
+        document.getElementById('sales-placeholder').innerText = isHindi ? "सेल्स पर्सन चुनें" : "Select Sales Person";
+    }
+
     function toggleLanguage() {
         isHindi = !isHindi;
         document.getElementById('lang-en').classList.toggle('active');
         document.getElementById('lang-hi').classList.toggle('active');
 
         document.getElementById('subtitle-text').innerText = isHindi ? "अपना अनुभव रेटिंग द्वारा बताएं" : "Please rate your experience";
-        document.getElementById('model-placeholder').innerText = isHindi ? "बाइक का मॉडल चुनें" : "Select Bike Model";
-        salesInput.placeholder = isHindi ? "सेल्स पर्सन का नाम (ऐच्छिक)" : "Sales Person Name (Optional)";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy";
         btnGoogle.innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
         btnWhatsapp.innerText = isHindi ? "रिव्यु मैनेजर को भेजें" : "Send to Review Manager";
 
+        updatePlaceholders();
         if(currentRating > 0) renderTags(currentRating);
         updateReviewBox();
     }
@@ -193,6 +206,7 @@
             }
 
             inputGroup.style.display = "flex";
+            updatePlaceholders();
             renderTags(currentRating);
             updateButtons(currentRating);
             updateReviewBox();
@@ -269,14 +283,12 @@
         if(currentRating === 0) return;
 
         let mName = modelInput.value;
-        let sName = salesInput.value.trim();
         let finalReview = "";
 
         if (selectedTagsData.length > 0) {
             let firstTag = selectedTagsData[0];
             let opening = isHindi ? firstTag.openHi : firstTag.openEn;
 
-            // SMART SENTENCE BLENDING
             let modelReplacement = mName !== "" && mName !== "Other" ? mName : (isHindi ? "बाइक" : "bike");
             opening = opening.replace("{MODEL}", modelReplacement);
             
@@ -285,10 +297,6 @@
             selectedTagsData.forEach(tag => {
                 finalReview += (isHindi ? tag.bodyHi : tag.bodyEn);
             });
-
-            if (sName !== "") {
-                finalReview += isHindi ? ` ${sName} को उनकी बेहतरीन मदद के लिए खास धन्यवाद।` : ` Special thanks to ${sName} for the excellent support.`;
-            }
         } else {
             finalReview = isHindi ? "कृपया अपने अनुभव के लिए ऊपर दिए गए विकल्प चुनें..." : "Please select options above to generate your review...";
         }
@@ -301,7 +309,7 @@
         dataSaved = true;
 
         const mName = modelInput.value;
-        const sName = salesInput.value.trim();
+        const sName = salesInput.value;
         const tagsString = selectedTagsData.map(item => isHindi ? item.tagHi : item.tagEn).join(", ");
         const rText = reviewBox.value;
 
@@ -326,27 +334,37 @@
     }
 
     function copyReview() {
+        if (currentRating >= 4 && salesInput.value === "") {
+            alert(isHindi ? "कृपया आगे बढ़ने के लिए सेल्स पर्सन का नाम चुनें!" : "Please select a Sales Person to proceed!");
+            salesInput.focus();
+            return;
+        }
         if(selectedTagsData.length === 0) {
             alert(isHindi ? "कृपया पहले कुछ विकल्प चुनें!" : "Please select some options first!");
             return;
         }
         reviewBox.select();
         document.execCommand("copy");
-        saveToGoogleSheets(); 
+        // DATA WILL NOT SAVE ON COPY BUTTON NOW
         alert(isHindi ? "रिव्यु कॉपी हो गया!" : "Review copied!");
     }
 
     function openGoogle() {
+        if (currentRating >= 4 && salesInput.value === "") {
+            alert(isHindi ? "कृपया आगे बढ़ने के लिए सेल्स पर्सन का नाम चुनें!" : "Please select a Sales Person to proceed!");
+            salesInput.focus();
+            return;
+        }
         if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले रिव्यु बनाएं!" : "Please complete your review first!"); return; }
         copyReview();
-        saveToGoogleSheets(); 
+        saveToGoogleSheets(); // Data updates on Sheet only when clicking this final action button
         window.open("https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA", "_blank");
     }
 
     function sendToWhatsApp() {
         if(selectedTagsData.length === 0) { alert(isHindi ? "कृपया पहले समस्या बताएं!" : "Please specify the issue first!"); return; }
         
-        saveToGoogleSheets(); 
+        saveToGoogleSheets(); // Data updates on Sheet for 1-3 stars on submit
         const managerNumber = "918448988950"; 
         
         const message = encodeURIComponent((isHindi ? "मैनेजर ध्यान दें, नया फीडबैक: \n\n" : "Manager Alert, New Feedback: \n\n") + reviewBox.value);
