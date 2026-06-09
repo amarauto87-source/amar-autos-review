@@ -71,7 +71,7 @@
         /* Buttons */
         .button-group { display: flex; flex-direction: column; gap: 12px;}
         .top-buttons { display: flex; gap: 12px; width: 100%;}
-        button { padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.2s ease; flex: 1; text-transform: uppercase; letter-spacing: 0.8px;}
+        button { padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: all 0.3s ease; flex: 1; text-transform: uppercase; letter-spacing: 0.8px;}
         button:active { transform: scale(0.97); }
         
         .btn-copy { background: #222222; color: #ffffff; display: none; border: 1px solid #333;}
@@ -81,6 +81,24 @@
         
         .btn-whatsapp { background: transparent; color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366; margin-top: 4px;}
         .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.05); transform: translateY(-1px); }
+
+        /* NEW HIGHLIGHTED SUBMIT BUTTON STYLING */
+        .btn-submit { 
+            background: #111; 
+            color: #E5A93C; 
+            display: none; 
+            width: 100%; 
+            border: 2px solid #E5A93C; 
+            margin-top: 8px;
+            animation: glowingSubmit 2s infinite; /* Active Pulse Animation */
+            box-shadow: 0 0 10px rgba(229, 169, 60, 0.3);
+        }
+        .btn-submit:hover { 
+            background: #E5A93C; 
+            color: #000; 
+            transform: translateY(-2px); 
+            box-shadow: 0 0 20px rgba(229, 169, 60, 0.6);
+        }
 
         .sparkle { position: absolute; width: 6px; height: 6px; background: #E5A93C; border-radius: 50%; pointer-events: none; z-index: 999; }
 
@@ -93,11 +111,17 @@
             50% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
+        /* Keyframes for the glowing submit button */
+        @keyframes glowingSubmit {
+            0% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(229, 169, 60, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.2); }
+        }
     </style>
 </head>
-<body>
+<body id="main-body">
 
-<div class="review-card">
+<div class="review-card" id="main-card">
     <div class="lang-toggle" onclick="toggleLanguage()">
         <div class="lang-btn active" id="lang-en">ENG</div>
         <div class="lang-btn" id="lang-hi">हिंदी</div>
@@ -171,6 +195,7 @@
             <button class="btn-google" id="btn-google" onclick="openGoogle()">Open Google Review</button>
         </div>
         <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsApp()">Issue? Talk to Manager (WhatsApp)</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitInternalFeedback()">Submit Feedback</button>
     </div>
 </div>
 
@@ -181,7 +206,7 @@
     let dataSaved = false;
     let customEdit = false;
     let joinRidingGroup = "No";
-    let defaultReviewIndex = 0; // Added variable for randomizing default reviews
+    let defaultReviewIndex = 0; 
 
     function shuffleArray(array) {
         let shuffled = [...array];
@@ -253,7 +278,6 @@
         }
     }
 
-    // MASSIVE ULTIMATE DATABASE
     const reviewData = {
         positive: [
             { 
@@ -378,6 +402,7 @@
     const reviewBox = document.getElementById('review-box');
     const btnGoogle = document.getElementById('btn-google');
     const btnWhatsapp = document.getElementById('btn-whatsapp');
+    const btnSubmit = document.getElementById('btn-submit'); 
     const hintText = document.getElementById('hint-text');
 
     function updatePlaceholders() {
@@ -397,6 +422,7 @@
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         btnGoogle.innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
         btnWhatsapp.innerText = isHindi ? "समस्या है? मैनेजर से बात करें" : "Issue? Talk to Manager";
+        btnSubmit.innerText = isHindi ? "फीडबैक सबमिट करें" : "Submit Feedback"; 
         hintText.innerText = isHindi ? "📝 आप चाहें तो नीचे अपने शब्द लिख सकते हैं:" : "📝 You can edit this text below:";
 
         updatePlaceholders();
@@ -411,7 +437,6 @@
             dataSaved = false; 
             customEdit = false; 
             
-            // Randomly select a default base index each time a star is clicked
             defaultReviewIndex = Math.floor(Math.random() * 3);
             
             stars.forEach(s => s.classList.remove('active'));
@@ -487,6 +512,8 @@
     function updateButtons(rating) {
         btnGoogle.style.display = "block";
         document.getElementById('btn-copy').style.display = "block";
+        btnSubmit.style.display = "block"; 
+
         if (rating <= 3) {
             btnWhatsapp.style.display = "block";
         } else {
@@ -511,7 +538,6 @@
                 finalReview += (isHindi ? tag.pickedBodyHi : tag.pickedBodyEn); 
             });
         } else {
-            // Arrays of natural defaults for when NO tags are selected yet
             let defaultsPosEn = [
                 `Great experience purchasing my ${modelReplacement} from Amar Autos. Highly recommend this showroom! `,
                 `Absolutely loved the service at Amar Autos while buying my ${modelReplacement}. Great team! `,
@@ -597,6 +623,26 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }).catch(err => console.log("Data Save Error:", err));
+    }
+
+    function submitInternalFeedback() {
+        if(!isNumberValid()) return;
+        if (currentRating >= 4 && salesInput.value === "") {
+            alert(isHindi ? "कृपया आगे बढ़ने के लिए सेल्स पर्सन का नाम चुनें!" : "Please select a Sales Person to proceed!");
+            salesInput.focus();
+            return;
+        }
+
+        saveToGoogleSheets(); 
+
+        alert(isHindi ? "आपका फीडबैक सफलतापूर्वक सबमिट हो गया है। धन्यवाद!" : "Your feedback has been submitted successfully. Thank you!");
+
+        document.body.innerHTML = `
+            <div style="text-align: center; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 40px;">
+                <h1 style="color: #E5A93C; font-size: 36px; margin-bottom: 20px;">${isHindi ? "धन्यवाद!" : "Thank You!"}</h1>
+                <p style="color: #bbb; font-size: 16px; line-height: 1.6;">${isHindi ? "आपका फीडबैक हमारे पास सुरक्षित पहुँच गया है।<br>अब आप इस पेज को बंद कर सकते हैं।" : "Your feedback has been securely received.<br>You can close this page now."}</p>
+            </div>
+        `;
     }
 
     function copyReview() {
