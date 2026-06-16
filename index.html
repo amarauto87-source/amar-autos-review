@@ -18,9 +18,8 @@
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 15px; background-color: #0a0a0a; margin: 0; box-sizing: border-box; overflow-x: hidden;}
         
         /* --- BRANDING STYLES --- */
-        .brand-header { text-align: center; margin-bottom: 15px; }
-        .re-logo { width: 140px; margin-bottom: 10px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
-        .dealer-name { margin: 0; color: #ffffff; font-size: 26px; font-weight: 900; text-transform: uppercase; letter-spacing: 2.5px;}
+        .brand-header { text-align: center; margin-bottom: 20px; }
+        .custom-logo { max-width: 240px; margin-bottom: 5px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); border-radius: 8px;}
         .since-text { color: #E5A93C; font-size: 11px; font-weight: 800; letter-spacing: 4px; margin: 5px 0 0 0;}
 
         /* --- CARD STYLES --- */
@@ -28,7 +27,7 @@
         
         /* --- WELCOME SCREEN --- */
         #welcome-screen { max-width: 400px; }
-        .welcome-desc { color: #888888; font-size: 14px; margin-bottom: 25px; line-height: 1.5; margin-top: 20px;}
+        .welcome-desc { color: #888888; font-size: 14px; margin-bottom: 25px; line-height: 1.5; margin-top: 10px;}
         .code-input-container { width: 100%; margin-bottom: 25px;}
         .code-input { width: 100%; padding: 15px; background: #1a1a1a; border: 2px solid #333; border-radius: 10px; color: #E5A93C; font-size: 22px; text-align: center; letter-spacing: 8px; font-weight: 700; box-sizing: border-box; transition: 0.3s;}
         .code-input:focus { outline: none; border-color: #E5A93C; box-shadow: 0 0 15px rgba(229,169,60,0.2);}
@@ -41,10 +40,22 @@
         
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
 
-        /* --- REVIEW SCREEN --- */
-        #main-card { display: none; }
+        /* --- CHOICE & SUB-CHOICE SCREENS --- */
+        #choice-screen, #sub-choice-screen { display: none; max-width: 400px;}
+        .choice-btn { width: 100%; padding: 18px 20px; margin-bottom: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        .btn-review { background: #E5A93C; color: #000; }
+        .btn-review:hover { background: #cca130; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229,169,60,0.3);}
+        .btn-complaint { background: #1a1a1a; color: #ff4d4d; border: 2px solid #ff4d4d; }
+        .btn-complaint:hover { background: #ff4d4d; color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 77, 77, 0.3);}
+        .btn-feedback { background: #1a1a1a; color: #E5A93C; border: 2px solid #E5A93C; }
+        .btn-feedback:hover { background: #E5A93C; color: #000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229, 169, 60, 0.3);}
+        .btn-back { background: transparent; color: #888; border: 1px solid #444; padding: 12px; margin-top: 5px; }
+        .btn-back:hover { background: #222; color: #fff; }
+
+        /* --- REVIEW & COMPLAINT COMMON STYLES --- */
+        #main-card, #complaint-screen { display: none; }
         
-        .lang-toggle { position: absolute; top: 20px; right: 25px; background: #222; border-radius: 30px; display: flex; overflow: hidden; cursor: pointer; border: 1px solid #333; padding: 2px;}
+        .lang-toggle { position: absolute; top: 20px; right: 25px; background: #222; border-radius: 30px; display: flex; overflow: hidden; cursor: pointer; border: 1px solid #333; padding: 2px; z-index: 10;}
         .lang-btn { padding: 4px 12px; font-size: 11px; font-weight: 700; color: #888; transition: 0.3s; user-select: none; border-radius: 30px;}
         .lang-btn.active { background: #E5A93C; color: #000; } 
         
@@ -54,10 +65,10 @@
         .community-section { margin-bottom: 25px; text-align: left; padding: 5px 0; border-bottom: 1px solid #222; padding-bottom: 20px; width: 100%;}
         .community-title { color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.3px;}
         .community-options { display: flex; gap: 12px; margin-bottom: 12px;}
-        .community-btn { flex: 1; padding: 11px; text-align: center; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; cursor: pointer; color: #999; font-size: 13px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600;}
+        .community-btn { flex: 1; padding: 11px; text-align: center; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; cursor: pointer; color: #999; font-size: 13px; transition: all 0.2s; font-weight: 600;}
         .community-btn.active { background: #E5A93C; color: #000; border-color: #E5A93C; transform: scale(1.02); }
-        #whatsapp-number { display: none; width: 100%; padding: 12px 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #222; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; margin-top: 5px;}
-        #whatsapp-number:focus { outline: none; border-color: #25D366; }
+        .form-input { width: 100%; padding: 12px 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #222; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s;}
+        .form-input:focus { outline: none; border-color: #E5A93C; }
         
         .stars-section-title { color: #e0e0e0; font-size: 14px; font-weight: 600; margin-bottom: 8px; text-align: left; width: 100%;}
         .stars { font-size: 44px; cursor: pointer; color: #222222; margin-bottom: 25px; text-align: left; user-select: none; width: 100%;}
@@ -98,6 +109,10 @@
         .btn-submit { background: #111; color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; margin-top: 8px; animation: glowingSubmit 2s infinite; }
         .btn-submit:hover { background: #E5A93C; color: #000; }
         
+        /* --- COMPLAINT SUBMIT BUTTON --- */
+        .btn-complaint-submit { background: #ff4d4d; color: #fff; width: 100%; display: block; animation: none; border: none; }
+        .btn-complaint-submit:hover { background: #e60000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4); }
+
         /* --- TIMEOUT SCREEN --- */
         #timeout-screen { display: none; text-align: center; }
         .timeout-icon { font-size: 50px; margin-bottom: 15px; }
@@ -112,8 +127,8 @@
 
 <!-- COMMON BRANDING HEADER -->
 <div class="brand-header">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Royal_Enfield_logo.svg/800px-Royal_Enfield_logo.svg.png" alt="Royal Enfield" class="re-logo">
-    <h1 class="dealer-name">Amar Autos</h1>
+    <!-- If logo.jpg fails to load on GitHub, it will automatically use the Wikipedia RE logo URL as a fallback -->
+    <img src="logo.jpg" alt="Amar Autos Royal Enfield" class="custom-logo" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Royal_Enfield_logo.svg/800px-Royal_Enfield_logo.svg.png';">
     <p class="since-text">SINCE 1982</p>
 </div>
 
@@ -121,7 +136,7 @@
      STEP 1: WELCOME SCREEN (DEALER CODE) 
      ========================================== -->
 <div class="card" id="welcome-screen">
-    <p class="welcome-desc">Please enter your <b>Dealer Code</b> to continue to the feedback system.</p>
+    <p class="welcome-desc">Please enter your <b>Dealer Code</b> to continue to the system.</p>
     
     <div class="code-input-container">
         <input type="number" id="dealer-code-input" class="code-input" placeholder="CODE" onkeypress="handleEnter(event)">
@@ -132,7 +147,54 @@
 </div>
 
 <!-- ==========================================
-     STEP 2: MAIN FEEDBACK SCREEN
+     STEP 2: CHOICE SCREEN (REVIEW OR FEEDBACK/COMPLAINT)
+     ========================================== -->
+<div class="card" id="choice-screen">
+    <div class="lang-toggle" onclick="toggleLanguageManual()">
+        <div class="lang-btn active" id="lang-en-ch1">ENG</div>
+        <div class="lang-btn" id="lang-hi-ch1">हिंदी</div>
+    </div>
+    <div class="branch-badge" id="branch-badge-choice">Amar Autos</div>
+    <h2 style="color: #fff; margin-top: 10px; font-size: 22px;" id="choice-title">How can we help?</h2>
+    <p class="subtitle" id="choice-subtitle">Please select an option below.</p>
+    
+    <div style="width: 100%; margin-top: 10px;">
+        <button class="choice-btn btn-review" onclick="selectFlow('review')">
+            <span id="btn-text-review">⭐ Share Review</span>
+        </button>
+        <button class="choice-btn btn-complaint" onclick="showSubChoice()" style="border-color:#555; color:#fff;">
+            <span id="btn-text-feedcomp">📝 Feedback or Complaint</span>
+        </button>
+    </div>
+</div>
+
+<!-- ==========================================
+     STEP 2.1: SUB-CHOICE SCREEN (FEEDBACK OR COMPLAINT)
+     ========================================== -->
+<div class="card" id="sub-choice-screen">
+    <div class="lang-toggle" onclick="toggleLanguageManual()">
+        <div class="lang-btn active" id="lang-en-ch2">ENG</div>
+        <div class="lang-btn" id="lang-hi-ch2">हिंदी</div>
+    </div>
+    <div class="branch-badge" id="branch-badge-sub">Amar Autos</div>
+    <h2 style="color: #fff; margin-top: 10px; font-size: 22px;" id="sub-title">Feedback / Complaint</h2>
+    <p class="subtitle" id="sub-subtitle">What would you like to share?</p>
+    
+    <div style="width: 100%; margin-top: 10px;">
+        <button class="choice-btn btn-feedback" onclick="selectFlow('feedback')">
+            <span id="btn-text-feedback">💡 Share Feedback</span>
+        </button>
+        <button class="choice-btn btn-complaint" onclick="selectFlow('complaint')">
+            <span id="btn-text-complaint">⚠️ Register Complaint</span>
+        </button>
+        <button class="choice-btn btn-back" onclick="hideSubChoice()">
+            <span id="btn-text-back">🔙 Back</span>
+        </button>
+    </div>
+</div>
+
+<!-- ==========================================
+     STEP 3A: MAIN FEEDBACK/REVIEW SCREEN
      ========================================== -->
 <div class="card" id="main-card">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
@@ -140,7 +202,7 @@
         <div class="lang-btn" id="lang-hi">हिंदी</div>
     </div>
 
-    <div class="branch-badge" id="branch-badge">Amar Autos</div>
+    <div class="branch-badge" id="branch-badge-review">Amar Autos</div>
     <p class="subtitle" id="subtitle-text">Your feedback helps us improve!</p>
 
     <div class="community-section" id="community-section">
@@ -149,7 +211,7 @@
             <div class="community-btn" id="join-yes" onclick="setCommunity('Yes')">Yes / हाँ</div>
             <div class="community-btn active" id="join-no" onclick="setCommunity('No')">No / नहीं</div>
         </div>
-        <input type="number" id="whatsapp-number" placeholder="Enter 10-digit WhatsApp Number" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
+        <input type="number" id="whatsapp-number" class="form-input" style="display:none; margin-top:5px;" placeholder="Enter 10-digit WhatsApp Number" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
     </div>
 
     <div class="stars-section-title" id="stars-title">Please rate your experience:</div>
@@ -162,17 +224,8 @@
     </div>
 
     <div class="input-group" id="input-group">
-        <select id="model-name" onchange="updateReviewBox()">
-            <option value="" disabled selected id="model-placeholder">Select Bike Model</option>
-            <option value="Bullet 350">Bullet 350</option>
-            <option value="Classic 350">Classic 350</option>
-            <option value="Hunter 350">Hunter 350</option>
-            <option value="Meteor 350">Meteor 350</option>
-            <option value="Himalayan 450">Himalayan 450</option>
-            <option value="Guerrilla 450">Guerrilla 450</option>
-            <option value="650 Twins">650 Twins (GT/Interceptor/Shotgun)</option>
-            <option value="Other">Other</option>
-        </select>
+        <!-- CUSTOMER CAN TYPE BIKE NAME HERE -->
+        <input type="text" id="model-name" class="form-input" placeholder="Enter Bike Model (e.g. Classic 350)" oninput="updateReviewBox()" style="flex: 1; min-width: 45%;">
 
         <select id="sales-person" onchange="updateReviewBox()">
             <option value="" disabled selected id="sales-placeholder">Select Staff</option>
@@ -222,7 +275,33 @@
 </div>
 
 <!-- ==========================================
-     STEP 3: TIMEOUT SCREEN (SESSION EXPIRED)
+     STEP 3B: COMPLAINT SCREEN
+     ========================================== -->
+<div class="card" id="complaint-screen">
+    <div class="lang-toggle" onclick="toggleLanguageManual()">
+        <div class="lang-btn active" id="lang-en-c">ENG</div>
+        <div class="lang-btn" id="lang-hi-c">हिंदी</div>
+    </div>
+
+    <div class="branch-badge" id="branch-badge-complaint">Amar Autos</div>
+    <h2 style="color: #ff4d4d; margin-top: 10px; font-size: 22px;" id="c-title">Register Complaint</h2>
+    <p class="subtitle" id="c-subtitle">We are sorry for the inconvenience. Please share the details.</p>
+
+    <div style="width: 100%; text-align: left; margin-bottom: 20px;">
+        <label style="color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block;" id="c-phone-label">Mobile Number *</label>
+        <input type="number" id="complaint-phone" class="form-input" placeholder="Enter 10-digit number" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
+    </div>
+
+    <div style="width: 100%; text-align: left; margin-bottom: 25px;">
+        <label style="color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block;" id="c-desc-label">Issue Description *</label>
+        <textarea id="complaint-box" placeholder="Please describe your issue here..." oninput="restrictWords(this)"></textarea>
+    </div>
+
+    <button class="btn-complaint-submit" id="btn-complaint-submit" onclick="submitComplaint()">Submit Complaint</button>
+</div>
+
+<!-- ==========================================
+     STEP 4: TIMEOUT SCREEN (SESSION EXPIRED)
      ========================================== -->
 <div class="card" id="timeout-screen">
     <div class="timeout-icon">⏱️</div>
@@ -236,7 +315,7 @@
     // IDLE TIMEOUT LOGIC (5 MINUTES)
     // ==========================================
     let idleTimer;
-    const idleWaitTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const idleWaitTime = 5 * 60 * 1000; // 5 minutes
 
     function resetIdleTimer() {
         clearTimeout(idleTimer);
@@ -244,18 +323,19 @@
     }
 
     function showTimeoutScreen() {
-        // Hide Main screens and show Timeout screen
         document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('choice-screen').style.display = 'none';
+        document.getElementById('sub-choice-screen').style.display = 'none';
         document.getElementById('main-card').style.display = 'none';
+        document.getElementById('complaint-screen').style.display = 'none';
         document.getElementById('timeout-screen').style.display = 'flex';
         
-        // Redirect to Royal Enfield Amar Autos Page after 3 seconds
+        // Redirect after 3 seconds
         setTimeout(function() {
             window.location.href = "https://dealers.royalenfield.com/delhi/new-delhi/kanti-nagar-amar-autos-9110000960";
         }, 3000);
     }
 
-    // Monitor user activity to keep session alive
     window.onload = resetIdleTimer;
     document.addEventListener('mousemove', resetIdleTimer);
     document.addEventListener('keypress', resetIdleTimer);
@@ -263,15 +343,14 @@
     document.addEventListener('click', resetIdleTimer);
     document.addEventListener('scroll', resetIdleTimer);
 
-
     // ==========================================
     // INITIAL SETUP & DATA
     // ==========================================
     let branchLocation = "";
     let isServiceCenter = false;
     let googleReviewURL = ""; 
+    let currentFlow = ""; // 'review', 'feedback', or 'complaint'
     
-    // CUSTOMIZE YOUR STAFF NAMES HERE:
     let kantiNagarStaff = ["Aslam", "Rakesh", "Sandeep", "Pooja Negi", "Simmi", "Kashish"];
     let vikasMargStaff = ["Sales Staff 1", "Sales Staff 2", "Sales Staff 3"];
     let serviceStaff = ["Service Advisor 1", "Service Advisor 2", "Technician 1"];
@@ -340,9 +419,14 @@
             return;
         }
 
-        document.getElementById('branch-badge').innerText = branchLocation;
+        // Apply Branch Labels
+        document.getElementById('branch-badge-choice').innerText = branchLocation;
+        document.getElementById('branch-badge-sub').innerText = branchLocation;
+        document.getElementById('branch-badge-review').innerText = branchLocation;
+        document.getElementById('branch-badge-complaint').innerText = branchLocation;
         reviewData = isServiceCenter ? serviceData : salesData;
         
+        // Load Staff Dropdown for Review/Feedback screen
         const staffDropdown = document.getElementById('sales-person');
         let optionsHTML = `<option value="" disabled selected id="sales-placeholder">${isServiceCenter ? "Select Service Advisor" : "Select Sales Person"}</option>`;
         staffListToLoad.forEach(name => {
@@ -352,8 +436,38 @@
         staffDropdown.innerHTML = optionsHTML;
 
         applyLanguageStrings();
+        
+        // Move to Choice Screen
         document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('main-card').style.display = 'flex';
+        document.getElementById('choice-screen').style.display = 'flex';
+        resetIdleTimer();
+    }
+
+    // ==========================================
+    // FLOW SELECTION 
+    // ==========================================
+    function showSubChoice() {
+        document.getElementById('choice-screen').style.display = 'none';
+        document.getElementById('sub-choice-screen').style.display = 'flex';
+        resetIdleTimer();
+    }
+
+    function hideSubChoice() {
+        document.getElementById('sub-choice-screen').style.display = 'none';
+        document.getElementById('choice-screen').style.display = 'flex';
+        resetIdleTimer();
+    }
+
+    function selectFlow(type) {
+        currentFlow = type;
+        document.getElementById('choice-screen').style.display = 'none';
+        document.getElementById('sub-choice-screen').style.display = 'none';
+        
+        if(type === 'review' || type === 'feedback') {
+            document.getElementById('main-card').style.display = 'flex';
+        } else if(type === 'complaint') {
+            document.getElementById('complaint-screen').style.display = 'flex';
+        }
         resetIdleTimer();
     }
 
@@ -377,22 +491,48 @@
 
     function toggleLanguageManual() {
         isHindi = !isHindi;
+        
+        // Toggle buttons on all screens
         document.getElementById('lang-en').classList.toggle('active');
         document.getElementById('lang-hi').classList.toggle('active');
+        document.getElementById('lang-en-ch1').classList.toggle('active');
+        document.getElementById('lang-hi-ch1').classList.toggle('active');
+        document.getElementById('lang-en-ch2').classList.toggle('active');
+        document.getElementById('lang-hi-ch2').classList.toggle('active');
+        document.getElementById('lang-en-c').classList.toggle('active');
+        document.getElementById('lang-hi-c').classList.toggle('active');
+        
         applyLanguageStrings();
-        if(currentRating > 0) renderTags(currentRating);
-        updateReviewBox();
+        if((currentFlow === 'review' || currentFlow === 'feedback') && currentRating > 0) renderTags(currentRating);
+        if(currentFlow === 'review' || currentFlow === 'feedback') updateReviewBox();
     }
 
     function applyLanguageStrings() {
+        // Choice Screen
+        document.getElementById('choice-title').innerText = isHindi ? "हम आपकी कैसे मदद कर सकते हैं?" : "How can we help?";
+        document.getElementById('choice-subtitle').innerText = isHindi ? "कृपया नीचे दिए गए विकल्पों में से एक चुनें।" : "Please select an option below.";
+        document.getElementById('btn-text-review').innerText = isHindi ? "⭐ रिव्यु दें" : "⭐ Share Review";
+        document.getElementById('btn-text-feedcomp').innerText = isHindi ? "📝 फीडबैक या शिकायत" : "📝 Feedback or Complaint";
+
+        // Sub Choice Screen
+        document.getElementById('sub-title').innerText = isHindi ? "फीडबैक / शिकायत" : "Feedback / Complaint";
+        document.getElementById('sub-subtitle').innerText = isHindi ? "आप क्या साझा करना चाहेंगे?" : "What would you like to share?";
+        document.getElementById('btn-text-feedback').innerText = isHindi ? "💡 फीडबैक दें" : "💡 Share Feedback";
+        document.getElementById('btn-text-complaint').innerText = isHindi ? "⚠️ शिकायत दर्ज करें" : "⚠️ Register Complaint";
+        document.getElementById('btn-text-back').innerText = isHindi ? "🔙 पीछे जाएं" : "🔙 Back";
+
+        // Review/Feedback Form Screen
         document.getElementById('subtitle-text').innerText = isHindi ? "आपका फीडबैक हमारे लिए ज़रूरी है!" : "Your feedback helps us improve!";
         document.getElementById('stars-title').innerText = isHindi ? "कृपया अपना अनुभव रेट करें:" : "Please rate your experience:";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         document.getElementById('btn-google').innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
         document.getElementById('btn-submit').innerText = isHindi ? "फीडबैक सबमिट करें" : "Submit Feedback"; 
+        
+        // Update Placeholder for Model input
+        document.getElementById('model-name').placeholder = isHindi ? "बाइक का मॉडल लिखें (जैसे: Classic 350)" : "Enter Bike Model (e.g. Classic 350)";
 
+        // Questionnaire
         document.getElementById('q1-text').innerText = isHindi ? "क्या आपको चाय/कॉफी पूछी गई?" : "Were you offered Tea/Coffee?";
-
         if(isServiceCenter) {
             document.getElementById('q2-text').innerText = isHindi ? "क्या बाइक की वाशिंग अच्छे से हुई?" : "Was the vehicle washed properly?";
             document.getElementById('q3-text').innerText = isHindi ? "क्या आपकी बताई समस्याएँ ठीक हुईं?" : "Were all reported issues resolved?";
@@ -402,13 +542,23 @@
             document.getElementById('q3-text').innerText = isHindi ? "क्या टेस्ट राइड के लिए पूछा गया?" : "Were you offered a Test Ride?";
             document.getElementById('sales-placeholder').innerText = isHindi ? "सेल्स पर्सन चुनें" : "Select Sales Person";
         }
-
         document.querySelectorAll('.fb-btn').forEach(btn => {
             if(btn.innerText === "Yes" || btn.innerText === "हाँ") btn.innerText = isHindi ? "हाँ" : "Yes";
             if(btn.innerText === "No" || btn.innerText === "नहीं") btn.innerText = isHindi ? "नहीं" : "No";
         });
+
+        // Complaint Screen
+        document.getElementById('c-title').innerText = isHindi ? "शिकायत दर्ज करें" : "Register Complaint";
+        document.getElementById('c-subtitle').innerText = isHindi ? "असुविधा के लिए खेद है। कृपया विवरण साझा करें।" : "We are sorry for the inconvenience. Please share the details.";
+        document.getElementById('c-phone-label').innerText = isHindi ? "मोबाइल नंबर *" : "Mobile Number *";
+        document.getElementById('c-desc-label').innerText = isHindi ? "समस्या का विवरण *" : "Issue Description *";
+        document.getElementById('complaint-box').placeholder = isHindi ? "कृपया अपनी समस्या यहाँ विस्तार से लिखें..." : "Please describe your issue here...";
+        document.getElementById('btn-complaint-submit').innerText = isHindi ? "शिकायत सबमिट करें" : "Submit Complaint";
     }
 
+    // ==========================================
+    // REVIEW/FEEDBACK SCREEN FUNCTIONS
+    // ==========================================
     function setFb(question, answer) {
         fbData[question] = answer;
         document.getElementById(question + '-yes').classList.remove('active');
@@ -477,8 +627,8 @@
 
     function updateReviewBox() {
         if(currentRating === 0 || customEdit) return; 
-        let mName = document.getElementById('model-name').value;
-        let modelReplacement = mName !== "" && mName !== "Other" ? mName : "bike";
+        let mName = document.getElementById('model-name').value.trim();
+        let modelReplacement = mName !== "" ? mName : "bike";
         
         let finalReview = "";
         
@@ -500,7 +650,7 @@
 
         const payload = {
             branch: branchLocation,
-            type: isServiceCenter ? "Service" : "Sales",
+            type: isServiceCenter ? "Service Review" : "Sales Review",
             rating: currentRating,
             model: document.getElementById('model-name').value || "N/A",
             staffPerson: document.getElementById('sales-person').value || "N/A",
@@ -515,7 +665,7 @@
 
     function submitInternalFeedback() {
         saveToGoogleSheets(); 
-        document.getElementById('main-card').innerHTML = `<div style="text-align:center; color:#fff; padding:40px;"><h1 style="color:#E5A93C;">Thank You!</h1><p>Your feedback has been received.</p></div>`;
+        document.getElementById('main-card').innerHTML = `<div style="text-align:center; color:#fff; padding:40px;"><h1 style="color:#E5A93C;">Thank You!</h1><p>${isHindi ? "आपका फीडबैक सबमिट हो गया है।" : "Your feedback has been received."}</p></div>`;
     }
 
     function openGoogle() {
@@ -523,6 +673,44 @@
         document.getElementById('review-box').select();
         document.execCommand("copy");
         window.open(googleReviewURL, "_blank"); 
+    }
+
+    // ==========================================
+    // COMPLAINT SCREEN FUNCTIONS
+    // ==========================================
+    function submitComplaint() {
+        let phone = document.getElementById('complaint-phone').value;
+        let text = document.getElementById('complaint-box').value;
+        
+        if(phone.length < 10) {
+            alert(isHindi ? "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें।" : "Please enter a valid 10-digit mobile number.");
+            return;
+        }
+        if(text.trim() === "") {
+            alert(isHindi ? "कृपया अपनी समस्या का विवरण दर्ज करें।" : "Please describe your issue.");
+            return;
+        }
+
+        const payload = {
+            branch: branchLocation,
+            type: "Complaint",
+            rating: 0,
+            model: "N/A",
+            staffPerson: "N/A",
+            reviewText: text,
+            whatsappNumber: phone,
+            q1: "N/A", q2: "N/A", q3: "N/A"
+        };
+
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
+        fetch(scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+
+        document.getElementById('complaint-screen').innerHTML = `
+            <div style="text-align:center; color:#fff; padding:40px;">
+                <div style="font-size:50px; margin-bottom:15px;">✅</div>
+                <h2 style="color:#ff4d4d; margin-bottom:15px;">${isHindi ? "शिकायत दर्ज हो गई है" : "Complaint Registered"}</h2>
+                <p style="color:#888; font-size:14px; line-height:1.6;">${isHindi ? "हमारी टीम जल्द से जल्द आपकी समस्या के समाधान के लिए आपसे संपर्क करेगी।" : "Our team will contact you shortly to resolve the issue as soon as possible."}</p>
+            </div>`;
     }
 </script>
 
