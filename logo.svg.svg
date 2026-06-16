@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="100%" height="100%">
+  <defs>
+    <style>
+      .re-text { font-family: 'Georgia', serif; font-size: 52px; font-weight: 900; fill: #D52B1E; text-anchor: middle; letter-spacing: 1px; }
+      .dealer-text { font-family: 'Arial', sans-serif; font-size: 18px; font-weight: bold; fill: #E5A93C; text-anchor: middle; letter-spacing: 4px; }
+      .line { stroke: #E5A93C; stroke-width: 1.5px; }
+    </style>
+  </defs>
+
+  <!-- Dark Background to match your website -->
+  <rect width="400" height="160" fill="#0a0a0a"/>
+
+  <!-- ROYAL ENFIELD Text -->
+  <text x="200" y="65" class="re-text">ROYAL</text>
+  <text x="200" y="115" class="re-text">ENFIELD</text>
+
+  <!-- AMAR AUTOS Text with golden side lines -->
+  <line x1="50" y1="142" x2="110" y2="142" class="line"/>
+  <text x="200" y="148" class="dealer-text">AMAR AUTOS</text>
+  <line x1="290" y1="142" x2="350" y2="142" class="line"/>
+</svg>
