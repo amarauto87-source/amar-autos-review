@@ -28,7 +28,7 @@
         .subtitle { color: #888888; margin: 0 0 30px 0; font-size: 14px; letter-spacing: 0.5px;}
         
         /* Riding Group UI */
-        .community-section { margin-bottom: 30px; text-align: left; padding: 5px 0; border-bottom: 1px solid #222; padding-bottom: 20px;}
+        .community-section { margin-bottom: 25px; text-align: left; padding: 5px 0; border-bottom: 1px solid #222; padding-bottom: 20px;}
         .community-title { color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.3px;}
         .community-options { display: flex; gap: 12px; margin-bottom: 12px;}
         .community-btn { flex: 1; padding: 11px; text-align: center; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; cursor: pointer; color: #999; font-size: 13px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600;}
@@ -50,10 +50,20 @@
         .animate-block-up { display: block; animation: fadeInUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
         /* Inputs & Select */
-        .input-group { display: none; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; text-align: left;}
+        .input-group { display: none; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; text-align: left;}
         .input-group select { flex: 1; min-width: 45%; padding: 12px 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #222; border-radius: 8px; font-size: 13px; box-sizing: border-box; transition: 0.3s; appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url('data:image/svg+xml;utf8,<svg fill="%23888888" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: calc(100% - 10px) center;}
         .input-group select:focus { border-color: #E5A93C; outline: none; }
         .input-group select option { background: #111; color: #fff; }
+
+        /* Quick Feedback Section */
+        .quick-feedback { display: none; margin-bottom: 25px; text-align: left; background: #151515; padding: 15px; border-radius: 8px; border: 1px solid #222;}
+        .fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .fb-row:last-child { margin-bottom: 0; }
+        .fb-question { font-size: 12.5px; color: #ccc; font-weight: 500; width: 65%; line-height: 1.3;}
+        .fb-options { display: flex; gap: 6px; width: 35%; justify-content: flex-end;}
+        .fb-btn { padding: 6px 12px; font-size: 12px; background: #222; border: 1px solid #333; border-radius: 6px; cursor: pointer; color: #888; font-weight: 600; transition: 0.2s; user-select: none;}
+        .fb-btn:hover { background: #333; color: #fff;}
+        .fb-btn.active { background: #E5A93C; color: #000; border-color: #E5A93C; }
 
         /* Tags Display */
         .tags-container { display: none; margin-bottom: 25px; text-align: left;}
@@ -71,7 +81,7 @@
         /* Buttons */
         .button-group { display: flex; flex-direction: column; gap: 12px;}
         .top-buttons { display: flex; gap: 12px; width: 100%;}
-        button { padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: all 0.3s ease; flex: 1; text-transform: uppercase; letter-spacing: 0.8px;}
+        button { padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.3s ease; flex: 1; text-transform: uppercase; letter-spacing: 0.8px;}
         button:active { transform: scale(0.97); }
         
         .btn-copy { background: #222222; color: #ffffff; display: none; border: 1px solid #333;}
@@ -82,7 +92,7 @@
         .btn-whatsapp { background: transparent; color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366; margin-top: 4px;}
         .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.05); transform: translateY(-1px); }
 
-        /* NEW HIGHLIGHTED SUBMIT BUTTON STYLING */
+        /* Glowing Submit Button */
         .btn-submit { 
             background: #111; 
             color: #E5A93C; 
@@ -90,7 +100,7 @@
             width: 100%; 
             border: 2px solid #E5A93C; 
             margin-top: 8px;
-            animation: glowingSubmit 2s infinite; /* Active Pulse Animation */
+            animation: glowingSubmit 2s infinite; 
             box-shadow: 0 0 10px rgba(229, 169, 60, 0.3);
         }
         .btn-submit:hover { 
@@ -111,7 +121,6 @@
             50% { transform: scale(1.3); }
             100% { transform: scale(1); }
         }
-        /* Keyframes for the glowing submit button */
         @keyframes glowingSubmit {
             0% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.2); }
             50% { box-shadow: 0 0 20px rgba(229, 169, 60, 0.8); }
@@ -181,6 +190,30 @@
         </select>
     </div>
 
+    <div class="quick-feedback animate-block-up" id="quick-feedback">
+        <div class="fb-row">
+            <div class="fb-question" id="q1-text">Were you offered Tea/Coffee?</div>
+            <div class="fb-options">
+                <div class="fb-btn active" id="fb1-yes" onclick="setFb('fb1', 'Yes')">Yes</div>
+                <div class="fb-btn" id="fb1-no" onclick="setFb('fb1', 'No')">No</div>
+            </div>
+        </div>
+        <div class="fb-row">
+            <div class="fb-question" id="q2-text">Were all features explained clearly?</div>
+            <div class="fb-options">
+                <div class="fb-btn active" id="fb2-yes" onclick="setFb('fb2', 'Yes')">Yes</div>
+                <div class="fb-btn" id="fb2-no" onclick="setFb('fb2', 'No')">No</div>
+            </div>
+        </div>
+        <div class="fb-row">
+            <div class="fb-question" id="q3-text">Were you offered a Test Ride?</div>
+            <div class="fb-options">
+                <div class="fb-btn active" id="fb3-yes" onclick="setFb('fb3', 'Yes')">Yes</div>
+                <div class="fb-btn" id="fb3-no" onclick="setFb('fb3', 'No')">No</div>
+            </div>
+        </div>
+    </div>
+
     <div class="tags-container" id="tags-container">
         <div class="tags-title" id="tags-title">What did you like?</div>
         <div class="tags-list" id="tags-list"></div>
@@ -207,6 +240,8 @@
     let customEdit = false;
     let joinRidingGroup = "No";
     let defaultReviewIndex = 0; 
+    
+    let fbData = { fb1: "Yes", fb2: "Yes", fb3: "Yes" };
 
     function shuffleArray(array) {
         let shuffled = [...array];
@@ -215,6 +250,17 @@
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
+    }
+
+    function setFb(question, answer) {
+        fbData[question] = answer;
+        document.getElementById(question + '-yes').classList.remove('active');
+        document.getElementById(question + '-no').classList.remove('active');
+        if(answer === 'Yes') {
+            document.getElementById(question + '-yes').classList.add('active');
+        } else {
+            document.getElementById(question + '-no').classList.add('active');
+        }
     }
 
     function triggerSparkles(element) {
@@ -323,11 +369,44 @@
                 bodyHi: ["टेस्ट राइड का अनुभव बहुत ही शानदार और व्यवस्थित था। ", "टेस्ट राइड की बाइक्स की कंडीशन बहुत अच्छी थी। ", "स्टाफ ने तुरंत मेरे लिए टेस्ट राइड का इंतज़ाम कर दिया। ", "टेस्ट बाइक बिल्कुल बढ़िया ट्यून, साफ़ और नई जैसी कंडीशन में थी। ", "एग्जीक्यूटिव ने साथ चलकर बाइक की हैंडलिंग और टॉर्क को अच्छे से समझाया। ", "वे जल्दबाजी नहीं करते, आपको बाइक को अच्छे से परखने का पूरा मौका देते हैं। ", "टेस्ट व्हीकल के लिए कोई लंबी लाइन या लंबा इंतज़ार नहीं करना पड़ा। ", "वे राइड से पहले सेफ्टी और रास्तों की पूरी जानकारी देते हैं। ", "उनके पास सभी नए मॉडल्स के लिए अलग से अच्छी बाइक्स हैं। ", "सेल्स गाइड ने राइड के दौरान ब्रेकिंग और सस्पेंशन के फीचर्स बताए। ", "वे परफॉरमेंस को जांचने के लिए एक बढ़िया लंबा रूट देते हैं। ", "जिस प्रोफेशनल तरीके से ये टेस्ट राइड कराते हैं, उससे मैं बहुत संतुष्ट हूँ। "] 
             },
             { 
+                tagEn: "Fair Deal", tagHi: "सही डील", 
+                openEn: ["Got a very fair deal on my new {MODEL}. ", "Superb value on my purchase of {MODEL}. ", "Amar Autos gave genuine pricing for my {MODEL}. ", "Very satisfied with the pricing of {MODEL} here. ", "The commercial terms for {MODEL} were crystal clear. ", "Got the best value for my dream {MODEL} today. ", "Compared everywhere, but the trust here for {MODEL} won me over. ", "Amar Autos has the most genuine approach for {MODEL}. ", "Got a highly transparent deal for my {MODEL}. ", "The billing process for {MODEL} was straightforward. ", "Best overall experience for my brand new {MODEL}. ", "Highly satisfied with the budget alignment of my {MODEL}. "], 
+                openHi: ["अपनी नई {MODEL} पर मुझे बहुत ही सही डील मिली। ", "{MODEL} खरीदते समय मुझे पूरी वैल्यू मिली। ", "अमर ऑटोस ने मेरी {MODEL} के लिए बिल्कुल सही कीमत लगाई। ", "यहाँ {MODEL} की डील से मैं बहुत संतुष्ट हूँ। ", "{MODEL} के लिए कोटेशन बिल्कुल साफ़ और स्पष्ट थी। ", "आज अपनी ड्रीम {MODEL} के लिए सबसे बेहतरीन वैल्यू मिली। ", "सब जगह देखा, पर {MODEL} के लिए यहाँ का भरोसा जीत गया। ", "अमर ऑटोस का {MODEL} बेचने का तरीका बहुत ही सच्चा है। ", "मेरी {MODEL} के लिए मुझे एक बहुत ही पारदर्शी डील मिली। ", "{MODEL} की बिलिंग में कोई भी कन्फ्यूजन नहीं था। ", "मेरी ब्रांड न्यू {MODEL} के लिए ओवरऑल अनुभव शानदार रहा। ", "अपनी {MODEL} के बजट और डील से मैं बेहद संतुष्ट हूँ। "], 
+                bodyEn: [
+                    "They gave proper genuine accessories with proper billing. ", 
+                    "The exchange process for my old vehicle was very fair. ", 
+                    "Got brilliant corporate support and a great buying experience. ", 
+                    "They provided the standard complimentary helmet along with other gear options. ", 
+                    "The price quotation had no hidden charges at all. ", 
+                    "They maintained complete transparency throughout the billing. ", 
+                    "Got superb guidance on insurance and warranty extensions. ", 
+                    "The billing was transparent and they handed over the complimentary helmet gracefully. ", 
+                    "They have transparent combo options on official protection guards. ", 
+                    "No fake markup on prices, just genuine pricing given. ", 
+                    "The official accessories package was perfectly explained. ", 
+                    "Highly transparent pricing that builds instant trust. "
+                ], 
+                bodyHi: [
+                    "मुझे पूरी बिलिंग के साथ जेन्युइन एक्सेसरीज़ दी गईं। ", 
+                    "मेरी पुरानी गाड़ी की एक्सचेंज वैल्यू भी काफी सही और उचित लगाई। ", 
+                    "मुझे बहुत ही बढ़िया सपोर्ट और शानदार खरीदारी का अनुभव मिला। ", 
+                    "उन्होंने गाड़ी के साथ मिलने वाला कॉम्प्लीमेंट्री हेलमेट भी सम्मान के साथ दिया। ", 
+                    "प्राइस कोटेशन में कोई भी छिपा हुआ खर्च नहीं था। ", 
+                    "उन्होंने पूरी बिलिंग के दौरान 100% पारदर्शिता बनाए रखी। ", 
+                    "इंश्योरेंस और एक्सटेंडेड वारंटी पर बहुत बढ़िया मार्गदर्शन मिला। ", 
+                    "बिलिंग पारदर्शी थी और वादे के मुताबिक कॉम्प्लीमेंट्री हेलमेट भी साथ दिया गया। ", 
+                    "ऑफिशियल प्रोटेक्शन गार्ड्स पर उनके पास पारदर्शी ऑप्शंस हैं। ", 
+                    "कीमतों में कोई फालतू का बढ़ाव नहीं था, एकदम सही कीमत लगाई। ", 
+                    "ऑफिशियल एक्सेसरीज़ के पैकेज को बहुत अच्छी तरह समझाया गया। ", 
+                    "इनकी पारदर्शी बिलिंग से तुरंत भरोसा बन जाता है। "
+                ] 
+            },
+            { 
                 tagEn: "Transparent Deal", tagHi: "पारदर्शी डीलिंग", 
                 openEn: ["Very happy with the overall deal of my {MODEL}. ", "Trustworthy experience buying my {MODEL}. ", "Amar Autos is highly honest with {MODEL} pricing. ", "Felt completely secure while billing my {MODEL}. ", "The commercial discussion for my {MODEL} was smooth. ", "No hidden agendas while purchasing the {MODEL}. ", "Got a very fair trade-in and deal for my {MODEL}. ", "Everything was documented transparently for my {MODEL}. ", "Very clear transaction from day one for the {MODEL}. ", "They value integrity when selling a motorcycle like {MODEL}. ", "No fake promises made for my new {MODEL}. ", "The quotation given for my {MODEL} was clear and itemized. "], 
                 openHi: ["{MODEL} की डीलिंग का पूरा काम बहुत अच्छे से हुआ। ", "{MODEL} लेते हुए बहुत बढ़िया भरोसा मिला। ", "अमर ऑटोस {MODEL} की कीमतों को लेकर बहुत ईमानदार हैं। ", "अपनी {MODEL} की बिलिंग कराते समय पूरा भरोसा था। ", "मेरी {MODEL} के लिए पैसों की बातचीत बहुत स्मूथ रही। ", "{MODEL} खरीदते समय कोई छिपा हुआ एजेंडा नहीं था। ", "मेरी {MODEL} के लिए बहुत ही सही डील और वैल्यू मिली। ", "मेरी {MODEL} के लिए सब कुछ पूरी पारदर्शिता से लिखा गया। ", "पहले दिन से ही पैसों का लेन-देन बिल्कुल साफ़ था। ", "बाइक बेचते समय ये लोग ईमानदारी को बहुत महत्व देते हैं। ", "मेरी नई {MODEL} के लिए कोई झूठा वादा नहीं किया गया। ", "मेरी {MODEL} के लिए जो कोटेशन दी गई, वो बिल्कुल साफ़ और विस्तृत थी। "], 
-                bodyEn: ["No hidden charges, everything was crystal clear from day one. ", "Highly transparent process with absolute clarity on pricing. ", "They explain the breakdown of insurance, RTO, and handling perfectly. ", "No forced accessories or extended warranties loaded on the invoice. ", "The price match and benefits were explained without any confusion. ", "They give you a proper printed breakdown of every single rupee. ", "Amazing honesty shown by the management regarding waiting periods. ", "Every discount promised was automatically applied to the final bill. ", "They don't push for unnecessary coverages or extra fees. ", "You get exact receipts for every payment made to the showroom. ", "The sales consultant was open about availability and logistics timelines. ", "Absolute peace of mind due to their ethical and clear business code. "], 
-                bodyHi: ["कोई छिपे हुए खर्चे नहीं थे, सब कुछ पहले दिन से बिल्कुल साफ़ था। ", "पैसों के मामले में पूरी ईमानदारी और स्पष्टता देखने को मिली। ", "उन्होंने इंश्योरेंस, आरटीओ और हैंडलिंग चार्जेस को अलग-अलग अच्छे से समझाया। ", "इनवॉइस में कोई जबरदस्ती की एक्सेसरीज़ या वारंटी नहीं जोड़ी गई। ", "डिस्काउंट और ऑफर्स को बिना किसी कन्फ्यूजन के साफ़ समझाया गया। ", "वे आपको एक-एक रुपये का पूरा प्रिंटेड हिसाब देते हैं। ", "वेटिंग पीरियड को लेकर मैनेजमेंट ने बिल्कुल सच और सही बात बताई। ", "जो भी डिस्काउंट प्रॉमिस किया गया था, वो फाइनल बिल में लगा हुआ मिला। ", "वे किसी भी फालतू के चार्ज या एक्स्ट्रा फीस के लिए दबाव नहीं डालते। ", "शोरूम को किए गए हर पेमेंट की पक्की रसीद आपको तुरंत मिलती है। ", "सेल्स कंसलटेंट ने डिलीवरी टाइमलाइन को लेकर सब कुछ साफ़ रखा। ", "उनके काम करने के ईमानदार तरीके की वजह से मन को पूरी संतुष्टि मिली। "] 
+                bodyEn: ["No hidden charges, everything was crystal clear from day one. ", "Highly transparent process with absolute clarity on pricing. ", "They explain the breakdown of insurance, RTO, and handling perfectly. ", "No forced accessories or extended warranties loaded on the invoice. ", "The price match and benefits were explained without any confusion. ", "They give you a proper printed breakdown of every single rupee. ", "Amazing honesty shown by the management regarding waiting periods. ", "Everything discussed was applied accurately to the final bill. ", "They don't push for unnecessary coverages or extra fees. ", "You get exact receipts for every payment made to the showroom. ", "The sales consultant was open about availability and logistics timelines. ", "Absolute peace of mind due to their ethical and clear business code. "], 
+                bodyHi: ["कोई छिपे हुए खर्चे नहीं थे, सब कुछ पहले दिन से बिल्कुल साफ़ था। ", "पैसों के मामले में पूरी ईमानदारी और स्पष्टता देखने को मिली। ", "उन्होंने इंश्योरेंस, आरटीओ और हैंडलिंग चार्जेस को अलग-अलग अच्छे से समझाया। ", "इनवॉइस में कोई जबरदस्ती की एक्सेसरीज़ या वारंटी नहीं जोड़ी गई। ", "सारे ऑफर्स को बिना किसी कन्फ्यूजन के साफ़ समझाया गया। ", "वे आपको एक-एक रुपये का पूरा प्रिंटेड हिसाब देते हैं। ", "वेटिंग पीरियड को लेकर मैनेजमेंट ने बिल्कुल सच और सही बात बताई। ", "जो भी तय हुआ था, वो फाइनल बिल में बिल्कुल सही से लगा हुआ मिला। ", "वे किसी भी फालतू के चार्ज या एक्स्ट्रा फीस के लिए दबाव नहीं डालते। ", "शोरूम को किए गए हर पेमेंट की पक्की रसीद आपको तुरंत मिलती है। ", "सेल्स कंसलटेंट ने डिलीवरी टाइमलाइन को लेकर सब कुछ साफ़ रखा। ", "उनके काम करने के ईमानदार तरीके की वजह से मन को पूरी संतुष्टि मिली। "] 
             },
             { 
                 tagEn: "Easy Finance", tagHi: "आसान फाइनेंस", 
@@ -340,8 +419,8 @@
                 tagEn: "Celebration", tagHi: "शानदार स्वागत", 
                 openEn: ["The delivery ceremony for my {MODEL} was unforgettable. ", "Celebrated my new {MODEL} delivery today! ", "Amar Autos makes {MODEL} delivery feel royal. ", "The moment I received my {MODEL} keys was beautiful. ", "They turned my {MODEL} delivery into a grand party. ", "Such a memorable day for my family and my {MODEL}. ", "Unmatched energy during my {MODEL} handover. ", "Loved the special treatment given for my {MODEL}. ", "The reveal of my brand new {MODEL} was awesome. ", "Brought my {MODEL} home with a great ceremony. ", "They value the emotion behind a new {MODEL}. ", "The best bike delivery event I have ever seen. "], 
                 openHi: ["मेरी {MODEL} की डिलीवरी का सेलिब्रेशन हमेशा याद रहेगा। ", "आज अपनी नई {MODEL} की डिलीवरी को यादगार बना दिया। ", "अमर ऑटोस {MODEL} की डिलीवरी को वाकई रॉयल फील देता है। ", "जिस पल मुझे {MODEL} की चाबियां मिलीं, वो बेहद खूबसूरत था। ", "उन्होंने मेरी {MODEL} की डिलीवरी को एक बड़े जश्न में बदल दिया। ", "मेरी फैमिली और मेरी {MODEL} के लिए आज का दिन यादगार बन गया। ", "मेरी {MODEL} के हैंडओवर के समय टीम की एनर्जी देखने लायक थी। ", "मेरी {MODEL} के लिए जो स्पेशल ट्रीटमेंट मिला, वो बहुत पसंद आया। ", "मेरी ब्रांड न्यू {MODEL} का रिवील (पर्दा हटाना) बहुत शानदार था। ", "एक बहुत ही बढ़िया सेरेमनी के साथ अपनी {MODEL} घर ले आया। ", "ये लोग एक नई {MODEL} के पीछे की भावनाओं की कद्र करते हैं। ", "बाइक्स की डिलीवरी का ऐसा बेहतरीन इवेंट मैंने पहले कभी नहीं देखा। "], 
-                bodyEn: ["The key handover ceremony and cake cutting made our day special. ", "They celebrate your vehicle delivery like a festival! ", "Got a complimentary gift and a beautiful framed photograph too. ", "The entire team gathered to clap and wish us luck with the ride. ", "The curtain drop reveal with ribbon-cutting felt extremely premium. ", "They record high-quality videos and click great family photos for you. ", "The energy and enthusiasm of the staff during handover was top-level. ", "They make the customer feel like a true VVIP during the event. ", "Beautifully decorated delivery area with great lighting and setup. ", "Loved the personalized touch they add to the whole ceremony. ", "It wasn't just a sale, it felt like welcoming us into the Enfield family. ", "They put a traditional tilak and did a sweet auspicious beginning. "], 
-                bodyHi: ["चाबी सौंपने की सेरेमनी और केक कटिंग ने हमारा दिन बहुत खास बना दिया। ", "ये लोग हर गाड़ी की डिलीवरी को एक त्योहार की तरह मनाते हैं! ", "मुझे एक कॉम्प्लीमेंट्री गिफ्ट और एक सुंदर फ्रेम किया हुआ फोटो भी मिला। ", "पूरी टीम ने इकट्ठा होकर तालियों के साथ हमें नई राइड की बधाई दी। ", "पर्दा हटाकर रिबन-कटिंग के साथ बाइक का रिवील होना बेहद प्रीमियम था। ", "वे आपके लिए हाई-क्वालिटी वीडियो रिकॉर्ड करते हैं और बढ़िया फोटोज खींचते हैं। ", "हैंडओवर के समय स्टाफ का उत्साह और एनर्जी एकदम टॉप लेवल की थी। ", "पूरे इवेंट के दौरान उन्होंने हमें एक वीवीआईपी की तरह महसूस कराया। ", "डिलीवरी एरिया को बहुत ही सुंदर लाइटिंग और सेटअप के साथ सजाया गया था। ", "सेरेमनी में जो उन्होंने पर्सनल टच दिया, वो बहुत ही प्यारा था। ", "यह सिर्फ एक सेल नहीं थी, ऐसा लगा जैसे हमारा एनफील्ड फैमिली में स्वागत हुआ हो। ", "उन्होंने पूरी परंपरा के साथ तिलक लगाकर एक बहुत ही शुभ शुरुआत की। "] 
+                bodyEn: ["The key handover ceremony and cake cutting made our day special. ", "They celebrate your vehicle delivery like a festival! ", "The delivery moment was captured beautifully for us to remember. ", "The entire team gathered to clap and wish us luck with the ride. ", "The curtain drop reveal with ribbon-cutting felt extremely premium. ", "They record high-quality videos and click great family photos for you. ", "The energy and enthusiasm of the staff during handover was top-level. ", "They make the customer feel like a true VVIP during the event. ", "Beautifully decorated delivery area with great lighting and setup. ", "Loved the personalized touch they add to the whole ceremony. ", "It wasn't just a sale, it felt like welcoming us into the Enfield family. ", "They put a traditional tilak and did a sweet auspicious beginning. "], 
+                bodyHi: ["चाबी सौंपने की सेरेमनी और केक कटिंग ने हमारा दिन बहुत खास बना दिया। ", "ये लोग हर गाड़ी की डिलीवरी को एक त्योहार की तरह मनाते हैं! ", "डिलीवरी के इस खूबसूरत पल की बहुत ही बढ़िया तस्वीरें ली गईं। ", "पूरी टीम ने इकट्ठा होकर तालियों के साथ हमें नई राइड की बधाई दी। ", "पर्दा हटाकर रिबन-कटिंग के साथ बाइक का रिवील होना बेहद प्रीमियम था। ", "वे आपके लिए हाई-क्वालिटी वीडियो रिकॉर्ड करते हैं और बढ़िया फोटोज खींचते हैं। ", "हैंडओवर के समय स्टाफ का उत्साह और एनर्जी एकदम टॉप लेवल की थी। ", "पूरे इवेंट के दौरान उन्होंने हमें एक वीवीआईपी की तरह महसूस कराया। ", "डिलीवरी एरिया को बहुत ही सुंदर लाइटिंग और सेटअप के साथ सजाया गया था। ", "सेरेमनी में जो उन्होंने पर्सनल टच दिया, वो बहुत ही प्यारा था। ", "यह सिर्फ एक सेल नहीं थी, ऐसा लगा जैसे हमारा एनफील्ड फैमिली में स्वागत हुआ हो। ", "उन्होंने पूरी परंपरा के साथ तिलक लगाकर एक बहुत ही शुभ शुरुआत की। "] 
             },
             { 
                 tagEn: "Hospitality", tagHi: "अच्छा सत्कार", 
@@ -349,13 +428,6 @@
                 openHi: ["आज अपनी {MODEL} के लिए अमर ऑटोस शोरूम गया था। ", "{MODEL} लेते वक़्त बहुत बढ़िया आवभगत मिली। ", "अमर ऑटोस पर {MODEL} खरीदते समय जैसा ट्रीटमेंट मिला, वो बढ़िया था। ", "{MODEL} देखने आए एक मेहमान की तरह मुझे बहुत मान मिला। ", "मेरी {MODEL} की पूरी डील के दौरान लाजवाब आदर-सत्कार देखने को मिला। ", "{MODEL} के खरीदारों के लिए यहाँ का माहौल बहुत स्वागत करने वाला है। ", "अपनी {MODEL} की बुकिंग के लिए यहाँ कुछ घंटे बिताए, बहुत अच्छा लगा। ", "अमर ऑटोस को पता है कि {MODEL} के ग्राहकों का स्वागत कैसे करना है। ", "शोरूम का अपने ग्राहकों की आवभगत पर बहुत बेहतरीन फोकस है। ", "{MODEL} के बारे में बातचीत करते हुए अनुभव बहुत सुखद रहा। ", "वे {MODEL} के लिए आने वाले हर कस्टमर को पूरा सम्मान देते हैं। ", "बाइक खरीदने के दौरान टीम द्वारा बहुत ही बढ़िया होस्टिंग की गई। "], 
                 bodyEn: ["They offered tea/coffee and took amazing care of my family. ", "The hospitality shown by the team was heartwarming. ", "The staff constantly checks on your comfort while you wait. ", "The customer lounge is loaded with amenities and very relaxing. ", "They welcomed my kids and family with great warmth and patience. ", "Even during heavy rush, they serve refreshments politely to everyone. ", "The staff makes sure you don't feel lost or ignored in the store. ", "Very premium hosting standard matching global corporate levels. ", "They have a clean, air-conditioned sitting area with water facilities. ", "Every team member greets you with respect when you enter. ", "They maintain a highly sophisticated and pleasing guest management system. ", "Really touched by their sweet gestures and polite behavior. "], 
                 bodyHi: ["उन्होंने बढ़िया चाय-कॉफी पूछी और मेरी फैमिली का बहुत अच्छा ध्यान रखा। ", "पूरी टीम का आदर-सत्कार करने का तरीका वाकई दिल छू लेने वाला था। ", "वेटिंग के दौरान स्टाफ लगातार आपके कम्फर्ट का ध्यान रखता है। ", "कस्टमर लाउंज सभी सुविधाओं से लैस है और बहुत ही रिलैक्सिंग है। ", "उन्होंने मेरे बच्चों और परिवार का बहुत प्यार और धैर्य से स्वागत किया। ", "भारी भीड़ होने के बावजूद उन्होंने सबको बहुत प्यार से रिफ्रेशमेंट्स सर्व किए। ", "स्टाफ यह सुनिश्चित करता है कि शोरूम में आपको अनदेखा महसूस न हो। ", "होस्टिंग का स्टैंडर्ड बहुत प्रीमियम है जो किसी बड़े कॉर्पोरेट जैसा लगता है। ", "उनके पास पानी और बैठने की पूरी व्यवस्था के साथ बढ़िया एसी एरिया है। ", "जब आप एंटर करते हैं, तो हर टीम मेंबर आपका मुस्कुराकर अभिवादन करता है। ", "उनका गेस्ट मैनेजमेंट सिस्टम बहुत ही शानदार और सुखद है। ", "उनके इस बढ़िया व्यवहार और शिष्टाचार ने मेरा दिल जीत लिया। "] 
-            },
-            { 
-                tagEn: "Great Offers", tagHi: "बढ़िया ऑफर्स", 
-                openEn: ["Got an amazing deal on my new {MODEL}. ", "Superb benefits on my purchase of {MODEL}. ", "Amar Autos gave the best pricing for my {MODEL}. ", "Saved a good amount on booking the {MODEL} here. ", "The commercial offer for {MODEL} was too good to resist. ", "Got the value deal for my dream {MODEL} today. ", "Compared prices everywhere, bought {MODEL} here. ", "Amar Autos has the most competitive offers for {MODEL}. ", "Got a highly profitable deal for my {MODEL}. ", "The seasonal scheme on {MODEL} made me buy it instantly. ", "Best package deal given for my brand new {MODEL}. ", "Highly satisfied with the budget alignment of my {MODEL}. "], 
-                openHi: ["अपनी नई {MODEL} पर मुझे बहुत ही शानदार डील मिली। ", "{MODEL} खरीदते समय कुछ बहुत अच्छे फायदे मिले। ", "अमर ऑटोस ने मेरी {MODEL} के लिए सबसे बेस्ट प्राइस दिया। ", "यहाँ {MODEL} बुक करने पर मेरे अच्छे पैसों की बचत हुई। ", "{MODEL} के लिए जो कमर्शियल ऑफर मिला, उसे मैं मना नहीं कर पाया। ", "आज अपनी ड्रीम {MODEL} के लिए बहुत ही वैल्यू-फॉर-मनी डील मिली। ", "सब जगह प्राइस कंपेयर करने के बाद {MODEL} यहीं से खरीदी। ", "अमर ऑटोस के पास {MODEL} के लिए सबसे बेस्ट ऑफर्स हैं। ", "मेरी {MODEL} के लिए मुझे एक बहुत ही मुनाफे वाली डील मिली। ", "{MODEL} पर चल रहे ऑफर को देखकर मैंने इसे तुरंत खरीद लिया। ", "मेरी ब्रांड न्यू {MODEL} के लिए बेस्ट पैकेज डील दी गई। ", "अपनी {MODEL} के बजट और ऑफर्स से मैं बेहद संतुष्ट हूँ। "], 
-                bodyEn: ["They gave excellent discounts and good genuine accessories too. ", "The exchange value offered for my old vehicle was very fair. ", "Got some brilliant corporate benefits and dynamic loyalty bonuses. ", "They provided complimentary helmets and essential riding gear kits. ", "The price quotation had maximum legitimate benefits applied. ", "They matched the best market offers without any arguments. ", "Got superb value additions on insurance and warranty extensions. ", "The manager went out of the way to give me the best discount. ", "They have transparent combo offers on official protection guards. ", "No fake markup on prices, just genuine direct savings given. ", "The bundled package with official accessories saved me a lot. ", "Highly competitive pricing that beats any other showroom nearby. "], 
-                bodyHi: ["मुझे बहुत अच्छे डिस्काउंट के साथ जेन्युइन एक्सेसरीज़ भी दी गईं। ", "मेरी पुरानी गाड़ी की एक्सचेंज वैल्यू भी काफी सही और अच्छी लगाई। ", "मुझे कुछ बहुत ही बढ़िया कॉर्पोरेट बेनिफिट्स और लॉयल्टी बोनस मिले। ", "उन्होंने कॉम्प्लीमेंट्री हेलमेट और ज़रूरी राइडिंग गियर किट्स भी दीं। ", "प्राइस कोटेशन में सभी सही और कानूनी फायदों को लगाया गया था। ", "उन्होंने बिना किसी बहस के मार्केट का सबसे बेस्ट ऑफर मैच करके दिया। ", "इंश्योरेंस और एक्सटेंडेड वारंटी पर बहुत बढ़िया वैल्यू एडिशन्स मिले। ", "मैनेजर ने खुद आगे बढ़कर मुझे सबसे बेस्ट पॉसिबल डिस्काउंट दिया। ", "ऑफिशियल प्रोटेक्शन गार्ड्स पर उनके पास पारदर्शी कॉम्बो ऑफर्स हैं। ", "कीमतों में कोई फालतू का बढ़ाव नहीं था, सीधे तौर पर बचत मिली। ", "ऑफिशियल एक्सेसरीज़ के बंडल पैकेज से मेरे बहुत सारे पैसे बच गए। ", "आसपास के किसी भी अन्य शोरूम से इनकी कीमतें काफी बेहतर हैं। "] 
             },
             { 
                 tagEn: "Sleek RTO Work", tagHi: "RTO और बीमा", 
@@ -397,6 +469,7 @@
     const tagsList = document.getElementById('tags-list');
     const tagsTitle = document.getElementById('tags-title');
     const inputGroup = document.getElementById('input-group');
+    const quickFeedback = document.getElementById('quick-feedback'); 
     const modelInput = document.getElementById('model-name');
     const salesInput = document.getElementById('sales-person');
     const reviewBox = document.getElementById('review-box');
@@ -425,6 +498,15 @@
         btnSubmit.innerText = isHindi ? "फीडबैक सबमिट करें" : "Submit Feedback"; 
         hintText.innerText = isHindi ? "📝 आप चाहें तो नीचे अपने शब्द लिख सकते हैं:" : "📝 You can edit this text below:";
 
+        document.getElementById('q1-text').innerText = isHindi ? "क्या आपको चाय/कॉफी पूछी गई?" : "Were you offered Tea/Coffee?";
+        document.getElementById('q2-text').innerText = isHindi ? "क्या फीचर्स अच्छे से समझाए गए?" : "Were all features explained clearly?";
+        document.getElementById('q3-text').innerText = isHindi ? "क्या टेस्ट राइड के लिए पूछा गया?" : "Were you offered a Test Ride?";
+
+        document.querySelectorAll('.fb-btn').forEach(btn => {
+            if(btn.innerText === "Yes" || btn.innerText === "हाँ") btn.innerText = isHindi ? "हाँ" : "Yes";
+            if(btn.innerText === "No" || btn.innerText === "नहीं") btn.innerText = isHindi ? "नहीं" : "No";
+        });
+
         updatePlaceholders();
         if(currentRating > 0) renderTags(currentRating);
         updateReviewBox();
@@ -450,6 +532,8 @@
 
             inputGroup.style.display = "flex";
             inputGroup.classList.add("animate-slide-up");
+            
+            quickFeedback.style.display = "block"; 
             
             hintText.style.display = "block";
             hintText.classList.add("animate-block-up");
@@ -612,7 +696,10 @@
             tags: tagsString || "None",
             reviewText: rText,
             ridingGroup: joinRidingGroup,
-            whatsappNumber: wpNumber
+            whatsappNumber: wpNumber,
+            teaCoffee: fbData.fb1,
+            featuresExplained: fbData.fb2,
+            testRide: fbData.fb3
         };
 
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
