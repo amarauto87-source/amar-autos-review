@@ -1,24 +1,4 @@
 <!DOCTYPE html>
-<!-- COMMON BRANDING HEADER (Large Text Version) -->
-<div class="brand-header">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 170" width="340px" max-width="100%" height="auto" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); margin-bottom: 5px;">
-      <defs>
-        <style>
-          .re-text { font-family: 'Georgia', serif; font-size: 56px; font-weight: 900; fill: #D52B1E; text-anchor: middle; letter-spacing: 1px; }
-          .dealer-text { font-family: 'Arial', sans-serif; font-size: 24px; font-weight: 900; fill: #E5A93C; text-anchor: middle; letter-spacing: 3px; }
-          .line { stroke: #E5A93C; stroke-width: 2px; }
-        </style>
-      </defs>
-      <!-- ROYAL ENFIELD Text -->
-      <text x="200" y="65" class="re-text">ROYAL</text>
-      <text x="200" y="120" class="re-text">ENFIELD</text>
-      <!-- AMAR AUTOS Text with golden side lines -->
-      <line x1="30" y1="152" x2="85" y2="152" class="line"/>
-      <text x="200" y="160" class="dealer-text">AMAR AUTOS</text>
-      <line x1="315" y1="152" x2="370" y2="152" class="line"/>
-    </svg>
-    <p class="since-text" style="font-size: 13px; margin-top: 8px;">SINCE 1982</p>
-</div>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,8 +19,7 @@
         
         /* --- BRANDING STYLES --- */
         .brand-header { text-align: center; margin-bottom: 20px; }
-        .custom-logo { max-width: 240px; margin-bottom: 5px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); border-radius: 8px;}
-        .since-text { color: #E5A93C; font-size: 11px; font-weight: 800; letter-spacing: 4px; margin: 5px 0 0 0;}
+        .since-text { color: #E5A93C; font-size: 13px; font-weight: 800; letter-spacing: 4px; margin: 8px 0 0 0;}
 
         /* --- CARD STYLES --- */
         .card { background: #111111; padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align: center; width: 100%; max-width: 480px; position: relative; border-top: 5px solid #E5A93C; box-sizing: border-box; transition: all 0.4s ease; display: flex; flex-direction: column; align-items: center;}
@@ -145,16 +124,24 @@
 </head>
 <body>
 
-<!-- COMMON BRANDING HEADER -->
 <div class="brand-header">
-    <!-- If logo.jpg fails to load on GitHub, it will automatically use the Wikipedia RE logo URL as a fallback -->
-    <img src="logo.svg" alt="Amar Autos Royal Enfield" class="custom-logo" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Royal_Enfield_logo.svg/800px-Royal_Enfield_logo.svg.png';">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 170" width="340px" max-width="100%" height="auto" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); margin-bottom: 5px;">
+      <defs>
+        <style>
+          .re-text { font-family: 'Georgia', serif; font-size: 56px; font-weight: 900; fill: #D52B1E; text-anchor: middle; letter-spacing: 1px; }
+          .dealer-text { font-family: 'Arial', sans-serif; font-size: 24px; font-weight: 900; fill: #E5A93C; text-anchor: middle; letter-spacing: 3px; }
+          .line { stroke: #E5A93C; stroke-width: 2px; }
+        </style>
+      </defs>
+      <text x="200" y="65" class="re-text">ROYAL</text>
+      <text x="200" y="120" class="re-text">ENFIELD</text>
+      <line x1="30" y1="152" x2="85" y2="152" class="line"/>
+      <text x="200" y="160" class="dealer-text">AMAR AUTOS</text>
+      <line x1="315" y1="152" x2="370" y2="152" class="line"/>
+    </svg>
     <p class="since-text">SINCE 1982</p>
 </div>
 
-<!-- ==========================================
-     STEP 1: WELCOME SCREEN (DEALER CODE) 
-     ========================================== -->
 <div class="card" id="welcome-screen">
     <p class="welcome-desc">Please enter your <b>Dealer Code</b> to continue to the system.</p>
     
@@ -166,9 +153,6 @@
     <div class="error-msg" id="code-error">Invalid Dealer Code! Please try again.</div>
 </div>
 
-<!-- ==========================================
-     STEP 2: CHOICE SCREEN (REVIEW OR FEEDBACK/COMPLAINT)
-     ========================================== -->
 <div class="card" id="choice-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-ch1">ENG</div>
@@ -188,9 +172,6 @@
     </div>
 </div>
 
-<!-- ==========================================
-     STEP 2.1: SUB-CHOICE SCREEN (FEEDBACK OR COMPLAINT)
-     ========================================== -->
 <div class="card" id="sub-choice-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-ch2">ENG</div>
@@ -213,9 +194,6 @@
     </div>
 </div>
 
-<!-- ==========================================
-     STEP 3A: MAIN FEEDBACK/REVIEW SCREEN
-     ========================================== -->
 <div class="card" id="main-card">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en">ENG</div>
@@ -244,7 +222,6 @@
     </div>
 
     <div class="input-group" id="input-group">
-        <!-- CUSTOMER CAN TYPE BIKE NAME HERE -->
         <input type="text" id="model-name" class="form-input" placeholder="Enter Bike Model (e.g. Classic 350)" oninput="updateReviewBox()" style="flex: 1; min-width: 45%;">
 
         <select id="sales-person" onchange="updateReviewBox()">
@@ -294,9 +271,6 @@
     </div>
 </div>
 
-<!-- ==========================================
-     STEP 3B: COMPLAINT SCREEN
-     ========================================== -->
 <div class="card" id="complaint-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-c">ENG</div>
@@ -320,9 +294,6 @@
     <button class="btn-complaint-submit" id="btn-complaint-submit" onclick="submitComplaint()">Submit Complaint</button>
 </div>
 
-<!-- ==========================================
-     STEP 4: TIMEOUT SCREEN (SESSION EXPIRED)
-     ========================================== -->
 <div class="card" id="timeout-screen">
     <div class="timeout-icon">⏱️</div>
     <h2 style="color:#fff; margin:0 0 10px 0;">Session Expired</h2>
