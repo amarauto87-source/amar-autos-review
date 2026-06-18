@@ -35,7 +35,7 @@
         /* --- GLASSMORPHISM CARD STYLES --- */
         .card { 
             background: rgba(18, 18, 18, 0.7); 
-            backdrop-filter: blur(12px); /* Modern blur effect */
+            backdrop-filter: blur(12px); 
             -webkit-backdrop-filter: blur(12px);
             padding: 40px 30px; 
             border-radius: 16px; 
@@ -68,7 +68,7 @@
         .code-input:focus { outline: none; border-color: #E5A93C; box-shadow: 0 0 15px rgba(229,169,60,0.2), inset 0 2px 10px rgba(0,0,0,0.5);}
         .code-input::placeholder { color: #555; letter-spacing: 4px; font-size: 16px;}
         
-        /* Outline Golden Buttons (Changed from solid yellow) */
+        /* Outline Golden Buttons */
         .btn-primary, .btn-review { 
             background: rgba(0, 0, 0, 0.6); 
             color: #E5A93C; 
@@ -236,7 +236,7 @@
         <button class="choice-btn btn-review" onclick="selectFlow('review')">
             <span id="btn-text-review">⭐ Share Review</span>
         </button>
-        <button class="choice-btn btn-complaint" onclick="showSubChoice()" style="border-color:#444; color:#fff; background: #111;">
+        <button class="choice-btn btn-complaint" onclick="showSubChoice()">
             <span id="btn-text-feedcomp">📝 Feedback or Complaint</span>
         </button>
     </div>
@@ -432,6 +432,47 @@
     let seoKeywordsEn = ["the best Royal Enfield showroom in East Delhi", "Amar Autos in East Delhi", "the top Royal Enfield dealership near me", "Amar Autos Royal Enfield"];
     let seoKeywordsHi = ["ईस्ट दिल्ली के सबसे बेहतरीन रॉयल एनफील्ड शोरूम", "ईस्ट दिल्ली में अमर ऑटोस", "मेरे आस-पास के सबसे अच्छे रॉयल एनफील्ड शोरूम", "अमर ऑटोस रॉयल एनफील्ड"];
 
+    // 20 Unique Starting Lines for Each Category
+    const salesStartsEn = [
+        "I recently purchased my new {model}", "Took delivery of my {model} today", "Just got my hands on the new {model}", 
+        "Happy to bring home my new {model}", "Had a great time buying my {model}", "Finally bought my dream ride, the {model}", 
+        "Amazing experience purchasing the {model}", "Got my new {model} delivered today", "Thrilled to own the new {model}", 
+        "The purchase of my {model} was very smooth", "I am so excited about my new {model}", "Buying the {model} was a wonderful experience", 
+        "Proud owner of a brand new {model}", "Just rode home my new {model}", "Excellent delivery experience for my {model}", 
+        "My new {model} looks absolutely stunning", "Very satisfied with the purchase of my {model}", "Booked and received my {model} without any hassle", 
+        "The whole process of buying my {model} was fantastic", "Super happy with my new {model}"
+    ];
+
+    const salesStartsHi = [
+        "मैंने हाल ही में अपनी नई {model} खरीदी है", "आज मेरी नई {model} की डिलीवरी हुई", "अपनी नई {model} घर लाकर बहुत खुश हूँ", 
+        "आखिरकार मेरी सपनों की बाइक {model} मेरे पास है", "नई {model} खरीदने का अनुभव शानदार रहा", "{model} की खरीदारी बहुत स्मूथ रही", 
+        "अपनी नई {model} के साथ बहुत अच्छा लग रहा है", "आज मैंने अपनी {model} बाइक ली", "मुझे अपनी नई {model} बहुत पसंद आई", 
+        "{model} की डिलीवरी का अनुभव बहुत बढ़िया था", "नई {model} का मालिक बनकर गर्व महसूस हो रहा है", "मेरी {model} की डिलीवरी बिना किसी परेशानी के हो गई", 
+        "मैंने आज ही अपनी {model} बाइक खरीदी है", "{model} की पूरी खरीद प्रक्रिया बहुत आसान थी", "अपनी नई {model} की राइड लेकर मज़ा आ गया", 
+        "मैंने अपनी मनपसंद {model} बाइक फाइनली ले ली", "{model} को खरीदना एक बेहतरीन अनुभव था", "आज मेरे गैराज में नई {model} आ गई है", 
+        "अपनी नई {model} की शानदार डिलीवरी से संतुष्ट हूँ", "मैं अपनी नई {model} खरीद कर बहुत एक्साइटेड हूँ"
+    ];
+
+    const serviceStartsEn = [
+        "Just got my {model} serviced", "Took my {model} in for routine maintenance", "Got the servicing done for my {model} today", 
+        "Excellent service experience for my {model}", "My {model} is running completely smooth after the service", "Brought my {model} for its scheduled service", 
+        "Very happy with the service of my {model}", "The mechanics did a great job on my {model}", "My {model} feels brand new after the service", 
+        "Got my {model} repaired and serviced today", "Prompt and proper service for my {model}", "They took good care of my {model} during the service", 
+        "Visited for the periodic service of my {model}", "Satisfied with the maintenance work on my {model}", "The service quality for my {model} was top notch", 
+        "My {model} was serviced exactly on time", "Great servicing done for my {model}", "Everything was checked and fixed in my {model}", 
+        "The service center did an amazing job with my {model}", "My {model} is performing flawlessly post service"
+    ];
+
+    const serviceStartsHi = [
+        "मैंने अपनी {model} की सर्विस कराई", "आज मेरी {model} की सर्विसिंग बहुत अच्छे से हुई", "अपनी {model} की सर्विस कराकर बहुत संतुष्ट हूँ", 
+        "सर्विस के बाद मेरी {model} एकदम नई जैसी चल रही है", "मेरी {model} की सर्विस का अनुभव शानदार रहा", "मैंने अपनी {model} का रूटीन मेंटेनेंस करवाया", 
+        "सर्विस सेंटर ने मेरी {model} का अच्छे से ध्यान रखा", "मेरी {model} की सर्विस बिल्कुल समय पर पूरी हो गई", "आज अपनी {model} की रिपेयर और सर्विसिंग करवाई", 
+        "{model} की सभी समस्याएं सर्विस में ठीक कर दी गईं", "मेरी {model} का काम बहुत ही बढ़िया तरीके से हुआ", "सर्विसिंग के बाद {model} की परफॉरमेंस एकदम स्मूथ है", 
+        "अपनी {model} के मेंटेनेंस के काम से खुश हूँ", "{model} की सर्विस क्वालिटी बहुत ही शानदार थी", "मैंने अपनी {model} की शेड्यूल्ड सर्विस करवाई", 
+        "मेकैनिक्स ने मेरी {model} पर बहुत अच्छा काम किया", "सर्विस के बाद अपनी {model} चलाकर मज़ा आ गया", "मेरी {model} की बहुत ही प्रोफेशनल सर्विस हुई", 
+        "आज मैंने अपनी {model} सर्विस सेंटर पर दिखाई", "मेरी {model} की पूरी चेकिंग और सर्विस अच्छे से की गई"
+    ];
+
     const salesData = {
         positive: [
             { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", bodyEn: "The staff is super friendly. ", bodyHi: "यहाँ का स्टाफ बहुत अच्छा है। " },
@@ -458,7 +499,6 @@
 
     let reviewData = salesData;
 
-    // Helper function to shuffle array items randomly
     function shuffleArray(array) {
         let shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -684,7 +724,6 @@
     function renderTags(rating) {
         let category = rating >= 4 ? reviewData.positive : (rating === 3 ? reviewData.neutral : reviewData.negative);
         
-        // --- TAG SHUFFLING APPLIED HERE ---
         category = shuffleArray(category);
 
         document.getElementById('tags-title').innerText = isHindi ? "आपको क्या लगा? (विकल्प चुनें)" : "What did you notice? (Select options)";
@@ -719,18 +758,47 @@
         
         let finalReview = "";
         
+        // 1. Pick a random starting line
+        let baseLine = "";
+        let addSeo = Math.random() < 0.1; // 10% Chance for SEO location
+
         let randomSeoEn = seoKeywordsEn[Math.floor(Math.random() * seoKeywordsEn.length)];
         let randomSeoHi = seoKeywordsHi[Math.floor(Math.random() * seoKeywordsHi.length)];
 
+        let seoTextEnSales = addSeo ? (" from " + randomSeoEn) : "";
+        let seoTextEnService = addSeo ? (" at " + randomSeoEn) : "";
+        let seoTextHiSales = addSeo ? (" " + randomSeoHi + " से") : "";
+        let seoTextHiService = addSeo ? (" " + randomSeoHi + " पर") : "";
+
+        if (isServiceCenter) {
+            if (isHindi) {
+                let tmpl = serviceStartsHi[Math.floor(Math.random() * serviceStartsHi.length)];
+                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextHiService + "। ";
+            } else {
+                let tmpl = serviceStartsEn[Math.floor(Math.random() * serviceStartsEn.length)];
+                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextEnService + ". ";
+            }
+        } else {
+            if (isHindi) {
+                let tmpl = salesStartsHi[Math.floor(Math.random() * salesStartsHi.length)];
+                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextHiSales + "। ";
+            } else {
+                let tmpl = salesStartsEn[Math.floor(Math.random() * salesStartsEn.length)];
+                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextEnSales + ". ";
+            }
+        }
+
+        // Clean up any weird double spaces or punctuation
+        baseLine = baseLine.replace("। ।", "।").replace(". .", ".").replace(" .", ".");
+        finalReview += baseLine;
+
+        // 2. Append selected tags
         if (selectedTagsData.length > 0) {
-            let baseTextEn = isServiceCenter ? `I recently got my ${modelReplacement} serviced at ${randomSeoEn}. ` : `I bought my new ${modelReplacement} from ${randomSeoEn}. `;
-            let baseTextHi = isServiceCenter ? `मैंने अपनी ${modelReplacement} की सर्विस ${randomSeoHi} पर कराई। ` : `मैंने अपनी नई ${modelReplacement} ${randomSeoHi} से खरीदी। `;
-            
-            finalReview += isHindi ? baseTextHi : baseTextEn;
             selectedTagsData.forEach(tag => { finalReview += (isHindi ? tag.bodyHi : tag.bodyEn); });
         } else {
-            finalReview = isHindi ? "सर्विस और अनुभव अच्छा रहा।" : "Great experience and service.";
+            finalReview += (isHindi ? "सर्विस और अनुभव अच्छा रहा।" : "Great experience and service.");
         }
+        
         document.getElementById('review-box').value = finalReview;
     }
 
