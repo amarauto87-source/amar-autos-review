@@ -14,118 +14,182 @@
     </script>
 
     <style>
-        /* Royal Enfield Premium Minimal Dark Theme */
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 15px; background-color: #0a0a0a; margin: 0; box-sizing: border-box; overflow-x: hidden;}
+        /* --- MODERN ROYAL ENFIELD THEME WITH BACKGROUND --- */
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; padding: 20px 15px; 
+            
+            /* Dark Bike Background Image */
+            background: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.9)), 
+                        url('https://images.unsplash.com/photo-1614165936126-2ed18e471b3b?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            
+            margin: 0; box-sizing: border-box; overflow-x: hidden;
+        }
         
         /* --- BRANDING STYLES --- */
-        .brand-header { text-align: center; margin-bottom: 20px; }
-        .since-text { color: #E5A93C; font-size: 13px; font-weight: 800; letter-spacing: 4px; margin: 8px 0 0 0;}
+        .brand-header { text-align: center; margin-bottom: 30px; position: relative; transition: opacity 0.5s ease;}
+        .since-text { color: #E5A93C; font-size: 13px; font-weight: 800; letter-spacing: 5px; margin: 8px 0 0 0; text-shadow: 0 2px 4px rgba(0,0,0,0.8);}
 
-        /* --- CARD STYLES --- */
-        .card { background: #111111; padding: 40px 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align: center; width: 100%; max-width: 480px; position: relative; border-top: 5px solid #E5A93C; box-sizing: border-box; transition: all 0.4s ease; display: flex; flex-direction: column; align-items: center;}
+        /* --- GLASSMORPHISM CARD STYLES --- */
+        .card { 
+            background: rgba(18, 18, 18, 0.7); 
+            backdrop-filter: blur(12px); /* Modern blur effect */
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); 
+            text-align: center; width: 100%; max-width: 480px; 
+            position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 4px solid #E5A93C; 
+            box-sizing: border-box; transition: all 0.4s ease; 
+            display: flex; flex-direction: column; align-items: center;
+        }
         
+        /* --- TYPOGRAPHY --- */
+        h2 { font-family: 'Georgia', serif; font-weight: bold; letter-spacing: 1px; color: #fff; margin-top: 10px; font-size: 26px;}
+        .subtitle { color: #aaa; margin: 5px 0 30px 0; font-size: 15px; letter-spacing: 0.5px; font-weight: 300;}
+
         /* --- WELCOME SCREEN --- */
         #welcome-screen { max-width: 400px; }
-        .welcome-desc { color: #888888; font-size: 14px; margin-bottom: 25px; line-height: 1.5; margin-top: 10px;}
-        .code-input-container { width: 100%; margin-bottom: 25px;}
-        .code-input { width: 100%; padding: 15px; background: #1a1a1a; border: 2px solid #333; border-radius: 10px; color: #E5A93C; font-size: 22px; text-align: center; letter-spacing: 8px; font-weight: 700; box-sizing: border-box; transition: 0.3s;}
-        .code-input:focus { outline: none; border-color: #E5A93C; box-shadow: 0 0 15px rgba(229,169,60,0.2);}
-        .code-input::placeholder { color: #444; letter-spacing: 2px; font-size: 16px;}
+        .welcome-desc { color: #ccc; font-size: 15px; margin-bottom: 30px; line-height: 1.6; margin-top: 10px;}
         
-        .btn-primary { background: #E5A93C; color: #000; padding: 15px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; font-size: 14px; text-transform: uppercase; width: 100%; letter-spacing: 1.5px; transition: all 0.3s;}
-        .btn-primary:hover { background: #cca130; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229,169,60,0.3);}
-        .btn-primary:active { transform: scale(0.98);}
-        .error-msg { color: #ff4d4d; font-size: 13px; font-weight: 600; margin-top: 15px; display: none; animation: shake 0.4s;}
+        .code-input-container { width: 100%; margin-bottom: 30px;}
+        .code-input { 
+            width: 100%; padding: 18px; 
+            background: rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(229, 169, 60, 0.3); border-radius: 10px; 
+            color: #E5A93C; font-size: 24px; text-align: center; 
+            letter-spacing: 10px; font-weight: 900; 
+            box-sizing: border-box; transition: 0.3s;
+        }
+        .code-input:focus { outline: none; border-color: #E5A93C; box-shadow: 0 0 15px rgba(229,169,60,0.2), inset 0 2px 10px rgba(0,0,0,0.5);}
+        .code-input::placeholder { color: #555; letter-spacing: 4px; font-size: 16px;}
         
+        /* Outline Golden Buttons (Changed from solid yellow) */
+        .btn-primary, .btn-review { 
+            background: rgba(0, 0, 0, 0.6); 
+            color: #E5A93C; 
+            border: 2px solid #E5A93C; 
+            padding: 18px 20px; border-radius: 10px; 
+            cursor: pointer; font-weight: 900; font-size: 15px; text-transform: uppercase; 
+            width: 100%; letter-spacing: 1.5px; transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .btn-primary:hover, .btn-review:hover { 
+            background: rgba(229, 169, 60, 0.15); 
+            border-color: #F3BA54; color: #F3BA54; 
+            transform: translateY(-3px); box-shadow: 0 8px 25px rgba(229,169,60,0.3);
+        }
+        .btn-primary:active, .btn-review:active { transform: scale(0.98);}
+        
+        .error-msg { color: #ff5e5e; font-size: 13px; font-weight: bold; margin-top: 15px; display: none; animation: shake 0.4s;}
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
 
         /* --- CHOICE & SUB-CHOICE SCREENS --- */
-        #choice-screen, #sub-choice-screen { display: none; max-width: 400px;}
-        .choice-btn { width: 100%; padding: 18px 20px; margin-bottom: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;}
-        .btn-review { background: #E5A93C; color: #000; }
-        .btn-review:hover { background: #cca130; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229,169,60,0.3);}
-        .btn-complaint { background: #1a1a1a; color: #ff4d4d; border: 2px solid #ff4d4d; }
-        .btn-complaint:hover { background: #ff4d4d; color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 77, 77, 0.3);}
-        .btn-feedback { background: #1a1a1a; color: #E5A93C; border: 2px solid #E5A93C; }
-        .btn-feedback:hover { background: #E5A93C; color: #000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229, 169, 60, 0.3);}
-        .btn-back { background: transparent; color: #888; border: 1px solid #444; padding: 12px; margin-top: 5px; }
-        .btn-back:hover { background: #222; color: #fff; }
+        #choice-screen, #sub-choice-screen { display: none; max-width: 420px;}
+        
+        .choice-btn { 
+            width: 100%; padding: 20px 20px; margin-bottom: 25px; 
+            border: none; border-radius: 10px; cursor: pointer; 
+            font-weight: 800; font-size: 15px; text-transform: uppercase; 
+            letter-spacing: 1px; transition: all 0.3s; display: flex; 
+            align-items: center; justify-content: center; gap: 10px;
+        }
+        
+        .btn-complaint { background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+        .btn-complaint:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.4); transform: translateY(-3px);}
+        
+        .btn-feedback { background: rgba(0,0,0,0.6); color: #E5A93C; border: 1px solid rgba(229, 169, 60, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+        .btn-feedback:hover { background: rgba(229, 169, 60, 0.1); border-color: #E5A93C; transform: translateY(-3px);}
+        
+        .btn-back { background: transparent; color: #888; border: 1px solid rgba(255,255,255,0.1); padding: 14px; margin-top: 5px; }
+        .btn-back:hover { background: rgba(255,255,255,0.05); color: #fff; }
 
         /* --- REVIEW & COMPLAINT COMMON STYLES --- */
         #main-card, #complaint-screen { display: none; }
         
-        .lang-toggle { position: absolute; top: 20px; right: 25px; background: #222; border-radius: 30px; display: flex; overflow: hidden; cursor: pointer; border: 1px solid #333; padding: 2px; z-index: 10;}
-        .lang-btn { padding: 4px 12px; font-size: 11px; font-weight: 700; color: #888; transition: 0.3s; user-select: none; border-radius: 30px;}
+        .lang-toggle { position: absolute; top: 20px; right: 25px; background: rgba(0,0,0,0.5); border-radius: 30px; display: flex; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); padding: 2px; z-index: 10;}
+        .lang-btn { padding: 5px 12px; font-size: 11px; font-weight: 800; color: #888; transition: 0.3s; user-select: none; border-radius: 30px;}
         .lang-btn.active { background: #E5A93C; color: #000; } 
         
-        .branch-badge { background: #1a1a1a; color: #E5A93C; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 6px; letter-spacing: 1px; display: inline-block; margin: 20px 0 10px 0; text-transform: uppercase; border: 1px solid #333;}
-        .subtitle { color: #888; margin: 0 0 25px 0; font-size: 14px; letter-spacing: 0.5px;}
+        .branch-badge { background: rgba(0,0,0,0.5); color: #E5A93C; font-size: 11px; font-weight: bold; padding: 6px 14px; border-radius: 6px; letter-spacing: 2px; display: inline-block; margin: 20px 0 10px 0; text-transform: uppercase; border: 1px solid rgba(229, 169, 60, 0.3);}
         
-        .community-section { margin-bottom: 25px; text-align: left; padding: 5px 0; border-bottom: 1px solid #222; padding-bottom: 20px; width: 100%;}
-        .community-title { color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 12px; letter-spacing: 0.3px;}
-        .community-options { display: flex; gap: 12px; margin-bottom: 12px;}
-        .community-btn { flex: 1; padding: 11px; text-align: center; background: #1a1a1a; border: 1px solid #222; border-radius: 8px; cursor: pointer; color: #999; font-size: 13px; transition: all 0.2s; font-weight: 600;}
-        .community-btn.active { background: #E5A93C; color: #000; border-color: #E5A93C; transform: scale(1.02); }
-        .form-input { width: 100%; padding: 12px 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #222; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s;}
-        .form-input:focus { outline: none; border-color: #E5A93C; }
+        .community-section { margin-bottom: 25px; text-align: left; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; width: 100%; box-sizing: border-box;}
+        .community-title { color: #ddd; font-size: 13px; font-weight: bold; margin-bottom: 12px; letter-spacing: 0.5px;}
+        .community-options { display: flex; gap: 12px; margin-bottom: 8px;}
+        .community-btn { flex: 1; padding: 12px; text-align: center; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; color: #999; font-size: 13px; transition: all 0.2s; font-weight: bold;}
+        .community-btn.active { background: #E5A93C; color: #000; border-color: #E5A93C; transform: scale(1.02); box-shadow: 0 0 15px rgba(229,169,60,0.3);}
         
-        .stars-section-title { color: #e0e0e0; font-size: 14px; font-weight: 600; margin-bottom: 8px; text-align: left; width: 100%;}
-        .stars { font-size: 44px; cursor: pointer; color: #222222; margin-bottom: 25px; text-align: left; user-select: none; width: 100%;}
-        .stars span { transition: all 0.2s; display: inline-block; margin-right: 4px;}
-        .stars span:hover { transform: scale(1.25); color: #f5c060; }
-        .stars span.active { color: #E5A93C; animation: pulseStar 0.3s ease-in-out; } 
+        .form-input { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); color: #ffffff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s;}
+        .form-input:focus { outline: none; border-color: #E5A93C; background: rgba(0,0,0,0.8);}
         
-        .animate-slide-up { display: flex; animation: fadeInUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .stars-section-title { color: #ddd; font-size: 14px; font-weight: bold; margin-bottom: 12px; text-align: left; width: 100%; letter-spacing: 0.5px;}
+        .stars { font-size: 46px; cursor: pointer; color: rgba(255,255,255,0.1); margin-bottom: 25px; text-align: left; user-select: none; width: 100%;}
+        .stars span { transition: all 0.2s; display: inline-block; margin-right: 2px;}
+        .stars span:hover { transform: scale(1.2); color: #c48c22; }
+        .stars span.active { color: #E5A93C; animation: pulseStar 0.3s ease-in-out; text-shadow: 0 0 20px rgba(229,169,60,0.6);} 
+        
         .animate-block-up { display: block; animation: fadeInUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         
         .input-group { display: none; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; text-align: left; width: 100%;}
-        .input-group select { flex: 1; min-width: 45%; padding: 12px 14px; background: #1a1a1a; color: #ffffff; border: 1px solid #222; border-radius: 8px; font-size: 13px; box-sizing: border-box; transition: 0.3s; cursor: pointer;}
-        .input-group select:focus { border-color: #E5A93C; outline: none; }
+        .input-group select { flex: 1; min-width: 45%; padding: 15px; background: rgba(0,0,0,0.5); color: #ffffff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; cursor: pointer;}
+        .input-group select:focus { border-color: #E5A93C; outline: none; background: rgba(0,0,0,0.8);}
         
-        .quick-feedback { display: none; margin-bottom: 25px; text-align: left; background: #151515; padding: 15px; border-radius: 8px; border: 1px solid #222; width: 100%; box-sizing: border-box;}
-        .fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .fb-question { font-size: 12.5px; color: #ccc; font-weight: 500; width: 65%; line-height: 1.3;}
-        .fb-options { display: flex; gap: 6px; width: 35%; justify-content: flex-end;}
-        .fb-btn { padding: 6px 12px; font-size: 12px; background: #222; border: 1px solid #333; border-radius: 6px; cursor: pointer; color: #888; font-weight: 600;}
+        .quick-feedback { display: none; margin-bottom: 25px; text-align: left; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box;}
+        .fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;}
+        .fb-row:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0;}
+        .fb-question { font-size: 13px; color: #ccc; font-weight: 500; width: 65%; line-height: 1.4;}
+        .fb-options { display: flex; gap: 8px; width: 35%; justify-content: flex-end;}
+        .fb-btn { padding: 8px 16px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; color: #888; font-weight: bold;}
         .fb-btn.active { background: #E5A93C; color: #000; border-color: #E5A93C; }
         
         .tags-container { display: none; margin-bottom: 25px; text-align: left; width: 100%;}
-        .tags-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #e0e0e0; }
+        .tags-title { font-size: 13px; font-weight: bold; margin-bottom: 12px; color: #ddd; letter-spacing: 0.5px;}
         .tags-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
-        .tag { padding: 6px 12px; background: #1a1a1a; border: 1px solid #222; border-radius: 20px; cursor: pointer; font-size: 12px; color: #999; user-select: none; font-weight: 500;}
-        .tag.active { background: #E5A93C; color: #000; border-color: #E5A93C; font-weight: 600; transform: scale(1.05);}
+        .tag { padding: 10px 16px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; cursor: pointer; font-size: 12px; color: #bbb; user-select: none; font-weight: bold; transition: 0.2s;}
+        .tag.active { background: #E5A93C; color: #000; border-color: #E5A93C; box-shadow: 0 4px 15px rgba(229, 169, 60, 0.3);}
         
-        .hint-text { color: #666; font-size: 11px; margin-bottom: 6px; text-align: left; display: none; font-weight: 500; width: 100%;}
-        textarea { width: 100%; height: 120px; padding: 12px 14px; margin-bottom: 25px; border: 1px solid #222; border-radius: 8px; resize: none; font-size: 13px; box-sizing: border-box; line-height: 1.6; background-color: #1a1a1a; color: #ffffff;}
-        textarea:focus { outline: none; border-color: #E5A93C;}
+        .hint-text { color: #888; font-size: 12px; margin-bottom: 8px; text-align: left; display: none; font-weight: bold; width: 100%; letter-spacing: 0.5px;}
+        textarea { width: 100%; height: 120px; padding: 15px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; resize: none; font-size: 14px; box-sizing: border-box; line-height: 1.6; background-color: rgba(0,0,0,0.5); color: #ffffff;}
+        textarea:focus { outline: none; border-color: #E5A93C; background-color: rgba(0,0,0,0.8);}
         
         .button-group { display: flex; flex-direction: column; gap: 12px; width: 100%;}
         .top-buttons { display: flex; gap: 12px; width: 100%;}
-        button { padding: 14px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.3s ease; flex: 1; text-transform: uppercase;}
-        .btn-copy { background: #222222; color: #ffffff; display: none; border: 1px solid #333;}
-        .btn-google { background: #E5A93C; color: #000; display: none; width: 100%;}
-        .btn-whatsapp { background: transparent; color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366; margin-top: 4px;}
-        .btn-submit { background: #111; color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; margin-top: 8px; animation: glowingSubmit 2s infinite; }
-        .btn-submit:hover { background: #E5A93C; color: #000; }
+        button { padding: 16px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-size: 13px; transition: all 0.3s ease; flex: 1; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .btn-copy { background: rgba(0,0,0,0.6); color: #ffffff; display: none; border: 1px solid rgba(255,255,255,0.2);}
+        .btn-copy:hover { background: rgba(255,255,255,0.1); }
+        
+        .btn-google { background: rgba(0,0,0,0.6); color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        .btn-google:hover { background: rgba(229, 169, 60, 0.15); border-color: #F3BA54; color: #F3BA54; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(229,169,60,0.3);}
+        
+        .btn-whatsapp { background: rgba(0,0,0,0.6); color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366;}
+        .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
+        
+        .btn-submit { background: rgba(0,0,0,0.6); color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; margin-top: 8px; animation: glowingSubmit 2s infinite; }
+        .btn-submit:hover { background: rgba(229, 169, 60, 0.15); border-color: #F3BA54; color: #F3BA54; animation: none;}
         
         /* --- COMPLAINT SUBMIT BUTTON --- */
-        .btn-complaint-submit { background: #ff4d4d; color: #fff; width: 100%; display: block; animation: none; border: none; }
-        .btn-complaint-submit:hover { background: #e60000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4); }
+        .btn-complaint-submit { background: #ff4d4d; color: #fff; width: 100%; display: block; border: none; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);}
+        .btn-complaint-submit:hover { background: #ff3333; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 77, 77, 0.5);}
 
         /* --- TIMEOUT SCREEN --- */
         #timeout-screen { display: none; text-align: center; }
-        .timeout-icon { font-size: 50px; margin-bottom: 15px; }
+        .timeout-icon { font-size: 50px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(229,169,60,0.5));}
 
-        .sparkle { position: absolute; width: 6px; height: 6px; background: #E5A93C; border-radius: 50%; pointer-events: none; z-index: 999; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseStar { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        @keyframes glowingSubmit { 0% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.2); } 50% { box-shadow: 0 0 20px rgba(229, 169, 60, 0.8); } 100% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.2); } }
+        @keyframes pulseStar { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes glowingSubmit { 0% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.1); } 50% { box-shadow: 0 0 15px rgba(229, 169, 60, 0.4); } 100% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.1); } }
     </style>
 </head>
 <body>
 
-<div class="brand-header">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 170" width="340px" max-width="100%" height="auto" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); margin-bottom: 5px;">
+<!-- COMMON BRANDING HEADER (Hides on login) -->
+<div class="brand-header" id="brand-header">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 170" width="340px" max-width="100%" height="auto" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8)); margin-bottom: 5px;">
       <defs>
         <style>
           .re-text { font-family: 'Georgia', serif; font-size: 56px; font-weight: 900; fill: #D52B1E; text-anchor: middle; letter-spacing: 1px; }
@@ -142,6 +206,9 @@
     <p class="since-text">SINCE 1982</p>
 </div>
 
+<!-- ==========================================
+     STEP 1: WELCOME SCREEN (DEALER CODE) 
+     ========================================== -->
 <div class="card" id="welcome-screen">
     <p class="welcome-desc">Please enter your <b>Dealer Code</b> to continue to the system.</p>
     
@@ -153,39 +220,45 @@
     <div class="error-msg" id="code-error">Invalid Dealer Code! Please try again.</div>
 </div>
 
+<!-- ==========================================
+     STEP 2: CHOICE SCREEN (REVIEW OR FEEDBACK/COMPLAINT)
+     ========================================== -->
 <div class="card" id="choice-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-ch1">ENG</div>
         <div class="lang-btn" id="lang-hi-ch1">हिंदी</div>
     </div>
     <div class="branch-badge" id="branch-badge-choice">Amar Autos</div>
-    <h2 style="color: #fff; margin-top: 10px; font-size: 22px;" id="choice-title">How can we help?</h2>
+    <h2 id="choice-title">How can we help?</h2>
     <p class="subtitle" id="choice-subtitle">Please select an option below.</p>
     
     <div style="width: 100%; margin-top: 10px;">
         <button class="choice-btn btn-review" onclick="selectFlow('review')">
             <span id="btn-text-review">⭐ Share Review</span>
         </button>
-        <button class="choice-btn btn-complaint" onclick="showSubChoice()" style="border-color:#555; color:#fff;">
+        <button class="choice-btn btn-complaint" onclick="showSubChoice()" style="border-color:#444; color:#fff; background: #111;">
             <span id="btn-text-feedcomp">📝 Feedback or Complaint</span>
         </button>
     </div>
 </div>
 
+<!-- ==========================================
+     STEP 2.1: SUB-CHOICE SCREEN (FEEDBACK OR COMPLAINT)
+     ========================================== -->
 <div class="card" id="sub-choice-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-ch2">ENG</div>
         <div class="lang-btn" id="lang-hi-ch2">हिंदी</div>
     </div>
     <div class="branch-badge" id="branch-badge-sub">Amar Autos</div>
-    <h2 style="color: #fff; margin-top: 10px; font-size: 22px;" id="sub-title">Feedback / Complaint</h2>
+    <h2 id="sub-title">Feedback / Complaint</h2>
     <p class="subtitle" id="sub-subtitle">What would you like to share?</p>
     
     <div style="width: 100%; margin-top: 10px;">
         <button class="choice-btn btn-feedback" onclick="selectFlow('feedback')">
             <span id="btn-text-feedback">💡 Share Feedback</span>
         </button>
-        <button class="choice-btn btn-complaint" onclick="selectFlow('complaint')">
+        <button class="choice-btn btn-complaint" onclick="selectFlow('complaint')" style="margin-bottom: 25px;">
             <span id="btn-text-complaint">⚠️ Register Complaint</span>
         </button>
         <button class="choice-btn btn-back" onclick="hideSubChoice()">
@@ -194,6 +267,9 @@
     </div>
 </div>
 
+<!-- ==========================================
+     STEP 3A: MAIN FEEDBACK/REVIEW SCREEN
+     ========================================== -->
 <div class="card" id="main-card">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en">ENG</div>
@@ -263,14 +339,17 @@
 
     <div class="button-group">
         <div class="top-buttons">
-            <button class="btn-copy" id="btn-copy" onclick="copyReview()">Copy Draft</button>
-            <button class="btn-google" id="btn-google" onclick="openGoogle()">Open Google Review</button>
+            <button class="btn-copy" id="btn-copy" onclick="copyAndValidate()">Copy Draft</button>
+            <button class="btn-google" id="btn-google" onclick="openGoogleAndValidate()">Open Google Review</button>
         </div>
-        <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsApp()">Issue? Talk to Manager (WhatsApp)</button>
+        <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsAppAndValidate()">Issue? Talk to Manager (WhatsApp)</button>
         <button class="btn-submit" id="btn-submit" onclick="submitInternalFeedback()">Submit Feedback</button>
     </div>
 </div>
 
+<!-- ==========================================
+     STEP 3B: COMPLAINT SCREEN
+     ========================================== -->
 <div class="card" id="complaint-screen">
     <div class="lang-toggle" onclick="toggleLanguageManual()">
         <div class="lang-btn active" id="lang-en-c">ENG</div>
@@ -278,26 +357,29 @@
     </div>
 
     <div class="branch-badge" id="branch-badge-complaint">Amar Autos</div>
-    <h2 style="color: #ff4d4d; margin-top: 10px; font-size: 22px;" id="c-title">Register Complaint</h2>
+    <h2 style="color: #ff4d4d; margin-top: 10px;" id="c-title">Register Complaint</h2>
     <p class="subtitle" id="c-subtitle">We are sorry for the inconvenience. Please share the details.</p>
 
     <div style="width: 100%; text-align: left; margin-bottom: 20px;">
-        <label style="color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block;" id="c-phone-label">Mobile Number *</label>
+        <label style="color: #e0e0e0; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block; letter-spacing: 0.5px;" id="c-phone-label">Mobile Number *</label>
         <input type="number" id="complaint-phone" class="form-input" placeholder="Enter 10-digit number" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
     </div>
 
     <div style="width: 100%; text-align: left; margin-bottom: 25px;">
-        <label style="color: #e0e0e0; font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block;" id="c-desc-label">Issue Description *</label>
-        <textarea id="complaint-box" placeholder="Please describe your issue here..." oninput="restrictWords(this)"></textarea>
+        <label style="color: #e0e0e0; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block; letter-spacing: 0.5px;" id="c-desc-label">Issue Description *</label>
+        <textarea id="complaint-box" class="form-input" placeholder="Please describe your issue here..." oninput="restrictWords(this)" style="height: 120px; resize: none;"></textarea>
     </div>
 
-    <button class="btn-complaint-submit" id="btn-complaint-submit" onclick="submitComplaint()">Submit Complaint</button>
+    <button class="btn-complaint-submit" id="btn-complaint-submit" onclick="submitComplaint()" style="padding: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px;">Submit Complaint</button>
 </div>
 
+<!-- ==========================================
+     STEP 4: TIMEOUT SCREEN (SESSION EXPIRED)
+     ========================================== -->
 <div class="card" id="timeout-screen">
     <div class="timeout-icon">⏱️</div>
-    <h2 style="color:#fff; margin:0 0 10px 0;">Session Expired</h2>
-    <p style="color:#888; font-size:14px; margin-bottom:25px;">Your session has timed out due to inactivity. Redirecting...</p>
+    <h2>Session Expired</h2>
+    <p style="color:#999; font-size:14px; margin-bottom:25px;">Your session has timed out due to inactivity. Redirecting...</p>
     <button class="btn-primary" onclick="window.location.reload()">Start Over</button>
 </div>
 
@@ -306,7 +388,8 @@
     // IDLE TIMEOUT LOGIC (5 MINUTES)
     // ==========================================
     let idleTimer;
-    const idleWaitTime = 5 * 60 * 1000; // 5 minutes
+    const idleWaitTime = 5 * 60 * 1000; 
+    let redirectURL = "https://www.royalenfield.com/"; 
 
     function resetIdleTimer() {
         clearTimeout(idleTimer);
@@ -314,6 +397,7 @@
     }
 
     function showTimeoutScreen() {
+        document.getElementById('brand-header').style.display = 'none';
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('choice-screen').style.display = 'none';
         document.getElementById('sub-choice-screen').style.display = 'none';
@@ -321,9 +405,8 @@
         document.getElementById('complaint-screen').style.display = 'none';
         document.getElementById('timeout-screen').style.display = 'flex';
         
-        // Redirect after 3 seconds
         setTimeout(function() {
-            window.location.href = "https://dealers.royalenfield.com/delhi/new-delhi/kanti-nagar-amar-autos-9110000960";
+            window.location.href = redirectURL;
         }, 3000);
     }
 
@@ -340,18 +423,22 @@
     let branchLocation = "";
     let isServiceCenter = false;
     let googleReviewURL = ""; 
-    let currentFlow = ""; // 'review', 'feedback', or 'complaint'
+    let currentFlow = ""; 
     
     let kantiNagarStaff = ["Aslam", "Rakesh", "Sandeep", "Pooja Negi", "Simmi", "Kashish"];
-    let vikasMargStaff = ["Sales Staff 1", "Sales Staff 2", "Sales Staff 3"];
+    let vikasMargStaff = ["Iqra", "Mohan", "Roma", "Bharat"];
     let serviceStaff = ["Service Advisor 1", "Service Advisor 2", "Technician 1"];
+
+    let seoKeywordsEn = ["the best Royal Enfield showroom in East Delhi", "Amar Autos in East Delhi", "the top Royal Enfield dealership near me", "Amar Autos Royal Enfield"];
+    let seoKeywordsHi = ["ईस्ट दिल्ली के सबसे बेहतरीन रॉयल एनफील्ड शोरूम", "ईस्ट दिल्ली में अमर ऑटोस", "मेरे आस-पास के सबसे अच्छे रॉयल एनफील्ड शोरूम", "अमर ऑटोस रॉयल एनफील्ड"];
 
     const salesData = {
         positive: [
             { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", bodyEn: "The staff is super friendly. ", bodyHi: "यहाँ का स्टाफ बहुत अच्छा है। " },
             { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", bodyEn: "Delivery process was smooth. ", bodyHi: "डिलीवरी का प्रोसेस बिल्कुल स्मूथ था। " },
             { tagEn: "Fast Process", tagHi: "तेज़ काम", bodyEn: "Paperwork was completed quickly. ", bodyHi: "पेपरवर्क बहुत जल्दी पूरा हो गया। " },
-            { tagEn: "Transparent Deal", tagHi: "पारदर्शी डीलिंग", bodyEn: "Pricing and billing details were clear. ", bodyHi: "बिलिंग डिटेल्स बिल्कुल साफ़ समझाई गईं। " }
+            { tagEn: "Transparent Deal", tagHi: "पारदर्शी डीलिंग", bodyEn: "Pricing and billing details were clear. ", bodyHi: "बिलिंग डिटेल्स बिल्कुल साफ़ समझाई गईं। " },
+            { tagEn: "Helpful Team", tagHi: "मददगार टीम", bodyEn: "The entire team was very helpful and professional. ", bodyHi: "पूरी टीम बहुत मददगार और पेशेवर थी। " }
         ],
         neutral: [{ tagEn: "Decent Staff", tagHi: "ठीक स्टाफ", bodyEn: "The experience was average. ", bodyHi: "अनुभव साधारण रहा। " }],
         negative: [{ tagEn: "Slow Process", tagHi: "धीमा काम", bodyEn: "Process was too slow. ", bodyHi: "काम बहुत धीमा था। " }]
@@ -370,6 +457,16 @@
     };
 
     let reviewData = salesData;
+
+    // Helper function to shuffle array items randomly
+    function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
 
     // ==========================================
     // LOGIN / DEALER CODE LOGIC
@@ -390,18 +487,21 @@
         if (codeInput === '96') {
             branchLocation = "Kanti Nagar Showroom";
             isServiceCenter = false;
+            redirectURL = "https://dealers.royalenfield.com/delhi/new-delhi/kanti-nagar-amar-autos-9110000960";
             googleReviewURL = "https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9110000960&review_url=https://search.google.com/local/writereview?placeid=ChIJZWy1kIP8DDkRF1GgIgnOueA"; 
             staffListToLoad = kantiNagarStaff;
         } 
         else if (codeInput === '8022') {
             branchLocation = "Vikas Marg Showroom";
             isServiceCenter = false;
+            redirectURL = "https://www.royalenfield.com/"; 
             googleReviewURL = "https://search.google.com/local/writereview?placeid=PLACE_ID_VIKAS_MARG";
             staffListToLoad = vikasMargStaff;
         } 
         else if (codeInput === '446') {
             branchLocation = "Jhilmil Service Center";
             isServiceCenter = true;
+            redirectURL = "https://dealers.royalenfield.com/delhi/new-delhi/kanti-nagar-amar-autos-9110000960";
             googleReviewURL = "https://royalenfield.interactiveavenues.net/web/pages/qr/qrTracker.jsp?client_name=re&dealer_id=9120004460&review_url=https://search.google.com/local/writereview?placeid=ChIJ8WXcsK77DDkRu_tWgjizLpc";
             staffListToLoad = serviceStaff;
         } 
@@ -410,25 +510,24 @@
             return;
         }
 
-        // Apply Branch Labels
+        // Hide Logo
+        document.getElementById('brand-header').style.display = 'none';
+
         document.getElementById('branch-badge-choice').innerText = branchLocation;
         document.getElementById('branch-badge-sub').innerText = branchLocation;
         document.getElementById('branch-badge-review').innerText = branchLocation;
         document.getElementById('branch-badge-complaint').innerText = branchLocation;
         reviewData = isServiceCenter ? serviceData : salesData;
         
-        // Load Staff Dropdown for Review/Feedback screen
         const staffDropdown = document.getElementById('sales-person');
-        let optionsHTML = `<option value="" disabled selected id="sales-placeholder">${isServiceCenter ? "Select Service Advisor" : "Select Sales Person"}</option>`;
+        let optionsHTML = `<option value="" disabled selected id="sales-placeholder">${isServiceCenter ? "Select Service Advisor *" : "Select Sales Person *"}</option>`;
         staffListToLoad.forEach(name => {
             optionsHTML += `<option value="${name}">${name}</option>`;
         });
-        optionsHTML += `<option value="Not Remember">Not Remember / याद नहीं</option>`;
         staffDropdown.innerHTML = optionsHTML;
 
         applyLanguageStrings();
         
-        // Move to Choice Screen
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('choice-screen').style.display = 'flex';
         resetIdleTimer();
@@ -483,7 +582,6 @@
     function toggleLanguageManual() {
         isHindi = !isHindi;
         
-        // Toggle buttons on all screens
         document.getElementById('lang-en').classList.toggle('active');
         document.getElementById('lang-hi').classList.toggle('active');
         document.getElementById('lang-en-ch1').classList.toggle('active');
@@ -499,46 +597,40 @@
     }
 
     function applyLanguageStrings() {
-        // Choice Screen
         document.getElementById('choice-title').innerText = isHindi ? "हम आपकी कैसे मदद कर सकते हैं?" : "How can we help?";
         document.getElementById('choice-subtitle').innerText = isHindi ? "कृपया नीचे दिए गए विकल्पों में से एक चुनें।" : "Please select an option below.";
         document.getElementById('btn-text-review').innerText = isHindi ? "⭐ रिव्यु दें" : "⭐ Share Review";
         document.getElementById('btn-text-feedcomp').innerText = isHindi ? "📝 फीडबैक या शिकायत" : "📝 Feedback or Complaint";
 
-        // Sub Choice Screen
         document.getElementById('sub-title').innerText = isHindi ? "फीडबैक / शिकायत" : "Feedback / Complaint";
         document.getElementById('sub-subtitle').innerText = isHindi ? "आप क्या साझा करना चाहेंगे?" : "What would you like to share?";
         document.getElementById('btn-text-feedback').innerText = isHindi ? "💡 फीडबैक दें" : "💡 Share Feedback";
         document.getElementById('btn-text-complaint').innerText = isHindi ? "⚠️ शिकायत दर्ज करें" : "⚠️ Register Complaint";
         document.getElementById('btn-text-back').innerText = isHindi ? "🔙 पीछे जाएं" : "🔙 Back";
 
-        // Review/Feedback Form Screen
         document.getElementById('subtitle-text').innerText = isHindi ? "आपका फीडबैक हमारे लिए ज़रूरी है!" : "Your feedback helps us improve!";
         document.getElementById('stars-title').innerText = isHindi ? "कृपया अपना अनुभव रेट करें:" : "Please rate your experience:";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         document.getElementById('btn-google').innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
         document.getElementById('btn-submit').innerText = isHindi ? "फीडबैक सबमिट करें" : "Submit Feedback"; 
         
-        // Update Placeholder for Model input
         document.getElementById('model-name').placeholder = isHindi ? "बाइक का मॉडल लिखें (जैसे: Classic 350)" : "Enter Bike Model (e.g. Classic 350)";
 
-        // Questionnaire
         document.getElementById('q1-text').innerText = isHindi ? "क्या आपको चाय/कॉफी पूछी गई?" : "Were you offered Tea/Coffee?";
         if(isServiceCenter) {
             document.getElementById('q2-text').innerText = isHindi ? "क्या बाइक की वाशिंग अच्छे से हुई?" : "Was the vehicle washed properly?";
             document.getElementById('q3-text').innerText = isHindi ? "क्या आपकी बताई समस्याएँ ठीक हुईं?" : "Were all reported issues resolved?";
-            document.getElementById('sales-placeholder').innerText = isHindi ? "सर्विस एडवाइजर चुनें" : "Select Service Advisor";
+            document.getElementById('sales-placeholder').innerText = isHindi ? "सर्विस एडवाइजर चुनें *" : "Select Service Advisor *";
         } else {
             document.getElementById('q2-text').innerText = isHindi ? "क्या फीचर्स अच्छे से समझाए गए?" : "Were all features explained clearly?";
             document.getElementById('q3-text').innerText = isHindi ? "क्या टेस्ट राइड के लिए पूछा गया?" : "Were you offered a Test Ride?";
-            document.getElementById('sales-placeholder').innerText = isHindi ? "सेल्स पर्सन चुनें" : "Select Sales Person";
+            document.getElementById('sales-placeholder').innerText = isHindi ? "सेल्स पर्सन चुनें *" : "Select Sales Person *";
         }
         document.querySelectorAll('.fb-btn').forEach(btn => {
             if(btn.innerText === "Yes" || btn.innerText === "हाँ") btn.innerText = isHindi ? "हाँ" : "Yes";
             if(btn.innerText === "No" || btn.innerText === "नहीं") btn.innerText = isHindi ? "नहीं" : "No";
         });
 
-        // Complaint Screen
         document.getElementById('c-title').innerText = isHindi ? "शिकायत दर्ज करें" : "Register Complaint";
         document.getElementById('c-subtitle').innerText = isHindi ? "असुविधा के लिए खेद है। कृपया विवरण साझा करें।" : "We are sorry for the inconvenience. Please share the details.";
         document.getElementById('c-phone-label').innerText = isHindi ? "मोबाइल नंबर *" : "Mobile Number *";
@@ -591,6 +683,10 @@
 
     function renderTags(rating) {
         let category = rating >= 4 ? reviewData.positive : (rating === 3 ? reviewData.neutral : reviewData.negative);
+        
+        // --- TAG SHUFFLING APPLIED HERE ---
+        category = shuffleArray(category);
+
         document.getElementById('tags-title').innerText = isHindi ? "आपको क्या लगा? (विकल्प चुनें)" : "What did you notice? (Select options)";
         
         document.getElementById('tags-container').style.display = "block";
@@ -623,9 +719,12 @@
         
         let finalReview = "";
         
+        let randomSeoEn = seoKeywordsEn[Math.floor(Math.random() * seoKeywordsEn.length)];
+        let randomSeoHi = seoKeywordsHi[Math.floor(Math.random() * seoKeywordsHi.length)];
+
         if (selectedTagsData.length > 0) {
-            let baseTextEn = isServiceCenter ? `I recently got my ${modelReplacement} serviced at ${branchLocation}. ` : `I bought my new ${modelReplacement} from ${branchLocation}. `;
-            let baseTextHi = isServiceCenter ? `मैंने अपनी ${modelReplacement} की सर्विस ${branchLocation} पर कराई। ` : `मैंने अपनी नई ${modelReplacement} ${branchLocation} से खरीदी। `;
+            let baseTextEn = isServiceCenter ? `I recently got my ${modelReplacement} serviced at ${randomSeoEn}. ` : `I bought my new ${modelReplacement} from ${randomSeoEn}. `;
+            let baseTextHi = isServiceCenter ? `मैंने अपनी ${modelReplacement} की सर्विस ${randomSeoHi} पर कराई। ` : `मैंने अपनी नई ${modelReplacement} ${randomSeoHi} से खरीदी। `;
             
             finalReview += isHindi ? baseTextHi : baseTextEn;
             selectedTagsData.forEach(tag => { finalReview += (isHindi ? tag.bodyHi : tag.bodyEn); });
@@ -635,17 +734,57 @@
         document.getElementById('review-box').value = finalReview;
     }
 
+    function validateStaffSelection() {
+        let sp = document.getElementById('sales-person').value;
+        if (!sp || sp === "") {
+            let msg = isServiceCenter ? (isHindi ? "कृपया सर्विस एडवाइजर का नाम चुनें।" : "Please select a Service Advisor.") : (isHindi ? "कृपया सेल्स पर्सन का नाम चुनें।" : "Please select a Sales Person.");
+            alert(msg);
+            document.getElementById('sales-person').focus();
+            return false;
+        }
+        return true;
+    }
+
+    function copyAndValidate() {
+        if(!validateStaffSelection()) return;
+        copyReview();
+    }
+
+    function openGoogleAndValidate() {
+        if(!validateStaffSelection()) return;
+        openGoogle();
+    }
+
+    function sendToWhatsAppAndValidate() {
+        if(!validateStaffSelection()) return;
+        
+        saveToGoogleSheets(); 
+        const managerNumber = "918448988950"; 
+        const message = encodeURIComponent((isHindi ? "मैनेजर ध्यान दें, नया फीडबैक: \n\n" : "Manager Alert, New Feedback: \n\n") + document.getElementById('review-box').value);
+        window.open(`https://wa.me/${managerNumber}?text=${message}`, "_blank");
+    }
+
+    function copyReview() {
+        document.getElementById('review-box').select();
+        document.execCommand("copy");
+        alert(isHindi ? "रिव्यु कॉपी हो गया!" : "Review copied!");
+    }
+
     function saveToGoogleSheets() {
         if (dataSaved || currentRating === 0) return;
         dataSaved = true;
+
+        const tagsString = selectedTagsData.map(item => isHindi ? item.tagHi : item.tagEn).join(", ");
 
         const payload = {
             branch: branchLocation,
             type: isServiceCenter ? "Service Review" : "Sales Review",
             rating: currentRating,
             model: document.getElementById('model-name').value || "N/A",
-            staffPerson: document.getElementById('sales-person').value || "N/A",
+            salesPerson: document.getElementById('sales-person').value || "N/A",
+            tags: tagsString || "None",
             reviewText: document.getElementById('review-box').value,
+            ridingGroup: joinRidingGroup,
             whatsappNumber: document.getElementById('whatsapp-number').value || "N/A",
             q1: fbData.fb1, q2: fbData.fb2, q3: fbData.fb3
         };
@@ -655,6 +794,7 @@
     }
 
     function submitInternalFeedback() {
+        if(!validateStaffSelection()) return;
         saveToGoogleSheets(); 
         document.getElementById('main-card').innerHTML = `<div style="text-align:center; color:#fff; padding:40px;"><h1 style="color:#E5A93C;">Thank You!</h1><p>${isHindi ? "आपका फीडबैक सबमिट हो गया है।" : "Your feedback has been received."}</p></div>`;
     }
@@ -687,8 +827,10 @@
             type: "Complaint",
             rating: 0,
             model: "N/A",
-            staffPerson: "N/A",
+            salesPerson: "N/A",
+            tags: "N/A",
             reviewText: text,
+            ridingGroup: "N/A",
             whatsappNumber: phone,
             q1: "N/A", q2: "N/A", q3: "N/A"
         };
@@ -699,8 +841,8 @@
         document.getElementById('complaint-screen').innerHTML = `
             <div style="text-align:center; color:#fff; padding:40px;">
                 <div style="font-size:50px; margin-bottom:15px;">✅</div>
-                <h2 style="color:#ff4d4d; margin-bottom:15px;">${isHindi ? "शिकायत दर्ज हो गई है" : "Complaint Registered"}</h2>
-                <p style="color:#888; font-size:14px; line-height:1.6;">${isHindi ? "हमारी टीम जल्द से जल्द आपकी समस्या के समाधान के लिए आपसे संपर्क करेगी।" : "Our team will contact you shortly to resolve the issue as soon as possible."}</p>
+                <h2 style="color:#ff4d4d; margin-bottom:15px; font-family:'Georgia', serif;">${isHindi ? "शिकायत दर्ज हो गई है" : "Complaint Registered"}</h2>
+                <p style="color:#aaa; font-size:14px; line-height:1.6;">${isHindi ? "हमारी टीम जल्द से जल्द आपकी समस्या के समाधान के लिए आपसे संपर्क करेगी।" : "Our team will contact you shortly to resolve the issue as soon as possible."}</p>
             </div>`;
     }
 </script>
