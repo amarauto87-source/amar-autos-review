@@ -169,9 +169,6 @@
         .btn-whatsapp { background: rgba(0,0,0,0.6); color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366;}
         .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
         
-        .btn-submit { background: rgba(0,0,0,0.6); color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; margin-top: 8px; animation: glowingSubmit 2s infinite; }
-        .btn-submit:hover { background: rgba(229, 169, 60, 0.15); border-color: #F3BA54; color: #F3BA54; animation: none;}
-        
         /* --- COMPLAINT SUBMIT BUTTON --- */
         .btn-complaint-submit { background: #ff4d4d; color: #fff; width: 100%; display: block; border: none; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);}
         .btn-complaint-submit:hover { background: #ff3333; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 77, 77, 0.5);}
@@ -182,7 +179,6 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseStar { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        @keyframes glowingSubmit { 0% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.1); } 50% { box-shadow: 0 0 15px rgba(229, 169, 60, 0.4); } 100% { box-shadow: 0 0 5px rgba(229, 169, 60, 0.1); } }
     </style>
 </head>
 <body>
@@ -343,7 +339,6 @@
             <button class="btn-google" id="btn-google" onclick="openGoogleAndValidate()">Open Google Review</button>
         </div>
         <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsAppAndValidate()">Issue? Talk to Manager (WhatsApp)</button>
-        <button class="btn-submit" id="btn-submit" onclick="submitInternalFeedback()">Submit Feedback</button>
     </div>
 </div>
 
@@ -652,7 +647,6 @@
         document.getElementById('stars-title').innerText = isHindi ? "कृपया अपना अनुभव रेट करें:" : "Please rate your experience:";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         document.getElementById('btn-google').innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
-        document.getElementById('btn-submit').innerText = isHindi ? "फीडबैक सबमिट करें" : "Submit Feedback"; 
         
         document.getElementById('model-name').placeholder = isHindi ? "बाइक का मॉडल लिखें (जैसे: Classic 350)" : "Enter Bike Model (e.g. Classic 350)";
 
@@ -714,7 +708,6 @@
             renderTags(currentRating);
             document.getElementById('btn-google').style.display = "block";
             document.getElementById('btn-copy').style.display = "block";
-            document.getElementById('btn-submit').style.display = "block"; 
             document.getElementById('btn-whatsapp').style.display = currentRating <= 3 ? "block" : "none";
             
             updateReviewBox(); 
@@ -820,6 +813,13 @@
 
     function openGoogleAndValidate() {
         if(!validateStaffSelection()) return;
+        
+        // Show Alert About Login
+        let loginMsg = isHindi ? 
+            "रिव्यु कॉपी हो गया है! आपको गूगल पर भेजा जा रहा है।\n\n⚠️ ध्यान दें: अगर गूगल आपसे 'Login' मांगे, तो ऊपर दाईं ओर 3-बिंदु (⋮) पर क्लिक करें और 'Open in Chrome / Safari' चुनें।" : 
+            "Review copied! Redirecting to Google...\n\n⚠️ NOTE: If it asks for Google Login, tap the 3-dots (⋮) on the top right and select 'Open in Chrome / Safari'.";
+        
+        alert(loginMsg);
         openGoogle();
     }
 
@@ -835,7 +835,6 @@
     function copyReview() {
         document.getElementById('review-box').select();
         document.execCommand("copy");
-        alert(isHindi ? "रिव्यु कॉपी हो गया!" : "Review copied!");
     }
 
     function saveToGoogleSheets() {
@@ -859,12 +858,6 @@
 
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
         fetch(scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    }
-
-    function submitInternalFeedback() {
-        if(!validateStaffSelection()) return;
-        saveToGoogleSheets(); 
-        document.getElementById('main-card').innerHTML = `<div style="text-align:center; color:#fff; padding:40px;"><h1 style="color:#E5A93C;">Thank You!</h1><p>${isHindi ? "आपका फीडबैक सबमिट हो गया है।" : "Your feedback has been received."}</p></div>`;
     }
 
     function openGoogle() {
