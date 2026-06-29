@@ -937,19 +937,20 @@
         const tagsString = selectedTagsData.map(item => isHindi ? item.tagHi : item.tagEn).join(", ");
 
         const payload = {
-            branch: branchLocation,
-            type: isServiceCenter ? "Service Review" : "Sales Review",
-            rating: currentRating,
-            model: document.getElementById('model-name').value || "N/A",
-            salesPerson: document.getElementById('sales-person').value || "N/A",
-            tags: tagsString || "None",
-            reviewText: document.getElementById('review-box').value,
-            ridingGroup: joinRidingGroup,
-            whatsappNumber: document.getElementById('whatsapp-number').value || "N/A",
-            q1: fbData.fb1, q2: fbData.fb2, q3: fbData.fb3
+            rating: currentRating,            // Col B
+            model: document.getElementById('model-name').value || "N/A", // Col C
+            salesPerson: document.getElementById('sales-person').value || "N/A", // Col D
+            tags: tagsString || "None",       // Col E
+            reviewText: document.getElementById('review-box').value, // Col F
+            ridingGroup: joinRidingGroup,    // Col G
+            whatsappNumber: document.getElementById('whatsapp-number').value || "N/A", // Col H
+            branch: branchLocation,          // Col I
+            q1: fbData.fb1,                  // Col J: TeaCoffee
+            q2: fbData.fb2,                  // Col K: Features
+            q3: fbData.fb3                   // Col L: TestRide
         };
 
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbwjysUvFqKiB0UOzYtlFZ8c3Wpl8AiMuybUJ65SVVqxACzKqltP79s7IW4mw9qMUGCT/exec";
         fetch(scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     }
 
@@ -979,8 +980,6 @@
         if(hasError) return;
 
         const payload = {
-            branch: branchLocation,
-            type: "Complaint",
             rating: 0,
             model: "N/A",
             salesPerson: "N/A",
@@ -988,10 +987,11 @@
             reviewText: text,
             ridingGroup: "N/A",
             whatsappNumber: phone,
+            branch: branchLocation,
             q1: "N/A", q2: "N/A", q3: "N/A"
         };
 
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbxSiHkYveOOOJd22j3aEDpvsWnmgFgTNgGy7K5QTZiAK7N9GK_5M3A875M-3ylw0xc_/exec";
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbwjysUvFqKiB0UOzYtlFZ8c3Wpl8AiMuybUJ65SVVqxACzKqltP79s7IW4mw9qMUGCT/exec";
         fetch(scriptUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
 
         document.getElementById('complaint-screen').innerHTML = `
