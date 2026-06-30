@@ -20,9 +20,9 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             min-height: 100vh; padding: 20px 15px; 
             
-            /* Dark Bike Background Image */
+            /* Royal Enfield Specific Background Image */
             background: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.9)), 
-                        url('https://images.unsplash.com/photo-1614165936126-2ed18e471b3b?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+                        url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
             
             margin: 0; box-sizing: border-box; overflow-x: hidden;
@@ -169,6 +169,9 @@
         
         .btn-google { background: rgba(0,0,0,0.6); color: #E5A93C; display: none; width: 100%; border: 2px solid #E5A93C; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
         .btn-google:hover { background: rgba(229, 169, 60, 0.15); border-color: #F3BA54; color: #F3BA54; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(229,169,60,0.3);}
+
+        .btn-submit-review { background: #E5A93C; color: #000; display: none; width: 100%; box-shadow: 0 4px 15px rgba(229,169,60,0.3); border: none;}
+        .btn-submit-review:hover { background: #F3BA54; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(229,169,60,0.5);}
         
         .btn-whatsapp { background: rgba(0,0,0,0.6); color: #25D366; display: none; width: 100%; font-size: 13px; border: 1px solid #25D366;}
         .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
@@ -378,6 +381,8 @@
             <button class="btn-copy" id="btn-copy" onclick="copyAndValidate()">Copy Draft</button>
             <button class="btn-google" id="btn-google" onclick="openGoogleAndValidate()">Open Google Review</button>
         </div>
+        <!-- Internal Submit Button for < 5 Stars (Updated text to "Submit") -->
+        <button class="btn-submit-review" id="btn-submit-review" onclick="submitInternalReview()">Submit</button>
         <button class="btn-whatsapp" id="btn-whatsapp" onclick="sendToWhatsAppAndValidate()">Issue? Talk to Manager (WhatsApp)</button>
     </div>
 </div>
@@ -470,72 +475,82 @@
     let vikasMargStaff = ["Iqra", "Mohan", "Roma", "Bharat"];
     let serviceStaff = ["Service Advisor 1", "Service Advisor 2", "Technician 1"];
 
-    let seoKeywordsEn = ["the best Royal Enfield showroom in East Delhi", "Amar Autos in East Delhi", "the top Royal Enfield dealership near me", "Amar Autos Royal Enfield"];
-    let seoKeywordsHi = ["ईस्ट दिल्ली के सबसे बेहतरीन रॉयल एनफील्ड शोरूम", "ईस्ट दिल्ली में अमर ऑटोस", "मेरे आस-पास के सबसे अच्छे रॉयल एनफील्ड शोरूम", "अमर ऑटोस रॉयल एनफील्ड"];
-
-    // 20 Unique Starting Lines
+    // NATURAL INDIAN ENGLISH & HINGLISH REVIEW STARTERS
     const salesStartsEn = [
-        "I recently purchased my new {model}", "Took delivery of my {model} today", "Just got my hands on the new {model}", 
-        "Happy to bring home my new {model}", "Had a great time buying my {model}", "Finally bought my dream ride, the {model}", 
-        "Amazing experience purchasing the {model}", "Got my new {model} delivered today", "Thrilled to own the new {model}", 
-        "The purchase of my {model} was very smooth", "I am so excited about my new {model}", "Buying the {model} was a wonderful experience", 
-        "Proud owner of a brand new {model}", "Just rode home my new {model}", "Excellent delivery experience for my {model}", 
-        "My new {model} looks absolutely stunning", "Very satisfied with the purchase of my {model}", "Booked and received my {model} without any hassle", 
-        "The whole process of buying my {model} was fantastic", "Super happy with my new {model}"
+        "Got my new {model} today and I'm really happy with it.",
+        "Just took delivery of my {model}. Great experience overall.",
+        "Brought home my dream bike, the {model}. Highly recommended.",
+        "Really satisfied with the purchase of my {model}.",
+        "Taking delivery of the {model} was a very smooth process.",
+        "Very happy to join the RE family with my new {model}.",
+        "Got the new {model} delivered perfectly on time.",
+        "Amazing overall experience while buying my {model}.",
+        "The delivery process for my {model} was really good.",
+        "Super excited to ride my new {model}!"
     ];
 
     const salesStartsHi = [
-        "मैंने हाल ही में अपनी नई {model} खरीदी है", "आज मेरी नई {model} की डिलीवरी हुई", "अपनी नई {model} घर लाकर बहुत खुश हूँ", 
-        "आखिरकार मेरी सपनों की बाइक {model} मेरे पास है", "नई {model} खरीदने का अनुभव शानदार रहा", "{model} की खरीदारी बहुत स्मूथ रही", 
-        "अपनी नई {model} के साथ बहुत अच्छा लग रहा है", "आज मैंने अपनी {model} बाइक ली", "मुझे अपनी नई {model} बहुत पसंद आई", 
-        "{model} की डिलीवरी का अनुभव बहुत बढ़िया था", "नई {model} का मालिक बनकर गर्व महसूस हो रहा है", "मेरी {model} की डिलीवरी बिना किसी परेशानी के हो गई", 
-        "मैंने आज ही अपनी {model} बाइक खरीदी है", "{model} की पूरी खरीद प्रक्रिया बहुत आसान थी", "अपनी नई {model} की राइड लेकर मज़ा आ गया", 
-        "मैंने अपनी मनपसंद {model} बाइक फाइनली ले ली", "{model} को खरीदना एक बेहतरीन अनुभव था", "आज मेरे गैराज में नई {model} आ गई है", 
-        "अपनी नई {model} की शानदार डिलीवरी से संतुष्ट हूँ", "मैं अपनी नई {model} खरीद कर बहुत एक्साइटेड हूँ"
+        "Aaj apni nayi {model} li, bahut badhiya experience raha.",
+        "Maine nayi {model} kharidi aur main bahut khush hu.",
+        "Apni dream bike {model} ghar la kar bahut accha lag raha hai.",
+        "{model} ki delivery ka process bahut smooth tha.",
+        "Nayi {model} ki delivery time par mil gayi.",
+        "{model} kharidne ka anubhav bahut hi shandaar raha.",
+        "Staff ka behaviour bahut accha tha {model} lete waqt.",
+        "Apni nayi {model} chalaane ke liye bahut excited hu.",
+        "Bahut acchi service mili {model} ki purchase par.",
+        "Over-all experience ekdum badhiya tha meri {model} ke liye."
     ];
 
     const serviceStartsEn = [
-        "Just got my {model} serviced", "Took my {model} in for routine maintenance", "Got the servicing done for my {model} today", 
-        "Excellent service experience for my {model}", "My {model} is running completely smooth after the service", "Brought my {model} for its scheduled service", 
-        "Very happy with the service of my {model}", "The mechanics did a great job on my {model}", "My {model} feels brand new after the service", 
-        "Got my {model} repaired and serviced today", "Prompt and proper service for my {model}", "They took good care of my {model} during the service", 
-        "Visited for the periodic service of my {model}", "Satisfied with the maintenance work on my {model}", "The service quality for my {model} was top notch", 
-        "My {model} was serviced exactly on time", "Great servicing done for my {model}", "Everything was checked and fixed in my {model}", 
-        "The service center did an amazing job with my {model}", "My {model} is performing flawlessly post service"
+        "Got my {model} serviced today. Really satisfied with the work.",
+        "The routine service for my {model} was done very well.",
+        "Mechanics did a proper checkup and service of my {model}.",
+        "My {model} is running absolutely smooth after today's service.",
+        "Good service experience for my {model}.",
+        "All issues in my {model} were resolved properly.",
+        "Very happy with the maintenance work done on my {model}.",
+        "The servicing of my {model} was completed on time.",
+        "Staff was helpful and my {model} feels brand new.",
+        "Genuine and transparent service for my {model}."
     ];
 
     const serviceStartsHi = [
-        "मैंने अपनी {model} की सर्विस कराई", "आज मेरी {model} की सर्विसिंग बहुत अच्छे से हुई", "अपनी {model} की सर्विस कराकर बहुत संतुष्ट हूँ", 
-        "सर्विस के बाद मेरी {model} एकदम नई जैसी चल रही है", "मेरी {model} की सर्विस का अनुभव शानदार रहा", "मैंने अपनी {model} का रूटीन मेंटेनेंस करवाया", 
-        "सर्विस सेंटर ने मेरी {model} का अच्छे से ध्यान रखा", "मेरी {model} की सर्विस बिल्कुल समय पर पूरी हो गई", "आज अपनी {model} की रिपेयर और सर्विसिंग करवाई", 
-        "{model} की सभी समस्याएं सर्विस में ठीक कर दी गईं", "मेरी {model} का काम बहुत ही बढ़िया तरीके से हुआ", "सर्विसिंग के बाद {model} की परफॉरमेंस एकदम स्मूथ है", 
-        "अपनी {model} के मेंटेनेंस के काम से खुश हूँ", "{model} की सर्विस क्वालिटी बहुत ही शानदार थी", "मैंने अपनी {model} की शेड्यूल्ड सर्विस करवाई", 
-        "मेकैनिक्स ने मेरी {model} पर बहुत अच्छा काम किया", "सर्विस के बाद अपनी {model} चलाकर मज़ा आ गया", "मेरी {model} की बहुत ही प्रोफेशनल सर्विस हुई", 
-        "आज मैंने अपनी {model} सर्विस सेंटर पर दिखाई", "मेरी {model} की पूरी चेकिंग और सर्विस अच्छे से की गई"
+        "Aaj apni {model} ki service karayi, kaam bahut badhiya hua.",
+        "Service ke baad meri {model} ekdum smooth chal rahi hai.",
+        "Meri {model} ki saari problems properly theek kar di gayi.",
+        "{model} ki service bilkul time par poori ho gayi.",
+        "Washing aur servicing dono bahut acche se ki gayi {model} ki.",
+        "Service advisor ne sab kuch clearly samjhaya meri {model} ke liye.",
+        "{model} ka maintenance work ekdum tasalli baksh tha.",
+        "Mujhe apni {model} ki service quality bahut pasand aayi.",
+        "Staff bahut cooperative tha {model} ki service ke dauran.",
+        "Overall service experience meri {model} ke liye bahut accha raha."
     ];
 
+    // NATURAL INDIAN ENGLISH & HINGLISH TAGS
     const salesData = {
         positive: [
-            { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", bodyEn: "The staff is super friendly. ", bodyHi: "यहाँ का स्टाफ बहुत अच्छा है। " },
-            { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", bodyEn: "Delivery process was smooth. ", bodyHi: "डिलीवरी का प्रोसेस बिल्कुल स्मूथ था। " },
-            { tagEn: "Fast Process", tagHi: "तेज़ काम", bodyEn: "Paperwork was completed quickly. ", bodyHi: "पेपरवर्क बहुत जल्दी पूरा हो गया। " },
-            { tagEn: "Transparent Deal", tagHi: "पारदर्शी डीलिंग", bodyEn: "Pricing and billing details were clear. ", bodyHi: "बिलिंग डिटेल्स बिल्कुल साफ़ समझाई गईं। " },
-            { tagEn: "Helpful Team", tagHi: "मददगार टीम", bodyEn: "The entire team was very helpful and professional. ", bodyHi: "पूरी टीम बहुत मददगार और पेशेवर थी। " }
+            { tagEn: "Friendly Staff", tagHi: "अच्छा स्टाफ", bodyEn: "Staff is very polite and helpful. ", bodyHi: "Staff ka behaviour kafi polite tha. " },
+            { tagEn: "Smooth Delivery", tagHi: "स्मूथ डिलीवरी", bodyEn: "Everything was done smoothly. ", bodyHi: "Delivery bina kisi pareshani ke ho gayi. " },
+            { tagEn: "Fast Process", tagHi: "तेज़ काम", bodyEn: "Paperwork was very quick. ", bodyHi: "Paperwork bahut jaldi pura ho gaya. " },
+            { tagEn: "Transparent Deal", tagHi: "पारदर्शी डीलिंग", bodyEn: "Billing was fully transparent. ", bodyHi: "Billing aur pricing sab transparent tha. " },
+            { tagEn: "Helpful Team", tagHi: "मददगार टीम", bodyEn: "The entire team is very professional. ", bodyHi: "Puri team professional aur helpful hai. " }
         ],
-        neutral: [{ tagEn: "Decent Staff", tagHi: "ठीक स्टाफ", bodyEn: "The experience was average. ", bodyHi: "अनुभव साधारण रहा। " }],
-        negative: [{ tagEn: "Slow Process", tagHi: "धीमा काम", bodyEn: "Process was too slow. ", bodyHi: "काम बहुत धीमा था। " }]
+        neutral: [{ tagEn: "Decent Experience", tagHi: "ठीक अनुभव", bodyEn: "The overall experience was decent. ", bodyHi: "Mera anubhav theek tha. " }],
+        negative: [{ tagEn: "Slow Process", tagHi: "धीमा काम", bodyEn: "The process took too much time. ", bodyHi: "Kaam hone mein bahut time lag gaya. " }]
     };
 
     const serviceData = {
         positive: [
-            { tagEn: "Timely Delivery", tagHi: "समय पर डिलीवरी", bodyEn: "Got my bike serviced exactly on time. ", bodyHi: "मेरी बाइक की सर्विसिंग बिल्कुल समय पर पूरी हो गई। " },
-            { tagEn: "Problem Resolved", tagHi: "समस्या का समाधान", bodyEn: "All the issues I reported were fixed perfectly. ", bodyHi: "मेरी बताई गई बाइक की सारी समस्याएं अच्छे से ठीक कर दी गईं। " },
-            { tagEn: "Fair Billing", tagHi: "सही बिलिंग", bodyEn: "The service cost was transparent and genuine. ", bodyHi: "सर्विस का बिल बिल्कुल सही और पारदर्शी था। " },
-            { tagEn: "Good Washing", tagHi: "बढ़िया वाशिंग", bodyEn: "The vehicle washing and polishing was top-notch. ", bodyHi: "गाड़ी की धुलाई और पॉलिशिंग बहुत ही बढ़िया हुई। " },
-            { tagEn: "Helpful Advisor", tagHi: "मददगार एडवाइजर", bodyEn: "The service advisor explained all the repairs clearly. ", bodyHi: "सर्विस एडवाइजर ने काम और बिल बहुत अच्छे से समझाया। " }
+            { tagEn: "Timely Delivery", tagHi: "समय पर डिलीवरी", bodyEn: "Got my bike back exactly on time. ", bodyHi: "Bike ki service bilkul time par ho gayi. " },
+            { tagEn: "Problem Resolved", tagHi: "समस्या का समाधान", bodyEn: "All the issues were fixed properly. ", bodyHi: "Bike ki saari problems properly theek ho gayi. " },
+            { tagEn: "Fair Billing", tagHi: "सही बिलिंग", bodyEn: "The service charges were genuine. ", bodyHi: "Service bill bilkul sahi aur genuine tha. " },
+            { tagEn: "Good Washing", tagHi: "बढ़िया वाशिंग", bodyEn: "Bike washing and polish was top-notch. ", bodyHi: "Bike ki washing aur polish bahut badhiya hui. " },
+            { tagEn: "Helpful Advisor", tagHi: "मददगार एडवाइजर", bodyEn: "The service advisor explained everything clearly. ", bodyHi: "Advisor ne sabhi repairs ache se samjhaye. " }
         ],
-        neutral: [{ tagEn: "Average Wash", tagHi: "ठीक-ठाक वाशिंग", bodyEn: "Service was okay but washing could be better. ", bodyHi: "सर्विस ठीक थी पर धुलाई बेहतर हो सकती थी। " }],
-        negative: [{ tagEn: "Issue Not Fixed", tagHi: "समस्या ठीक नहीं हुई", bodyEn: "The main issue in my bike was not resolved. ", bodyHi: "मेरी बाइक की मुख्य समस्या ठीक नहीं हुई। " }]
+        neutral: [{ tagEn: "Average Wash", tagHi: "ठीक-ठाक वाशिंग", bodyEn: "Service was okay but washing could be better. ", bodyHi: "Service theek thi par washing better ho sakti thi. " }],
+        negative: [{ tagEn: "Issue Not Fixed", tagHi: "समस्या ठीक नहीं हुई", bodyEn: "My main issue was not resolved. ", bodyHi: "Meri problem properly fix nahi hui. " }]
     };
 
     let reviewData = salesData;
@@ -701,6 +716,8 @@
         document.getElementById('stars-title').innerText = isHindi ? "कृपया अपना अनुभव रेट करें:" : "Please rate your experience:";
         document.getElementById('btn-copy').innerText = isHindi ? "रिव्यु कॉपी करें" : "Copy Draft";
         document.getElementById('btn-google').innerText = isHindi ? "गूगल पर रिव्यु दें" : "Open Google Review";
+        // Button Name Change (Submit)
+        document.getElementById('btn-submit-review').innerText = isHindi ? "सबमिट" : "Submit";
         
         document.getElementById('model-name').placeholder = isHindi ? "बाइक का मॉडल लिखें (जैसे: Classic 350)" : "Enter Bike Model (e.g. Classic 350)";
 
@@ -762,11 +779,20 @@
             document.getElementById('quick-feedback').style.display = "block"; 
             document.getElementById('hint-text').style.display = "block";
             
-            renderTags(currentRating);
-            document.getElementById('btn-google').style.display = "block";
-            document.getElementById('btn-copy').style.display = "block";
-            document.getElementById('btn-whatsapp').style.display = currentRating <= 3 ? "block" : "none";
+            // 5-Star Condition Logic
+            if (currentRating === 5) {
+                document.getElementById('btn-google').style.display = "block";
+                document.getElementById('btn-copy').style.display = "block";
+                document.getElementById('btn-submit-review').style.display = "none";
+                document.getElementById('btn-whatsapp').style.display = "none";
+            } else {
+                document.getElementById('btn-google').style.display = "none";
+                document.getElementById('btn-copy').style.display = "none";
+                document.getElementById('btn-submit-review').style.display = "block";
+                document.getElementById('btn-whatsapp').style.display = currentRating <= 3 ? "block" : "none";
+            }
             
+            renderTags(currentRating);
             updateReviewBox(); 
         });
     });
@@ -808,41 +834,25 @@
         
         let finalReview = "";
         let baseLine = "";
-        let addSeo = Math.random() < 0.1; // 10% Chance for SEO location
-
-        let randomSeoEn = seoKeywordsEn[Math.floor(Math.random() * seoKeywordsEn.length)];
-        let randomSeoHi = seoKeywordsHi[Math.floor(Math.random() * seoKeywordsHi.length)];
-
-        let seoTextEnSales = addSeo ? (" from " + randomSeoEn) : "";
-        let seoTextEnService = addSeo ? (" at " + randomSeoEn) : "";
-        let seoTextHiSales = addSeo ? (" " + randomSeoHi + " से") : "";
-        let seoTextHiService = addSeo ? (" " + randomSeoHi + " पर") : "";
 
         if (isServiceCenter) {
             if (isHindi) {
-                let tmpl = serviceStartsHi[Math.floor(Math.random() * serviceStartsHi.length)];
-                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextHiService + "। ";
+                baseLine = serviceStartsHi[Math.floor(Math.random() * serviceStartsHi.length)].replace("{model}", modelReplacement) + " ";
             } else {
-                let tmpl = serviceStartsEn[Math.floor(Math.random() * serviceStartsEn.length)];
-                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextEnService + ". ";
+                baseLine = serviceStartsEn[Math.floor(Math.random() * serviceStartsEn.length)].replace("{model}", modelReplacement) + " ";
             }
         } else {
             if (isHindi) {
-                let tmpl = salesStartsHi[Math.floor(Math.random() * salesStartsHi.length)];
-                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextHiSales + "। ";
+                baseLine = salesStartsHi[Math.floor(Math.random() * salesStartsHi.length)].replace("{model}", modelReplacement) + " ";
             } else {
-                let tmpl = salesStartsEn[Math.floor(Math.random() * salesStartsEn.length)];
-                baseLine = tmpl.replace("{model}", modelReplacement) + seoTextEnSales + ". ";
+                baseLine = salesStartsEn[Math.floor(Math.random() * salesStartsEn.length)].replace("{model}", modelReplacement) + " ";
             }
         }
 
-        baseLine = baseLine.replace("। ।", "।").replace(". .", ".").replace(" .", ".");
         finalReview += baseLine;
 
         if (selectedTagsData.length > 0) {
             selectedTagsData.forEach(tag => { finalReview += (isHindi ? tag.bodyHi : tag.bodyEn); });
-        } else {
-            finalReview += (isHindi ? "सर्विस और अनुभव अच्छा रहा।" : "Great experience and service.");
         }
         
         document.getElementById('review-box').value = finalReview;
@@ -910,7 +920,7 @@
             fetch(trackerURL, { mode: 'no-cors' }).catch(err => console.log(err));
         }
 
-        // 5. Redirect smoothly after 2.5 seconds (gives user time to read the tip)
+        // 5. Redirect smoothly after 2.5 seconds
         setTimeout(() => {
             window.location.href = directGoogleURL; 
             
@@ -919,6 +929,20 @@
                 document.getElementById('custom-overlay').style.display = 'none';
             }, 2000);
         }, 3000);
+    }
+
+    // --- INTERNAL SUBMIT FOR < 5 STARS ---
+    function submitInternalReview() {
+        if(!validateStaffSelection()) return;
+        
+        saveToGoogleSheets();
+        
+        document.getElementById('main-card').innerHTML = `
+            <div style="text-align:center; color:#fff; padding:40px;">
+                <div style="font-size:50px; margin-bottom:15px;">✅</div>
+                <h2 style="color:#E5A93C; margin-bottom:15px; font-family:'Georgia', serif;">${isHindi ? "फीडबैक के लिए धन्यवाद!" : "Thank You for your Feedback!"}</h2>
+                <p style="color:#aaa; font-size:14px; line-height:1.6;">${isHindi ? "हम आपकी राय की कद्र करते हैं और सुधार करने की कोशिश करेंगे।" : "We appreciate your feedback and will work on improving our services."}</p>
+            </div>`;
     }
 
     function sendToWhatsAppAndValidate() {
