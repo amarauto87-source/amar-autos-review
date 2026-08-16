@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Enfield AMAR AUTOS (ESTD 1982) - Ride Feedback</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Teko:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            background-color: #080808;
+            /* Himalayan 450 Dark Mountain Terrain */
+            background-image: linear-gradient(rgba(5, 5, 5, 0.80), rgba(8, 8, 8, 0.92)), url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 15px;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 680px;
+            background: rgba(14, 15, 17, 0.95);
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            border-radius: 16px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 175, 55, 0.2);
+            padding: 35px 28px;
+            backdrop-filter: blur(14px);
+            margin: 15px 0;
+            position: relative;
+        }
+
+        /* Dealership Branding Header */
+        .dealership-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-top: 5px;
+        }
+
+        .dealership-name {
+            font-family: 'Cinzel', serif;
+            font-size: 27px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .dealership-name span {
+            color: #d4af37;
+        }
+
+        .estd-text {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 3.5px;
+            color: #c9a544;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .header-sub {
+            text-align: center;
+            color: #a8a8a8;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            margin-bottom: 26px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e6c35c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .field-label .hindi {
+            color: #b8b8b8;
+            font-size: 12px;
+            text-transform: none;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .field-label .req {
+            color: #ff4d4f;
+            font-size: 15px;
+        }
+
+        .input-box {
+            width: 100%;
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid #3d3527;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.25s ease;
+        }
+
+        select.input-box {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            cursor: pointer;
+            padding-right: 38px;
+        }
+
+        select.input-box option {
+            background: #16181c;
+            color: #ffffff;
+        }
+
+        .input-box.uppercase-input {
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        input[type="date"] {
+            color-scheme: dark;
+            cursor: pointer;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) sepia(100%) saturate(300%) hue-rotate(5deg);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
+            background: rgba(30, 32, 38, 1);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 580px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .wrapper {
+                padding: 24px 16px;
+            }
+            .dealership-name {
+                font-size: 21px;
+            }
+            .rating-row {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 8px;
+            }
+        }
+
+        .rating-card {
+            background: rgba(20, 22, 26, 0.85);
+            border: 1px solid #2f2a20;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .rating-card:hover {
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+
+        .rating-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rating-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+
+        .rating-text small {
+            display: block;
+            color: #9e9e9e;
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .star-box {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 4px;
+        }
+
+        .star-box input {
+            display: none;
+        }
+
+        .star-box label {
+            font-size: 24px;
+            color: #383838;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.15s;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .star-box label:hover,
+        .star-box label:hover ~ label,
+        .star-box input:checked ~ label {
+            color: #d4af37;
+            transform: scale(1.1);
+        }
+
+        .radio-pills {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .radio-pill-label {
+            background: rgba(22, 24, 28, 0.95);
+            border: 1px solid #3d3527;
+            border-radius: 8px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: block;
+        }
+
+        .radio-pill-label .en {
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+            color: #e0e0e0;
+        }
+
+        .radio-pill-label .hi {
+            font-size: 11px;
+            color: #8f8f8f;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .radio-pills input[type="radio"] {
+            display: none;
+        }
+
+        .radio-pills input[type="radio"]:checked + .radio-pill-label {
+            background: linear-gradient(135deg, #8b181b, #4e0d10);
+            border-color: #d4af37;
+            box-shadow: 0 4px 15px rgba(139, 24, 27, 0.5);
+        }
+
+        .radio-pills input[type="radio"]:checked + .radio-pill-label .en {
+            color: #ffffff;
+        }
+
+        .radio-pills input[type="radio"]:checked + .radio-pill-label .hi {
+            color: #ffcccc;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #b81e22 0%, #7b1215 100%);
+            border: 1.5px solid #d4af37;
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(184, 30, 34, 0.5);
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #d32328 0%, #94171a 100%);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-alert {
+            display: none;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .status-alert.success {
+            background: rgba(22, 101, 52, 0.85);
+            border: 1px solid #4ade80;
+            color: #dcfce7;
+        }
+
+        .status-alert.error {
+            background: rgba(153, 27, 27, 0.85);
+            border: 1px solid #f87171;
+            color: #fee2e2;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #7a7a7a;
+            text-transform: uppercase;
+        }
+
+        .footer-note span {
+            color: #d4af37;
+        }
+
+        .hidden-field {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <div class="dealership-header">
+            <h1 class="dealership-name">Royal Enfield <span>AMAR AUTOS</span></h1>
+            <div class="estd-text">(ESTD 1982)</div>
+        </div>
+
+        <p class="header-sub">Rider's Debrief & Experience Feedback • राइड फीडबैक फॉर्म</p>
+        
+        <div class="divider"></div>
+
+        <form id="riderFeedbackForm">
+            
+            <!-- Row 1: Rider Details -->
+            <div class="grid-2">
+                <div class="form-section">
+                    <label class="field-label" for="rider_name">
+                        Rider Name <span class="hindi">(आपका नाम)</span> <span class="req">*</span>
+                    </label>
+                    <input type="text" id="rider_name" name="rider_name" class="input-box" placeholder="e.g. Rahul Sharma" required>
+                </div>
+                <div class="form-section">
+                    <label class="field-label" for="contact">
+                        Phone / WhatsApp <span class="hindi">(फ़ोन नंबर)</span> <span class="req">*</span>
+                    </label>
+                    <input type="tel" id="contact" name="contact" class="input-box" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+                </div>
+            </div>
+
+            <!-- Row 2: Bike Details & Date -->
+            <div class="grid-2">
+                <div class="form-section">
+                    <label class="field-label" for="bike_model">
+                        Bike Model <span class="hindi">(आपकी बाइक का मॉडल)</span> <span class="req">*</span>
+                    </label>
+                    <select id="bike_model" name="bike_model" class="input-box" required>
+                        <option value="" disabled selected>Select Model / मॉडल चुनें</option>
+                        <option value="Classic 350">Classic 350</option>
+                        <option value="Classic 650">Classic 650</option>
+                        <option value="Bullet 350">Bullet 350</option>
+                        <option value="Hunter 350">Hunter 350</option>
+                        <option value="Meteor 350">Meteor 350</option>
+                        <option value="Himalayan 450">Himalayan 450</option>
+                        <option value="Himalayan 411">Himalayan 411</option>
+                        <option value="Scram 411">Scram 411</option>
+                        <option value="Guerrilla 450">Guerrilla 450</option>
+                        <option value="Continental GT 650">Continental GT 650</option>
+                        <option value="Interceptor 650">Interceptor 650</option>
+                        <option value="Super Meteor 650">Super Meteor 650</option>
+                        <option value="Shotgun 650">Shotgun 650</option>
+                        <option value="Other">Other / अन्य</option>
+                    </select>
+                    <input type="text" id="bike_model_other" name="bike_model_other" class="input-box hidden-field" placeholder="Model ka naam likhein">
+                </div>
+                <div class="form-section">
+                    <label class="field-label" for="bike_reg_no">
+                        Bike Reg. No. <span class="hindi">(गाड़ी नंबर)</span> <span class="req">*</span>
+                    </label>
+                    <input type="text" id="bike_reg_no" name="bike_reg_no" class="input-box uppercase-input" placeholder="e.g. DL7S0000" required>
+                </div>
+            </div>
+
+            <!-- Row 3: Ride Date -->
+            <div class="form-section">
+                <label class="field-label" for="ride_date">
+                    Ride Date <span class="hindi">(राइड की तारीख)</span> <span class="req">*</span>
+                </label>
+                <input type="date" id="ride_date" name="ride_date" class="input-box" required>
+            </div>
+
+            <!-- Star Ratings Section -->
+            <div class="form-section">
+                <label class="field-label">Rate Your Experience <span class="hindi">(अपना अनुभव रेटिंग दें)</span></label>
+                
+                <!-- 1. Overall -->
+                <div class="rating-card">
+                    <div class="rating-row">
+                        <div class="rating-text">
+                            1. Overall Ride Experience
+                            <small>पूरी राइड का कुल अनुभव</small>
+                        </div>
+                        <div class="star-box">
+                            <input type="radio" id="ov-5" name="overall_rating" value="5" required><label for="ov-5">★</label>
+                            <input type="radio" id="ov-4" name="overall_rating" value="4"><label for="ov-4">★</label>
+                            <input type="radio" id="ov-3" name="overall_rating" value="3"><label for="ov-3">★</label>
+                            <input type="radio" id="ov-2" name="overall_rating" value="2"><label for="ov-2">★</label>
+                            <input type="radio" id="ov-1" name="overall_rating" value="1"><label for="ov-1">★</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Route & Pacing -->
+                <div class="rating-card">
+                    <div class="rating-row">
+                        <div class="rating-text">
+                            2. Route & Riding Pace
+                            <small>रूट का चयन और राइडिंग स्पीड</small>
+                        </div>
+                        <div class="star-box">
+                            <input type="radio" id="rt-5" name="route_rating" value="5" required><label for="rt-5">★</label>
+                            <input type="radio" id="rt-4" name="route_rating" value="4"><label for="rt-4">★</label>
+                            <input type="radio" id="rt-3" name="route_rating" value="3"><label for="rt-3">★</label>
+                            <input type="radio" id="rt-2" name="route_rating" value="2"><label for="rt-2">★</label>
+                            <input type="radio" id="rt-1" name="route_rating" value="1"><label for="rt-1">★</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Safety & Marshall -->
+                <div class="rating-card">
+                    <div class="rating-row">
+                        <div class="rating-text">
+                            3. Safety, Briefing & Lead Support
+                            <small>सुरक्षा, ब्रीफिंग और ग्रुप लीड / मार्शल का सपोर्ट</small>
+                        </div>
+                        <div class="star-box">
+                            <input type="radio" id="sf-5" name="safety_rating" value="5" required><label for="sf-5">★</label>
+                            <input type="radio" id="sf-4" name="safety_rating" value="4"><label for="sf-4">★</label>
+                            <input type="radio" id="sf-3" name="safety_rating" value="3"><label for="sf-3">★</label>
+                            <input type="radio" id="sf-2" name="safety_rating" value="2"><label for="sf-2">★</label>
+                            <input type="radio" id="sf-1" name="safety_rating" value="1"><label for="sf-1">★</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Food & Stops -->
+                <div class="rating-card">
+                    <div class="rating-row">
+                        <div class="rating-text">
+                            4. Food, Refreshments & Pit-Stops
+                            <small>खान-पान और आराम के स्टॉप्स की व्यवस्था</small>
+                        </div>
+                        <div class="star-box">
+                            <input type="radio" id="fd-5" name="food_rating" value="5" required><label for="fd-5">★</label>
+                            <input type="radio" id="fd-4" name="food_rating" value="4"><label for="fd-4">★</label>
+                            <input type="radio" id="fd-3" name="food_rating" value="3"><label for="fd-3">★</label>
+                            <input type="radio" id="fd-2" name="food_rating" value="2"><label for="fd-2">★</label>
+                            <input type="radio" id="fd-1" name="food_rating" value="1"><label for="fd-1">★</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Rides -->
+            <div class="form-section">
+                <label class="field-label">
+                    Would you ride with Amar Autos again? <span class="hindi">(क्या आप दोबारा Amar Autos के साथ राइड करना चाहेंगे?)</span>
+                </label>
+                <div class="radio-pills">
+                    <div>
+                        <input type="radio" id="ag-yes" name="join_again" value="Definitely Yes" checked>
+                        <label class="radio-pill-label" for="ag-yes">
+                            <span class="en">🔥 100% Yes!</span>
+                            <span class="hi">हाँ, बिल्कुल</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="ag-maybe" name="join_again" value="Maybe">
+                        <label class="radio-pill-label" for="ag-maybe">
+                            <span class="en">⚡ Maybe</span>
+                            <span class="hi">शायद</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="ag-no" name="join_again" value="No">
+                        <label class="radio-pill-label" for="ag-no">
+                            <span class="en">❌ No</span>
+                            <span class="hi">नहीं</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="form-section">
+                <label class="field-label" for="highlight">
+                    Best Moment of the Ride <span class="hindi">(राइड की सबसे यादगार बात)</span>
+                </label>
+                <textarea id="highlight" name="best_moment" rows="2" class="input-box" placeholder="रूट, व्यूज, बाइक परफॉर्मेंस, या ग्रुप का माहौल..."></textarea>
+            </div>
+
+            <div class="form-section">
+                <label class="field-label" for="feedback">
+                    Suggestions for Amar Autos Team <span class="hindi">(Amar Autos टीम के लिए कोई सुझाव)</span>
+                </label>
+                <textarea id="feedback" name="suggestions" rows="2" class="input-box" placeholder="अगली राइड को और बेहतर बनाने के लिए अपने विचार साझा करें..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">Submit Ride Feedback / फॉर्म जमा करें</button>
+            <div id="statusAlert" class="status-alert"></div>
+        </form>
+
+        <div class="footer-note">
+            Royal Enfield • <span>Amar Autos (ESTD 1982)</span> • Pure Motorcycling
+        </div>
+    </div>
+
+    <script>
+        // Aapka Linked Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXj5wm7jzvyQL0y9AdN--Wm-68IsJ7vhfYIOMeby5-drFQ1I0gMfgSTDjgSLy5jXrL/exec";
+
+        const form = document.getElementById('riderFeedbackForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusAlert = document.getElementById('statusAlert');
+        const bikeModelSelect = document.getElementById('bike_model');
+        const bikeModelOther = document.getElementById('bike_model_other');
+
+        // Show/hide the "Other" free-text box based on dropdown choice
+        bikeModelSelect.addEventListener('change', function () {
+            if (this.value === 'Other') {
+                bikeModelOther.style.display = 'block';
+                bikeModelOther.required = true;
+            } else {
+                bikeModelOther.style.display = 'none';
+                bikeModelOther.required = false;
+                bikeModelOther.value = '';
+            }
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting Feedback... / जमा हो रहा है...';
+            statusAlert.style.display = 'none';
+
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // If "Other" was picked, send the typed model name as bike_model
+            if (data.bike_model === 'Other' && data.bike_model_other) {
+                data.bike_model = data.bike_model_other;
+            }
+            delete data.bike_model_other;
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                showAlert('🎉 धन्यवाद! आपका फीडबैक Google Sheet में दर्ज हो गया है। Ride Safe!', 'success');
+                form.reset();
+                bikeModelOther.style.display = 'none';
+                bikeModelOther.required = false;
+            } catch (error) {
+                console.error('Submission Error:', error);
+                showAlert('Kuch gadbad hui, kripya dobara koshish karein ya seedha contact karein.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit Ride Feedback / फॉर्म जमा करें';
+            }
+        });
+
+        function showAlert(msg, type) {
+            statusAlert.innerText = msg;
+            statusAlert.className = 'status-alert ' + type;
+            statusAlert.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
