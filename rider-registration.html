@@ -21,611 +21,122 @@
     --font-body:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font-body);
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{ background:var(--bg); color:var(--text); font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased; }
   h1,h2,h3,.brand,.headline{font-family:var(--font-head); text-transform:uppercase; letter-spacing:1px; font-weight:700;}
   a{color:inherit; text-decoration:none;}
-  img{max-width:100%; display:block;}
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
-
   .icon{width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; vertical-align:-0.15em; flex:none;}
-  .icon.filled{fill:currentColor; stroke:none;}
+  .filled{fill:currentColor; stroke:none;}
 
-  header.site{
-    position:sticky; top:0; z-index:50;
-    background:rgba(11,10,9,0.94);
-    backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--border);
-  }
-  header.site .wrap{
-    display:flex; align-items:center; justify-content:space-between;
-    padding-top:16px; padding-bottom:16px; gap:16px;
-  }
-  .brand{font-size:clamp(16px,2.4vw,22px); font-weight:700; letter-spacing:2px; white-space:nowrap;}
+  /* Header */
+  header.site{ position:sticky; top:0; z-index:50; background:rgba(11,10,9,0.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); }
+  header.site .wrap{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; }
+  .brand{font-size:22px; font-weight:700; letter-spacing:2px;}
   .brand span{color:var(--gold-light);}
-  nav.main-nav{display:flex; gap:clamp(14px,2.6vw,32px); align-items:center;}
-  nav.main-nav a{
-    font-family:var(--font-head); font-size:12.5px; letter-spacing:1.3px;
-    color:var(--text-muted); font-weight:600; transition:color .2s; white-space:nowrap;
-  }
-  nav.main-nav a:hover{color:var(--gold-light);}
-  .btn-register{
-    border:1px solid var(--gold); color:var(--gold-light); background:transparent;
-    padding:9px 18px; border-radius:3px; font-family:var(--font-head);
-    font-size:12.5px; letter-spacing:1.3px; font-weight:700; transition:.2s; white-space:nowrap;
-    cursor:pointer; display:inline-block;
-  }
+  .btn-register{ border:1px solid var(--gold); color:var(--gold-light); padding:9px 18px; border-radius:3px; font-family:var(--font-head); font-size:12.5px; font-weight:700; cursor:pointer; }
   .btn-register:hover{background:var(--gold); color:#161310;}
-  .nav-toggle{display:none; background:none; border:none; color:var(--gold-light); font-size:22px; cursor:pointer; padding:4px;}
 
-  .hero{
-    position:relative;
-    padding:clamp(120px,20vw,190px) 0 clamp(40px,6vw,64px);
-    border-bottom:1px solid var(--border);
-    overflow:hidden;
-    background:var(--bg);
-    isolation:isolate;
-  }
-  .hero-bg{
-    position:absolute; inset:0; z-index:0;
-    background-image:url("https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1600&q=80");
-    background-size:cover;
-    background-position:center right;
-  }
-  .hero-overlay{
-    position:absolute; inset:0; z-index:1;
-    background:
-      linear-gradient(90deg, rgba(27,23,20,0.94) 0%, rgba(27,23,20,0.82) 32%, rgba(27,23,20,0.42) 58%, rgba(27,23,20,0.12) 100%),
-      linear-gradient(0deg, rgba(27,23,20,0.82) 0%, rgba(27,23,20,0.1) 45%, rgba(27,23,20,0.1) 70%, rgba(27,23,20,0.68) 100%);
-  }
+  /* Hero */
+  .hero{ position:relative; padding:120px 0 60px; border-bottom:1px solid var(--border); background:var(--bg); overflow:hidden;}
+  .hero-bg{ position:absolute; inset:0; z-index:0; background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1600&q=80'); background-size:cover; background-position:center; }
   .hero .wrap{position:relative; z-index:2;}
-  .headline{font-size:clamp(26px,4.4vw,52px); line-height:1.08; font-weight:700;}
+  .headline{font-size:52px; line-height:1.08;}
   .headline .accent{color:var(--gold-light); display:block;}
-  .tagline{margin-top:16px; font-family:var(--font-head); letter-spacing:1px; color:var(--text-muted); font-size:clamp(12px,1.6vw,15px); display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
-  .tagline .star{color:var(--gold-light);}
-  .lead{margin-top:14px; color:var(--text-muted); font-size:clamp(13px,1.6vw,15px); max-width:460px;}
-  .feature-strip{display:flex; gap:clamp(12px,2.4vw,28px); margin-top:28px; flex-wrap:wrap;}
-  .feature-strip .item{width:clamp(72px,9vw,104px); text-align:center;}
-  .feature-strip .icon-badge{
-    width:clamp(42px,5.4vw,56px); height:clamp(42px,5.4vw,56px); margin:0 auto 8px; border-radius:50%;
-    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
-    color:var(--gold-light); font-size:clamp(16px,2vw,20px); background:rgba(21,18,16,0.75); backdrop-filter:blur(2px);
-  }
-  .feature-strip .label{font-family:var(--font-head); font-size:clamp(9px,1vw,10.5px); letter-spacing:.8px; color:var(--text-muted); line-height:1.3;}
 
-  .form-section{padding:clamp(32px,6vw,56px) 0 40px;}
-  .form-card{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:clamp(24px,4vw,40px) clamp(16px,4vw,56px) clamp(28px,4vw,48px);
-  }
-  .form-title-row{display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:32px; flex-wrap:wrap;}
-  .form-title-row .line{height:1px; flex:1; max-width:140px; min-width:20px; background:linear-gradient(90deg, transparent, var(--gold-dim));}
-  .form-title-row .line.right{background:linear-gradient(90deg, var(--gold-dim), transparent);}
-  .form-title-row h2{font-size:clamp(17px,2.6vw,26px); color:var(--gold-light); letter-spacing:1.5px; white-space:nowrap;}
-  .emblem-mini{width:30px; height:30px; border:1px solid var(--gold-dim); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--gold-light); font-size:13px; flex:none;}
-
-  form#riderForm{display:grid; grid-template-columns:repeat(3, 1fr); gap:22px 24px;}
+  /* Form */
+  .form-section{padding:56px 0 40px;}
+  .form-card{ background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:40px; }
+  form#riderForm{display:grid; grid-template-columns:repeat(2, 1fr); gap:20px;}
   .field{display:flex; flex-direction:column; gap:8px;}
   .field.full{grid-column:1 / -1;}
-  .field label{
-    font-family:var(--font-head); font-size:12px; letter-spacing:.4px; color:var(--text);
-    font-weight:600; text-transform:uppercase;
-  }
-  .field label .req{color:var(--danger); margin-left:3px;}
-  .input-wrap{
-    position:relative; display:flex; align-items:center;
-    background:var(--field); border:1px solid var(--border); border-radius:5px;
-    transition:border-color .2s, box-shadow .2s;
-  }
-  .input-wrap:focus-within{border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,151,62,0.12);}
-  .input-wrap .icon-slot{
-    width:40px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--gold-dim); font-size:15px;
-  }
-  .input-wrap input, .input-wrap select{
-    flex:1; background:transparent; border:none; outline:none; color:var(--text);
-    font-family:var(--font-body); font-size:14px; padding:12px 12px 12px 0;
-    min-width:0;
-  }
-  .input-wrap select{appearance:none; -webkit-appearance:none; padding-right:34px; cursor:pointer;}
-  .input-wrap select option{background:#1f1a14; color:var(--text);}
-  .input-wrap.select-wrap .caret{
-    position:absolute; right:14px; color:var(--gold-dim); pointer-events:none; font-size:11px;
-  }
-  .input-wrap input::placeholder{color:#786e5f;}
-  .input-wrap input[type="date"]{color-scheme:dark;}
-  .field.disabled .input-wrap{opacity:.45; pointer-events:none;}
-  .field-error{font-size:11.5px; color:var(--danger); display:none;}
-  .field.invalid .input-wrap{border-color:var(--danger);}
-  .field.invalid .field-error{display:block;}
-
-  .agree-row{
-    grid-column:1 / -1; display:flex; align-items:flex-start; gap:10px;
-    margin-top:6px; font-size:13.5px; color:var(--text-muted);
-  }
-  .agree-row input{margin-top:3px; width:16px; height:16px; accent-color:var(--gold);}
-  .agree-row a{color:var(--gold-light); text-decoration:underline;}
-
-  .submit-row{grid-column:1 / -1; display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:8px;}
-  button.submit-btn{
-    background:linear-gradient(180deg, var(--gold-light), var(--gold));
-    color:#181410; border:none; font-family:var(--font-head); font-weight:700;
-    letter-spacing:1.3px; font-size:14.5px; padding:15px 40px; border-radius:5px;
-    cursor:pointer; display:flex; align-items:center; gap:10px; transition:transform .15s, box-shadow .15s;
-  }
-  button.submit-btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(201,151,62,0.25);}
-  button.submit-btn:disabled{opacity:.6; cursor:not-allowed; transform:none; box-shadow:none;}
-  .form-status{font-size:13.5px; text-align:center; min-height:18px;}
-  .form-status.success{color:var(--success);}
-  .form-status.error{color:var(--danger);}
-
-  .thank-you{
-    display:none; flex-direction:column; align-items:center; text-align:center;
-    padding:48px 20px 32px; gap:14px;
-  }
-  .thank-you .thank-you-icon{
-    width:64px; height:64px; border-radius:50%; border:2px solid var(--success);
-    display:flex; align-items:center; justify-content:center; color:var(--success); font-size:30px;
-    margin-bottom:6px;
-  }
-  .thank-you h3{color:var(--gold-light); font-size:24px; letter-spacing:1px;}
-  .thank-you p{color:var(--text-muted); font-size:14.5px; max-width:420px; line-height:1.6;}
-  .thank-you .btn-register{margin-top:10px; display:inline-block;}
-
-  footer.site{padding:40px 0 26px;}
-  footer.site .wrap{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px;}
-  .footer-left{display:flex; flex-direction:column; gap:14px;}
-  .footer-left .brand{font-size:19px;}
-  .follow{display:flex; gap:12px; align-items:center; font-size:11.5px; letter-spacing:1px; color:var(--text-muted); font-family:var(--font-head); font-weight:600;}
-  .follow .icons{display:flex; gap:10px;}
-  .follow .icons a{
-    width:32px; height:32px; border:1px solid var(--border); border-radius:50%;
-    display:flex; align-items:center; justify-content:center; color:var(--gold-light); font-size:13px; transition:.2s;
-  }
-  .follow .icons a:hover{background:var(--gold); color:#161310;}
-  .footer-center{text-align:center; color:var(--gold-light); font-family:var(--font-head); letter-spacing:1.3px; font-size:12.5px;}
-  .footer-center .copy{display:block; margin-top:6px; color:var(--text-muted); font-size:11px; letter-spacing:.4px; text-transform:none; font-weight:400;}
-  .footer-right{
-    border:1px solid var(--gold-dim); border-radius:8px; padding:10px 18px; text-align:center;
-    font-family:var(--font-head); font-size:11px; letter-spacing:1px; color:var(--gold-light);
-  }
-  .footer-right .stars{color:var(--gold-light); margin-top:4px; font-size:11px; letter-spacing:3px;}
-
-  @media (max-width:860px){
-    nav.main-nav{position:fixed; top:60px; left:0; right:0; background:var(--panel); flex-direction:column; padding:20px; gap:18px; border-bottom:1px solid var(--border); display:none;}
-    nav.main-nav.open{display:flex;}
-    .nav-toggle{display:block;}
-    form#riderForm{grid-template-columns:repeat(2,1fr);}
-  }
-  @media (max-width:620px){
-    .hero{padding-top:clamp(90px,32vw,140px);}
-    form#riderForm{grid-template-columns:1fr;}
-    .feature-strip{gap:14px;}
-    .footer-left, .footer-center, .footer-right{width:100%; text-align:center;}
-    .footer-left{align-items:center;}
-    .form-title-row .line{display:none;}
-  }
+  .field label{font-family:var(--font-head); font-size:12px; color:var(--text); font-weight:600; text-transform:uppercase;}
+  .input-wrap{ background:var(--field); border:1px solid var(--border); border-radius:5px; display:flex; align-items:center;}
+  input, select{ flex:1; background:transparent; border:none; color:var(--text); padding:12px; }
+  .field.disabled{opacity:0.5; pointer-events:none;}
+  .submit-btn{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#181410; padding:15px 40px; border-radius:5px; border:none; font-weight:700; cursor:pointer; grid-column:1 / -1;}
+  .field-error{color:var(--danger); font-size:11px; display:none;}
+  .invalid .field-error{display:block;}
 </style>
 </head>
 <body>
 
-<svg style="display:none" aria-hidden="true">
-  <symbol id="i-bars" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
-  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0"/><rect x="3" y="16" width="18" height="4" rx="2"/><path d="M9 16v-1a3 3 0 0 1 6 0v1"/></symbol>
-  <symbol id="i-map" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></symbol>
-  <symbol id="i-handshake" viewBox="0 0 24 24"><path d="M2 13l4-4 4 4-2.2 2.2a1.7 1.7 0 0 1-2.4 0z"/><path d="M22 13l-4-4-4 4 2.2 2.2a1.7 1.7 0 0 0 2.4 0z"/><path d="M10 13l2 2 2-2"/></symbol>
-  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
-  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
-  <symbol id="i-phone-alert" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/><line x1="18" y1="2" x2="18" y2="6"/><line x1="16" y1="4" x2="20" y2="4"/></symbol>
-  <symbol id="i-motorcycle" viewBox="0 0 24 24"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M5 17h6l3-6h4l2 6"/><path d="M11 11h3l2-3"/></symbol>
-  <symbol id="i-id-card" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="5" y1="15" x2="10" y2="15"/></symbol>
-  <symbol id="i-gauge" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
-  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
-  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
-  <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
-  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
-  <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
-  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
-  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 3 3 7l3 3 2-1v11h8V9l2 1 3-3-5-4-2 2h-4z"/></symbol>
-  <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3 10v4h3l5 4V6l-5 4H3z"/><path d="M14 9a4 4 0 0 1 0 6"/><path d="M17 6a8 8 0 0 1 0 12"/></symbol>
-  <symbol id="i-emblem" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.2l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" fill="currentColor" stroke="none"/></symbol>
-  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="7 12.5 10.5 16 17 8.5"/></symbol>
-  <symbol id="i-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
-  <symbol id="i-facebook" viewBox="0 0 24 24" class="filled"><path d="M13 3h4v4h-3c-.6 0-1 .4-1 1v3h4l-.5 4H13v8h-4v-8H6v-4h3V7c0-2.2 1.8-4 4-4z" fill="currentColor" stroke="none"/></symbol>
-  <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
-  <symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none"/></symbol>
-</svg>
-
 <header class="site">
   <div class="wrap">
     <div class="brand">ROYAL <span>ENFIELD</span></div>
-    <nav class="main-nav" id="mainNav">
-      <a href="#top">Home</a>
-      <a href="#riderForm">Riders Meet</a>
-      <a href="#riderForm">Events</a>
-      <a href="#top">Gallery</a>
-      <a href="#top">About Us</a>
-    </nav>
-    <div style="display:flex; align-items:center; gap:14px;">
-      <a href="#riderForm" class="btn-register">Register</a>
-      <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg class="icon"><use href="#i-bars"></use></svg></button>
-    </div>
+    <a href="#riderForm" class="btn-register">Register</a>
   </div>
 </header>
 
-<section class="hero" id="top">
+<section class="hero">
   <div class="hero-bg"></div>
-  <div class="hero-overlay"></div>
   <div class="wrap">
-    <div>
-      <h1 class="headline">Ride Together<span class="accent">Stay Together</span></h1>
-      <p class="tagline"><span class="star">&#9733;</span> One Ride &nbsp;<span class="star">&#9733;</span> One Family &nbsp;<span class="star">&#9733;</span> Royal Enfield</p>
-      <p class="lead">Join our rider community by filling the registration form.</p>
-
-      <div class="feature-strip">
-        <div class="item">
-          <div class="icon-badge"><svg class="icon"><use href="#i-helmet"></use></svg></div>
-          <div class="label">WEAR HELMET<br>RIDE SAFE</div>
-        </div>
-        <div class="item">
-          <div class="icon-badge"><svg class="icon"><use href="#i-emblem"></use></svg></div>
-          <div class="label">PURE MOTORCYCLING<br>SINCE 1901</div>
-        </div>
-        <div class="item">
-          <div class="icon-badge"><svg class="icon"><use href="#i-map"></use></svg></div>
-          <div class="label">EXPLORE<br>TOGETHER</div>
-        </div>
-        <div class="item">
-          <div class="icon-badge"><svg class="icon"><use href="#i-handshake"></use></svg></div>
-          <div class="label">RESPECT<br>EVERY RIDER</div>
-        </div>
-      </div>
-    </div>
+    <h1 class="headline">Ride Together<span class="accent">Stay Together</span></h1>
+    <p>Join our rider community by filling the registration form.</p>
   </div>
 </section>
 
 <section class="form-section">
   <div class="wrap">
     <div class="form-card">
-      <div class="form-title-row">
-        <div class="line"></div>
-        <div class="emblem-mini"><svg class="icon"><use href="#i-motorcycle"></use></svg></div>
-        <h2>Rider Registration Form</h2>
-        <div class="emblem-mini"><svg class="icon"><use href="#i-motorcycle"></use></svg></div>
-        <div class="line right"></div>
-      </div>
-
+      <h2>Rider Registration Form</h2>
+      <br>
       <form id="riderForm" novalidate>
-
-        <div class="field">
-          <label for="riderName">1. Rider Name <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-user"></use></svg></span>
-            <input type="text" id="riderName" name="Rider Name" placeholder="Enter your full name" required>
-          </div>
-          <span class="field-error">Please enter your name.</span>
-        </div>
-
-        <div class="field">
-          <label for="mobile">2. Mobile Number <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-phone"></use></svg></span>
-            <input type="tel" id="mobile" name="Mobile Number" placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" maxlength="10" required>
-          </div>
-          <span class="field-error">Enter a valid 10-digit mobile number.</span>
-        </div>
-
-        <div class="field">
-          <label for="emergency">3. Emergency Contact Number <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-phone-alert"></use></svg></span>
-            <input type="tel" id="emergency" name="Emergency Contact Number" placeholder="Enter emergency number" pattern="[0-9]{10}" maxlength="10" required>
-          </div>
-          <span class="field-error">Enter a valid 10-digit emergency number.</span>
-        </div>
-
-        <div class="field">
-          <label for="bikeModel">4. Bike Model <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-motorcycle"></use></svg></span>
-            <input type="text" id="bikeModel" name="Bike Model" placeholder="e.g. Classic 350, Himalayan 450" required>
-          </div>
-          <span class="field-error">Please enter your bike model.</span>
-        </div>
-
-        <div class="field">
-          <label for="bikeReg">5. Bike Registration Number <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-id-card"></use></svg></span>
-            <input type="text" id="bikeReg" name="Bike Registration Number" placeholder="e.g. DL 01 AB 1234" required>
-          </div>
-          <span class="field-error">Please enter registration number.</span>
-        </div>
-
-        <div class="field">
-          <label for="experience">6. Riding Experience <span class="req">*</span></label>
-          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-gauge"></use></svg></span>
-            <select id="experience" name="Riding Experience" required>
-              <option value="" disabled selected>Select your experience</option>
-              <option value="Beginner (0-1 year)">Beginner (0-1 year)</option>
-              <option value="Intermediate (1-3 years)">Intermediate (1-3 years)</option>
-              <option value="Experienced (3-5 years)">Experienced (3-5 years)</option>
-              <option value="Expert (5+ years)">Expert (5+ years)</option>
-            </select>
-            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
-          </div>
-          <span class="field-error">Please select your experience.</span>
-        </div>
-
-        <div class="field">
-          <label for="groupMember">7. Member of Any Riding Group? <span class="req">*</span></label>
-          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-users"></use></svg></span>
-            <select id="groupMember" name="Already Member of Riding Group" required>
-              <option value="" disabled selected>Select Yes / No</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
-          </div>
-          <span class="field-error">Please select an option.</span>
-        </div>
-
-        <div class="field disabled" id="groupNameField">
-          <label for="groupName">8. If Yes, Enter Riding Group Name</label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-flag"></use></svg></span>
-            <input type="text" id="groupName" name="Riding Group Name" placeholder="Enter riding group name" disabled>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="city">9. City / Location <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-map-pin"></use></svg></span>
-            <input type="text" id="city" name="City / Location" placeholder="Enter your city" required>
-          </div>
-          <span class="field-error">Please enter your city.</span>
-        </div>
-
-        <div class="field">
-          <label for="dob">10. Date of Birth <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-calendar"></use></svg></span>
-            <input type="date" id="dob" name="Date of Birth" required>
-          </div>
-          <span class="field-error">Please enter your date of birth.</span>
-        </div>
-
-        <div class="field">
-          <label for="email">11. Email Address</label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-mail"></use></svg></span>
-            <input type="email" id="email" name="Email Address" placeholder="Enter email address">
-          </div>
-          <span class="field-error">Please enter a valid email.</span>
-        </div>
-
-        <div class="field full">
-          <label for="address">12. Address <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-home"></use></svg></span>
-            <input type="text" id="address" name="Address" placeholder="Enter your full residential address" required>
-          </div>
-          <span class="field-error">Please enter your address.</span>
-        </div>
-
-        <div class="field">
-          <label for="helmet">13. Helmet Available? <span class="req">*</span></label>
-          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-helmet"></use></svg></span>
-            <select id="helmet" name="Helmet Available" required>
-              <option value="" disabled selected>Select Yes / No</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
-          </div>
-          <span class="field-error">Please select an option.</span>
-        </div>
-
-        <div class="field">
-          <label for="gear">14. Riding Gear Available? <span class="req">*</span></label>
-          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-shirt"></use></svg></span>
-            <select id="gear" name="Riding Gear Available" required>
-              <option value="" disabled selected>Select Yes / No</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
-          </div>
-          <span class="field-error">Please select an option.</span>
-        </div>
-
-        <div class="field">
-          <label for="heardFrom">15. How Did You Hear About Us?</label>
-          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-megaphone"></use></svg></span>
-            <select id="heardFrom" name="How Did You Hear About Us">
-              <option value="" disabled selected>Select an option</option>
-              <option value="Social Media">Social Media</option>
-              <option value="Friend / Family">Friend / Family</option>
-              <option value="Riding Event">Riding Event</option>
-              <option value="Royal Enfield Dealer">Royal Enfield Dealer</option>
-              <option value="Amar Auto - Kanti Nagar">Amar Auto - Kanti Nagar</option>
-              <option value="Amar Auto - Vikas Marg">Amar Auto - Vikas Marg</option>
-              <option value="Other">Other</option>
-            </select>
-            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
-          </div>
-        </div>
-
-        <div class="agree-row">
-          <input type="checkbox" id="agree" required>
-          <label for="agree">I agree to the <a href="#top">Terms &amp; Conditions</a> and <a href="#top">Privacy Policy</a>.</label>
-        </div>
-
-        <div class="submit-row">
-          <button type="submit" class="submit-btn" id="submitBtn">
-            <span id="submitLabel">Submit Registration</span> <svg class="icon"><use href="#i-motorcycle"></use></svg>
-          </button>
-          <div class="form-status" id="formStatus"></div>
-        </div>
-
+        <div class="field"><label>Rider Name *</label><div class="input-wrap"><input type="text" name="Rider Name" required></div><span class="field-error">Required</span></div>
+        <div class="field"><label>Mobile Number *</label><div class="input-wrap"><input type="tel" name="Mobile Number" required></div><span class="field-error">Required</span></div>
+        <div class="field"><label>Emergency Contact *</label><div class="input-wrap"><input type="tel" name="Emergency Contact Number" required></div><span class="field-error">Required</span></div>
+        <div class="field"><label>Bike Model *</label><div class="input-wrap"><input type="text" name="Bike Model" required></div><span class="field-error">Required</span></div>
+        <div class="field"><label>Registration No. *</label><div class="input-wrap"><input type="text" name="Bike Registration Number" required></div><span class="field-error">Required</span></div>
+        <div class="field"><label>Riding Experience *</label><div class="input-wrap"><select name="Riding Experience" required><option value="">Select...</option><option>Beginner</option><option>Intermediate</option><option>Expert</option></select></div></div>
+        <div class="field"><label>Member of Group? *</label><div class="input-wrap"><select id="groupMember" name="Already Member of Riding Group" required><option value="No">No</option><option value="Yes">Yes</option></select></div></div>
+        <div class="field disabled" id="groupNameField"><label>If Yes, Group Name</label><div class="input-wrap"><input type="text" name="Riding Group Name" id="groupName" disabled></div></div>
+        <div class="field"><label>City *</label><div class="input-wrap"><input type="text" name="City / Location" required></div></div>
+        <div class="field"><label>DOB *</label><div class="input-wrap"><input type="date" name="Date of Birth" required></div></div>
+        <div class="field full"><label>Address *</label><div class="input-wrap"><input type="text" name="Address" required></div></div>
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Registration</button>
       </form>
-
-      <div class="thank-you" id="thankYou">
-        <div class="thank-you-icon"><svg class="icon"><use href="#i-check-circle"></use></svg></div>
-        <h3>Thank You!</h3>
-        <p>Your registration has been submitted successfully to the community dashboard. Ride safe, ride pure!</p>
-        <button type="button" class="btn-register" id="submitAnotherBtn">Submit Another Response</button>
-      </div>
+      <div id="formStatus" style="margin-top:20px; text-align:center;"></div>
     </div>
   </div>
 </section>
 
-<footer class="site">
-  <div class="wrap">
-    <div class="footer-left">
-      <div class="brand">ROYAL ENFIELD</div>
-      <div class="follow">FOLLOW US
-        <div class="icons">
-          <a href="#top" aria-label="Facebook"><svg class="icon"><use href="#i-facebook"></use></svg></a>
-          <a href="https://www.instagram.com/royalenfield_shahadra" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="icon"><use href="#i-instagram"></use></svg></a>
-          <a href="#top" aria-label="YouTube"><svg class="icon"><use href="#i-youtube"></use></svg></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-center">
-      RIDE SAFE. RIDE HARD. RIDE TOGETHER.
-      <span class="copy">&copy; <span id="year"></span> Royal Enfield Riders Community. All rights reserved.</span>
-    </div>
-    <div class="footer-right">
-      ROYAL ENFIELD<br>RIDERS COMMUNITY
-      <div class="stars">&#9733;&#9733;&#9733;&#9733;</div>
-    </div>
-  </div>
-</footer>
-
 <script>
-  // Mobile navigation toggle
-  document.getElementById('navToggle').addEventListener('click', function(){
-    document.getElementById('mainNav').classList.toggle('open');
-  });
-  document.getElementById('year').textContent = new Date().getFullYear();
+  // URL Update ho gaya hai
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2OFBToUugUA9wqp5t8LFjkeKX_Ib1FPJP93NxM6n9a3tt4er2t7xsNQ4rSJUjDxBe/exec";
 
-  // Set DOB maximum date (Must be at least 18 years old)
-  const today = new Date();
-  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
-  document.getElementById('dob').setAttribute('max', maxDate);
-
-  // Conditional field: Riding group name
-  var groupMember = document.getElementById('groupMember');
-  var groupNameField = document.getElementById('groupNameField');
-  var groupNameInput = document.getElementById('groupName');
-
-  function toggleGroupName(){
-    if (groupMember.value === 'Yes') {
-      groupNameField.classList.remove('disabled');
-      groupNameInput.disabled = false;
-      groupNameInput.focus();
-    } else {
-      groupNameField.classList.add('disabled');
-      groupNameInput.disabled = true;
-      groupNameInput.value = '';
-    }
-  }
-  groupMember.addEventListener('change', toggleGroupName);
-
-  // Google Apps Script Web App Endpoint
-  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwXBTqanA11J6eU9uJMEckrUOBaq4Ck42ZPzgPg-_6t_8nzwEUQPQqw_HGTqFoyzoi/exec";
-
-  var form = document.getElementById('riderForm');
-  var submitBtn = document.getElementById('submitBtn');
-  var submitLabel = document.getElementById('submitLabel');
-  var formStatus = document.getElementById('formStatus');
-  var thankYou = document.getElementById('thankYou');
-  var submitAnotherBtn = document.getElementById('submitAnotherBtn');
-
-  submitAnotherBtn.addEventListener('click', function(){
-    thankYou.style.display = 'none';
-    form.style.display = '';
-    formStatus.className = 'form-status';
-    formStatus.textContent = '';
-    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Group Name Toggle
+  document.getElementById('groupMember').addEventListener('change', function(){
+    var isYes = this.value === 'Yes';
+    document.getElementById('groupNameField').classList.toggle('disabled', !isYes);
+    document.getElementById('groupName').disabled = !isYes;
   });
 
-  function setFieldError(fieldEl, isInvalid){
-    if (fieldEl) fieldEl.classList.toggle('invalid', isInvalid);
-  }
-
-  function validateForm(){
-    var valid = true;
-    var requiredFields = form.querySelectorAll('[required]');
-    
-    requiredFields.forEach(function(input){
-      var fieldEl = input.closest('.field') || input.closest('.agree-row');
-      var ok = true;
-      if (input.type === 'checkbox') {
-        ok = input.checked;
-      } else {
-        ok = input.value.trim() !== '';
-        if (ok && input.pattern) {
-          var re = new RegExp('^' + input.pattern + '$');
-          ok = re.test(input.value.trim());
-        }
-      }
-      if (fieldEl && fieldEl.classList.contains('field')) setFieldError(fieldEl, !ok);
-      if (!ok) valid = false;
-    });
-
-    var emailInput = document.getElementById('email');
-    if (emailInput.value.trim() !== '') {
-      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
-      setFieldError(emailInput.closest('.field'), !emailOk);
-      if (!emailOk) valid = false;
-    }
-
-    return valid;
-  }
-
-  form.addEventListener('submit', function(e){
+  // Form Submit
+  document.getElementById('riderForm').addEventListener('submit', function(e){
     e.preventDefault();
-    formStatus.className = 'form-status';
-    formStatus.textContent = '';
-
-    if (!validateForm()) {
-      formStatus.classList.add('error');
-      formStatus.textContent = 'Please fill all required fields correctly.';
-      return;
-    }
+    var btn = document.getElementById('submitBtn');
+    var status = document.getElementById('formStatus');
+    
+    btn.disabled = true;
+    status.textContent = "Submitting...";
 
     var data = {};
-    new FormData(form).forEach(function(value, key){ data[key] = value; });
-    data['Agreed to Terms'] = document.getElementById('agree').checked ? 'Yes' : 'No';
-    data['Submission Time'] = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
-    submitBtn.disabled = true;
-    submitLabel.textContent = 'Submitting...';
+    new FormData(this).forEach(function(v, k){ data[k] = v; });
+    data['Submission Time'] = new Date().toLocaleString();
 
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(data)
     })
     .then(function(){
-      form.reset();
-      toggleGroupName();
-      formStatus.className = 'form-status';
-      formStatus.textContent = '';
-      form.style.display = 'none';
-      thankYou.style.display = 'flex';
-      thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      status.textContent = "Success! Data saved.";
+      btn.disabled = false;
     })
     .catch(function(){
-      formStatus.classList.add('error');
-      formStatus.textContent = 'Something went wrong. Please check your connection and try again.';
-    })
-    .finally(function(){
-      submitBtn.disabled = false;
-      submitLabel.textContent = 'Submit Registration';
+      status.textContent = "Error occurred.";
+      btn.disabled = false;
     });
   });
 </script>
-
 </body>
 </html>
