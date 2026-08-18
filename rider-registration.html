@@ -786,7 +786,7 @@
             <h3>Recent Registrations</h3>
             <table>
               <thead>
-                <tr><th>Timestamp</th><th>Name</th><th>Mobile</th><th>Bike Model</th><th>City</th></tr>
+                <tr><th>Timestamp</th><th>Name</th><th>Bike Model</th><th>City</th></tr>
               </thead>
               <tbody id="recentTableBody"></tbody>
             </table>
@@ -1041,7 +1041,7 @@
     submitLabel.textContent = (currentLang === 'hi') ? 'जमा हो रहा है...' : 'Submitting...';
 
     // ⚠️ Verify this is Amar Autos' correct WhatsApp Business number before going live.
-    var DEALER_WHATSAPP_NUMBER = "919810092809";
+    var DEALER_WHATSAPP_NUMBER = "918448988948";
 
     fetch(SCRIPT_URL, {
       method: 'POST',
@@ -1083,13 +1083,13 @@
 
 
 <script>
-  // ====== DASHBOARD ======
-  var SHEET_ID = "1Ubte1A0NEuyIE8z7YCW0FsENLW-6Xogj3MCzD4s5aQ4";
-  var SHEET_NAME = "Rider Registration";
+  // ====== DASHBOARD (privacy-safe: talks to an Apps Script proxy, never the raw Sheet) ======
+  // Paste your deployed proxy's /exec URL here after setting it up (see dashboard-proxy-script.gs).
+  var DASHBOARD_PROXY_URL = "https://script.google.com/macros/s/AKfycbxgd3u-3_KTGg2TGOBXii5bz19dv-KBDtAcJtUgcLiDV1yPlzXabXQnDQSqVYs3mWHl/exec";
 
-  // Simple passcode — change this to whatever you like. This is NOT strong
-  // security (anyone who reads the page source can find it) — it just keeps
-  // casual visitors from opening the dashboard.
+  // Simple passcode — must match ACCESS_CODE inside the Apps Script proxy too.
+  // This is NOT strong security (anyone who reads the page source can find it) —
+  // it just keeps casual visitors from opening the dashboard.
   var ACCESS_CODE = "Guerrilla@450";
 
   document.getElementById('unlockBtn').addEventListener('click', tryUnlock);
@@ -1123,18 +1123,23 @@
     errorMsg.style.display = 'none';
     dashContent.style.display = 'none';
 
-    var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(SHEET_NAME);
+    if (!DASHBOARD_PROXY_URL || DASHBOARD_PROXY_URL.indexOf('PASTE_YOUR') === 0) {
+      loadingMsg.style.display = 'none';
+      errorMsg.style.display = 'block';
+      errorMsg.textContent = 'Dashboard proxy URL not set yet — see dashboard-proxy-script.gs setup steps.';
+      return;
+    }
+
+    var url = DASHBOARD_PROXY_URL + '?code=' + encodeURIComponent(ACCESS_CODE);
 
     fetch(url)
       .then(function(res){
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.text();
+        return res.json();
       })
-      .then(function(text){
-        var jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        var parsed = JSON.parse(jsonStr);
-        var rows = parseSheetRows(parsed);
-        renderDashboard(rows);
+      .then(function(data){
+        if (data.error) throw new Error(data.error);
+        renderDashboard(data);
         loadingMsg.style.display = 'none';
         dashContent.style.display = 'block';
         document.getElementById('lastUpdated').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
@@ -1142,56 +1147,21 @@
       .catch(function(err){
         loadingMsg.style.display = 'none';
         errorMsg.style.display = 'block';
-        errorMsg.textContent = 'Could not load data. Make sure the Google Sheet is set to "Anyone with the link can view". (' + err.message + ')';
+        errorMsg.textContent = 'Could not load data. (' + err.message + ')';
       });
   }
 
-  function parseSheetRows(gvizResponse){
-    var cols = gvizResponse.table.cols.map(function(c){ return c.label || c.id; });
-    var rows = gvizResponse.table.rows.map(function(r){
-      var obj = {};
-      r.c.forEach(function(cell, i){
-        obj[cols[i]] = cell ? (cell.f || cell.v) : '';
-      });
-      return obj;
-    });
-    return rows;
-  }
+  function renderDashboard(data){
+    document.getElementById('totalCount').textContent = data.totalCount;
+    document.getElementById('todayCount').textContent = data.todayCount;
+    document.getElementById('groupCount').textContent = data.groupCount;
 
-  function renderDashboard(rows){
-    document.getElementById('totalCount').textContent = rows.length;
-
-    var today = new Date().toLocaleDateString('en-IN');
-    var todayCount = rows.filter(function(r){
-      var ts = r['Timestamp'] || '';
-      var d = new Date(ts);
-      return !isNaN(d) && d.toLocaleDateString('en-IN') === today;
-    }).length;
-    document.getElementById('todayCount').textContent = todayCount;
-
-    var groupCount = rows.filter(function(r){ return (r['Already Member of Riding Group'] || '').trim() === 'Yes'; }).length;
-    document.getElementById('groupCount').textContent = groupCount;
-
-    var modelTally = {};
-    rows.forEach(function(r){
-      var m = (r['Bike Model'] || 'Unknown').trim() || 'Unknown';
-      modelTally[m] = (modelTally[m] || 0) + 1;
-    });
-    var sortedModels = Object.entries(modelTally).sort(function(a,b){ return b[1]-a[1]; });
+    var sortedModels = Object.entries(data.modelTally || {}).sort(function(a,b){ return b[1]-a[1]; });
     document.getElementById('topModel').textContent = sortedModels.length ? sortedModels[0][0] : '—';
 
-    var expTally = {};
-    rows.forEach(function(r){
-      var e = (r['Riding Experience'] || 'Unknown').trim() || 'Unknown';
-      expTally[e] = (expTally[e] || 0) + 1;
-    });
+    var expTally = data.experienceTally || {};
 
-    var cityTally = {};
-    rows.forEach(function(r){
-      var c = (r['City / Location'] || 'Unknown').trim() || 'Unknown';
-      cityTally[c] = (cityTally[c] || 0) + 1;
-    });
-    var sortedCities = Object.entries(cityTally).sort(function(a,b){ return b[1]-a[1]; }).slice(0, 8);
+    var sortedCities = Object.entries(data.cityTally || {}).sort(function(a,b){ return b[1]-a[1]; }).slice(0, 8);
 
     var goldPalette = ['#d3a24f','#eec27a','#a17f42','#8b6a35','#c9a544','#e0b76a','#b58a3f','#f0d9a8'];
 
@@ -1238,17 +1208,15 @@
       }
     });
 
-    var recent = rows.slice(-10).reverse();
     var tbody = document.getElementById('recentTableBody');
     tbody.innerHTML = '';
-    recent.forEach(function(r){
+    (data.recent || []).forEach(function(r){
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>' + (r['Timestamp'] || '') + '</td>' +
         '<td>' + (r['Rider Name'] || '') + '</td>' +
-        '<td>' + (r['Mobile Number'] || '') + '</td>' +
         '<td>' + (r['Bike Model'] || '') + '</td>' +
-        '<td>' + (r['City / Location'] || '') + '</td>';
+        '<td>' + (r['City'] || '') + '</td>';
       tbody.appendChild(tr);
     });
   }
