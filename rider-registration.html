@@ -1130,9 +1130,9 @@
       return;
     }
 
-    var url = DASHBOARD_PROXY_URL + '?code=' + encodeURIComponent(ACCESS_CODE);
+    var url = DASHBOARD_PROXY_URL + '?code=' + encodeURIComponent(ACCESS_CODE) + '&_ts=' + Date.now();
 
-    fetch(url)
+    fetch(url, { cache: 'no-store' })
       .then(function(res){
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
