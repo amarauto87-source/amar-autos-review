@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Royal Enfield Riders Community | Registration</title>
+<meta name="description" content="Join the Amar Autos Royal Enfield Riders Community — register for rides, browse the gallery, and connect with fellow riders in East Delhi.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='47' fill='%231b1714' stroke='%23d3a24f' stroke-width='5'/%3E%3Ctext x='50' y='63' font-family='Georgia,serif' font-size='36' font-weight='700' fill='%23eec27a' text-anchor='middle'%3ERE%3C/text%3E%3C/svg%3E">
+
+<!-- Open Graph / social share preview -->
+<meta property="og:title" content="Royal Enfield Riders Community | Amar Autos">
+<meta property="og:description" content="Join the Amar Autos Royal Enfield Riders Community — register for rides, browse the gallery, and connect with fellow riders in East Delhi.">
+<meta property="og:image" content="https://drive.google.com/thumbnail?id=1NFUKxRJlOr9pfwq33mxbin7RjhbgwdRQ&sz=w1200">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Royal Enfield Riders Community | Amar Autos">
+<meta name="twitter:description" content="Join the Amar Autos Royal Enfield Riders Community — register for rides, browse the gallery, and connect with fellow riders in East Delhi.">
+<meta name="twitter:image" content="https://drive.google.com/thumbnail?id=1NFUKxRJlOr9pfwq33mxbin7RjhbgwdRQ&sz=w1200">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -514,21 +528,44 @@
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-phone-alert"></use></svg></span>
             <input type="tel" id="emergency" name="Emergency Contact Number" placeholder="Enter emergency number" data-hi-placeholder="आपातकालीन नंबर लिखें" pattern="[0-9]{10}" maxlength="10" required>
           </div>
-          <span class="field-error"><span class="i18n" data-en="Enter a valid 10-digit emergency number." data-hi="सही 10 अंकों का आपातकालीन नंबर लिखें।">Enter a valid 10-digit emergency number.</span></span>
+          <span class="field-error" id="emergencyError">
+            <span class="i18n" id="emergencyPatternMsg" data-en="Enter a valid 10-digit emergency number." data-hi="सही 10 अंकों का आपातकालीन नंबर लिखें।">Enter a valid 10-digit emergency number.</span>
+            <span class="i18n" id="emergencySameNumberMsg" data-en="Emergency contact must be different from your mobile number." data-hi="आपातकालीन नंबर आपके मोबाइल नंबर से अलग होना चाहिए।" style="display:none;">Emergency contact must be different from your mobile number.</span>
+          </span>
         </div>
 
         <div class="field">
           <label for="bikeModel"><span class="i18n" data-en="4. Bike Model" data-hi="4. बाइक मॉडल">4. Bike Model</span> <span class="req">*</span></label>
-          <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-motorcycle"></use></svg></span>
-            <input type="text" id="bikeModel" name="Bike Model" placeholder="e.g. Classic 350, Himalayan 450" data-hi-placeholder="जैसे Classic 350, Himalayan 450" required>
+          <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-motorcycle"></use></svg></span>
+            <select id="bikeModel" name="Bike Model" required>
+              <option value="" disabled selected><span class="i18n" data-en="Select your bike model" data-hi="अपनी बाइक का मॉडल चुनें">Select your bike model</span></option>
+              <option value="Classic 350">Classic 350</option>
+              <option value="Classic 650">Classic 650</option>
+              <option value="Bullet 350">Bullet 350</option>
+              <option value="Hunter 350">Hunter 350</option>
+              <option value="Meteor 350">Meteor 350</option>
+              <option value="Himalayan 450">Himalayan 450</option>
+              <option value="Himalayan 411">Himalayan 411</option>
+              <option value="Scram 411">Scram 411</option>
+              <option value="Guerrilla 450">Guerrilla 450</option>
+              <option value="Continental GT 650">Continental GT 650</option>
+              <option value="Interceptor 650">Interceptor 650</option>
+              <option value="Super Meteor 650">Super Meteor 650</option>
+              <option value="Shotgun 650">Shotgun 650</option>
+              <option value="Other"><span class="i18n" data-en="Other" data-hi="अन्य">Other</span></option>
+            </select>
+            <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
           </div>
-          <span class="field-error"><span class="i18n" data-en="Please enter your bike model." data-hi="कृपया अपनी बाइक का मॉडल लिखें।">Please enter your bike model.</span></span>
+          <div class="input-wrap" id="bikeModelOtherWrap" style="display:none; margin-top:10px;">
+            <input type="text" id="bikeModelOther" placeholder="Model ka naam likhein" style="padding-left:14px;">
+          </div>
+          <span class="field-error"><span class="i18n" data-en="Please select your bike model." data-hi="कृपया अपनी बाइक का मॉडल चुनें।">Please select your bike model.</span></span>
         </div>
 
         <div class="field">
           <label for="bikeReg"><span class="i18n" data-en="5. Bike Registration Number" data-hi="5. बाइक पंजीकरण नंबर">5. Bike Registration Number</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-id-card"></use></svg></span>
-            <input type="text" id="bikeReg" name="Bike Registration Number" placeholder="e.g. DL 01 AB 1234" data-hi-placeholder="जैसे DL 01 AB 1234" required>
+            <input type="text" id="bikeReg" name="Bike Registration Number" placeholder="e.g. DL 01 AB 1234" data-hi-placeholder="जैसे DL 01 AB 1234" style="text-transform:uppercase;" required>
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter registration number." data-hi="कृपया पंजीकरण नंबर लिखें।">Please enter registration number.</span></span>
         </div>
@@ -969,6 +1006,28 @@
   }
   groupMember.addEventListener('change', toggleGroupName);
 
+  // Bike Model: show free-text field when "Other" is selected
+  var bikeModelSelect = document.getElementById('bikeModel');
+  var bikeModelOther = document.getElementById('bikeModelOther');
+  var bikeModelOtherWrap = document.getElementById('bikeModelOtherWrap');
+  bikeModelSelect.addEventListener('change', function(){
+    if (this.value === 'Other') {
+      bikeModelOtherWrap.style.display = 'flex';
+      bikeModelOther.required = true;
+    } else {
+      bikeModelOtherWrap.style.display = 'none';
+      bikeModelOther.required = false;
+      bikeModelOther.value = '';
+    }
+  });
+
+  // Force Bike Registration Number to uppercase (both display and actual value)
+  document.getElementById('bikeReg').addEventListener('input', function(){
+    var pos = this.selectionStart;
+    this.value = this.value.toUpperCase();
+    this.setSelectionRange(pos, pos);
+  });
+
   // Updated Active Google Apps Script Web App URL
   var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_I8pCyDutFotd_hv6e6ob3bFCoTl398h5l3hBYQgg2phNywBg5JgltVmiBhh8hSzG/exec";
 
@@ -1018,6 +1077,19 @@
       if (!emailOk) valid = false;
     }
 
+    // Emergency contact must not be the same as the rider's own mobile number
+    var mobileInput = document.getElementById('mobile');
+    var emergencyInput = document.getElementById('emergency');
+    var emergencyPatternMsg = document.getElementById('emergencyPatternMsg');
+    var emergencySameNumberMsg = document.getElementById('emergencySameNumberMsg');
+    if (mobileInput.value.trim() !== '' && emergencyInput.value.trim() !== '') {
+      var sameNumber = mobileInput.value.trim() === emergencyInput.value.trim();
+      setFieldError(emergencyInput.closest('.field'), sameNumber);
+      emergencyPatternMsg.style.display = sameNumber ? 'none' : '';
+      emergencySameNumberMsg.style.display = sameNumber ? '' : 'none';
+      if (sameNumber) valid = false;
+    }
+
     return valid;
   }
 
@@ -1034,6 +1106,9 @@
 
     var data = {};
     new FormData(form).forEach(function(value, key){ data[key] = value; });
+    if (data['Bike Model'] === 'Other' && bikeModelOther.value.trim()) {
+      data['Bike Model'] = bikeModelOther.value.trim();
+    }
     data['Agreed to Terms'] = document.getElementById('agree').checked ? 'Yes' : 'No';
     data['Submission Time'] = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
@@ -1045,13 +1120,18 @@
 
     fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(data)
+    })
+    .then(function(res){
+      if (!res.ok) throw new Error('Server responded with status ' + res.status);
+      return res;
     })
     .then(function(){
       form.reset();
       toggleGroupName();
+      bikeModelOtherWrap.style.display = 'none';
+      bikeModelOther.required = false;
       formStatus.className = 'form-status';
       formStatus.textContent = '';
       form.style.display = 'none';
@@ -1070,9 +1150,10 @@
         waLink.href = 'https://wa.me/' + DEALER_WHATSAPP_NUMBER + '?text=' + encodeURIComponent(waMsg);
       }
     })
-    .catch(function(){
+    .catch(function(err){
       formStatus.classList.add('error');
       formStatus.textContent = (currentLang === 'hi') ? 'कुछ गड़बड़ हुई। कृपया अपना कनेक्शन जांचें और दोबारा कोशिश करें।' : 'Something went wrong. Please check your connection and try again.';
+      console.error('Registration submission error:', err);
     })
     .finally(function(){
       submitBtn.disabled = false;
