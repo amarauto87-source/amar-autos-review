@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amar Autos — Master Dashboard</title><style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --surface-2: #ffffff;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --good: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #d03b3b;
+    --s1: #2a78d6; /* blue */
+    --s2: #eb6834; /* orange */
+    --s3: #1baf7a; /* aqua */
+    --s4: #eda100; /* yellow */
+    --s5: #e87ba4; /* magenta */
+    --s6: #008300; /* green */
+    --s7: #4a3aa7; /* violet */
+    --s8: #e34948; /* red */
+    --brand-red: #c8102e;
+    --brand-red-2: #8f0c21;
+    --brand-glow: rgba(200,16,46,0.35);
+    --header-grad: linear-gradient(120deg, #101010 0%, #1c0f11 45%, #2a0f14 100%);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #17171a;
+    --surface-2: #1f1f23;
+    --page: #0a0a0c;
+    --text-primary: #f5f5f3;
+    --text-secondary: #b9b8c2;
+    --text-muted: #83828d;
+    --grid: #2b2b30;
+    --baseline: #3a3a41;
+    --border: rgba(255,255,255,0.09);
+    --good: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #e66767;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --s6: #17c964;
+    --s7: #9085e9;
+    --s8: #ff4d5e;
+    --brand-red: #ff2a44;
+    --brand-red-2: #c8102e;
+    --brand-glow: rgba(255,42,68,0.35);
+    --header-grad: linear-gradient(120deg, #0a0a0c 0%, #170a0d 45%, #29090f 100%);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, color-mix(in srgb, var(--brand-red) 10%, transparent), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 0%, color-mix(in srgb, var(--s1) 8%, transparent), transparent 55%),
+      var(--page);
+    background-attachment: fixed;
+    color: var(--text-primary);
+  }
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--header-grad);
+    border-bottom: 1px solid var(--brand-glow);
+    box-shadow: 0 1px 0 var(--border), 0 4px 24px -8px var(--brand-glow);
+    padding: 16px 22px;
+  }
+  .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .logo {
+    font-size: 24px; width: 42px; height: 42px; display:flex; align-items:center; justify-content:center;
+    border-radius: 10px; flex-shrink:0;
+    background: linear-gradient(155deg, var(--brand-red) 0%, var(--brand-red-2) 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 6px 18px -6px var(--brand-glow);
+  }
+  .brand h1 {
+    font-size: 15px; margin: 0; letter-spacing: 1.1px; color: #fff; font-weight: 800;
+    text-transform: uppercase;
+  }
+  .brand .sub {
+    font-size: 11px; color: color-mix(in srgb, var(--brand-red) 55%, #fff 45%);
+    margin-top: 3px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600;
+  }
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  select, input[type="text"] {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  button {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button.primary { background: linear-gradient(135deg, var(--brand-red), var(--brand-red-2)); color: #fff; border-color: transparent; box-shadow: 0 4px 14px -4px var(--brand-glow); font-weight: 700; }
+  button:hover { filter: brightness(1.08); }
+  header.top select, header.top input[type="text"], header.top button {
+    background: rgba(255,255,255,0.06); color: #f2f0ee; border-color: rgba(255,255,255,0.14);
+    backdrop-filter: blur(4px);
+  }
+  header.top button.primary { background: linear-gradient(135deg, var(--brand-red), var(--brand-red-2)); border-color: transparent; }
+  header.top select option { color: #111; }
+  .status-line { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 8px; letter-spacing: 0.2px; }
+  nav.tabs {
+    display: flex; gap: 4px; padding: 10px 20px 0 20px;
+    background: var(--surface-1); border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  nav.tabs button {
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary);
+    border-radius: 0; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  nav.tabs button.active { color: var(--brand-red); border-bottom-color: var(--brand-red); text-shadow: 0 0 14px var(--brand-glow); }
+  main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+  section.tabpanel { display: none; }
+  section.tabpanel.active { display: block; }
+  h2.section-title { font-size: 15px; margin: 28px 0 12px; color: var(--text-primary); display:flex; align-items:center; gap:8px;}
+  h2.section-title:first-child { margin-top: 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .kpi-card {
+    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 88%, var(--brand-red) 12%) 130%);
+    border: 1px solid var(--border); border-left: 3px solid color-mix(in srgb, var(--brand-red) 55%, var(--border) 45%);
+    border-radius: 10px; padding: 14px 16px; position: relative; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .kpi-card:hover { border-left-color: var(--brand-red); box-shadow: 0 6px 20px -10px var(--brand-glow); }
+  .kpi-card .label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+  .kpi-card .value { font-size: 25px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
+  .kpi-card .hint { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
+  .meter > div { height: 100%; background: linear-gradient(90deg, var(--s1), color-mix(in srgb, var(--s1) 70%, white 30%)); border-radius: 3px; }
+  /* charts */
+  .chart-svg { width: 100%; height: auto; overflow: visible; font-family: inherit; }
+  .chart-svg .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .chart-svg .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .chart-svg .axis-label { fill: var(--text-muted); font-size: 10px; }
+  .chart-svg .legend-label { fill: var(--text-secondary); font-size: 11px; }
+  .chart-tooltip {
+    position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: var(--text-primary); box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4);
+    opacity: 0; transition: opacity .1s; z-index: 30; white-space: nowrap;
+  }
+  .chart-wrap { position: relative; }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 11.5px; }
+  .legend-row .item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+  .legend-row .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink:0; }
+  table.data {
+    width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  table.data th, table.data td {
+    padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--grid);
+    white-space: nowrap;
+  }
+  table.data th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface-1); }
+  table.data th:hover { color: var(--s1); }
+  table.data tbody tr:hover { background: var(--page); }
+  .table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
+  .table-wrap table.data { border: none; border-radius: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .toolbar input[type="text"] { min-width: 220px; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  }
+  .pill.good { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
+  .pill.bad { background: color-mix(in srgb, var(--critical) 18%, transparent); color: var(--critical); }
+  .pill.warn { background: color-mix(in srgb, var(--warning) 25%, transparent); color: #8a5a00; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+  }
+  .card h3 { margin: 0 0 10px; font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+  .empty-note { color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center; }
+  .loading-overlay {
+    position: fixed; inset: 0; background: var(--page); display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px; z-index: 100; font-size: 14px; color: var(--text-secondary);
+  }
+  .spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--grid); border-top-color: var(--s1); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { background: color-mix(in srgb, var(--critical) 12%, var(--surface-1)); border: 1px solid var(--critical); color: var(--critical); border-radius: 10px; padding: 14px 16px; font-size: 13px; }
+  footer { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 11px; }
+  a { color: var(--s1); }
+  .barrow { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12.5px;}
+  .barrow .lbl { width: 130px; flex-shrink:0; color: var(--text-secondary); }
+  .barrow .track { flex:1; height:8px; background:var(--grid); border-radius:4px; overflow:hidden;}
+  .barrow .fill { height:100%; border-radius:4px; }
+  .barrow .val { width:70px; text-align:right; font-variant-numeric: tabular-nums; flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <div>Loading live data from Google Sheet…</div>
+</div>
+
+<header class="top">
+  <div class="top-row">
+    <div class="brand">
+      <div class="logo">🏍️</div>
+      <div>
+        <h1>AMAR AUTOS · ROYAL ENFIELD · EAST DELHI</h1>
+        <div class="sub">Command Console — Live Sales Intelligence</div>
+      </div>
+    </div>
+    <div class="controls">
+      <select id="monthFilter"></select>
+      <select id="execFilter"></select>
+      <button id="themeToggle">🌓</button>
+      <button id="refreshBtn" class="primary">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="status-line" id="statusLine">—</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="analytics">Analytics</button>
+  <button data-tab="delivery">Delivery</button>
+  <button data-tab="pending">Delivery Plan</button>
+  <button data-tab="riders">Riders &amp; Reviews</button>
+  <button data-tab="explorer">Data Explorer</button>
+</nav>
+
+<main>
+  <div id="errorBox"></div>
+
+  <section class="tabpanel active" id="tab-overview">
+    <h2 class="section-title">🏍️ Sales Console</h2>
+    <div class="kpi-grid" id="kpiSalesConsole"></div>
+
+    <h2 class="section-title">👤 Employee-wise Performance</h2>
+    <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
+
+    <div class="grid-2">
+      <div>
+        <h2 class="section-title">🎯 Enquiry Funnel</h2>
+        <div class="table-wrap"><table class="data" id="tblFunnel"></table></div>
+      </div>
+      <div>
+        <h2 class="section-title">📋 Bookings — Active vs Cancelled</h2>
+        <div class="kpi-grid" id="kpiBookings"></div>
+        <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">⭐ Google Reviews Summary</h2>
+    <div class="kpi-grid" id="kpiReviews"></div>
+    <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblReviewsEmp"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-analytics">
+    <h2 class="section-title">📈 Retail Trend — Actual vs Target</h2>
+    <div class="card">
+      <div class="legend-row" id="trendLegend"></div>
+      <div class="chart-wrap"><div id="trendChart"></div></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Model-wise Units (current filter)</h3>
+        <div class="chart-wrap"><div id="modelBarChart"></div></div>
+      </div>
+      <div class="card">
+        <h3>Enquiry Funnel — Conversion %</h3>
+        <div class="chart-wrap"><div id="funnelBarChart"></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Executive Leaderboard — Retail (current filter)</h3>
+        <div class="chart-wrap"><div id="execBarChart"></div></div>
+      </div>
+      <div class="card">
+        <h3>Review Rating Distribution (all time)</h3>
+        <div class="chart-wrap"><div id="ratingBarChart"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tabpanel" id="tab-delivery">
+    <h2 class="section-title">🚚 Delivery Overview</h2>
+    <div class="kpi-grid" id="kpiDelivery"></div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Cash vs Finance</h3>
+        <div id="deliveryCashFin"></div>
+      </div>
+      <div class="card">
+        <h3>Attach Rates (INS / EW / RSA / Gear / AMC)</h3>
+        <div id="deliveryAttach"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🏍️ Model-wise Deliveries</h2>
+    <div class="table-wrap"><table class="data" id="tblModelWise"></table></div>
+
+    <h2 class="section-title">📄 All Deliveries</h2>
+    <div class="toolbar">
+      <input type="text" id="searchDelivery" placeholder="Search customer, model, receipt no…" />
+      <button id="exportDelivery">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblDeliveryAll"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-pending">
+    <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
+    <div class="kpi-grid" id="kpiPending"></div>
+
+    <h2 class="section-title">🏍️ Model-wise — Pending Units</h2>
+    <div class="card"><div id="pendingModelBars"></div></div>
+
+    <h2 class="section-title">📄 Pending Bookings — Full List</h2>
+    <div class="toolbar">
+      <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive…" />
+      <button id="exportPending">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-riders">
+    <div class="grid-2">
+      <div>
+        <h2 class="section-title">🪖 Rider Registration</h2>
+        <div class="kpi-grid" id="kpiRiderReg"></div>
+        <div class="card" style="margin-top:12px;">
+          <h3>By Riding Experience</h3>
+          <div id="riderExpBars"></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <h3>Top Cities</h3>
+          <div id="riderCityBars"></div>
+        </div>
+      </div>
+      <div>
+        <h2 class="section-title">📝 Rider Feedback</h2>
+        <div class="kpi-grid" id="kpiRiderFb"></div>
+        <div class="card" style="margin-top:12px;">
+          <h3>By Bike Model — Avg Overall Rating</h3>
+          <div id="feedbackModelBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🪪 Rider Registration — Full List</h2>
+    <div class="toolbar">
+      <input type="text" id="searchRiderReg" placeholder="Search rider, mobile, city, model…" />
+      <button id="exportRiderReg">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblRiderRegAll"></table></div>
+
+    <h2 class="section-title">💬 Rider Feedback — Full List</h2>
+    <div class="toolbar">
+      <input type="text" id="searchRiderFb" placeholder="Search rider, model, comments…" />
+      <button id="exportRiderFb">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblRiderFbAll"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-explorer">
+    <div class="toolbar">
+      <select id="explorerSheet">
+        <option value="ACTUL BOOKING">ACTUL BOOKING</option>
+        <option value="DELIVERY SHEET">DELIVERY SHEET</option>
+        <option value="enquiry">enquiry</option>
+        <option value="Google Review">Google Review</option>
+        <option value="RIDER FEEDBACK">RIDER FEEDBACK</option>
+        <option value="RIDER REGISTRATION">RIDER REGISTRATION</option>
+      </select>
+      <input type="text" id="explorerSearch" placeholder="Search across all columns…" />
+      <button id="explorerExport">⬇ Export CSV</button>
+      <span class="status-line" id="explorerCount"></span>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblExplorer"></table></div>
+  </section>
+</main>
+
+<footer>
+  Data pulled live from your Google Sheet on every refresh (auto-refreshes every 5 minutes) · Built for Amar Autos<br/>
+  Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
+</footer>
+
+<script>
+const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
+const AUTO_REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes so the dashboard stays current without manual clicks
+
+/* ---------------- theme ---------------- */
+(function initTheme(){
+  // Defaults to dark — the dashboard's visual identity is a dark, RE-branded console.
+  document.documentElement.setAttribute('data-theme', 'dark');
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  });
+})();
+
+/* ---------------- helpers ---------------- */
+function str(v){ return (v === null || v === undefined) ? '' : String(v).trim(); }
+function up(v){ return str(v).toUpperCase(); }
+function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function fmtInt(v){ return Math.round(v).toLocaleString('en-IN'); }
+function fmtMoney(v){ return '₹' + Math.round(v).toLocaleString('en-IN'); }
+function fmtPct(v){ return (v*100).toFixed(0) + '%'; }
+function esc(s){ return str(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtId(v){ if (v === null || v === undefined || v === '') return ''; const n = Number(v); return isFinite(n) ? String(Math.round(n)) : String(v); }
+function fmtDate(d){
+  if (!(d instanceof Date) || isNaN(d)) return '';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+  return `${dd}-${mm}-${d.getFullYear()}`;
+}
+
+// Some columns (e.g. the "enquiry" sheet's "Created On") are stored as plain text in the
+// sheet rather than a real date cell, so gviz hands them back as a string like "8/19/2026 13:59"
+// instead of a Date(...) literal. Parse that shape too, or every date-range filter on those
+// columns silently matches nothing.
+const TEXT_DATETIME_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/;
+function parseCell(v){
+  if (typeof v === 'string' && v.indexOf('Date(') === 0) {
+    const m = v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
+    if (m) return new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+  }
+  if (typeof v === 'string') {
+    const m = v.match(TEXT_DATETIME_RE);
+    if (m) {
+      const [, mo, d, y, h, mi, s] = m;
+      const dt = new Date(+y, +mo - 1, +d, +(h || 0), +(mi || 0), +(s || 0));
+      if (!isNaN(dt)) return dt;
+    }
+  }
+  return v;
+}
+
+// Loaded via a dynamic <script> tag (JSONP), not fetch(). This avoids CORS/file:// restrictions
+// that some browsers apply to fetch() when this dashboard is opened as a local file — script tags
+// are not subject to those restrictions, and Google's gviz endpoint is designed for this pattern.
+let __gvizCounter = 0;
+function fetchSheetRaw(name){
+  return new Promise((resolve, reject) => {
+    const cbName = '__gvizCb_' + (++__gvizCounter) + '_' + Math.random().toString(36).slice(2);
+    let done = false;
+    const timer = setTimeout(() => {
+      if (done) return;
+      done = true; cleanup();
+      reject(new Error(`Timed out loading sheet "${name}". Check your internet connection and try Refresh again.`));
+    }, 20000);
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = (json) => {
+      if (done) return;
+      done = true; cleanup();
+      if (!json || json.status === 'error') {
+        reject(new Error(`Sheet "${name}" not found or not accessible. Make sure it's shared as "Anyone with the link — Viewer".`));
+        return;
+      }
+      resolve(json.table.rows.map(r => (r.c || []).map(cell => cell ? parseCell(cell.v) : null)));
+    };
+    const tqx = `out:json;responseHandler:${cbName}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=${encodeURIComponent(tqx)}&sheet=${encodeURIComponent(name)}&headers=0`;
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => {
+      if (done) return;
+      done = true; cleanup();
+      reject(new Error(`Could not reach Google Sheets for "${name}". Check your internet connection, or that the sheet is shared as "Anyone with the link — Viewer".`));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+/* ---------------- global state ---------------- */
+const STATE = {
+  booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [],
+  execList: [], months: [], filterMonth: null, filterExec: 'ALL', lastLoaded: null, initialized: false
+};
+
+const COL = {
+  BOOKING: ['S NO','RCPT NO','BKG DT','Model','Colour','Customer Name','Customer Mobile','SE','TDD','STATUS','Expected Delivery','Booking Again'],
+  DELIVERY: ['S.NO','PMT DT','BILL DATE','RECPT NO','Customer Name','Customer Mobile','Model','Color','Cash/Fin','STATUS','INS','EW','RSA','GMA Amt','Gear','AMC','Booking Slip No','Discount','Executive'],
+  ENQUIRY: ['ENQ Number','Name','First Name','Middle Name','Last Name','Mobile','City','State','Model','Stage','Enquiry Type','Type of Enquiry','Test Ride Taken','Owner','Created On'],
+  REVIEW: ['Date & Time','Rating','Bike Model','Sales Person','Selected Tags','Full Review Text','Riding Group','WhatsApp Number','Branch'],
+  RIDER_FB: ['Timestamp','Rider Name','Phone Number','Bike Model','Bike Reg No','Ride Date','Overall Rating','Route Rating','Safety Rating','Food Rating','Ride Again','Best Moment','Suggestions'],
+  RIDER_REG: ['Timestamp','Rider Name','Mobile Number','Emergency Contact','Bike Model','Bike Reg No','Riding Experience','Already Member','Riding Group Name','City / Location','Date of Birth','Email','Address'],
+};
+
+/* ---------------- data loading ---------------- */
+async function loadAll(){
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('errorBox').innerHTML = '';
+  try {
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap] = await Promise.all([
+      fetchSheetRaw('ACTUL BOOKING'),
+      fetchSheetRaw('DELIVERY SHEET'),
+      fetchSheetRaw('enquiry'),
+      fetchSheetRaw('Google Review'),
+      fetchSheetRaw('RIDER FEEDBACK'),
+      fetchSheetRaw('RIDER REGISTRATION'),
+      fetchSheetRaw('Targets'),
+      fetchSheetRaw('Name Map'),
+    ]);
+
+    STATE.booking = booking.slice(1).filter(r => str(r[1]));
+    STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
+    STATE.enquiry = enquiry.slice(1).filter(r => str(r[0]));
+    STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
+    STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
+    STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
+    STATE.targets = targets.slice(4).filter(r => str(r[0]) && up(r[0]) !== 'TOTAL');
+    STATE.nameMap = nameMap.slice(4).filter(r => str(r[1]));
+
+    STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
+    buildMonthList();
+    populateFilters();
+    STATE.initialized = true;
+    STATE.lastLoaded = new Date();
+    renderAll();
+    document.getElementById('statusLine').textContent =
+      `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries`;
+  } catch (err) {
+    console.error(err);
+    document.getElementById('errorBox').innerHTML =
+      `<div class="error-box"><strong>Couldn't load data.</strong> ${esc(err.message || String(err))}<br/>
+      Make sure the Google Sheet is shared as "Anyone with the link — Viewer" (File → Share), then hit Refresh.</div>`;
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function buildMonthList(){
+  const seen = new Set();
+  const list = [];
+  function add(d){
+    if (!(d instanceof Date) || isNaN(d)) return;
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    if (!seen.has(key)) { seen.add(key); list.push({ key, year: d.getFullYear(), month: d.getMonth()+1 }); }
+  }
+  STATE.delivery.forEach(r => add(r[2]));
+  STATE.booking.forEach(r => add(r[2]));
+  list.sort((a,b) => b.key.localeCompare(a.key));
+  STATE.months = list;
+}
+
+function populateFilters(){
+  const monthSel = document.getElementById('monthFilter');
+  const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  monthSel.innerHTML = '<option value="ALL">All Months</option>' +
+    STATE.months.map(m => `<option value="${m.key}">${monthNames[m.month]} ${m.year}</option>`).join('');
+  if (!STATE.initialized) {
+    // First load: default to the current real-world month if it exists in the data, else the most recent month with data.
+    const now = new Date();
+    const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    const hasToday = STATE.months.some(m => m.key === todayKey);
+    monthSel.value = hasToday ? todayKey : (STATE.months.length ? STATE.months[0].key : 'ALL');
+  } else {
+    const prevMonth = STATE.filterMonth || 'ALL';
+    monthSel.value = [...monthSel.options].some(o => o.value === prevMonth) ? prevMonth : 'ALL';
+  }
+  STATE.filterMonth = monthSel.value;
+
+  const execSel = document.getElementById('execFilter');
+  const prevExec = execSel.value || 'ALL';
+  execSel.innerHTML = '<option value="ALL">All Executives</option>' +
+    STATE.execList.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
+  if ([...execSel.options].some(o => o.value === prevExec)) execSel.value = prevExec;
+  STATE.filterExec = execSel.value;
+}
+
+document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); });
+document.getElementById('execFilter').addEventListener('change', e => { STATE.filterExec = e.target.value; renderAll(); });
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+
+/* ---------------- filter predicates ---------------- */
+function monthYearOfFilter(){
+  if (STATE.filterMonth === 'ALL') return null;
+  const [y,m] = STATE.filterMonth.split('-').map(Number);
+  return { year: y, month: m };
+}
+function dateInFilter(d){
+  const f = monthYearOfFilter();
+  if (!f) return true;
+  if (!(d instanceof Date) || isNaN(d)) return false;
+  return (d.getMonth()+1) === f.month && d.getFullYear() === f.year;
+}
+function execInFilter(field){
+  if (STATE.filterExec === 'ALL') return true;
+  return up(field).includes(STATE.filterExec);
+}
+function billedOk(status){
+  const s = up(status);
+  return s === 'BILLED' || s === 'P DONE';
+}
+function mapOwnerToExec(owner){
+  const row = STATE.nameMap.find(r => up(r[1]) === up(owner));
+  return row ? up(row[2]) : null;
+}
+function ownerInFilter(owner){
+  if (STATE.filterExec === 'ALL') return true;
+  if (up(owner).includes(STATE.filterExec)) return true;
+  return mapOwnerToExec(owner) === STATE.filterExec;
+}
+
+/* ---------------- render orchestrator ---------------- */
+function renderAll(){
+  renderSalesConsole();
+  renderEmployeeTable();
+  renderFunnel();
+  renderBookings();
+  renderReviews();
+  renderDelivery();
+  renderPending();
+  renderRiders();
+  renderExplorer();
+  renderAnalytics();
+}
+
+/* ---------------- Sales Console ---------------- */
+function computeDeliveryAgg(execFilterName){
+  let retail=0, ew=0, rsa=0, gma=0, gear=0;
+  for (const r of STATE.delivery) {
+    if (!billedOk(r[9])) continue;
+    if (!dateInFilter(r[2])) continue;
+    const exec = r[18];
+    if (execFilterName) { if (!up(exec).includes(execFilterName)) continue; }
+    else { if (!execInFilter(exec)) continue; }
+    retail++;
+    if (num(r[11]) > 0) ew++;
+    if (num(r[12]) > 0) rsa++;
+    if (str(r[14]) && up(r[14]) !== 'NIL') gear++;
+    gma += num(r[13]);
+  }
+  return { retail, ew, rsa, gma, gear };
+}
+function targetFor(execName){
+  const f = monthYearOfFilter();
+  const monthColIdx = f ? f.month : null; // 1=Jan..12=Dec
+  const rows = execName ? STATE.targets.filter(r => up(r[0]) === execName) : STATE.targets;
+  let total = 0;
+  for (const r of rows) total += monthColIdx ? num(r[monthColIdx]) : num(r[13]);
+  return total;
+}
+
+function kpiCard(label, value, hint, meterPct){
+  return `<div class="kpi-card">
+    <div class="label">${esc(label)}</div>
+    <div class="value">${value}</div>
+    ${hint ? `<div class="hint">${hint}</div>` : ''}
+    ${meterPct !== undefined ? `<div class="meter"><div style="width:${Math.min(100,Math.max(0,meterPct))}%"></div></div>` : ''}
+  </div>`;
+}
+
+function renderSalesConsole(){
+  const agg = computeDeliveryAgg(null);
+  const target = targetFor(null);
+  const achv = target ? agg.retail/target : 0;
+  const ewPct = agg.retail ? agg.ew/agg.retail : 0;
+  const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
+  const gearPct = agg.retail ? agg.gear/agg.retail : 0;
+  const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
+  const el = document.getElementById('kpiSalesConsole');
+  el.innerHTML = [
+    kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed'),
+    kpiCard('Target', fmtInt(target), 'bikes (this filter)'),
+    kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100),
+    kpiCard('EW Attached', fmtInt(agg.ew), `${fmtPct(ewPct)} of retail`, ewPct*100),
+    kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100),
+    kpiCard('Gear Attached', fmtInt(agg.gear), `${fmtPct(gearPct)} of retail`, gearPct*100),
+    kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`),
+  ].join('');
+}
+
+function renderEmployeeTable(){
+  const rows = STATE.execList.map(name => {
+    const agg = computeDeliveryAgg(name);
+    const target = targetFor(name);
+    const achv = target ? agg.retail/target : 0;
+    const ewPct = agg.retail ? agg.ew/agg.retail : 0;
+    const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
+    const gearPct = agg.retail ? agg.gear/agg.retail : 0;
+    const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
+    return { name, ...agg, target, achv, ewPct, rsaPct, gearPct, gmaPerBike };
+  }).sort((a,b) => b.retail - a.retail);
+
+  const cols = [
+    { key:'name', label:'Executive' },
+    { key:'retail', label:'Retail', num:true },
+    { key:'target', label:'Target', num:true },
+    { key:'achv', label:'Achv %', num:true, fmt: fmtPct },
+    { key:'ewPct', label:'EW %', num:true, fmt: fmtPct },
+    { key:'rsaPct', label:'RSA %', num:true, fmt: fmtPct },
+    { key:'gearPct', label:'Gear %', num:true, fmt: fmtPct },
+    { key:'gma', label:'GMA', num:true, fmt: fmtMoney },
+    { key:'gmaPerBike', label:'GMA/Bike', num:true, fmt: fmtMoney },
+  ];
+  renderStaticTable('tblEmployee', cols, rows);
+}
+
+/* ---------------- Enquiry Funnel ---------------- */
+function renderFunnel(){
+  const groups = {};
+  for (const r of STATE.enquiry) {
+    const type = str(r[11]) || '(blank)';
+    const stage = r[9];
+    const owner = r[13];
+    const created = r[14];
+    if (!dateInFilter(created)) continue;
+    if (!ownerInFilter(owner)) continue;
+    const g = groups[type] || (groups[type] = { total:0, booked:0 });
+    g.total++;
+    if (up(stage) === 'BOOKED') g.booked++;
+  }
+  const rows = Object.entries(groups).map(([source, v]) => ({
+    source, total: v.total, booked: v.booked, conv: v.total ? v.booked/v.total : 0
+  })).sort((a,b) => b.total - a.total);
+  const totalRow = rows.reduce((acc,r) => ({ total: acc.total+r.total, booked: acc.booked+r.booked }), {total:0,booked:0});
+  rows.push({ source: 'TOTAL', total: totalRow.total, booked: totalRow.booked, conv: totalRow.total ? totalRow.booked/totalRow.total : 0 });
+
+  const cols = [
+    { key:'source', label:'Enquiry Source' },
+    { key:'total', label:'Total Enquiries', num:true },
+    { key:'booked', label:'Booked', num:true },
+    { key:'conv', label:'Conversion %', num:true, fmt: fmtPct },
+  ];
+  renderStaticTable('tblFunnel', cols, rows);
+}
+
+/* ---------------- Bookings ---------------- */
+function renderBookings(){
+  let active=0, cancelled=0;
+  const byExec = {};
+  for (const r of STATE.booking) {
+    if (!dateInFilter(r[2])) continue;
+    if (!execInFilter(r[7])) continue;
+    const isCancel = up(r[9]) === 'CANCEL';
+    if (isCancel) cancelled++; else active++;
+    STATE.execList.forEach(name => {
+      if (up(r[7]).includes(name)) {
+        const e = byExec[name] || (byExec[name] = { active:0, cancelled:0 });
+        if (isCancel) e.cancelled++; else e.active++;
+      }
+    });
+  }
+  const coverage = active ? (computeDeliveryAgg(null).retail/active) : 0;
+  document.getElementById('kpiBookings').innerHTML = [
+    kpiCard('Active Bookings', fmtInt(active)),
+    kpiCard('Cancelled', fmtInt(cancelled)),
+    kpiCard('Coverage', fmtPct(coverage), 'retail ÷ active bookings'),
+  ].join('');
+
+  const rows = STATE.execList.map(name => ({ name, active: (byExec[name]||{}).active||0, cancelled: (byExec[name]||{}).cancelled||0 }))
+    .sort((a,b) => b.active - a.active);
+  renderStaticTable('tblBookingsEmp', [
+    { key:'name', label:'Executive' },
+    { key:'active', label:'Active', num:true },
+    { key:'cancelled', label:'Cancelled', num:true },
+  ], rows);
+}
+
+/* ---------------- Reviews ---------------- */
+function parseRating(v){
+  const s = str(v);
+  const m = s.match(/([\d.]+)/);
+  return m ? Number(m[1]) : null;
+}
+function renderReviews(){
+  const filtered = STATE.review.filter(r => dateInFilter(r[0]) && execInFilter(r[3]));
+  let ratingsSum=0, ratingsCount=0, ridersAdded=0;
+  const byExec = {};
+  for (const r of filtered) {
+    const rating = parseRating(r[1]);
+    if (rating !== null) { ratingsSum += rating; ratingsCount++; }
+    const ridingGroup = up(r[6]);
+    if (ridingGroup === 'YES') ridersAdded++;
+    const person = up(r[3]);
+    STATE.execList.forEach(name => {
+      if (person.includes(name)) {
+        const e = byExec[name] || (byExec[name] = { count:0, sum:0, riders:0 });
+        e.count++;
+        if (rating !== null) e.sum += rating;
+        if (ridingGroup === 'YES') e.riders++;
+      }
+    });
+  }
+  const avg = ratingsCount ? ratingsSum/ratingsCount : 0;
+  document.getElementById('kpiReviews').innerHTML = [
+    kpiCard('Total Reviews', fmtInt(filtered.length)),
+    kpiCard('Average Rating', avg.toFixed(2), 'out of 5'),
+    kpiCard('Riders Added', fmtInt(ridersAdded), 'said "Yes" to riding group'),
+  ].join('');
+
+  const rows = STATE.execList.map(name => {
+    const e = byExec[name] || { count:0, sum:0, riders:0 };
+    return { name, reviews: e.count, avg: e.count ? e.sum/e.count : 0, riders: e.riders };
+  }).sort((a,b) => b.reviews - a.reviews);
+  renderStaticTable('tblReviewsEmp', [
+    { key:'name', label:'Executive' },
+    { key:'reviews', label:'Reviews', num:true },
+    { key:'avg', label:'Avg Rating', num:true, fmt: v => v.toFixed(2) },
+    { key:'riders', label:'Riders Added', num:true },
+  ], rows);
+}
+
+/* ---------------- Delivery tab ---------------- */
+function renderDelivery(){
+  const filtered = STATE.delivery.filter(r => billedOk(r[9]) && dateInFilter(r[2]) && execInFilter(r[18]));
+  let cash=0, fin=0, insCount=0, ewCount=0, rsaCount=0, gearCount=0, amcCount=0, discountSum=0, discountCount=0, gma=0;
+  for (const r of filtered) {
+    const cf = up(r[8]);
+    if (cf === 'CASH') cash++; else if (cf) fin++;
+    if (up(r[10]) && up(r[10]) !== 'NIL') insCount++;
+    if (num(r[11]) > 0) ewCount++;
+    if (num(r[12]) > 0) rsaCount++;
+    if (str(r[14]) && up(r[14]) !== 'NIL') gearCount++;
+    if (str(r[15])) amcCount++;
+    const disc = num(r[17]);
+    if (disc > 0) { discountSum += disc; discountCount++; }
+    gma += num(r[13]);
+  }
+  const n = filtered.length;
+  document.getElementById('kpiDelivery').innerHTML = [
+    kpiCard('Total Deliveries', fmtInt(n)),
+    kpiCard('Cash Sales', fmtInt(cash), n ? fmtPct(cash/n) : ''),
+    kpiCard('Finance Sales', fmtInt(fin), n ? fmtPct(fin/n) : ''),
+    kpiCard('Total GMA', fmtMoney(gma)),
+    kpiCard('Total Discount', fmtMoney(discountSum), `on ${discountCount} deliveries`),
+    kpiCard('Avg Discount', fmtMoney(discountCount ? discountSum/discountCount : 0), 'per discounted unit'),
+  ].join('');
+
+  function barRow(label, val, total, color){
+    const pct = total ? (val/total*100) : 0;
+    return `<div class="barrow"><div class="lbl">${esc(label)}</div><div class="track"><div class="fill" style="width:${pct}%;background:${color}"></div></div><div class="val">${fmtInt(val)} (${pct.toFixed(0)}%)</div></div>`;
+  }
+  document.getElementById('deliveryCashFin').innerHTML =
+    barRow('Cash', cash, n, 'var(--s1)') + barRow('Finance', fin, n, 'var(--s2)');
+  document.getElementById('deliveryAttach').innerHTML =
+    barRow('INS', insCount, n, 'var(--s3)') +
+    barRow('EW', ewCount, n, 'var(--s4)') +
+    barRow('RSA', rsaCount, n, 'var(--s5)') +
+    barRow('Gear', gearCount, n, 'var(--s6)') +
+    barRow('AMC', amcCount, n, 'var(--s7)');
+
+  // Model-wise
+  const models = {};
+  for (const r of filtered) {
+    const model = str(r[6]) || '(unknown)';
+    const m = models[model] || (models[model] = { count:0, gma:0, ew:0, rsa:0, gear:0 });
+    m.count++; m.gma += num(r[13]);
+    if (num(r[11])>0) m.ew++;
+    if (num(r[12])>0) m.rsa++;
+    if (str(r[14]) && up(r[14]) !== 'NIL') m.gear++;
+  }
+  const modelRows = Object.entries(models).map(([model,v]) => ({ model, ...v, avgGma: v.count ? v.gma/v.count : 0 }))
+    .sort((a,b) => b.count - a.count);
+  renderStaticTable('tblModelWise', [
+    { key:'model', label:'Model' },
+    { key:'count', label:'Units', num:true },
+    { key:'gma', label:'Total GMA', num:true, fmt: fmtMoney },
+    { key:'avgGma', label:'Avg GMA/Unit', num:true, fmt: fmtMoney },
+    { key:'ew', label:'EW Attached', num:true },
+    { key:'rsa', label:'RSA Attached', num:true },
+    { key:'gear', label:'Gear Attached', num:true },
+  ], modelRows);
+
+  // full table
+  const searchVal = str(document.getElementById('searchDelivery').value).toLowerCase();
+  const allRows = filtered.filter(r => !searchVal || r.some(c => str(c).toLowerCase().includes(searchVal)));
+  const cols = [
+    { key:2, label:'Bill Date', fmt: fmtDate },
+    { key:3, label:'Receipt No', fmt: fmtId },
+    { key:4, label:'Customer' },
+    { key:5, label:'Mobile', fmt: fmtId },
+    { key:6, label:'Model' },
+    { key:7, label:'Color' },
+    { key:8, label:'Cash/Fin' },
+    { key:13, label:'GMA', num:true, fmt: fmtMoney },
+    { key:14, label:'Gear' },
+    { key:17, label:'Discount', num:true, fmt: fmtMoney },
+    { key:18, label:'Executive' },
+  ];
+  renderRawTable('tblDeliveryAll', cols, allRows);
+}
+document.getElementById('searchDelivery').addEventListener('input', () => renderDelivery());
+document.getElementById('exportDelivery').addEventListener('click', () => {
+  const filtered = STATE.delivery.filter(r => billedOk(r[9]) && dateInFilter(r[2]) && execInFilter(r[18]));
+  exportCsv('deliveries.csv', COL.DELIVERY, filtered);
+});
+
+/* ---------------- Pending Delivery Plan tab ----------------
+   "Actual booking model-wise delivery plan for the same month" = this month's bookings
+   (by BKG DT) that are still pending — i.e. STATUS is not BILLED and not CANCEL. */
+function pendingRows(){
+  return STATE.booking.filter(r => {
+    if (!dateInFilter(r[2])) return false;
+    if (!execInFilter(r[7])) return false;
+    const s = up(r[9]);
+    return s !== 'BILLED' && s !== 'CANCEL';
+  });
+}
+function renderPending(){
+  const rows = pendingRows();
+  const models = {};
+  rows.forEach(r => { const m = str(r[3]) || '(unknown)'; models[m] = (models[m]||0) + 1; });
+  const totalBookedThisMonth = STATE.booking.filter(r => dateInFilter(r[2]) && execInFilter(r[7])).length;
+
+  document.getElementById('kpiPending').innerHTML = [
+    kpiCard('Pending Deliveries', fmtInt(rows.length), 'booked this month, not yet billed/cancelled'),
+    kpiCard('Total Bookings (this filter)', fmtInt(totalBookedThisMonth)),
+    kpiCard('Pending Models', fmtInt(Object.keys(models).length)),
+  ].join('');
+
+  renderBarList('pendingModelBars', models, 'var(--s2)');
+
+  const search = str(document.getElementById('searchPending').value).toLowerCase();
+  const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
+  renderRawTable('tblPendingAll', [
+    { key:1, label:'Receipt No', fmt: fmtId },
+    { key:2, label:'Booking Date', fmt: fmtDate },
+    { key:3, label:'Model' },
+    { key:4, label:'Colour' },
+    { key:5, label:'Customer' },
+    { key:6, label:'Mobile', fmt: fmtId },
+    { key:7, label:'Executive' },
+    { key:8, label:'TDD' },
+    { key:9, label:'Status' },
+  ], filtered);
+}
+document.getElementById('searchPending').addEventListener('input', () => renderPending());
+document.getElementById('exportPending').addEventListener('click', () => {
+  exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows());
+});
+
+/* ---------------- Riders & Reviews tab ---------------- */
+function renderRiders(){
+  const regFiltered = STATE.riderReg; // registrations don't carry an executive; show all, optionally month-filtered by timestamp
+  const regInRange = regFiltered.filter(r => dateInFilter(r[0]));
+  document.getElementById('kpiRiderReg').innerHTML = [
+    kpiCard('Total Riders (this filter)', fmtInt(regInRange.length)),
+    kpiCard('Total Riders (all time)', fmtInt(regFiltered.length)),
+    kpiCard('Already in a Group', fmtInt(regFiltered.filter(r => up(r[7])==='YES').length)),
+  ].join('');
+
+  const expGroups = {};
+  regFiltered.forEach(r => { const k = str(r[6]) || 'Unspecified'; expGroups[k] = (expGroups[k]||0)+1; });
+  renderBarList('riderExpBars', expGroups, 'var(--s1)');
+
+  const cityGroups = {};
+  regFiltered.forEach(r => { const k = str(r[9]) || 'Unspecified'; cityGroups[k] = (cityGroups[k]||0)+1; });
+  const topCities = Object.fromEntries(Object.entries(cityGroups).sort((a,b)=>b[1]-a[1]).slice(0,8));
+  renderBarList('riderCityBars', topCities, 'var(--s3)');
+
+  const fbFiltered = STATE.riderFb.filter(r => dateInFilter(r[0]));
+  let overallSum=0, routeSum=0, safetySum=0, foodSum=0, cnt=0, rideAgainYes=0;
+  const modelRatings = {};
+  fbFiltered.forEach(r => {
+    cnt++;
+    overallSum += num(r[6]); routeSum += num(r[7]); safetySum += num(r[8]); foodSum += num(r[9]);
+    if (up(r[10]).includes('DEFINITELY') || up(r[10]) === 'YES') rideAgainYes++;
+    const model = str(r[3]) || '(unknown)';
+    const m = modelRatings[model] || (modelRatings[model] = { sum:0, count:0 });
+    m.sum += num(r[6]); m.count++;
+  });
+  document.getElementById('kpiRiderFb').innerHTML = [
+    kpiCard('Feedback Entries', fmtInt(cnt)),
+    kpiCard('Avg Overall Rating', cnt ? (overallSum/cnt).toFixed(2) : '0.00', 'out of 5'),
+    kpiCard('Avg Safety Rating', cnt ? (safetySum/cnt).toFixed(2) : '0.00', 'out of 5'),
+    kpiCard('Would Ride Again', cnt ? fmtPct(rideAgainYes/cnt) : '0%'),
+  ].join('');
+  const modelAvg = {};
+  Object.entries(modelRatings).forEach(([m,v]) => modelAvg[m] = +(v.sum/v.count).toFixed(2));
+  renderBarList('feedbackModelBars', modelAvg, 'var(--s4)', 5);
+
+  // full tables
+  const regSearch = str(document.getElementById('searchRiderReg').value).toLowerCase();
+  const regRows = STATE.riderReg.filter(r => !regSearch || r.some(c => str(c).toLowerCase().includes(regSearch)));
+  renderRawTable('tblRiderRegAll', [
+    { key:0, label:'Timestamp', fmt: fmtDate },
+    { key:1, label:'Rider Name' },
+    { key:2, label:'Mobile', fmt: fmtId },
+    { key:4, label:'Bike Model' },
+    { key:5, label:'Reg No' },
+    { key:6, label:'Experience' },
+    { key:9, label:'City' },
+  ], regRows);
+
+  const fbSearch = str(document.getElementById('searchRiderFb').value).toLowerCase();
+  const fbRows = STATE.riderFb.filter(r => !fbSearch || r.some(c => str(c).toLowerCase().includes(fbSearch)));
+  renderRawTable('tblRiderFbAll', [
+    { key:0, label:'Timestamp', fmt: fmtDate },
+    { key:1, label:'Rider Name' },
+    { key:3, label:'Bike Model' },
+    { key:6, label:'Overall', num:true },
+    { key:7, label:'Route', num:true },
+    { key:8, label:'Safety', num:true },
+    { key:9, label:'Food', num:true },
+    { key:10, label:'Ride Again' },
+  ], fbRows);
+}
+document.getElementById('searchRiderReg').addEventListener('input', () => renderRiders());
+document.getElementById('searchRiderFb').addEventListener('input', () => renderRiders());
+document.getElementById('exportRiderReg').addEventListener('click', () => exportCsv('rider_registration.csv', COL.RIDER_REG, STATE.riderReg));
+document.getElementById('exportRiderFb').addEventListener('click', () => exportCsv('rider_feedback.csv', COL.RIDER_FB, STATE.riderFb));
+
+function renderBarList(containerId, groups, color, maxScale){
+  const entries = Object.entries(groups).sort((a,b) => b[1]-a[1]);
+  const max = maxScale || Math.max(1, ...entries.map(e => e[1]));
+  const el = document.getElementById(containerId);
+  if (!entries.length) { el.innerHTML = '<div class="empty-note">No data</div>'; return; }
+  el.innerHTML = entries.map(([label,val]) => {
+    const pct = Math.min(100, (val/max)*100);
+    return `<div class="barrow"><div class="lbl">${esc(label)}</div><div class="track"><div class="fill" style="width:${pct}%;background:${color}"></div></div><div class="val">${typeof val === 'number' && val % 1 !== 0 ? val.toFixed(2) : fmtInt(val)}</div></div>`;
+  }).join('');
+}
+
+/* ==================== CHART ENGINE ====================
+   Dependency-free inline SVG charts following the dataviz skill's mark specs:
+   thin 2px lines, rounded data-ends, recessive gridlines, one shared y-axis,
+   fixed categorical color order, hover tooltip, always-present legend for >=2 series. */
+const SEQ_BLUE = ['#cde2fb','#9ec5f4','#6da7ec','#3987e5','#256abf','#184f95','#0d366b'];
+const CAT_SLOTS = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s6)','var(--s7)','var(--s8)'];
+
+function ensureTooltip(container){
+  let tip = container.querySelector('.chart-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    container.style.position = 'relative';
+    container.appendChild(tip);
+  }
+  return tip;
+}
+function showTip(container, tip, x, y, html){
+  tip.innerHTML = html;
+  tip.style.left = Math.max(4, Math.min(container.clientWidth - 140, x + 10)) + 'px';
+  tip.style.top = Math.max(4, y - 34) + 'px';
+  tip.style.opacity = '1';
+}
+function hideTip(tip){ tip.style.opacity = '0'; }
+
+function lineChart(containerId, series, xLabels, opts){
+  const container = document.getElementById(containerId);
+  if (!xLabels.length) { container.innerHTML = '<div class="empty-note">Not enough months of data yet</div>'; return; }
+  const W = 760, H = 220, padL = 44, padR = 16, padT = 14, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const allVals = series.flatMap(s => s.values).filter(v => v !== null && v !== undefined);
+  const rawMax = Math.max(1, ...allVals);
+  function niceStep(rough){
+    const mag = Math.pow(10, Math.floor(Math.log10(rough || 1)));
+    const norm = rough / mag;
+    const step = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+    return step * mag;
+  }
+  const gridN = 4;
+  const step0 = niceStep(rawMax * 1.15 / gridN);
+  const maxV = step0 * gridN;
+  const n = xLabels.length;
+  const xAt = i => padL + (n === 1 ? plotW/2 : (i/(n-1)) * plotW);
+  const yAt = v => padT + plotH - (v/maxV)*plotH;
+
+  let gridSvg = '';
+  for (let g=0; g<=gridN; g++){
+    const yy = padT + (plotH/gridN)*g;
+    const val = Math.round(maxV - step0*g);
+    gridSvg += `<line class="grid-line" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+    gridSvg += `<text class="axis-label" x="${padL-8}" y="${yy+3}" text-anchor="end">${fmtInt(val)}</text>`;
+  }
+  const step = Math.max(1, Math.ceil(n/8));
+  let xLabelsSvg = '';
+  xLabels.forEach((lbl,i) => {
+    if (i % step !== 0 && i !== n-1) return;
+    xLabelsSvg += `<text class="axis-label" x="${xAt(i)}" y="${H-8}" text-anchor="middle">${esc(lbl)}</text>`;
+  });
+
+  let linesSvg = '', dotsSvg = '';
+  series.forEach((s, si) => {
+    const color = s.color || CAT_SLOTS[si % CAT_SLOTS.length];
+    const pts = s.values.map((v,i) => v === null || v === undefined ? null : [xAt(i), yAt(v)]).filter(Boolean);
+    if (pts.length) {
+      const path = pts.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+      linesSvg += `<path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    s.values.forEach((v,i) => {
+      if (v === null || v === undefined) return;
+      dotsSvg += `<circle class="pt" data-si="${si}" data-i="${i}" cx="${xAt(i)}" cy="${yAt(v)}" r="3.5" fill="${color}" stroke="var(--surface-1)" stroke-width="1.5"/>`;
+    });
+  });
+
+  container.innerHTML = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    ${gridSvg}
+    <line class="axis-line" x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}"/>
+    ${linesSvg}${dotsSvg}
+    ${xLabelsSvg}
+  </svg>`;
+  const legendEl = opts && opts.legendId ? document.getElementById(opts.legendId) : null;
+  if (legendEl) {
+    legendEl.innerHTML = series.map((s,si) => `<div class="item"><span class="swatch" style="background:${s.color || CAT_SLOTS[si % CAT_SLOTS.length]}"></span>${esc(s.name)}</div>`).join('');
+  }
+  const tip = ensureTooltip(container);
+  const svg = container.querySelector('svg');
+  svg.querySelectorAll('circle.pt').forEach(c => {
+    c.addEventListener('mouseenter', (e) => {
+      const si = +c.dataset.si, i = +c.dataset.i;
+      const s = series[si];
+      const rect = container.getBoundingClientRect();
+      const scale = rect.width / W;
+      const cx = parseFloat(c.getAttribute('cx')) * scale, cy = parseFloat(c.getAttribute('cy')) * scale;
+      showTip(container, tip, cx, cy, `<strong>${esc(xLabels[i])}</strong><br>${esc(s.name)}: ${fmtInt(s.values[i])}`);
+    });
+    c.addEventListener('mouseleave', () => hideTip(tip));
+  });
+}
+
+function hBarChart(containerId, items, opts){
+  const container = document.getElementById(containerId);
+  if (!items.length) { container.innerHTML = '<div class="empty-note">No data for this filter</div>'; return; }
+  const fmt = (opts && opts.fmt) || fmtInt;
+  const maxV = Math.max(1, ...items.map(it => it.value));
+  const rowH = 26, gap = 8;
+  const W = 640, padL = 4, padR = 60;
+  const H = items.length * (rowH + gap);
+  const barMaxW = W - padL - padR;
+
+  let rows = '';
+  items.forEach((it, i) => {
+    const y = i * (rowH + gap);
+    const w = Math.max(2, (it.value / maxV) * barMaxW);
+    const color = it.color || SEQ_BLUE[Math.min(SEQ_BLUE.length-1, Math.round((1 - it.value/maxV) * (SEQ_BLUE.length-2)))];
+    rows += `
+      <text class="legend-label" x="${padL}" y="${y+rowH/2-6}" font-size="11">${esc(it.label)}</text>
+      <rect class="bar" data-i="${i}" x="${padL}" y="${y+rowH/2+0}" width="${w}" height="9" rx="4" fill="${color}"/>
+      <text class="axis-label" x="${padL + w + 8}" y="${y+rowH/2+8}" font-size="11" fill="var(--text-primary)">${esc(fmt(it.value))}</text>`;
+  });
+  container.innerHTML = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${rows}</svg>`;
+  const tip = ensureTooltip(container);
+  const svg = container.querySelector('svg');
+  svg.querySelectorAll('rect.bar').forEach(r => {
+    r.addEventListener('mouseenter', () => {
+      const i = +r.dataset.i;
+      const rect = container.getBoundingClientRect();
+      const scale = rect.width / W;
+      const x = (parseFloat(r.getAttribute('x')) + parseFloat(r.getAttribute('width'))) * scale;
+      const y = parseFloat(r.getAttribute('y')) * scale;
+      showTip(container, tip, x, y, `<strong>${esc(items[+r.dataset.i].label)}</strong><br>${esc(fmt(items[i].value))}`);
+    });
+    r.addEventListener('mouseleave', () => hideTip(tip));
+  });
+}
+
+/* ---------------- Analytics tab ---------------- */
+function computeMonthlyTrend(){
+  const monthsSorted = [...STATE.months].sort((a,b) => a.key.localeCompare(b.key)).slice(-12);
+  const labels = monthsSorted.map(m => ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m.month] + " '" + String(m.year).slice(2));
+  const retail = monthsSorted.map(m => {
+    let count = 0;
+    for (const r of STATE.delivery) {
+      if (!billedOk(r[9])) continue;
+      const d = r[2];
+      if (!(d instanceof Date) || isNaN(d)) continue;
+      if ((d.getMonth()+1) === m.month && d.getFullYear() === m.year) count++;
+    }
+    return count;
+  });
+  const target = monthsSorted.map(m => {
+    let t = 0;
+    for (const r of STATE.targets) t += num(r[m.month]);
+    return t || null;
+  });
+  return { labels, retail, target };
+}
+
+function renderAnalytics(){
+  const trend = computeMonthlyTrend();
+  lineChart('trendChart', [
+    { name: 'Retail (actual)', color: 'var(--brand-red)', values: trend.retail },
+    { name: 'Target', color: 'var(--s1)', values: trend.target },
+  ], trend.labels, { legendId: 'trendLegend' });
+
+  // model-wise (reuse delivery filter logic)
+  const filtered = STATE.delivery.filter(r => billedOk(r[9]) && dateInFilter(r[2]) && execInFilter(r[18]));
+  const models = {};
+  filtered.forEach(r => { const m = str(r[6]) || '(unknown)'; models[m] = (models[m]||0) + 1; });
+  const modelItems = Object.entries(models).sort((a,b) => b[1]-a[1]).slice(0,10).map(([label,value]) => ({ label, value }));
+  hBarChart('modelBarChart', modelItems);
+
+  // funnel conversion %
+  const groups = {};
+  for (const r of STATE.enquiry) {
+    const type = str(r[11]) || '(blank)';
+    if (!dateInFilter(r[14])) continue;
+    if (!ownerInFilter(r[13])) continue;
+    const g = groups[type] || (groups[type] = { total:0, booked:0 });
+    g.total++;
+    if (up(r[9]) === 'BOOKED') g.booked++;
+  }
+  const funnelOrder = ['Walk In','Telephonic','Service Referral','Field Generation','Company'];
+  const funnelItems = Object.entries(groups)
+    .sort((a,b) => (funnelOrder.indexOf(a[0])+99 || 99) - (funnelOrder.indexOf(b[0])+99 || 99))
+    .map(([label,v], i) => ({ label, value: v.total ? +((v.booked/v.total)*100).toFixed(1) : 0, color: CAT_SLOTS[i % CAT_SLOTS.length] }));
+  hBarChart('funnelBarChart', funnelItems, { fmt: v => v + '%' });
+
+  // executive leaderboard (retail)
+  const execItems = STATE.execList.map((name,i) => ({ label: name, value: computeDeliveryAgg(name).retail, color: CAT_SLOTS[i % CAT_SLOTS.length] }))
+    .filter(it => it.value > 0).sort((a,b) => b.value - a.value);
+  hBarChart('execBarChart', execItems);
+
+  // rating distribution (all-time, all reviews)
+  const buckets = {5:0,4:0,3:0,2:0,1:0};
+  STATE.review.forEach(r => {
+    const rating = Math.round(parseRating(r[1]) || 0);
+    if (rating >= 1 && rating <= 5) buckets[rating]++;
+  });
+  const ratingItems = [5,4,3,2,1].map(k => ({ label: k + ' star', value: buckets[k] }));
+  hBarChart('ratingBarChart', ratingItems);
+}
+
+/* ---------------- Explorer tab ---------------- */
+function explorerData(){
+  const sheet = document.getElementById('explorerSheet').value;
+  const map = {
+    'ACTUL BOOKING': { rows: STATE.booking, cols: COL.BOOKING },
+    'DELIVERY SHEET': { rows: STATE.delivery, cols: COL.DELIVERY },
+    'enquiry': { rows: STATE.enquiry, cols: COL.ENQUIRY },
+    'Google Review': { rows: STATE.review, cols: COL.REVIEW },
+    'RIDER FEEDBACK': { rows: STATE.riderFb, cols: COL.RIDER_FB },
+    'RIDER REGISTRATION': { rows: STATE.riderReg, cols: COL.RIDER_REG },
+  };
+  return map[sheet];
+}
+function renderExplorer(){
+  const { rows, cols } = explorerData();
+  const search = str(document.getElementById('explorerSearch').value).toLowerCase();
+  const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
+  document.getElementById('explorerCount').textContent = `${filtered.length} of ${rows.length} rows`;
+  const colDefs = cols.map((label, i) => ({ key:i, label, fmt: (v) => v instanceof Date ? fmtDate(v) : str(v) }));
+  renderRawTable('tblExplorer', colDefs, filtered.slice(0, 500));
+}
+document.getElementById('explorerSheet').addEventListener('change', renderExplorer);
+document.getElementById('explorerSearch').addEventListener('input', renderExplorer);
+document.getElementById('explorerExport').addEventListener('click', () => {
+  const sheet = document.getElementById('explorerSheet').value;
+  const { rows, cols } = explorerData();
+  const search = str(document.getElementById('explorerSearch').value).toLowerCase();
+  const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
+  exportCsv(sheet.replace(/\s+/g,'_') + '.csv', cols, filtered);
+});
+
+/* ---------------- generic table renderers ---------------- */
+function renderStaticTable(tableId, cols, rows){
+  const table = document.getElementById(tableId);
+  if (!rows.length) { table.innerHTML = `<tr><td class="empty-note">No data for this filter</td></tr>`; return; }
+  const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.map(r => `<tr>${cols.map(c => {
+    let v = r[c.key];
+    if (c.fmt) v = c.fmt(v);
+    else if (typeof v === 'number') v = fmtInt(v);
+    return `<td class="${c.num ? 'num' : ''}">${esc(v)}</td>`;
+  }).join('')}</tr>`).join('')}</tbody>`;
+  table.innerHTML = thead + tbody;
+}
+function renderRawTable(tableId, cols, rows){
+  const table = document.getElementById(tableId);
+  if (!rows.length) { table.innerHTML = `<tr><td class="empty-note">No rows match</td></tr>`; return; }
+  const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.slice(0,1000).map(row => `<tr>${cols.map(c => {
+    let v = row[c.key];
+    if (c.fmt) v = c.fmt(v);
+    else if (v instanceof Date) v = fmtDate(v);
+    else if (typeof v === 'number') v = fmtInt(v);
+    return `<td class="${c.num ? 'num' : ''}">${esc(v)}</td>`;
+  }).join('')}</tr>`).join('')}</tbody>`;
+  table.innerHTML = thead + tbody;
+}
+
+function exportCsv(filename, headers, rows){
+  const lines = [headers.map(h => `"${h.replace(/"/g,'""')}"`).join(',')];
+  rows.forEach(r => {
+    lines.push(r.map(c => {
+      let v = c instanceof Date ? fmtDate(c) : str(c);
+      return `"${v.replace(/"/g,'""')}"`;
+    }).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------- tabs ---------------- */
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-tab]');
+  if (!btn) return;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab));
+});
+
+/* ---------------- boot ---------------- */
+loadAll();
+setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
+</script>
+</body>
+</html>
