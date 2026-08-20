@@ -653,7 +653,20 @@
     <p class="empty-note" style="text-align:left;padding:0 0 14px;">This tab reads the "ENQUIRY STATMENT" and "BOOKING MSD" sheets — Royal Enfield's own system data, synced live from RE's dealer portal (not the sheets your team fills in by hand). It has no sales-executive column, so these numbers are dealership-wide (Amar Autos total), not split by person. Shows all-time data — not affected by the month/executive filter above.</p>
     <div class="kpi-grid" id="kpiMsd"></div>
 
-    <div class="grid-2" style="margin-top:16px;">
+    <h2 class="section-title" style="margin-top:30px;">🥧 Share Breakdown</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Test Ride Taken</h3>
+        <div id="msdTestRidePie"></div>
+      </div>
+      <div class="card">
+        <h3>Bookings by Status</h3>
+        <div id="msdBookingStatus"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:30px;">📶 Enquiry Funnel</h2>
+    <div class="grid-2">
       <div class="card">
         <h3>Enquiries by Primary Source</h3>
         <div id="msdEnqSource"></div>
@@ -663,7 +676,6 @@
         <div id="msdEnqModel"></div>
       </div>
     </div>
-
     <div class="grid-2" style="margin-top:16px;">
       <div class="card">
         <h3>Lead Status Breakdown</h3>
@@ -675,20 +687,30 @@
       </div>
     </div>
 
-    <div class="grid-2" style="margin-top:16px;">
-      <div class="card">
-        <h3>Bookings by Status</h3>
-        <div id="msdBookingStatus"></div>
-      </div>
+    <h2 class="section-title" style="margin-top:30px;">🏍️ Booking Outcomes</h2>
+    <div class="grid-2">
       <div class="card">
         <h3>Top Cancellation Reasons</h3>
         <div id="msdCancelReasons"></div>
       </div>
+      <div class="card">
+        <h3>Financier Usage (Bookings)</h3>
+        <div id="msdFinancer"></div>
+      </div>
     </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h3>Financier Usage (Bookings)</h3>
-      <div id="msdFinancer"></div>
+    <h2 class="section-title" style="margin-top:30px;">📋 Recent Rows</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Recent Enquiries</h3>
+        <div class="table-wrap" style="max-height:360px;"><table class="data" id="tblMsdEnq"></table></div>
+        <div class="hint" style="margin-top:8px;">Showing latest rows — full searchable list is on the Data Explorer tab.</div>
+      </div>
+      <div class="card">
+        <h3>Recent Bookings</h3>
+        <div class="table-wrap" style="max-height:360px;"><table class="data" id="tblMsdBkg"></table></div>
+        <div class="hint" style="margin-top:8px;">Showing latest rows — full searchable list is on the Data Explorer tab.</div>
+      </div>
     </div>
   </section>
 
@@ -1125,11 +1147,12 @@ function renderDataHealthBanner(){
   const total = b + d + r;
   const label = isAdmin ? 'Everyone\'s' : `${CURRENT_USER.name}'s`;
   if (total === 0) {
+    // Only shown when something actually looks wrong (empty filter) — a routine "data loaded fine"
+    // message on every screen was just taking up space for no benefit once the app is working.
     el.className = 'data-health-banner show empty';
     el.innerHTML = `⚠️ ${esc(label)} data wasn't found for this filter (month/executive) — try "📅 Show All Months" above. If it's still empty, send a screenshot.`;
   } else {
-    el.className = 'data-health-banner show';
-    el.innerHTML = `✅ ${esc(label)} data has loaded — ${fmtInt(b)} bookings, ${fmtInt(d)} deliveries, ${fmtInt(r)} reviews (for the current filter).`;
+    el.className = 'data-health-banner';
   }
 }
 
@@ -2044,6 +2067,52 @@ function hBarChart(containerId, items, opts){
   });
 }
 
+// Donut chart — part-to-whole share (e.g. Delivered vs Cancelled vs Pending), capped at a handful
+// of slices with direct % + value in the legend (never color-alone), per the dataviz skill's rule
+// that identity/proportion always carries a text label alongside the color.
+function pieChart(containerId, items, opts){
+  const container = document.getElementById(containerId);
+  const fmt = (opts && opts.fmt) || fmtInt;
+  const total = items.reduce((s,it) => s + it.value, 0);
+  if (!items.length || !total) { container.innerHTML = '<div class="empty-note">No data</div>'; return; }
+  const size = 168, stroke = 30, r = (size - stroke) / 2, cx = size/2, cy = size/2;
+  const circumference = 2 * Math.PI * r;
+  let acc = 0;
+  const segs = items.map((it, i) => {
+    const frac = it.value / total;
+    const dash = Math.max(0, frac * circumference - 2); // 2px gap between segments, per mark spec
+    const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${it.color || CAT_SLOTS[i % CAT_SLOTS.length]}" stroke-width="${stroke}" stroke-dasharray="${dash} ${circumference-dash}" stroke-dashoffset="${-acc}" data-i="${i}" transform="rotate(-90 ${cx} ${cy})" style="cursor:pointer;"/>`;
+    acc += frac * circumference;
+    return seg;
+  }).join('');
+  const legend = items.map((it, i) => {
+    const pct = Math.round((it.value/total)*100);
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;">
+      <span style="width:10px;height:10px;border-radius:3px;background:${it.color || CAT_SLOTS[i % CAT_SLOTS.length]};flex-shrink:0;"></span>
+      <span style="flex:1;color:var(--text-secondary);">${esc(it.label)}</span>
+      <span style="font-weight:700;color:var(--text-primary);">${pct}%</span>
+      <span style="color:var(--text-muted);width:56px;text-align:right;">${esc(fmt(it.value))}</span>
+    </div>`;
+  }).join('');
+  container.innerHTML = `<div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0;">${segs}
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="20" font-weight="800" fill="var(--text-primary)">${fmtInt(total)}</text>
+      <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="9.5" fill="var(--text-muted)" text-transform="uppercase">total</text>
+    </svg>
+    <div style="flex:1;min-width:150px;">${legend}</div>
+  </div>`;
+  const tip = ensureTooltip(container);
+  container.querySelectorAll('circle[data-i]').forEach(c => {
+    c.addEventListener('mousemove', (e) => {
+      const i = +c.dataset.i;
+      const rect = container.getBoundingClientRect();
+      const pct = Math.round((items[i].value/total)*100);
+      showTip(container, tip, e.clientX - rect.left, e.clientY - rect.top, `<strong>${esc(items[i].label)}</strong><br>${esc(fmt(items[i].value))} (${pct}%)`);
+    });
+    c.addEventListener('mouseleave', () => hideTip(tip));
+  });
+}
+
 /* ---------------- Analytics tab ---------------- */
 function computeMonthlyTrend(){
   const monthsSorted = [...STATE.months].sort((a,b) => a.key.localeCompare(b.key)).slice(-12);
@@ -2179,7 +2248,7 @@ function renderMsdAnalysis(){
 
   const byBkgStatus = {};
   bkg.forEach(r => { const s = str(r[17]) || '(blank)'; byBkgStatus[s] = (byBkgStatus[s]||0) + 1; });
-  hBarChart('msdBookingStatus', toChartItems(byBkgStatus, 8));
+  pieChart('msdBookingStatus', toChartItems(byBkgStatus, 5));
 
   const byCancelReason = {};
   bkg.forEach(r => { const s = str(r[28]); if (!s) return; byCancelReason[s] = (byCancelReason[s]||0) + 1; });
@@ -2188,6 +2257,27 @@ function renderMsdAnalysis(){
   const byFinancer = {};
   bkg.forEach(r => { const s = str(r[24]) || 'Cash / No Finance'; byFinancer[s] = (byFinancer[s]||0) + 1; });
   hBarChart('msdFinancer', toChartItems(byFinancer, 8));
+
+  // Test Ride Taken — a true part-to-whole share (Yes/No/blank), so a donut reads more naturally
+  // here than a ranked bar list.
+  const byTestRide = {};
+  enq.forEach(r => { const s = str(r[11]) || '(not recorded)'; byTestRide[s] = (byTestRide[s]||0) + 1; });
+  pieChart('msdTestRidePie', toChartItems(byTestRide, 5));
+
+  // Recent-rows tables — a quick look without leaving this tab; Data Explorer has the full,
+  // searchable, exportable list for both sheets.
+  const enqCols = [
+    { key: 0, label: 'ENQ #' }, { key: 33, label: 'Model' }, { key: 14, label: 'Source' },
+    { key: 12, label: 'Status' }, { key: 11, label: 'Test Ride', fmt: v => str(v) || '—' },
+  ];
+  renderStaticTable('tblMsdEnq', enqCols, enq.slice(-30).reverse());
+
+  const bkgCols = [
+    { key: 0, label: 'Booking #' }, { key: 2, label: 'Model' }, { key: 17, label: 'Status' },
+    { key: 24, label: 'Financier', fmt: v => str(v) || 'Cash' },
+    { key: 34, label: 'Sale Amount', num: true, fmt: v => fmtMoney(num(v)) },
+  ];
+  renderStaticTable('tblMsdBkg', bkgCols, bkg.slice(-30).reverse());
 }
 
 /* ---------------- Explorer tab ---------------- */
