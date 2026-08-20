@@ -375,7 +375,7 @@
     <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
     <div class="kpi-grid" id="kpiPending"></div>
 
-    <h2 class="section-title">🏍️ Model-wise — Pending Units</h2>
+    <h2 class="section-title">🏍️ Model &amp; Colour-wise — Pending Units</h2>
     <div class="card"><div id="pendingModelBars"></div></div>
 
     <h2 class="section-title">⚖️ Pending Bookings vs Stock Available — model-family wise</h2>
@@ -812,9 +812,28 @@ function dateInFilter(d){
   if (!(d instanceof Date) || isNaN(d)) return false;
   return (d.getMonth()+1) === f.month && d.getFullYear() === f.year;
 }
+// Different sheets spell the same person differently (short code in DELIVERY SHEET/ACTUL
+// BOOKING vs full name in enquiry/Google Review — "ASLAM" vs "ASLAM KHAN", "POOJA" vs
+// "POOJA NEGI", etc). Plain substring matching (up(field).includes(execKey)) already covers
+// every case where the short code is literally the first word of the full name — which is
+// most of them. The one pair that ISN'T a substring match either way is Sandeep, who Deepak
+// also refers to as "Sanjeet"/"Sajeet Singh" — listed explicitly here so any sheet that ever
+// uses that spelling still resolves to the same person. Add more aliases here if another
+// mismatch turns up.
+const EXEC_ALIASES = {
+  SANDEEP: ['SANJEET', 'SANJEET SINGH', 'SAJEET', 'SAJEET SINGH'],
+};
+function execMatches(fieldValue, execKey){
+  const f = up(fieldValue);
+  const k = up(execKey);
+  if (!f || !k) return false;
+  if (f.includes(k) || k.includes(f)) return true;
+  const aliases = EXEC_ALIASES[k] || [];
+  return aliases.some(a => f.includes(up(a)) || up(a).includes(f));
+}
 function execInFilter(field){
   if (STATE.filterExec === 'ALL') return true;
-  return up(field).includes(STATE.filterExec);
+  return execMatches(field, STATE.filterExec);
 }
 function billedOk(status){
   const s = up(status);
@@ -826,7 +845,7 @@ function mapOwnerToExec(owner){
 }
 function ownerInFilter(owner){
   if (STATE.filterExec === 'ALL') return true;
-  if (up(owner).includes(STATE.filterExec)) return true;
+  if (execMatches(owner, STATE.filterExec)) return true;
   return mapOwnerToExec(owner) === STATE.filterExec;
 }
 
@@ -852,7 +871,7 @@ function computeDeliveryAgg(execFilterName){
     if (!billedOk(r[9])) continue;
     if (!dateInFilter(r[2])) continue;
     const exec = r[18];
-    if (execFilterName) { if (!up(exec).includes(execFilterName)) continue; }
+    if (execFilterName) { if (!execMatches(exec, execFilterName)) continue; }
     else { if (!execInFilter(exec)) continue; }
     retail++;
     if (num(r[11]) > 0) ew++;
@@ -965,7 +984,7 @@ function renderBookings(){
     const isCancel = up(r[9]) === 'CANCEL';
     if (isCancel) cancelled++; else active++;
     STATE.execList.forEach(name => {
-      if (up(r[7]).includes(name)) {
+      if (execMatches(r[7], name)) {
         const e = byExec[name] || (byExec[name] = { active:0, cancelled:0 });
         if (isCancel) e.cancelled++; else e.active++;
       }
@@ -1002,9 +1021,9 @@ function renderReviews(){
     if (rating !== null) { ratingsSum += rating; ratingsCount++; }
     const ridingGroup = up(r[6]);
     if (ridingGroup === 'YES') ridersAdded++;
-    const person = up(r[3]);
+    const person = r[3];
     STATE.execList.forEach(name => {
-      if (person.includes(name)) {
+      if (execMatches(person, name)) {
         const e = byExec[name] || (byExec[name] = { count:0, sum:0, riders:0 });
         e.count++;
         if (rating !== null) e.sum += rating;
@@ -1129,8 +1148,16 @@ function pendingRows(){
 }
 function renderPending(){
   const rows = pendingRows();
+  // Colour-wise, not just model — "BULLET 350 - STEALTH BLACK" vs "BULLET 350 - BATTALION
+  // BLACK" as separate bars, so a sales exec can see exactly which colour is pending, same
+  // granularity as the Stock tab's Model Name breakdown.
   const models = {};
-  rows.forEach(r => { const m = str(r[3]) || '(unknown)'; models[m] = (models[m]||0) + 1; });
+  rows.forEach(r => {
+    const model = str(r[3]) || '(unknown)';
+    const colour = str(r[4]);
+    const key = colour ? `${model} - ${colour}` : model;
+    models[key] = (models[key]||0) + 1;
+  });
   const totalBookedThisMonth = STATE.booking.filter(r => dateInFilter(r[2]) && execInFilter(r[7])).length;
 
   document.getElementById('kpiPending').innerHTML = [
