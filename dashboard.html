@@ -121,6 +121,18 @@
   header.top button.primary { background: linear-gradient(135deg, var(--brand-red), var(--brand-red-2)); border-color: transparent; }
   header.top select option { color: #111; }
   .status-line { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 8px; letter-spacing: 0.2px; }
+  .data-health-banner {
+    margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 700;
+    background: color-mix(in srgb, var(--s3, #199e70) 16%, transparent);
+    color: #eafff4; border: 1px solid color-mix(in srgb, var(--s3, #199e70) 45%, transparent);
+    display: none;
+  }
+  .data-health-banner.show { display: block; }
+  .data-health-banner.empty {
+    background: color-mix(in srgb, var(--critical) 16%, transparent);
+    border-color: color-mix(in srgb, var(--critical) 45%, transparent);
+    color: #ffecec;
+  }
   nav.tabs {
     display: flex; gap: 4px; padding: 10px 20px 0 20px;
     background: var(--surface-1); border-bottom: 1px solid var(--border);
@@ -269,11 +281,13 @@
       <a href="rider-registration.html" style="text-decoration:none;"><button type="button" title="Rider Registration Form">🪪 Register</button></a>
       <select id="monthFilter"></select>
       <select id="execFilter"></select>
+      <button id="allMonthsBtn" title="Ek click me sab mahino ka data dikhao">📅 Sab Mahino Dikhao</button>
       <button id="themeToggle">🌓</button>
-      <button id="refreshBtn" class="primary">↻ Refresh</button>
+      <button id="refreshBtn" class="primary" title="Fresh data khinchta hai — agar data purana/atka hua lage to yahi dabao">↻ Force Refresh</button>
     </div>
   </div>
   <div class="status-line" id="statusLine">—</div>
+  <div class="data-health-banner" id="dataHealthBanner"></div>
 </header>
 
 <nav class="tabs" id="tabs">
@@ -669,7 +683,10 @@ function fetchSheetRaw(name){
       resolve(json.table.rows.map(r => (r.c || []).map(cell => cell ? parseCell(cell.v) : null)));
     };
     const tqx = `out:json;responseHandler:${cbName}`;
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=${encodeURIComponent(tqx)}&sheet=${encodeURIComponent(name)}&headers=0`;
+    // Cache-buster (_cb) forces the browser to treat every load/refresh as a brand-new request,
+    // never silently reusing a stale cached response for the same sheet+time — this is what
+    // "Force Refresh" actually forces, on top of the manual/auto reload itself.
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=${encodeURIComponent(tqx)}&sheet=${encodeURIComponent(name)}&headers=0&_cb=${Date.now()}`;
     const script = document.createElement('script');
     script.src = url;
     script.onerror = () => {
@@ -747,6 +764,7 @@ async function loadAll(){
     STATE.initialized = true;
     STATE.lastLoaded = new Date();
     renderAll();
+    renderDataHealthBanner();
     document.getElementById('statusLine').textContent =
       `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
   } catch (err) {
@@ -779,11 +797,18 @@ function populateFilters(){
   monthSel.innerHTML = '<option value="ALL">All Months</option>' +
     STATE.months.map(m => `<option value="${m.key}">${monthNames[m.month]} ${m.year}</option>`).join('');
   if (!STATE.initialized) {
-    // First load: default to the current real-world month if it exists in the data, else the most recent month with data.
-    const now = new Date();
-    const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-    const hasToday = STATE.months.some(m => m.key === todayKey);
-    monthSel.value = hasToday ? todayKey : (STATE.months.length ? STATE.months[0].key : 'ALL');
+    if (CURRENT_USER && CURRENT_USER.role !== 'Admin') {
+      // Sales/CRT logins default to "All Months" — a non-techie sales person shouldn't have to
+      // understand month filters just to see that their own data loaded; they can narrow to a
+      // specific month themselves if they want to.
+      monthSel.value = 'ALL';
+    } else {
+      // First load: default to the current real-world month if it exists in the data, else the most recent month with data.
+      const now = new Date();
+      const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+      const hasToday = STATE.months.some(m => m.key === todayKey);
+      monthSel.value = hasToday ? todayKey : (STATE.months.length ? STATE.months[0].key : 'ALL');
+    }
   } else {
     const prevMonth = STATE.filterMonth || 'ALL';
     monthSel.value = [...monthSel.options].some(o => o.value === prevMonth) ? prevMonth : 'ALL';
@@ -804,9 +829,45 @@ function populateFilters(){
   STATE.filterExec = execSel.value;
 }
 
-document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); });
-document.getElementById('execFilter').addEventListener('change', e => { STATE.filterExec = e.target.value; renderAll(); });
+document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); renderDataHealthBanner(); });
+document.getElementById('execFilter').addEventListener('change', e => { STATE.filterExec = e.target.value; renderAll(); renderDataHealthBanner(); });
 document.getElementById('refreshBtn').addEventListener('click', loadAll);
+// One-click "show everything" — a non-techie sales person doesn't need to understand month
+// filters to see their own numbers; this just resets the month filter to ALL and re-renders.
+document.getElementById('allMonthsBtn').addEventListener('click', () => {
+  document.getElementById('monthFilter').value = 'ALL';
+  STATE.filterMonth = 'ALL';
+  renderAll();
+  renderDataHealthBanner();
+});
+
+// ---------------- Data Health Banner ----------------
+// Plain-language confirmation, right under the header, of exactly how much data loaded for
+// THIS login (own numbers for a sales person, everyone's for Admin) — so someone who isn't
+// comfortable with dev tools/console can immediately tell "data aaya ya nahi", and screenshot
+// this banner instead of guessing when something looks wrong.
+function renderDataHealthBanner(){
+  const el = document.getElementById('dataHealthBanner');
+  if (!STATE.initialized) { el.className = 'data-health-banner'; return; }
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const who = isAdmin ? null : CURRENT_USER.execKey;
+  function cnt(rows, execCol){
+    if (isAdmin) return rows.length;
+    return rows.filter(r => execMatches(r[execCol], who)).length;
+  }
+  const b = cnt(STATE.booking, 7);
+  const d = cnt(STATE.delivery, 18);
+  const r = cnt(STATE.review, 3);
+  const total = b + d + r;
+  const label = isAdmin ? 'Sabka' : `${CURRENT_USER.name} ka`;
+  if (total === 0) {
+    el.className = 'data-health-banner show empty';
+    el.innerHTML = `⚠️ ${esc(label)} data is filter (month/executive) me nahi mila — upar "📅 Sab Mahino Dikhao" try karo. Agar phir bhi khaali rahe, ye screenshot bhej do.`;
+  } else {
+    el.className = 'data-health-banner show';
+    el.innerHTML = `✅ ${esc(label)} data load ho gaya — ${fmtInt(b)} booking, ${fmtInt(d)} delivery, ${fmtInt(r)} review (current filter ke hisaab se).`;
+  }
+}
 
 /* ---------------- filter predicates ---------------- */
 function monthYearOfFilter(){
