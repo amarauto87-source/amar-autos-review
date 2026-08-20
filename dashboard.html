@@ -209,9 +209,45 @@
   .barrow .track { flex:1; height:8px; background:var(--grid); border-radius:4px; overflow:hidden;}
   .barrow .fill { height:100%; border-radius:4px; }
   .barrow .val { width:70px; text-align:right; font-variant-numeric: tabular-nums; flex-shrink:0;}
+  /* login screen */
+  .login-overlay {
+    position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, color-mix(in srgb, var(--brand-red) 14%, transparent), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 100% 0%, color-mix(in srgb, var(--s1) 10%, transparent), transparent 55%),
+      var(--page);
+  }
+  .login-card {
+    width: 100%; max-width: 340px; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 16px; padding: 30px 28px; box-shadow: 0 20px 60px -20px rgba(0,0,0,0.5);
+  }
+  .login-card .logo { font-size: 30px; width: 54px; height: 54px; display:flex; align-items:center; justify-content:center;
+    border-radius: 12px; margin: 0 auto 14px; background: linear-gradient(155deg, var(--brand-red) 0%, var(--brand-red-2) 100%); }
+  .login-card h1 { font-size: 15px; text-align:center; margin: 0 0 4px; letter-spacing:0.6px; text-transform:uppercase; font-weight:800; }
+  .login-card .sub { text-align:center; font-size:11.5px; color:var(--text-muted); margin-bottom:22px; }
+  .login-card label { display:block; font-size:11.5px; color:var(--text-secondary); margin: 12px 0 5px; font-weight:600; }
+  .login-card select, .login-card input[type="password"] { width:100%; }
+  .login-card button.primary { width:100%; margin-top:18px; padding:10px; font-size:13.5px; }
+  .login-error { color: var(--critical); font-size:12px; margin-top:10px; text-align:center; min-height:16px; }
 </style>
 </head>
 <body>
+
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <div class="logo">🏍️</div>
+    <h1>Amar Autos · Command Console</h1>
+    <div class="sub">Login karke apna dashboard dekhein</div>
+    <label for="loginName">Employee</label>
+    <select id="loginName"></select>
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" placeholder="Password" />
+    <button type="button" id="loginBtn" class="primary">Login</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
 
 <div id="loading" class="loading-overlay">
   <div class="spinner"></div>
@@ -228,6 +264,9 @@
       </div>
     </div>
     <div class="controls">
+      <a href="customer-experience.html" style="text-decoration:none;"><button type="button" title="Customer Experience">💬 Reviews</button></a>
+      <a href="ride.html" style="text-decoration:none;"><button type="button" title="Ride Feedback Form">🏍️ Ride FB</button></a>
+      <a href="rider-registration.html" style="text-decoration:none;"><button type="button" title="Rider Registration Form">🪪 Register</button></a>
       <select id="monthFilter"></select>
       <select id="execFilter"></select>
       <button id="themeToggle">🌓</button>
@@ -242,8 +281,11 @@
   <button data-tab="analytics">Analytics</button>
   <button data-tab="delivery">Delivery</button>
   <button data-tab="pending">Delivery Plan</button>
-  <button data-tab="riders">Riders &amp; Reviews</button>
+  <button data-tab="stock">Stock</button>
+  <button data-tab="riderreg">Rider Registration</button>
+  <button data-tab="riderfb">Rider Feedback</button>
   <button data-tab="explorer">Data Explorer</button>
+  <button data-tab="qrcodes">QR Codes</button>
 </nav>
 
 <main>
@@ -336,37 +378,63 @@
     <h2 class="section-title">🏍️ Model-wise — Pending Units</h2>
     <div class="card"><div id="pendingModelBars"></div></div>
 
-    <h2 class="section-title">📄 Pending Bookings — Full List</h2>
+    <h2 class="section-title">⚖️ Pending Bookings vs Stock Available — model-family wise</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Match hai model-family ke naam se (jaise "BULLET 350" aur "BULLET 650" dono "BULLET" family me count honge) — exact colour-variant match nahi hai. Red = stock kam hai booking se.
+    </div>
+    <div class="table-wrap"><table class="data" id="tblPendingVsStock"></table></div>
+
+    <h2 class="section-title">📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery seedha ACTUL BOOKING se)</h2>
     <div class="toolbar">
-      <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive…" />
+      <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive, TDD/date…" />
       <button id="exportPending">⬇ Export CSV</button>
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
   </section>
 
-  <section class="tabpanel" id="tab-riders">
-    <div class="grid-2">
-      <div>
-        <h2 class="section-title">🪖 Rider Registration</h2>
-        <div class="kpi-grid" id="kpiRiderReg"></div>
-        <div class="card" style="margin-top:12px;">
-          <h3>By Riding Experience</h3>
-          <div id="riderExpBars"></div>
-        </div>
-        <div class="card" style="margin-top:12px;">
-          <h3>Top Cities</h3>
-          <div id="riderCityBars"></div>
-        </div>
+  <section class="tabpanel" id="tab-stock">
+    <h2 class="section-title">🏬 Daily Stock — KN &amp; VM</h2>
+    <div class="kpi-grid" id="kpiStock"></div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Store-wise Split</h3>
+        <div id="stockStoreBars"></div>
       </div>
-      <div>
-        <h2 class="section-title">📝 Rider Feedback</h2>
-        <div class="kpi-grid" id="kpiRiderFb"></div>
-        <div class="card" style="margin-top:12px;">
-          <h3>By Bike Model — Avg Overall Rating</h3>
-          <div id="feedbackModelBars"></div>
-        </div>
+      <div class="card">
+        <h3>Status (Open vs In-Transit)</h3>
+        <div id="stockStatusBars"></div>
       </div>
     </div>
+
+    <h2 class="section-title">🏍️ Model-wise Stock</h2>
+    <div class="table-wrap"><table class="data" id="tblStockModel"></table></div>
+
+    <h2 class="section-title">📄 Full Stock List</h2>
+    <div class="toolbar">
+      <input type="text" id="searchStock" placeholder="Search model, chassis no, store…" />
+      <button id="exportStock">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblStockAll"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-riderreg">
+    <h2 class="section-title">🪖 Rider Registration</h2>
+    <div class="kpi-grid" id="kpiRiderReg"></div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>By Riding Experience</h3>
+        <div id="riderExpBars"></div>
+      </div>
+      <div class="card">
+        <h3>Top Cities</h3>
+        <div id="riderCityBars"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🏍️ By Bike Model</h2>
+    <div class="card"><div id="riderModelBars"></div></div>
 
     <h2 class="section-title">🪪 Rider Registration — Full List</h2>
     <div class="toolbar">
@@ -374,6 +442,14 @@
       <button id="exportRiderReg">⬇ Export CSV</button>
     </div>
     <div class="table-wrap"><table class="data" id="tblRiderRegAll"></table></div>
+  </section>
+
+  <section class="tabpanel" id="tab-riderfb">
+    <h2 class="section-title">📝 Rider Feedback</h2>
+    <div class="kpi-grid" id="kpiRiderFb"></div>
+
+    <h2 class="section-title">🏍️ By Bike Model — Avg Overall Rating</h2>
+    <div class="card"><div id="feedbackModelBars"></div></div>
 
     <h2 class="section-title">💬 Rider Feedback — Full List</h2>
     <div class="toolbar">
@@ -392,6 +468,7 @@
         <option value="Google Review">Google Review</option>
         <option value="RIDER FEEDBACK">RIDER FEEDBACK</option>
         <option value="RIDER REGISTRATION">RIDER REGISTRATION</option>
+        <option value="Stock">Stock</option>
       </select>
       <input type="text" id="explorerSearch" placeholder="Search across all columns…" />
       <button id="explorerExport">⬇ Export CSV</button>
@@ -399,12 +476,33 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblExplorer"></table></div>
   </section>
+
+  <section class="tabpanel" id="tab-qrcodes">
+    <h2 class="section-title">📱 Customer QR Codes — dikhao ya print karke counter par rakh do</h2>
+    <div class="grid-2">
+      <div class="card" style="text-align:center;">
+        <h3>⭐ Google Review</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Famarauto87-source.github.io%2Famar-autos-review%2Fcustomer-experience.html" alt="Review QR" style="border-radius:10px; margin:10px 0;" width="240" height="240" />
+        <div class="hint" style="word-break:break-all;">https://amarauto87-source.github.io/amar-autos-review/customer-experience.html</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <h3>🪖 Riding Group / Rider Registration</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Famarauto87-source.github.io%2Famar-autos-review%2Frider-registration.html" alt="Rider Registration QR" style="border-radius:10px; margin:10px 0;" width="240" height="240" />
+        <div class="hint" style="word-break:break-all;">https://amarauto87-source.github.io/amar-autos-review/rider-registration.html</div>
+      </div>
+    </div>
+    <div class="empty-note" style="text-align:left; padding:16px 0 0;">
+      Review QR abhi "Customer Experience" page par jaata hai. Agar aap chahte ho ki ye seedha aapke asli Google Maps review page par jaaye, uska link bhej dena — main QR update kar dunga.
+    </div>
+  </section>
 </main>
 
 <footer>
   Data pulled live from your Google Sheet on every refresh (auto-refreshes every 5 minutes) · Built for Amar Autos<br/>
   Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
 </footer>
+
+</div><!-- /#appShell -->
 
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
@@ -419,6 +517,84 @@ const AUTO_REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes so the da
     document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
   });
 })();
+
+/* ---------------- login / roles ----------------
+   This is a static, client-side-only page — there is no real server-side auth here. Anyone who
+   opens the browser's dev tools can see this credential list and all the Sheet data regardless of
+   login (the Sheet itself is link-shared "Anyone can view", which is what makes the live-fetch
+   trick work at all). This login is a practical UI gate for day-to-day use (so a sales exec's
+   default view only shows their own numbers), NOT real security — don't rely on it to keep data
+   away from a determined technical person. Told Deepak this plainly when it was built.
+   execKey must match the short executive codes used in the Targets sheet / DELIVERY SHEET
+   "Executive" column / ACTUL BOOKING "SE" column (ASLAM, RAKESH, POOJA, SIMMI, PRAKSHI, SHAISTA,
+   HARSH, SANDEEP, KASHISH) — confirmed against Deepak's final credentials list, all 9 non-admin
+   logins now map 1:1 onto the real execList codes.
+*/
+const CREDENTIALS = [
+  { name: 'Deepak',  password: 'Superman@123', role: 'Admin', execKey: null },
+  { name: 'ASLAM',   password: 'Khan@786',     role: 'Sales', execKey: 'ASLAM' },
+  { name: 'RAKESH',  password: 'Mishra@111',   role: 'Sales', execKey: 'RAKESH' },
+  { name: 'SANDEEP', password: 'Sanjeet@123',  role: 'Sales', execKey: 'SANDEEP' },
+  { name: 'POOJA',   password: 'Negi@111',     role: 'Sales', execKey: 'POOJA' },
+  { name: 'SIMMI',   password: 'Khan@786',     role: 'Sales', execKey: 'SIMMI' },
+  { name: 'PRAKSHI', password: 'Prakshi@123',  role: 'Sales', execKey: 'PRAKSHI' },
+  { name: 'SHAISTA', password: 'Shaista@123',  role: 'Sales', execKey: 'SHAISTA' },
+  { name: 'HARSH',   password: 'Sharma@111',   role: 'CRT',   execKey: 'HARSH' },
+  { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
+];
+let CURRENT_USER = null;
+// Tabs a non-Admin login should NOT see — company-wide data not specific to one person.
+const RESTRICTED_TABS = ['analytics', 'stock', 'riderreg', 'riderfb', 'explorer'];
+
+function populateLoginDropdown(){
+  const sel = document.getElementById('loginName');
+  sel.innerHTML = CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
+}
+populateLoginDropdown();
+
+function attemptLogin(){
+  const name = document.getElementById('loginName').value;
+  const pass = document.getElementById('loginPass').value;
+  const user = CREDENTIALS.find(u => u.name === name && u.password === pass);
+  const errEl = document.getElementById('loginError');
+  if (!user) {
+    errEl.textContent = 'Galat password. Dubara try karo.';
+    return;
+  }
+  errEl.textContent = '';
+  CURRENT_USER = user;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  applyRoleRestrictions();
+  loadAll();
+  setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
+}
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
+function visibleExecList(){
+  if (CURRENT_USER && CURRENT_USER.role !== 'Admin') return CURRENT_USER.execKey ? [CURRENT_USER.execKey] : [];
+  return STATE.execList;
+}
+
+function applyRoleRestrictions(){
+  if (!CURRENT_USER) return;
+  const isAdmin = CURRENT_USER.role === 'Admin';
+  // hide tabs that show company-wide / other-people's data from non-admin logins
+  document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
+    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(btn.dataset.tab)) ? 'none' : '';
+  });
+  if (!isAdmin) {
+    // land on Overview, not whatever tab happened to be marked active
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'overview'));
+    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-overview'));
+    // lock the executive filter to their own name so every KPI/table only shows their own numbers
+    const execSel = document.getElementById('execFilter');
+    execSel.disabled = true;
+    document.getElementById('statusLine').insertAdjacentHTML('beforeend',
+      ` · logged in as ${esc(CURRENT_USER.name)} (${esc(CURRENT_USER.role)})`);
+  }
+}
 
 /* ---------------- helpers ---------------- */
 function str(v){ return (v === null || v === undefined) ? '' : String(v).trim(); }
@@ -499,7 +675,7 @@ function fetchSheetRaw(name){
 
 /* ---------------- global state ---------------- */
 const STATE = {
-  booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [],
+  booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [], stock: [],
   execList: [], months: [], filterMonth: null, filterExec: 'ALL', lastLoaded: null, initialized: false
 };
 
@@ -510,14 +686,32 @@ const COL = {
   REVIEW: ['Date & Time','Rating','Bike Model','Sales Person','Selected Tags','Full Review Text','Riding Group','WhatsApp Number','Branch'],
   RIDER_FB: ['Timestamp','Rider Name','Phone Number','Bike Model','Bike Reg No','Ride Date','Overall Rating','Route Rating','Safety Rating','Food Rating','Ride Again','Best Moment','Suggestions'],
   RIDER_REG: ['Timestamp','Rider Name','Mobile Number','Emergency Contact','Bike Model','Bike Reg No','Riding Experience','Already Member','Riding Group Name','City / Location','Date of Birth','Email','Address'],
+  STOCK: ['Region','State','District','City','RE City','Category','Company','Store Code','Store','Model Family','Model Code','Model Name','Chassis No','Engine No','DMS Receipt Date','SAP Invoice Date','Ageing (Days)','Status','Basic Price','MRP'],
 };
+
+// Royal Enfield model-family keywords, longest/most-specific first, used to group Stock's
+// "Model Name" and ACTUL BOOKING's "Model" text onto the same key even though the two sheets
+// spell things slightly differently (colour variants, "NEW CLASSIC" vs "CLASSIC", typos like
+// "GUERRILA" vs "GUERRILLA"). This is a family-level match, not an exact colour/variant match.
+const MODEL_FAMILY_KEYWORDS = ['SUPER METEOR','CONTINENTAL GT','INTERCEPTOR','HIMALAYAN','GUERRIL','SCRAM','HUNTER','METEOR','CLASSIC','BULLET'];
+function modelFamilyKey(s){
+  const u = up(s);
+  let base = u.split(/\s+/)[0] || '(unknown)';
+  for (const kw of MODEL_FAMILY_KEYWORDS) {
+    if (u.includes(kw)) { base = (kw === 'GUERRIL' ? 'GUERRILLA' : kw); break; }
+  }
+  // Append engine displacement (350/450/650/750...) when present, so e.g. "BULLET 350" and
+  // "BULLET 650" are compared as separate stock pools rather than lumped into one "BULLET" bucket.
+  const ccMatch = u.match(/\b([3-9]\d0)\b/);
+  return ccMatch ? `${base} ${ccMatch[1]}` : base;
+}
 
 /* ---------------- data loading ---------------- */
 async function loadAll(){
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -526,6 +720,7 @@ async function loadAll(){
       fetchSheetRaw('RIDER REGISTRATION'),
       fetchSheetRaw('Targets'),
       fetchSheetRaw('Name Map'),
+      fetchSheetRaw('Stock'),
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -536,6 +731,7 @@ async function loadAll(){
     STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
     STATE.targets = targets.slice(4).filter(r => str(r[0]) && up(r[0]) !== 'TOTAL');
     STATE.nameMap = nameMap.slice(4).filter(r => str(r[1]));
+    STATE.stock = stock.slice(1).filter(r => str(r[12]));
 
     STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
     buildMonthList();
@@ -544,7 +740,7 @@ async function loadAll(){
     STATE.lastLoaded = new Date();
     renderAll();
     document.getElementById('statusLine').textContent =
-      `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries`;
+      `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
   } catch (err) {
     console.error(err);
     document.getElementById('errorBox').innerHTML =
@@ -590,7 +786,13 @@ function populateFilters(){
   const prevExec = execSel.value || 'ALL';
   execSel.innerHTML = '<option value="ALL">All Executives</option>' +
     STATE.execList.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
-  if ([...execSel.options].some(o => o.value === prevExec)) execSel.value = prevExec;
+  if (CURRENT_USER && CURRENT_USER.role !== 'Admin') {
+    // non-admin: always locked to their own executive code, even on periodic auto-refresh
+    execSel.value = CURRENT_USER.execKey || 'ALL';
+    execSel.disabled = true;
+  } else if ([...execSel.options].some(o => o.value === prevExec)) {
+    execSel.value = prevExec;
+  }
   STATE.filterExec = execSel.value;
 }
 
@@ -637,6 +839,7 @@ function renderAll(){
   renderReviews();
   renderDelivery();
   renderPending();
+  renderStock();
   renderRiders();
   renderExplorer();
   renderAnalytics();
@@ -698,7 +901,7 @@ function renderSalesConsole(){
 }
 
 function renderEmployeeTable(){
-  const rows = STATE.execList.map(name => {
+  const rows = visibleExecList().map(name => {
     const agg = computeDeliveryAgg(name);
     const target = targetFor(name);
     const achv = target ? agg.retail/target : 0;
@@ -775,7 +978,7 @@ function renderBookings(){
     kpiCard('Coverage', fmtPct(coverage), 'retail ÷ active bookings'),
   ].join('');
 
-  const rows = STATE.execList.map(name => ({ name, active: (byExec[name]||{}).active||0, cancelled: (byExec[name]||{}).cancelled||0 }))
+  const rows = visibleExecList().map(name => ({ name, active: (byExec[name]||{}).active||0, cancelled: (byExec[name]||{}).cancelled||0 }))
     .sort((a,b) => b.active - a.active);
   renderStaticTable('tblBookingsEmp', [
     { key:'name', label:'Executive' },
@@ -816,7 +1019,7 @@ function renderReviews(){
     kpiCard('Riders Added', fmtInt(ridersAdded), 'said "Yes" to riding group'),
   ].join('');
 
-  const rows = STATE.execList.map(name => {
+  const rows = visibleExecList().map(name => {
     const e = byExec[name] || { count:0, sum:0, riders:0 };
     return { name, reviews: e.count, avg: e.count ? e.sum/e.count : 0, riders: e.riders };
   }).sort((a,b) => b.reviews - a.reviews);
@@ -938,6 +1141,32 @@ function renderPending(){
 
   renderBarList('pendingModelBars', models, 'var(--s2)');
 
+  // Pending bookings vs stock on hand, grouped by model family (see modelFamilyKey()).
+  // Only STATUS="Open" stock counts as "available now" — "In-Transit" hasn't arrived yet.
+  const pendingByFamily = {};
+  rows.forEach(r => {
+    const fam = modelFamilyKey(r[3]);
+    pendingByFamily[fam] = (pendingByFamily[fam] || 0) + 1;
+  });
+  const stockByFamily = {};
+  STATE.stock.forEach(r => {
+    if (up(r[17]) !== 'OPEN') return; // only physically-available stock counts here
+    const fam = modelFamilyKey(r[11] || r[9]);
+    stockByFamily[fam] = (stockByFamily[fam] || 0) + 1;
+  });
+  const allFamilies = Array.from(new Set([...Object.keys(pendingByFamily), ...Object.keys(stockByFamily)])).sort();
+  const cmpRows = allFamilies.map(fam => {
+    const pending = pendingByFamily[fam] || 0;
+    const stock = stockByFamily[fam] || 0;
+    return { fam, pending, stock, gap: stock - pending };
+  }).filter(r => r.pending > 0 || r.stock > 0).sort((a,b) => b.pending - a.pending);
+  renderStaticTable('tblPendingVsStock', [
+    { key:'fam', label:'Model Family' },
+    { key:'pending', label:'Pending Bookings', num:true },
+    { key:'stock', label:'Stock Available (Open)', num:true },
+    { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
+  ], cmpRows);
+
   const search = str(document.getElementById('searchPending').value).toLowerCase();
   const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
   renderRawTable('tblPendingAll', [
@@ -950,12 +1179,72 @@ function renderPending(){
     { key:7, label:'Executive' },
     { key:8, label:'TDD' },
     { key:9, label:'Status' },
+    { key:10, label:'Expected Delivery' },
   ], filtered);
 }
 document.getElementById('searchPending').addEventListener('input', () => renderPending());
 document.getElementById('exportPending').addEventListener('click', () => {
   exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows());
 });
+
+/* ---------------- Stock tab ----------------
+   Reads the "Stock" sheet — every row is bike currently either "Open" (physically in stock,
+   ready to deliver) or "In-Transit" (dispatched but not yet arrived). Store Code splits it
+   between the two showrooms (KN and VM). */
+function renderStock(){
+  const all = STATE.stock;
+  const openRows = all.filter(r => up(r[17]) === 'OPEN');
+  const transitRows = all.filter(r => up(r[17]) === 'IN-TRANSIT');
+  const byStore = {};
+  all.forEach(r => { const s = str(r[7]) || '(unknown)'; byStore[s] = (byStore[s]||0) + 1; });
+
+  document.getElementById('kpiStock').innerHTML = [
+    kpiCard('Total Stock', fmtInt(all.length), 'Open + In-Transit'),
+    kpiCard('Available Now (Open)', fmtInt(openRows.length)),
+    kpiCard('In-Transit', fmtInt(transitRows.length), 'dispatched, not yet arrived'),
+    ...Object.entries(byStore).map(([store, n]) => kpiCard(`Store ${store}`, fmtInt(n))),
+  ].join('');
+
+  renderBarList('stockStoreBars', byStore, 'var(--s1)');
+  renderBarList('stockStatusBars', { 'Open (available)': openRows.length, 'In-Transit': transitRows.length }, 'var(--s3)');
+
+  // Model-wise, broken down to exact Model Name (not just family) — family alone was too
+  // coarse to actually tell colour/variant stock levels apart, per Deepak's feedback.
+  const modelRows = {};
+  all.forEach(r => {
+    const fam = modelFamilyKey(r[11] || r[9]);
+    const name = str(r[11]) || '(unknown)';
+    const key = fam + '||' + name;
+    const m = modelRows[key] || (modelRows[key] = { fam, name, kn:0, vm:0, open:0, transit:0 });
+    const store = up(r[7]);
+    if (store === 'KN') m.kn++; else if (store === 'VM') m.vm++;
+    if (up(r[17]) === 'OPEN') m.open++; else if (up(r[17]) === 'IN-TRANSIT') m.transit++;
+  });
+  const modelList = Object.values(modelRows).sort((a,b) => (b.open+b.transit) - (a.open+a.transit) || a.fam.localeCompare(b.fam));
+  renderStaticTable('tblStockModel', [
+    { key:'fam', label:'Model Family' },
+    { key:'name', label:'Model Name' },
+    { key:'kn', label:'Store KN', num:true },
+    { key:'vm', label:'Store VM', num:true },
+    { key:'open', label:'Available (Open)', num:true },
+    { key:'transit', label:'In-Transit', num:true },
+  ], modelList);
+
+  const search = str(document.getElementById('searchStock').value).toLowerCase();
+  const filtered = all.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
+  renderRawTable('tblStockAll', [
+    { key:7, label:'Store Code' },
+    { key:9, label:'Model Family' },
+    { key:11, label:'Model Name' },
+    { key:12, label:'Chassis No' },
+    { key:14, label:'DMS Receipt Date', fmt: fmtDate },
+    { key:16, label:'Ageing (Days)', num:true },
+    { key:17, label:'Status' },
+    { key:19, label:'MRP', num:true, fmt: fmtMoney },
+  ], filtered);
+}
+document.getElementById('searchStock').addEventListener('input', () => renderStock());
+document.getElementById('exportStock').addEventListener('click', () => exportCsv('stock.csv', COL.STOCK, STATE.stock));
 
 /* ---------------- Riders & Reviews tab ---------------- */
 function renderRiders(){
@@ -975,6 +1264,10 @@ function renderRiders(){
   regFiltered.forEach(r => { const k = str(r[9]) || 'Unspecified'; cityGroups[k] = (cityGroups[k]||0)+1; });
   const topCities = Object.fromEntries(Object.entries(cityGroups).sort((a,b)=>b[1]-a[1]).slice(0,8));
   renderBarList('riderCityBars', topCities, 'var(--s3)');
+
+  const regModelGroups = {};
+  regFiltered.forEach(r => { const k = str(r[4]) || 'Unspecified'; regModelGroups[k] = (regModelGroups[k]||0)+1; });
+  renderBarList('riderModelBars', regModelGroups, 'var(--s2)');
 
   const fbFiltered = STATE.riderFb.filter(r => dateInFilter(r[0]));
   let overallSum=0, routeSum=0, safetySum=0, foodSum=0, cnt=0, rideAgainYes=0;
@@ -1250,6 +1543,7 @@ function explorerData(){
     'Google Review': { rows: STATE.review, cols: COL.REVIEW },
     'RIDER FEEDBACK': { rows: STATE.riderFb, cols: COL.RIDER_FB },
     'RIDER REGISTRATION': { rows: STATE.riderReg, cols: COL.RIDER_REG },
+    'Stock': { rows: STATE.stock, cols: COL.STOCK },
   };
   return map[sheet];
 }
@@ -1280,7 +1574,7 @@ function renderStaticTable(tableId, cols, rows){
     let v = r[c.key];
     if (c.fmt) v = c.fmt(v);
     else if (typeof v === 'number') v = fmtInt(v);
-    return `<td class="${c.num ? 'num' : ''}">${esc(v)}</td>`;
+    return `<td class="${c.num ? 'num' : ''}">${c.raw ? v : esc(v)}</td>`;
   }).join('')}</tr>`).join('')}</tbody>`;
   table.innerHTML = thead + tbody;
 }
@@ -1322,9 +1616,8 @@ document.getElementById('tabs').addEventListener('click', (e) => {
   document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab));
 });
 
-/* ---------------- boot ---------------- */
-loadAll();
-setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
+/* ---------------- boot ----------------
+   loadAll() now only starts after a successful login — see attemptLogin() above. */
 </script>
 </body>
 </html>
