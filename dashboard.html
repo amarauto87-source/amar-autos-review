@@ -166,6 +166,21 @@
   .kpi-card .kpi-flag { display:inline-flex; align-items:center; gap:5px; font-size: 10.5px; font-weight: 700; color: var(--critical); margin-top: 6px; }
   td.cell-below-target, .table-flag { color: var(--critical); font-weight: 700; }
   .table-flag { display:inline-flex; align-items:center; gap:4px; font-size: 12px; }
+  /* Today's Priorities — a rule-based (not AI) daily briefing styled like a chat bubble, built
+     entirely from data already on this page: no API key, no external calls, no cost. */
+  .chat-panel {
+    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 92%, var(--brand-red) 8%) 130%);
+    border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
+  }
+  .chat-greeting { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .chat-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
+    border-top: 1px solid var(--border); font-size: 13px; line-height: 1.5;
+  }
+  .chat-item:first-of-type { border-top: none; }
+  .chat-item .chat-icon { font-size: 16px; flex-shrink: 0; }
+  .chat-item.urgent { color: var(--critical); font-weight: 600; }
+  .chat-item.ok { color: var(--good); font-weight: 600; }
   .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
   .meter > div { height: 100%; background: linear-gradient(90deg, var(--s1), color-mix(in srgb, var(--s1) 70%, white 30%)); border-radius: 3px; }
   /* charts */
@@ -312,6 +327,9 @@
   <div id="errorBox"></div>
 
   <section class="tabpanel active" id="tab-overview">
+    <h2 class="section-title">🤖 Today's Priorities</h2>
+    <div class="chat-panel" id="todayPriorities"></div>
+
     <h2 class="section-title">🏍️ Sales Console</h2>
     <div class="kpi-grid" id="kpiSalesConsole"></div>
 
@@ -747,6 +765,22 @@ function modelFamilyKey(s){
   return ccMatch ? `${base} ${ccMatch[1]}` : base;
 }
 
+// Checks a pending booking's Model+Colour against current Open stock. Shared by the Pending
+// tab's "Whose Booking vs Which Model Is Available" table and Today's Priorities.
+function stockMatchFor(model, colour){
+  const fam = modelFamilyKey(model);
+  const colourWords = up(colour).split(/\s+/).filter(w => w.length > 2);
+  let exact = 0, familyOnly = 0;
+  STATE.stock.forEach(r => {
+    if (up(r[17]) !== 'OPEN') return;
+    const name = up(r[11] || r[9]);
+    if (!name || modelFamilyKey(name) !== fam) return;
+    const isColourMatch = !colourWords.length || colourWords.some(w => name.includes(w));
+    if (isColourMatch) exact++; else familyOnly++;
+  });
+  return { exact, familyOnly };
+}
+
 /* ---------------- data loading ---------------- */
 async function loadAll(){
   document.getElementById('loading').style.display = 'flex';
@@ -959,6 +993,7 @@ function ownerInFilter(owner){
 
 /* ---------------- render orchestrator ---------------- */
 function renderAll(){
+  renderTodayPriorities();
   renderSalesConsole();
   renderEmployeeTable();
   renderFunnel();
@@ -1309,6 +1344,83 @@ function overdueRowsFor(execFilterName){
     return tdd && tdd < today;
   });
 }
+// Same "not billed, not cancelled" booking set as pendingRows(), but WITHOUT the month filter —
+// used by Today's Priorities, which is a right-now action list, not a monthly report.
+function allPendingRowsFor(execFilterName){
+  return STATE.booking.filter(r => {
+    if (execFilterName) { if (!execMatches(r[7], execFilterName)) return false; }
+    else { if (!execInFilter(r[7])) return false; }
+    const s = up(r[9]);
+    return s !== 'BILLED' && s !== 'CANCEL';
+  });
+}
+
+/* ---------------- Today's Priorities ----------------
+   NOT an AI chatbot — a rule-based daily briefing built entirely from data already on this
+   page (overdue deliveries, bookings whose stock just arrived, performance vs. the same
+   thresholds used elsewhere). No API key, no external calls, no cost, and no risk of an AI
+   inventing wrong sales advice — every line here is a direct fact pulled from the sheet. */
+function computeTodayPriorities(){
+  const items = [];
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  if (isAdmin) {
+    const overdueAll = overdueRowsFor(null);
+    if (overdueAll.length) {
+      const byExec = {};
+      overdueAll.forEach(r => { const e = str(r[7]) || 'Unknown'; byExec[e] = (byExec[e]||0) + 1; });
+      const breakdown = Object.entries(byExec).sort((a,b) => b[1]-a[1]).map(([n,c]) => `${n} (${c})`).join(', ');
+      items.push({ icon: '⏰', text: `${overdueAll.length} overdue ${overdueAll.length===1?'delivery':'deliveries'} across the team — ${breakdown}.`, cls: 'urgent' });
+    }
+    const readyAll = allPendingRowsFor(null).filter(r => stockMatchFor(r[3], r[4]).exact > 0);
+    if (readyAll.length) {
+      items.push({ icon: '📦', text: `${readyAll.length} pending ${readyAll.length===1?'booking has':'bookings have'} matching stock now — remind the team to schedule these deliveries.`, cls: '' });
+    }
+    const underperforming = visibleExecList().map(name => {
+      const agg = computeDeliveryAgg(name);
+      const target = targetFor(name);
+      const achv = target ? agg.retail/target : 0;
+      const flags = [];
+      if (target && achv < PERF_THRESHOLDS.achv) flags.push('behind target');
+      if (agg.retail && (agg.ew/agg.retail) < PERF_THRESHOLDS.ewPct) flags.push('low EW');
+      if (agg.retail && (agg.rsa/agg.retail) < PERF_THRESHOLDS.rsaPct) flags.push('low RSA');
+      if (agg.retail && (agg.gma/agg.retail) < PERF_THRESHOLDS.gmaPerBike) flags.push('low GMA');
+      return flags.length ? `${name} (${flags.join(', ')})` : null;
+    }).filter(Boolean);
+    if (underperforming.length) {
+      items.push({ icon: '📉', text: `${underperforming.length} team member${underperforming.length===1?'':'s'} ${underperforming.length===1?'needs':'need'} attention: ${underperforming.join('; ')}.`, cls: 'urgent' });
+    }
+  } else {
+    const name = CURRENT_USER.execKey;
+    const overdue = overdueRowsFor(name);
+    if (overdue.length) {
+      items.push({ icon: '⏰', text: `Follow up on ${overdue.length} overdue ${overdue.length===1?'delivery':'deliveries'} — ${overdue.length===1?'a customer is':'customers are'} waiting.`, cls: 'urgent' });
+    }
+    const ready = allPendingRowsFor(name).filter(r => stockMatchFor(r[3], r[4]).exact > 0);
+    if (ready.length) {
+      items.push({ icon: '📦', text: `${ready.length} of your ${ready.length===1?'customer\'s':'customers\''} ${ready.length===1?'bike is':'bikes are'} now in stock — call to schedule delivery.`, cls: 'urgent' });
+    }
+    const agg = computeDeliveryAgg(name);
+    const target = targetFor(name);
+    const achv = target ? agg.retail/target : 0;
+    if (target && achv < PERF_THRESHOLDS.achv) {
+      const remaining = target - agg.retail;
+      if (remaining > 0) items.push({ icon: '🎯', text: `You need ${remaining} more ${remaining===1?'bike':'bikes'} to hit this month's target of ${fmtInt(target)}.`, cls: '' });
+    }
+    if (agg.retail && (agg.ew/agg.retail) < PERF_THRESHOLDS.ewPct) items.push({ icon: '🛡️', text: 'Your EW (Extended Warranty) attach rate is below 70% — remember to pitch it on every sale.', cls: '' });
+    if (agg.retail && (agg.rsa/agg.retail) < PERF_THRESHOLDS.rsaPct) items.push({ icon: '🚨', text: 'Your RSA attach rate is below 50% — remember to offer it at billing.', cls: '' });
+    if (agg.retail && (agg.gma/agg.retail) < PERF_THRESHOLDS.gmaPerBike) items.push({ icon: '💰', text: 'Your average GMA per bike is below ₹7,500 — try upselling accessories/gear.', cls: '' });
+  }
+  if (!items.length) items.push({ icon: '🎉', text: 'All caught up — no urgent follow-ups right now. Keep up the good work!', cls: 'ok' });
+  return items;
+}
+function renderTodayPriorities(){
+  const el = document.getElementById('todayPriorities');
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const greetName = isAdmin ? 'Deepak' : CURRENT_USER.name;
+  const items = computeTodayPriorities();
+  el.innerHTML = `<div class="chat-greeting">👋 ${esc(greetName)}, here's what needs your attention${isAdmin ? ' across the team' : ' today'}:</div>` +
+    items.map(it => `<div class="chat-item ${it.cls}"><span class="chat-icon">${it.icon}</span><span>${esc(it.text)}</span></div>`).join('');
+}
 
 /* ---------------- Pending Delivery Plan tab ----------------
    "Actual booking model-wise delivery plan for the same month" = this month's bookings
@@ -1392,20 +1504,8 @@ function renderPending(){
   // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
   // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
   // level, not just family, so a sales person can tell a waiting customer exactly where things
-  // stand without going back to the sheet and filtering manually.
-  const openStock = STATE.stock.filter(r => up(r[17]) === 'OPEN');
-  function stockMatchFor(model, colour){
-    const fam = modelFamilyKey(model);
-    const colourWords = up(colour).split(/\s+/).filter(w => w.length > 2);
-    let exact = 0, familyOnly = 0;
-    openStock.forEach(r => {
-      const name = up(r[11] || r[9]);
-      if (!name || modelFamilyKey(name) !== fam) return;
-      const isColourMatch = !colourWords.length || colourWords.some(w => name.includes(w));
-      if (isColourMatch) exact++; else familyOnly++;
-    });
-    return { exact, familyOnly };
-  }
+  // stand without going back to the sheet and filtering manually. (stockMatchFor is now a
+  // module-level function — see below renderStock() — so Today's Priorities can reuse it too.)
   const bookingStockRows = rows.map(r => {
     const model = str(r[3]) || '(unknown)';
     const colour = str(r[4]);
