@@ -384,6 +384,12 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStock"></table></div>
 
+    <h2 class="section-title">🎯 Kiska Booking vs Kaunsa Model Available — customer-wise (exact colour match)</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Har pending booking ke saamne dikhta hai ki uska exact model+colour abhi stock me "Open" hai ya nahi — customer ko turant bata sakte ho delivery kab ho sakti hai. Admin ko sabka data dikhta hai, sales person ko sirf apna.
+    </div>
+    <div class="table-wrap"><table class="data" id="tblBookingStockMatch"></table></div>
+
     <h2 class="section-title">📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery seedha ACTUL BOOKING se)</h2>
     <div class="toolbar">
       <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive, TDD/date…" />
@@ -544,7 +550,9 @@ const CREDENTIALS = [
 ];
 let CURRENT_USER = null;
 // Tabs a non-Admin login should NOT see — company-wide data not specific to one person.
-const RESTRICTED_TABS = ['analytics', 'stock', 'riderreg', 'riderfb', 'explorer'];
+// Stock ab sabko dikhta hai (Deepak's request) — ye shared showroom inventory hai, kisi ek
+// sales person ki private data nahi, isliye sales person ke liye restrict karne ki zaroorat nahi.
+const RESTRICTED_TABS = ['analytics', 'riderreg', 'riderfb', 'explorer'];
 
 function populateLoginDropdown(){
   const sel = document.getElementById('loginName');
@@ -907,6 +915,11 @@ function renderSalesConsole(){
   const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
   const gearPct = agg.retail ? agg.gear/agg.retail : 0;
   const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
+  // Total Stock shown right here too (not exec-specific — it's shared showroom inventory) so a
+  // sales person can see "how much stock is available" without needing admin access to the
+  // full Stock tab. See also renderStock() for the full model-wise breakdown.
+  const stockOpen = STATE.stock.filter(r => up(r[17]) === 'OPEN').length;
+  const stockTransit = STATE.stock.filter(r => up(r[17]) === 'IN-TRANSIT').length;
   const el = document.getElementById('kpiSalesConsole');
   el.innerHTML = [
     kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed'),
@@ -916,6 +929,8 @@ function renderSalesConsole(){
     kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100),
     kpiCard('Gear Attached', fmtInt(agg.gear), `${fmtPct(gearPct)} of retail`, gearPct*100),
     kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`),
+    kpiCard('Total Stock (Open)', fmtInt(stockOpen), 'available now, both stores'),
+    kpiCard('In-Transit Stock', fmtInt(stockTransit), 'dispatched, arriving soon'),
   ].join('');
 }
 
@@ -1166,7 +1181,7 @@ function renderPending(){
     kpiCard('Pending Models', fmtInt(Object.keys(models).length)),
   ].join('');
 
-  renderBarList('pendingModelBars', models, 'var(--s2)');
+  renderBarList('pendingModelBars', models, 'var(--s2)', null, { groupByPrefix: true });
 
   // Pending bookings vs stock on hand, grouped by model family (see modelFamilyKey()).
   // Only STATUS="Open" stock counts as "available now" — "In-Transit" hasn't arrived yet.
@@ -1193,6 +1208,42 @@ function renderPending(){
     { key:'stock', label:'Stock Available (Open)', num:true },
     { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
   ], cmpRows);
+
+  // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
+  // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
+  // level, not just family, so a sales person can tell a waiting customer exactly where things
+  // stand without going back to the sheet and filtering manually.
+  const openStock = STATE.stock.filter(r => up(r[17]) === 'OPEN');
+  function stockMatchFor(model, colour){
+    const fam = modelFamilyKey(model);
+    const colourWords = up(colour).split(/\s+/).filter(w => w.length > 2);
+    let exact = 0, familyOnly = 0;
+    openStock.forEach(r => {
+      const name = up(r[11] || r[9]);
+      if (!name || modelFamilyKey(name) !== fam) return;
+      const isColourMatch = !colourWords.length || colourWords.some(w => name.includes(w));
+      if (isColourMatch) exact++; else familyOnly++;
+    });
+    return { exact, familyOnly };
+  }
+  const bookingStockRows = rows.map(r => {
+    const model = str(r[3]) || '(unknown)';
+    const colour = str(r[4]);
+    const { exact, familyOnly } = stockMatchFor(model, colour);
+    let status, cls;
+    if (exact > 0) { status = `✅ Available now (${exact} in stock)`; cls = 'good'; }
+    else if (familyOnly > 0) { status = `🟡 Same model, other colour available (${familyOnly})`; cls = 'warn'; }
+    else { status = '❌ Not in stock — check In-Transit / order'; cls = 'bad'; }
+    return { customer: str(r[5]), model, colour, exec: str(r[7]), tdd: str(r[8]) || str(r[10]), status, cls };
+  }).sort((a,b) => (a.cls==='bad'?0:1) - (b.cls==='bad'?0:1));
+  renderStaticTable('tblBookingStockMatch', [
+    { key:'customer', label:'Customer' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'exec', label:'Executive' },
+    { key:'tdd', label:'TDD / Expected' },
+    { key:'status', label:'Stock Status', raw:true },
+  ], bookingStockRows.map(r => ({ ...r, status: `<span class="pill ${r.cls}">${r.status}</span>` })));
 
   const search = str(document.getElementById('searchPending').value).toLowerCase();
   const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
@@ -1247,7 +1298,17 @@ function renderStock(){
     if (store === 'KN') m.kn++; else if (store === 'VM') m.vm++;
     if (up(r[17]) === 'OPEN') m.open++; else if (up(r[17]) === 'IN-TRANSIT') m.transit++;
   });
-  const modelList = Object.values(modelRows).sort((a,b) => (b.open+b.transit) - (a.open+a.transit) || a.fam.localeCompare(b.fam));
+  // Group by Model Family first (so e.g. all "CLASSIC 350" colour/variant rows sit together,
+  // not scattered across the table by raw count), families ordered by their combined stock
+  // total; inside a family, biggest-stock variant first.
+  const famTotals = {};
+  Object.values(modelRows).forEach(m => { famTotals[m.fam] = (famTotals[m.fam]||0) + m.open + m.transit; });
+  const modelList = Object.values(modelRows).sort((a,b) => {
+    const ft = famTotals[b.fam] - famTotals[a.fam];
+    if (ft !== 0) return ft;
+    if (a.fam !== b.fam) return a.fam.localeCompare(b.fam);
+    return (b.open+b.transit) - (a.open+a.transit);
+  });
   renderStaticTable('tblStockModel', [
     { key:'fam', label:'Model Family' },
     { key:'name', label:'Model Name' },
@@ -1348,8 +1409,26 @@ document.getElementById('searchRiderFb').addEventListener('input', () => renderR
 document.getElementById('exportRiderReg').addEventListener('click', () => exportCsv('rider_registration.csv', COL.RIDER_REG, STATE.riderReg));
 document.getElementById('exportRiderFb').addEventListener('click', () => exportCsv('rider_feedback.csv', COL.RIDER_FB, STATE.riderFb));
 
-function renderBarList(containerId, groups, color, maxScale){
-  const entries = Object.entries(groups).sort((a,b) => b[1]-a[1]);
+function renderBarList(containerId, groups, color, maxScale, opts){
+  opts = opts || {};
+  let entries = Object.entries(groups);
+  if (opts.groupByPrefix) {
+    // Keep same-model rows adjacent (e.g. all "CLASSIC 350" colour variants together) instead
+    // of scattering them wherever their individual count happens to rank — sort by the group's
+    // (model's) combined total first, then by each colour's own count inside that group.
+    const prefixOf = k => k.split(' - ')[0];
+    const groupTotals = {};
+    entries.forEach(([k,v]) => { const p = prefixOf(k); groupTotals[p] = (groupTotals[p]||0) + v; });
+    entries.sort((a,b) => {
+      const pa = prefixOf(a[0]), pb = prefixOf(b[0]);
+      const gt = groupTotals[pb] - groupTotals[pa];
+      if (gt !== 0) return gt;
+      if (pa !== pb) return pa.localeCompare(pb);
+      return b[1] - a[1];
+    });
+  } else {
+    entries.sort((a,b) => b[1]-a[1]);
+  }
   const max = maxScale || Math.max(1, ...entries.map(e => e[1]));
   const el = document.getElementById(containerId);
   if (!entries.length) { el.innerHTML = '<div class="empty-note">No data</div>'; return; }
