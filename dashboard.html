@@ -502,8 +502,8 @@
     <div class="grid-2">
       <div class="card" style="text-align:center;">
         <h3>⭐ Google Review</h3>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Famarauto87-source.github.io%2Famar-autos-review%2Fcustomer-experience.html" alt="Review QR" style="border-radius:10px; margin:10px 0;" width="240" height="240" />
-        <div class="hint" style="word-break:break-all;">https://amarauto87-source.github.io/amar-autos-review/customer-experience.html</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Famarauto87-source.github.io%2Famar-autos-review%2F" alt="Review QR" style="border-radius:10px; margin:10px 0;" width="240" height="240" />
+        <div class="hint" style="word-break:break-all;">https://amarauto87-source.github.io/amar-autos-review/</div>
       </div>
       <div class="card" style="text-align:center;">
         <h3>🪖 Riding Group / Rider Registration</h3>
@@ -512,7 +512,7 @@
       </div>
     </div>
     <div class="empty-note" style="text-align:left; padding:16px 0 0;">
-      Review QR abhi "Customer Experience" page par jaata hai. Agar aap chahte ho ki ye seedha aapke asli Google Maps review page par jaaye, uska link bhej dena — main QR update kar dunga.
+      ⚠️ Dhyan rahe: ye QR wahi link kholta hai jo aap Master Dashboard access karne ke liye khud use karte ho (naam+password wala login screen). Agar customer ye scan karega to usko bhi wahi login screen dikhega, seedha review dene ka form nahi. Agar customer ke liye hai, to behtar hoga ki isse "customer-experience.html" (jo isi ke liye bana hai) ya apna asli Google Maps review link par point kiya jaaye — bata dena, turant badal dunga.
     </div>
   </section>
 </main>
@@ -754,8 +754,31 @@ async function loadAll(){
     STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
     STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
     STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
-    STATE.targets = targets.slice(4).filter(r => str(r[0]) && up(r[0]) !== 'TOTAL');
-    STATE.nameMap = nameMap.slice(4).filter(r => str(r[1]));
+    // Targets and Name Map both have a few title/instruction rows above the real data (a title,
+    // an instructions line, a column-header row). We used to skip a FIXED number of rows
+    // (slice(4)) to get past those — but if Deepak ever adds/removes a row at the top of either
+    // sheet (a blank line, an extra note), that fixed count goes stale and silently eats the
+    // first real data row instead (this is exactly what caused ASLAM — always the first row in
+    // both sheets — to vanish from the Executive filter and get a ₹0 target: the real sheet
+    // currently has 3 header rows, not 4, so slice(4) was dropping his row).
+    // Filter by CONTENT instead — much more robust against the sheet's top rows shifting.
+    const TARGETS_HEADER_MARKERS = ['EXECUTIVE', 'TOTAL'];
+    STATE.targets = targets.filter(r => {
+      const name = str(r[0]);
+      if (!name) return false; // blank rows, and rows whose only content is in a later column
+      const upn = up(name);
+      if (TARGETS_HEADER_MARKERS.includes(upn)) return false; // "Executive" header label / TOTAL row (added back in separately by callers that want it)
+      if (name.startsWith('🎯') || upn.startsWith('ENTER EACH')) return false; // title / instructions row
+      return true;
+    }).filter(r => up(r[0]) !== 'TOTAL');
+    STATE.nameMap = nameMap.filter(r => {
+      const owner = str(r[1]);
+      if (!owner) return false;
+      const upo = up(owner);
+      if (upo.includes('OWNER NAME') || upo.includes('SALES EXECUTIVE')) return false; // header row
+      if (upo.includes('ENQUIRY OWNER') || upo.startsWith('THE ENQUIRY SHEET')) return false; // title / instructions row
+      return true;
+    }).filter(r => str(r[2])); // only rows where the mapped Sales Executive (column C) is actually filled in
     STATE.stock = stock.slice(1).filter(r => str(r[12]));
 
     STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
