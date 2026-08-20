@@ -160,6 +160,12 @@
   .kpi-card .label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
   .kpi-card .value { font-size: 25px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
   .kpi-card .hint { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  /* Below-target warning state — reserved status color, always paired with an icon + text label
+     (never color alone), per the dataviz status-palette rule. */
+  .kpi-card.kpi-below-target { border-left-color: var(--critical); background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 85%, var(--critical) 15%) 130%); }
+  .kpi-card .kpi-flag { display:inline-flex; align-items:center; gap:5px; font-size: 10.5px; font-weight: 700; color: var(--critical); margin-top: 6px; }
+  td.cell-below-target, .table-flag { color: var(--critical); font-weight: 700; }
+  .table-flag { display:inline-flex; align-items:center; gap:4px; font-size: 12px; }
   .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
   .meter > div { height: 100%; background: linear-gradient(90deg, var(--s1), color-mix(in srgb, var(--s1) 70%, white 30%)); border-radius: 3px; }
   /* charts */
@@ -249,7 +255,7 @@
   <div class="login-card">
     <div class="logo">🏍️</div>
     <h1>Amar Autos · Command Console</h1>
-    <div class="sub">Login karke apna dashboard dekhein</div>
+    <div class="sub">Log in to view your dashboard</div>
     <label for="loginName">Employee</label>
     <select id="loginName"></select>
     <label for="loginPass">Password</label>
@@ -281,9 +287,9 @@
       <a href="rider-registration.html" style="text-decoration:none;"><button type="button" title="Rider Registration Form">🪪 Register</button></a>
       <select id="monthFilter"></select>
       <select id="execFilter"></select>
-      <button id="allMonthsBtn" title="Ek click me sab mahino ka data dikhao">📅 Sab Mahino Dikhao</button>
+      <button id="allMonthsBtn" title="One click to show all months' data">📅 Show All Months</button>
       <button id="themeToggle">🌓</button>
-      <button id="refreshBtn" class="primary" title="Fresh data khinchta hai — agar data purana/atka hua lage to yahi dabao">↻ Force Refresh</button>
+      <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
     </div>
   </div>
   <div class="status-line" id="statusLine">—</div>
@@ -389,22 +395,28 @@
     <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
     <div class="kpi-grid" id="kpiPending"></div>
 
+    <h2 class="section-title">⏰ Overdue Deliveries — TDD has already passed</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      These bookings' TDD (tentative delivery date) is before today and the bike still hasn't been billed — the customer was expecting it already. Only rows where TDD is a real, readable date are checked (text like "HOLD"/"ASAP" is skipped, not guessed at). Admin sees every executive's overdue bookings here; a sales login sees only their own.
+    </div>
+    <div class="table-wrap"><table class="data" id="tblOverdue"></table></div>
+
     <h2 class="section-title">🏍️ Model &amp; Colour-wise — Pending Units</h2>
     <div class="card"><div id="pendingModelBars"></div></div>
 
-    <h2 class="section-title">⚖️ Pending Bookings vs Stock Available — model-family wise</h2>
+    <h2 class="section-title">⚖️ Pending Bookings vs Stock Available — by model family</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Match hai model-family ke naam se (jaise "BULLET 350" aur "BULLET 650" dono "BULLET" family me count honge) — exact colour-variant match nahi hai. Red = stock kam hai booking se.
+      Matched by model family name (e.g. "BULLET 350" and "BULLET 650" both count under the "BULLET" family) — not an exact colour/variant match. Red = stock is short of bookings.
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStock"></table></div>
 
-    <h2 class="section-title">🎯 Kiska Booking vs Kaunsa Model Available — customer-wise (exact colour match)</h2>
+    <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Har pending booking ke saamne dikhta hai ki uska exact model+colour abhi stock me "Open" hai ya nahi — customer ko turant bata sakte ho delivery kab ho sakti hai. Admin ko sabka data dikhta hai, sales person ko sirf apna.
+      For every pending booking, shows whether that exact model+colour is currently "Open" in stock — so you can tell a customer right away when their bike can be delivered. Admin sees everyone's bookings, a sales login sees only their own.
     </div>
     <div class="table-wrap"><table class="data" id="tblBookingStockMatch"></table></div>
 
-    <h2 class="section-title">📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery seedha ACTUL BOOKING se)</h2>
+    <h2 class="section-title">📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery, straight from ACTUL BOOKING)</h2>
     <div class="toolbar">
       <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive, TDD/date…" />
       <button id="exportPending">⬇ Export CSV</button>
@@ -498,7 +510,7 @@
   </section>
 
   <section class="tabpanel" id="tab-qrcodes">
-    <h2 class="section-title">📱 Customer QR Codes — dikhao ya print karke counter par rakh do</h2>
+    <h2 class="section-title">📱 Customer QR Codes — display on screen or print and keep at the counter</h2>
     <div class="grid-2">
       <div class="card" style="text-align:center;">
         <h3>⭐ Google Review</h3>
@@ -512,7 +524,7 @@
       </div>
     </div>
     <div class="empty-note" style="text-align:left; padding:16px 0 0;">
-      ⚠️ Dhyan rahe: ye QR wahi link kholta hai jo aap Master Dashboard access karne ke liye khud use karte ho (naam+password wala login screen). Agar customer ye scan karega to usko bhi wahi login screen dikhega, seedha review dene ka form nahi. Agar customer ke liye hai, to behtar hoga ki isse "customer-experience.html" (jo isi ke liye bana hai) ya apna asli Google Maps review link par point kiya jaaye — bata dena, turant badal dunga.
+      ⚠️ Note: this QR opens the same link you yourself use to access the Master Dashboard (the name+password login screen). A customer scanning it will see that same login screen, not a review form. If this is meant for customers, it would be better pointed at "customer-experience.html" (built for exactly this) or your real Google Maps review link — just let me know and I'll switch it right away.
     </div>
   </section>
 </main>
@@ -580,7 +592,7 @@ function attemptLogin(){
   const user = CREDENTIALS.find(u => u.name === name && u.password === pass);
   const errEl = document.getElementById('loginError');
   if (!user) {
-    errEl.textContent = 'Galat password. Dubara try karo.';
+    errEl.textContent = 'Wrong password. Please try again.';
     return;
   }
   errEl.textContent = '';
@@ -602,9 +614,13 @@ function visibleExecList(){
 function applyRoleRestrictions(){
   if (!CURRENT_USER) return;
   const isAdmin = CURRENT_USER.role === 'Admin';
-  // hide tabs that show company-wide / other-people's data from non-admin logins
+  // hide tabs that show company-wide / other-people's data from non-admin logins.
+  // Rider Registration is the one exception: Deepak wants CRT logins (Harsh handles riders)
+  // to see it too, alongside Admin — everyone else (Sales) still doesn't.
   document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
-    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(btn.dataset.tab)) ? 'none' : '';
+    const tab = btn.dataset.tab;
+    const allowedForCRT = tab === 'riderreg' && CURRENT_USER.role === 'CRT';
+    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) ? 'none' : '';
   });
   if (!isAdmin) {
     // land on Overview, not whatever tab happened to be marked active
@@ -882,13 +898,13 @@ function renderDataHealthBanner(){
   const d = cnt(STATE.delivery, 18);
   const r = cnt(STATE.review, 3);
   const total = b + d + r;
-  const label = isAdmin ? 'Sabka' : `${CURRENT_USER.name} ka`;
+  const label = isAdmin ? 'Everyone\'s' : `${CURRENT_USER.name}'s`;
   if (total === 0) {
     el.className = 'data-health-banner show empty';
-    el.innerHTML = `⚠️ ${esc(label)} data is filter (month/executive) me nahi mila — upar "📅 Sab Mahino Dikhao" try karo. Agar phir bhi khaali rahe, ye screenshot bhej do.`;
+    el.innerHTML = `⚠️ ${esc(label)} data wasn't found for this filter (month/executive) — try "📅 Show All Months" above. If it's still empty, send a screenshot.`;
   } else {
     el.className = 'data-health-banner show';
-    el.innerHTML = `✅ ${esc(label)} data load ho gaya — ${fmtInt(b)} booking, ${fmtInt(d)} delivery, ${fmtInt(r)} review (current filter ke hisaab se).`;
+    el.innerHTML = `✅ ${esc(label)} data has loaded — ${fmtInt(b)} bookings, ${fmtInt(d)} deliveries, ${fmtInt(r)} reviews (for the current filter).`;
   }
 }
 
@@ -982,12 +998,17 @@ function targetFor(execName){
   return total;
 }
 
-function kpiCard(label, value, hint, meterPct){
-  return `<div class="kpi-card">
+// Performance thresholds Deepak asked for — a sales person gets flagged wherever they're
+// below these. Kept in one place so the numbers are easy to tune later.
+const PERF_THRESHOLDS = { achv: 1.0, ewPct: 0.70, rsaPct: 0.50, gmaPerBike: 7500 };
+
+function kpiCard(label, value, hint, meterPct, flagText){
+  return `<div class="kpi-card${flagText ? ' kpi-below-target' : ''}">
     <div class="label">${esc(label)}</div>
     <div class="value">${value}</div>
     ${hint ? `<div class="hint">${hint}</div>` : ''}
     ${meterPct !== undefined ? `<div class="meter"><div style="width:${Math.min(100,Math.max(0,meterPct))}%"></div></div>` : ''}
+    ${flagText ? `<div class="kpi-flag">⚠️ ${esc(flagText)}</div>` : ''}
   </div>`;
 }
 
@@ -1008,11 +1029,11 @@ function renderSalesConsole(){
   el.innerHTML = [
     kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed'),
     kpiCard('Target', fmtInt(target), 'bikes (this filter)'),
-    kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100),
-    kpiCard('EW Attached', fmtInt(agg.ew), `${fmtPct(ewPct)} of retail`, ewPct*100),
-    kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100),
+    kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100, target && achv < PERF_THRESHOLDS.achv ? 'Below target' : null),
+    kpiCard('EW Attached', fmtInt(agg.ew), `${fmtPct(ewPct)} of retail`, ewPct*100, agg.retail && ewPct < PERF_THRESHOLDS.ewPct ? 'Below 70%' : null),
+    kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100, agg.retail && rsaPct < PERF_THRESHOLDS.rsaPct ? 'Below 50%' : null),
     kpiCard('Gear Attached', fmtInt(agg.gear), `${fmtPct(gearPct)} of retail`, gearPct*100),
-    kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`),
+    kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`, undefined, agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike ? 'Below ₹7,500/bike' : null),
     kpiCard('Total Stock (Open)', fmtInt(stockOpen), 'available now, both stores'),
     kpiCard('In-Transit Stock', fmtInt(stockTransit), 'dispatched, arriving soon'),
   ].join('');
@@ -1027,19 +1048,27 @@ function renderEmployeeTable(){
     const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
     const gearPct = agg.retail ? agg.gear/agg.retail : 0;
     const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
-    return { name, ...agg, target, achv, ewPct, rsaPct, gearPct, gmaPerBike };
+    // Overdue is computed by NAME here (not the current exec filter) so Admin sees every
+    // executive's own overdue count on this one table, regardless of which exec is selected
+    // in the header filter — this is the "show it on the admin page for everyone" part.
+    const overdue = overdueRowsFor(name).length;
+    return { name, ...agg, target, achv, ewPct, rsaPct, gearPct, gmaPerBike, overdue };
   }).sort((a,b) => b.retail - a.retail);
 
+  // Below-threshold cells get a red, bold flag (icon + text, not color alone — see
+  // PERF_THRESHOLDS) so a below-target sales person stands out immediately in this table.
+  const flagIf = (cond, formatted) => cond ? `<span class="table-flag">⚠️ ${formatted}</span>` : formatted;
   const cols = [
     { key:'name', label:'Executive' },
     { key:'retail', label:'Retail', num:true },
     { key:'target', label:'Target', num:true },
-    { key:'achv', label:'Achv %', num:true, fmt: fmtPct },
-    { key:'ewPct', label:'EW %', num:true, fmt: fmtPct },
-    { key:'rsaPct', label:'RSA %', num:true, fmt: fmtPct },
+    { key:'achv', label:'Achv %', num:true, raw:true, fmt: (v,row) => flagIf(row.target && v < PERF_THRESHOLDS.achv, fmtPct(v)) },
+    { key:'ewPct', label:'EW %', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.ewPct, fmtPct(v)) },
+    { key:'rsaPct', label:'RSA %', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.rsaPct, fmtPct(v)) },
     { key:'gearPct', label:'Gear %', num:true, fmt: fmtPct },
     { key:'gma', label:'GMA', num:true, fmt: fmtMoney },
-    { key:'gmaPerBike', label:'GMA/Bike', num:true, fmt: fmtMoney },
+    { key:'gmaPerBike', label:'GMA/Bike', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.gmaPerBike, fmtMoney(v)) },
+    { key:'overdue', label:'Overdue Deliveries', num:true, raw:true, fmt: (v) => v > 0 ? `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` : fmtInt(v) },
   ];
   renderStaticTable('tblEmployee', cols, rows);
 }
@@ -1234,6 +1263,53 @@ document.getElementById('exportDelivery').addEventListener('click', () => {
   exportCsv('deliveries.csv', COL.DELIVERY, filtered);
 });
 
+// ACTUL BOOKING's TDD column is mostly free text ("HOLD", "ASAP", "AFTER DIWALI") but
+// sometimes holds a real date written as "7-Jun" or "26-Feb" — day + month name, no year.
+// This tries to parse just that shape (plus real Date objects, in case a cell ever comes
+// through as one) so "TDD has already passed and the bike still hasn't gone out" can be
+// flagged; anything that doesn't look like a date (HOLD/ASAP/etc.) is left alone rather than
+// guessed at.
+const MONTH_ABBR = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+function parseTddDate(v, bookingDate){
+  if (v instanceof Date && !isNaN(v)) return v;
+  const s = str(v);
+  if (!s) return null;
+  const m = s.match(/^(\d{1,2})[-\/\s]([A-Za-z]{3,})[-\/\s]?(\d{2,4})?$/);
+  if (!m) return null;
+  const day = +m[1];
+  const monKey = m[2].slice(0,3).toLowerCase();
+  if (MONTH_ABBR[monKey] === undefined) return null;
+  const month = MONTH_ABBR[monKey];
+  let year = m[3] ? (m[3].length === 2 ? 2000 + (+m[3]) : +m[3]) : null;
+  if (!year) {
+    // No year in the text — assume the booking's own year, unless that would put the TDD
+    // before the booking was even made, in which case it must roll into the next year.
+    const bYear = (bookingDate instanceof Date && !isNaN(bookingDate)) ? bookingDate.getFullYear() : new Date().getFullYear();
+    year = bYear;
+    const candidate = new Date(year, month, day);
+    if (bookingDate instanceof Date && !isNaN(bookingDate) && candidate < bookingDate) year += 1;
+  }
+  const d = new Date(year, month, day);
+  return isNaN(d) ? null : d;
+}
+function todayMidnight(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+// Overdue = TDD (or, failing that, Expected Delivery) has a parseable date before today, and
+// the booking is still open (not billed, not cancelled). execFilterName mirrors
+// computeDeliveryAgg()'s pattern — pass a name to get one executive's count regardless of the
+// current filter (used by the Employee-wise table so Admin sees every row's own number), or
+// omit it to respect the current exec filter (used on the Pending tab itself).
+function overdueRowsFor(execFilterName){
+  const today = todayMidnight();
+  return STATE.booking.filter(r => {
+    if (execFilterName) { if (!execMatches(r[7], execFilterName)) return false; }
+    else { if (!execInFilter(r[7])) return false; }
+    const s = up(r[9]);
+    if (s === 'BILLED' || s === 'CANCEL') return false;
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    return tdd && tdd < today;
+  });
+}
+
 /* ---------------- Pending Delivery Plan tab ----------------
    "Actual booking model-wise delivery plan for the same month" = this month's bookings
    (by BKG DT) that are still pending — i.e. STATUS is not BILLED and not CANCEL. */
@@ -1259,11 +1335,31 @@ function renderPending(){
   });
   const totalBookedThisMonth = STATE.booking.filter(r => dateInFilter(r[2]) && execInFilter(r[7])).length;
 
+  // Overdue is intentionally NOT limited to the month filter — a booking made last month
+  // that's still pending today is exactly the kind of thing this should catch.
+  const overdue = overdueRowsFor(null);
   document.getElementById('kpiPending').innerHTML = [
     kpiCard('Pending Deliveries', fmtInt(rows.length), 'booked this month, not yet billed/cancelled'),
     kpiCard('Total Bookings (this filter)', fmtInt(totalBookedThisMonth)),
     kpiCard('Pending Models', fmtInt(Object.keys(models).length)),
+    kpiCard('Overdue Deliveries', fmtInt(overdue.length), 'TDD already passed', undefined, overdue.length ? 'Needs follow-up' : null),
   ].join('');
+
+  const today = todayMidnight();
+  const overdueRows = overdue.map(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    const daysLate = tdd ? Math.round((today - tdd) / 86400000) : 0;
+    return { customer: str(r[5]), model: str(r[3]), colour: str(r[4]), exec: str(r[7]), tdd: fmtDate(tdd), daysLate, status: str(r[9]) };
+  }).sort((a,b) => b.daysLate - a.daysLate);
+  renderStaticTable('tblOverdue', [
+    { key:'customer', label:'Customer' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'exec', label:'Executive' },
+    { key:'tdd', label:'TDD (Tentative Delivery Date)' },
+    { key:'daysLate', label:'Days Overdue', num:true, raw:true, fmt: v => `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` },
+    { key:'status', label:'Status' },
+  ], overdueRows);
 
   renderBarList('pendingModelBars', models, 'var(--s2)', null, { groupByPrefix: true });
 
@@ -1762,7 +1858,7 @@ function renderStaticTable(tableId, cols, rows){
   const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
   const tbody = `<tbody>${rows.map(r => `<tr>${cols.map(c => {
     let v = r[c.key];
-    if (c.fmt) v = c.fmt(v);
+    if (c.fmt) v = c.fmt(v, r); // fmt gets the whole row too, so a column can flag based on another field
     else if (typeof v === 'number') v = fmtInt(v);
     return `<td class="${c.num ? 'num' : ''}">${c.raw ? v : esc(v)}</td>`;
   }).join('')}</tr>`).join('')}</tbody>`;
