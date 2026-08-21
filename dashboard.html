@@ -10,15 +10,15 @@
 <style>
   :root {
     color-scheme: light;
-    --surface-1: #fcfcfb;
+    --surface-1: #fffdf7;
     --surface-2: #ffffff;
-    --page: #f9f9f7;
-    --text-primary: #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted: #898781;
-    --grid: #e1e0d9;
-    --baseline: #c3c2b7;
-    --border: rgba(11,11,11,0.10);
+    --page: #f4efe4;
+    --text-primary: #1a1510;
+    --text-secondary: #574f43;
+    --text-muted: #8a8073;
+    --grid: #e6ddcb;
+    --baseline: #c8bda6;
+    --border: rgba(26,21,16,0.13);
     --good: #0ca30c;
     --warning: #fab219;
     --serious: #ec835a;
@@ -34,7 +34,7 @@
     --brand-red: #c8102e;
     --brand-red-2: #8f0c21;
     --brand-glow: rgba(200,16,46,0.35);
-    --header-grad: linear-gradient(120deg, #101010 0%, #1c0f11 45%, #2a0f14 100%);
+    --header-grad: linear-gradient(115deg, #17120b 0%, #241b10 48%, #2e2214 100%);
     --gold: #b8863f;
     --gold-light: #d3a24f;
     --gold-dim: rgba(184,134,63,0.4);
@@ -42,15 +42,15 @@
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --surface-1: #17171a;
-    --surface-2: #1f1f23;
-    --page: #0a0a0c;
-    --text-primary: #f5f5f3;
-    --text-secondary: #b9b8c2;
-    --text-muted: #83828d;
-    --grid: #2b2b30;
-    --baseline: #3a3a41;
-    --border: rgba(255,255,255,0.09);
+    --surface-1: #1c1916;
+    --surface-2: #24201b;
+    --page: #100e0b;
+    --text-primary: #f6f0e4;
+    --text-secondary: #bcb1a0;
+    --text-muted: #8b8175;
+    --grid: #322c25;
+    --baseline: #443c33;
+    --border: rgba(211,162,79,0.16);
     --good: #0ca30c;
     --warning: #fab219;
     --serious: #ec835a;
@@ -66,7 +66,7 @@
     --brand-red: #ff2a44;
     --brand-red-2: #c8102e;
     --brand-glow: rgba(255,42,68,0.35);
-    --header-grad: linear-gradient(120deg, #0a0a0c 0%, #170a0d 45%, #29090f 100%);
+    --header-grad: linear-gradient(115deg, #0d0b08 0%, #1a140c 48%, #241a0f 100%);
     --gold: #d3a24f;
     --gold-light: #eec27a;
     --gold-dim: rgba(211,162,79,0.4);
@@ -76,17 +76,19 @@
     margin: 0;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 60%),
-      radial-gradient(ellipse 700px 400px at 100% 0%, color-mix(in srgb, var(--s1) 6%, transparent), transparent 55%),
+      radial-gradient(ellipse 1000px 520px at 12% -12%, color-mix(in srgb, var(--gold) 11%, transparent), transparent 62%),
+      radial-gradient(ellipse 800px 420px at 100% 0%, color-mix(in srgb, var(--gold) 5%, transparent), transparent 58%),
       var(--page);
     background-attachment: fixed;
     color: var(--text-primary);
   }
   header.top {
     position: sticky; top: 0; z-index: 20;
-    background: var(--header-grad);
+    background:
+      repeating-linear-gradient(115deg, rgba(211,162,79,0.045) 0 2px, transparent 2px 9px),
+      var(--header-grad);
     border-bottom: 2px solid var(--gold);
-    box-shadow: 0 1px 0 var(--border), 0 4px 24px -8px var(--gold-dim);
+    box-shadow: 0 1px 0 rgba(211,162,79,0.22), 0 6px 28px -10px rgba(0,0,0,0.6);
     padding: 16px 22px;
   }
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
@@ -164,7 +166,10 @@
     padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary);
     border-radius: 0; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
   }
-  nav.tabs button.active { color: var(--gold); border-bottom-color: var(--gold); text-shadow: none; }
+  nav.tabs button.active {
+    color: var(--gold); border-bottom-color: var(--gold); text-shadow: none;
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+  }
   nav.tabs button { font-family: var(--font-head); font-weight: 500; }
   main { padding: 20px; max-width: 1400px; margin: 0 auto; }
   section.tabpanel { display: none; }
@@ -174,30 +179,100 @@
     display:flex; align-items:center; gap:10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
     padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
-  h2.section-title::before { content: ''; display:block; width: 4px; height: 16px; border-radius: 2px; background: var(--gold); flex-shrink:0; }
+  h2.section-title::before {
+    content: ''; display:block; width: 4px; height: 17px; border-radius: 2px; flex-shrink:0;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    box-shadow: 0 0 10px -2px var(--gold-dim);
+  }
+  h2.section-title { border-bottom-color: var(--gold-dim); }
   h2.section-title:first-child { margin-top: 0; }
+
+  /* Collapsed-by-default panels for the long "raw/full list" sections (Data Explorer, full
+     stock/pending/delivery/rider lists, etc.) — keeps every tab's headline info visible without
+     scrolling past a wall of tables to get to the next section. Search/export tools inside still
+     work exactly the same once opened. */
+  details.section-collapse {
+    margin-top: 26px; border: 1px solid var(--border); border-left: 3px solid var(--gold-dim);
+    border-radius: 11px; background: var(--surface-1);
+  }
+  details.section-collapse[open] { border-left-color: var(--gold); }
+  details.section-collapse > summary {
+    cursor: pointer; list-style: none; padding: 13px 16px; user-select: none;
+    font-family: var(--font-head); font-size: 14px; font-weight: 600; letter-spacing: 0.4px;
+    text-transform: uppercase; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  details.section-collapse > summary::-webkit-details-marker { display: none; }
+  details.section-collapse > summary::before {
+    content: '▸'; color: var(--gold); font-size: 12px; transition: transform .15s ease; flex-shrink: 0;
+  }
+  details.section-collapse[open] > summary::before { transform: rotate(90deg); }
+  details.section-collapse > summary:hover { background: var(--surface-2); }
+  details.section-collapse[open] > summary { border-bottom: 1px solid var(--border); }
+  details.section-collapse > .details-body { padding: 16px; }
+
+  /* Inline "number you can click" — used for drill-downs like an executive's overdue list */
+  .link-btn {
+    background: none; border: none; padding: 0; font: inherit; cursor: pointer;
+    color: var(--critical); font-weight: 700; text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-thickness: 1px;
+  }
+  .link-btn:hover { color: var(--gold); }
+
+  /* Drill-down popup */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 300; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(0,0,0,0.62);
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-top: 3px solid var(--gold); border-radius: 14px;
+    width: 100%; max-width: 920px; max-height: 82vh; overflow: hidden;
+    display: flex; flex-direction: column; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+  }
+  .modal-head h3 {
+    margin: 0; font-family: var(--font-head); font-size: 15px; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--text-primary); font-weight: 700;
+  }
+  .modal-head button {
+    background: none; border: none; color: var(--text-muted); font-size: 18px;
+    cursor: pointer; padding: 2px 6px; line-height: 1;
+  }
+  .modal-head button:hover { color: var(--text-primary); }
+  .modal-body { padding: 16px 18px; overflow: auto; }
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
   .kpi-card {
-    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 90%, var(--gold) 10%) 130%);
-    border: 1px solid var(--border); border-left: 3px solid color-mix(in srgb, var(--gold) 55%, var(--border) 45%);
-    border-radius: 10px; padding: 14px 16px; position: relative; overflow: hidden;
-    transition: border-color .15s, box-shadow .15s;
+    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 88%, var(--gold) 12%) 135%);
+    border: 1px solid var(--border); border-top: 2px solid var(--gold-dim);
+    border-radius: 11px; padding: 15px 16px; position: relative; overflow: hidden;
+    transition: border-color .16s, box-shadow .16s, transform .16s;
   }
-  .kpi-card:hover { border-left-color: var(--gold); box-shadow: 0 6px 20px -10px var(--gold-dim); }
+  .kpi-card:hover {
+    border-top-color: var(--gold); transform: translateY(-1px);
+    box-shadow: 0 10px 26px -14px rgba(0,0,0,0.55);
+  }
+  .kpi-card .label { color: var(--gold); }
   .kpi-card .label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
   .kpi-card .value { font-size: 25px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
   .kpi-card .hint { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
   /* Below-target warning state — reserved status color, always paired with an icon + text label
      (never color alone), per the dataviz status-palette rule. */
-  .kpi-card.kpi-below-target { border-left-color: var(--critical); background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 85%, var(--critical) 15%) 130%); }
+  .kpi-card.kpi-below-target { border-top-color: var(--critical); background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 87%, var(--critical) 13%) 135%); }
+  .kpi-card.kpi-below-target .label { color: var(--critical); }
   .kpi-card .kpi-flag { display:inline-flex; align-items:center; gap:5px; font-size: 10.5px; font-weight: 700; color: var(--critical); margin-top: 6px; }
   td.cell-below-target, .table-flag { color: var(--critical); font-weight: 700; }
   .table-flag { display:inline-flex; align-items:center; gap:4px; font-size: 12px; }
   /* Today's Priorities — a rule-based (not AI) daily briefing styled like a chat bubble, built
      entirely from data already on this page: no API key, no external calls, no cost. */
   .chat-panel {
-    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 93%, var(--gold) 7%) 130%);
-    border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
+    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 91%, var(--gold) 9%) 135%);
+    border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 14px; padding: 16px 18px;
   }
   .chat-greeting { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
   .chat-item {
@@ -233,9 +308,15 @@
     padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--grid);
     white-space: nowrap;
   }
-  table.data th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface-1); }
-  table.data th:hover { color: var(--s1); }
-  table.data tbody tr:hover { background: var(--page); }
+  table.data th {
+    color: var(--gold); font-family: var(--font-head); font-weight: 600; font-size: 11.5px;
+    letter-spacing: 0.7px; text-transform: uppercase; cursor: pointer; user-select: none;
+    position: sticky; top: 0; background: var(--surface-2);
+    border-bottom: 1px solid var(--gold-dim);
+  }
+  table.data th:hover { color: var(--gold-light); }
+  table.data tbody tr:hover { background: color-mix(in srgb, var(--gold) 7%, transparent); }
+  table.data tbody tr:last-child td { border-bottom: none; }
   .table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
   .table-wrap table.data { border: none; border-radius: 0; }
   .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -251,9 +332,10 @@
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
   .card {
-    background: var(--surface-1); border: 1px solid var(--border); border-top: 2px solid var(--gold-dim); border-radius: 10px; padding: 16px;
+    background: linear-gradient(165deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 94%, var(--gold) 6%) 140%);
+    border: 1px solid var(--border); border-top: 2px solid var(--gold-dim); border-radius: 11px; padding: 16px;
   }
-  .card h3 { margin: 0 0 10px; font-family: var(--font-head); font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
+  .card h3 { margin: 0 0 10px; font-family: var(--font-head); font-size: 13px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
   .empty-note { color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center; }
   .loading-overlay {
     position: fixed; inset: 0; background: var(--page); display: flex; align-items: center; justify-content: center;
@@ -281,7 +363,9 @@
   .login-card {
     position: relative; z-index: 1;
     width: 100%; max-width: 360px; background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 18px; padding: 0; box-shadow: 0 24px 70px -20px rgba(0,0,0,0.55);
+    border-radius: 18px; padding: 0;
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 24px 70px -20px rgba(0,0,0,0.62), 0 0 0 1px rgba(211,162,79,0.12);
     overflow: hidden;
   }
   .login-card .photo {
@@ -491,7 +575,11 @@
     <h2 class="section-title">🤖 Today's Priorities</h2>
     <div class="chat-panel" id="todayPriorities"></div>
 
-    <h2 class="section-title">🏍️ Sales Console</h2>
+    <h2 class="section-title">🏪 Store Performance — Amar Autos, Kanti Nagar</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Whole-showroom totals for every executive together — not affected by who's logged in or the executive filter above. All sales/booking/stock figures here are Kanti Nagar's own; Vikas Marg (VM) is a separate store and appears only as reference stock on the Stock tab.</p>
+    <div class="kpi-grid" id="kpiStorePerformance"></div>
+
+    <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
     <div class="kpi-grid" id="kpiSalesConsole"></div>
 
     <h2 class="section-title">👤 Employee-wise Performance</h2>
@@ -552,32 +640,45 @@
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Booked count per executive per enquiry channel (respects the month filter above) — darker gold means more bookings won there. Empty/light cells show exactly where an executive isn't converting.</p>
     <div id="perfHeatmap"></div>
 
-    <h2 class="section-title" style="margin-top:30px;">📊 RE Portal Snapshot</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 12px;">From Royal Enfield's own "ENQUIRY STATMENT" / "BOOKING MSD" portal sheets — dealership-wide, all-time, not split by executive.</p>
-    <div class="kpi-grid" id="kpiMsd"></div>
-    <div class="card" style="margin-top:12px;">
-      <h3>Bookings by Status</h3>
-      <div id="msdBookingStatus"></div>
-    </div>
+    <h2 class="section-title" style="margin-top:30px;">🗣️ Sales Person — Enquiry Quality (RE Portal, matched)</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 6px;">The RE Portal's own enquiry sheet has no sales-executive column — so this is built by matching each enquiry (via ENQ Number) back to your own "enquiry" sheet, which does record who owned it. Shows how many of each executive's enquiries ended up dropped/lost, and the most common reason why.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 12px;" id="enquiryQualityNote"></p>
+    <div class="table-wrap"><table class="data" id="tblEnquiryQuality"></table></div>
 
-    <h2 class="section-title" style="margin-top:30px;">🔍 Data Explorer — Browse Any Sheet</h2>
-    <div class="toolbar">
-      <select id="explorerSheet">
-        <option value="ACTUL BOOKING">ACTUL BOOKING</option>
-        <option value="DELIVERY SHEET">DELIVERY SHEET</option>
-        <option value="enquiry">enquiry</option>
-        <option value="Google Review">Google Review</option>
-        <option value="RIDER FEEDBACK">RIDER FEEDBACK</option>
-        <option value="RIDER REGISTRATION">RIDER REGISTRATION</option>
-        <option value="Stock">Stock</option>
-        <option value="ENQUIRY STATMENT">ENQUIRY STATMENT (RE Portal)</option>
-        <option value="BOOKING MSD">BOOKING MSD (RE Portal)</option>
-      </select>
-      <input type="text" id="explorerSearch" placeholder="Search across all columns…" />
-      <button id="explorerExport">⬇ Export CSV</button>
-      <span class="status-line" id="explorerCount"></span>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblExplorer"></table></div>
+    <details class="section-collapse">
+      <summary>📊 RE Portal Snapshot</summary>
+      <div class="details-body">
+        <p class="empty-note" style="text-align:left;padding:0 0 12px;">From Royal Enfield's own "ENQUIRY STATMENT" / "BOOKING MSD" portal sheets — dealership-wide, all-time, not split by executive.</p>
+        <div class="kpi-grid" id="kpiMsd"></div>
+        <div class="card" style="margin-top:12px;">
+          <h3>Bookings by Status</h3>
+          <div id="msdBookingStatus"></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="section-collapse">
+      <summary>🔍 Data Explorer — Browse Any Sheet</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <select id="explorerSheet">
+            <option value="ACTUL BOOKING">ACTUL BOOKING</option>
+            <option value="DELIVERY SHEET">DELIVERY SHEET</option>
+            <option value="enquiry">enquiry</option>
+            <option value="Google Review">Google Review</option>
+            <option value="RIDER FEEDBACK">RIDER FEEDBACK</option>
+            <option value="RIDER REGISTRATION">RIDER REGISTRATION</option>
+            <option value="Stock">Stock</option>
+            <option value="ENQUIRY STATMENT">ENQUIRY STATMENT (RE Portal)</option>
+            <option value="BOOKING MSD">BOOKING MSD (RE Portal)</option>
+          </select>
+          <input type="text" id="explorerSearch" placeholder="Search across all columns…" />
+          <button id="explorerExport">⬇ Export CSV</button>
+          <span class="status-line" id="explorerCount"></span>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblExplorer"></table></div>
+      </div>
+    </details>
   </section>
 
   <section class="tabpanel" id="tab-delivery">
@@ -598,12 +699,22 @@
     <h2 class="section-title">🏍️ Model-wise Deliveries</h2>
     <div class="table-wrap"><table class="data" id="tblModelWise"></table></div>
 
-    <h2 class="section-title">📄 All Deliveries</h2>
-    <div class="toolbar">
-      <input type="text" id="searchDelivery" placeholder="Search customer, model, receipt no…" />
-      <button id="exportDelivery">⬇ Export CSV</button>
+    <h2 class="section-title">👤 Executive × Model — Who Sold Which Model</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Units billed per executive per model for the current month/executive filter — darker gold means more units of that model sold by that person.
     </div>
-    <div class="table-wrap"><table class="data" id="tblDeliveryAll"></table></div>
+    <div id="execModelMatrix"></div>
+
+    <details class="section-collapse">
+      <summary>📄 All Deliveries</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchDelivery" placeholder="Search customer, model, receipt no…" />
+          <button id="exportDelivery">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblDeliveryAll"></table></div>
+      </div>
+    </details>
   </section>
 
   <section class="tabpanel" id="tab-pending">
@@ -616,27 +727,41 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblOverdue"></table></div>
 
+    <h2 class="section-title">🚨 At Risk — Delivery Due Soon, Bike Not In Stock</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
+    <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
+
     <h2 class="section-title">🏍️ Model &amp; Colour-wise — Pending Units</h2>
     <div class="card"><div id="pendingModelBars"></div></div>
 
     <h2 class="section-title">⚖️ Pending Bookings vs Stock Available — by model family</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Matched by model family name (e.g. "BULLET 350" and "BULLET 650" both count under the "BULLET" family) — not an exact colour/variant match. Red = stock is short of bookings.
+      Matched by model family name (e.g. "BULLET 350" and "BULLET 650" both count under the "BULLET" family) — not an exact colour/variant match. Red = stock is short of bookings. Stock counted here is Kanti Nagar (KN) only — Vikas Marg (VM) stock is a separate store and isn't counted as ours to promise a customer (see the Stock tab for VM's own numbers).
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStock"></table></div>
 
+    <h2 class="section-title" style="margin-top:20px;">🎨 Pending Bookings vs Stock Available — by exact colour</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Same comparison, but matched to the exact model + colour (not just family). Sorted by model family, then model, then colour — so all the colours of one model sit together.
+    </div>
+    <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
+
     <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      For every pending booking, shows whether that exact model+colour is currently "Open" in stock — so you can tell a customer right away when their bike can be delivered. Admin sees everyone's bookings, a sales login sees only their own.
+      For every pending booking, shows whether that exact model+colour is currently "Open" in stock at Kanti Nagar (KN) — so you can tell a customer right away when their bike can be delivered. VM stock isn't counted here (it's a separate store, not ours to promise). Admin sees everyone's bookings, a sales login sees only their own.
     </div>
     <div class="table-wrap"><table class="data" id="tblBookingStockMatch"></table></div>
 
-    <h2 class="section-title">📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery, straight from ACTUL BOOKING)</h2>
-    <div class="toolbar">
-      <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive, TDD/date…" />
-      <button id="exportPending">⬇ Export CSV</button>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
+    <details class="section-collapse">
+      <summary>📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery)</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchPending" placeholder="Search customer, model, mobile, executive, TDD/date…" />
+          <button id="exportPending">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
+      </div>
+    </details>
   </section>
 
   <section class="tabpanel" id="tab-stock">
@@ -657,12 +782,20 @@
     <h2 class="section-title">🏍️ Model-wise Stock</h2>
     <div class="table-wrap"><table class="data" id="tblStockModel"></table></div>
 
-    <h2 class="section-title">📄 Full Stock List</h2>
-    <div class="toolbar">
-      <input type="text" id="searchStock" placeholder="Search model, chassis no, store…" />
-      <button id="exportStock">⬇ Export CSV</button>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblStockAll"></table></div>
+    <h2 class="section-title">⏳ Aged Stock — Open 60+ Days</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">These bikes have been sitting as available ("Open") stock for a while — worth pushing to customers or discussing with RE before they tie up more capital.</p>
+    <div class="table-wrap"><table class="data" id="tblAgedStock"></table></div>
+
+    <details class="section-collapse">
+      <summary>📄 Full Stock List</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchStock" placeholder="Search model, chassis no, store…" />
+          <button id="exportStock">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblStockAll"></table></div>
+      </div>
+    </details>
   </section>
 
   <section class="tabpanel" id="tab-riders">
@@ -683,12 +816,16 @@
     <h2 class="section-title">🏍️ By Bike Model</h2>
     <div class="card"><div id="riderModelBars"></div></div>
 
-    <h2 class="section-title">🪪 Rider Registration — Full List</h2>
-    <div class="toolbar">
-      <input type="text" id="searchRiderReg" placeholder="Search rider, mobile, city, model…" />
-      <button id="exportRiderReg">⬇ Export CSV</button>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblRiderRegAll"></table></div>
+    <details class="section-collapse">
+      <summary>🪪 Rider Registration — Full List</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchRiderReg" placeholder="Search rider, mobile, city, model…" />
+          <button id="exportRiderReg">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblRiderRegAll"></table></div>
+      </div>
+    </details>
 
     <h2 class="section-title" style="margin-top:30px;">📝 Rider Feedback</h2>
     <div class="kpi-grid" id="kpiRiderFb"></div>
@@ -696,12 +833,16 @@
     <h2 class="section-title">🏍️ By Bike Model — Avg Overall Rating</h2>
     <div class="card"><div id="feedbackModelBars"></div></div>
 
-    <h2 class="section-title">💬 Rider Feedback — Full List</h2>
-    <div class="toolbar">
-      <input type="text" id="searchRiderFb" placeholder="Search rider, model, comments…" />
-      <button id="exportRiderFb">⬇ Export CSV</button>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblRiderFbAll"></table></div>
+    <details class="section-collapse">
+      <summary>💬 Rider Feedback — Full List</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchRiderFb" placeholder="Search rider, model, comments…" />
+          <button id="exportRiderFb">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblRiderFbAll"></table></div>
+      </div>
+    </details>
   </section>
 
   <section class="tabpanel" id="tab-qrcodes">
@@ -728,6 +869,16 @@
   Data pulled live from your Google Sheet on every refresh (auto-refreshes every 5 minutes) · Built for Amar Autos<br/>
   Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
 </footer>
+
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modalTitle"></h3>
+      <button type="button" id="modalClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
 
 </div><!-- /#appShell -->
 
@@ -867,6 +1018,12 @@ function toggleControlsDrawer(open){
 document.getElementById('menuToggle').addEventListener('click', () => toggleControlsDrawer(true));
 document.getElementById('controlsClose').addEventListener('click', () => toggleControlsDrawer(false));
 document.getElementById('controlsBackdrop').addEventListener('click', () => toggleControlsDrawer(false));
+
+document.getElementById('modalClose').addEventListener('click', closeDetailModal);
+document.getElementById('detailModal').addEventListener('click', (e) => {
+  if (e.target.id === 'detailModal') closeDetailModal(); // click outside the card closes it
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetailModal(); });
 
 function visibleExecList(){
   if (CURRENT_USER && CURRENT_USER.role !== 'Admin') return CURRENT_USER.execKey ? [CURRENT_USER.execKey] : [];
@@ -1012,14 +1169,19 @@ function modelFamilyKey(s){
   return ccMatch ? `${base} ${ccMatch[1]}` : base;
 }
 
-// Checks a pending booking's Model+Colour against current Open stock. Shared by the Pending
-// tab's "Whose Booking vs Which Model Is Available" table and Today's Priorities.
+// Checks a pending booking's Model+Colour against current Open stock — KN (Kanti Nagar) only.
+// VM (Vikas Marg) is a separate store; Deepak can informally ask them for a bike if they happen
+// to have one free, but it's not stock he can promise a waiting customer, so it must never count
+// as "available" here. Shared by the Pending tab's "Whose Booking vs Which Model Is Available"
+// table and Today's Priorities. (VM stock still shows normally on the Stock tab itself — that's
+// purely for Deepak's own reference, this function is the only place it's deliberately excluded.)
 function stockMatchFor(model, colour){
   const fam = modelFamilyKey(model);
   const colourWords = up(colour).split(/\s+/).filter(w => w.length > 2);
   let exact = 0, familyOnly = 0;
   STATE.stock.forEach(r => {
     if (up(r[17]) !== 'OPEN') return;
+    if (up(r[7]) !== 'KN') return;
     const name = up(r[11] || r[9]);
     if (!name || modelFamilyKey(name) !== fam) return;
     const isColourMatch = !colourWords.length || colourWords.some(w => name.includes(w));
@@ -1250,6 +1412,7 @@ function ownerInFilter(owner){
 /* ---------------- render orchestrator ---------------- */
 function renderAll(){
   renderTodayPriorities();
+  renderStorePerformance();
   renderSalesConsole();
   renderEmployeeTable();
   renderFunnel();
@@ -1262,6 +1425,43 @@ function renderAll(){
   renderExplorer();
   renderAnalytics();
   renderMsdAnalysis();
+}
+
+/* ---------------- Store Performance (always whole-store, both branches) ---------------- */
+// Deliberately ignores the executive filter/lock — a sales login sees their own numbers via
+// the Sales Console below, but should ALSO always be able to see how the whole store (both
+// branches) is doing, so they have context without needing admin access.
+function computeStoreWideAgg(){
+  let retail=0, ew=0, rsa=0, gma=0, gear=0;
+  for (const r of STATE.delivery) {
+    if (!billedOk(r[9])) continue;
+    if (!dateInFilter(r[2])) continue;
+    retail++;
+    if (num(r[11]) > 0) ew++;
+    if (num(r[12]) > 0) rsa++;
+    if (str(r[14]) && up(r[14]) !== 'NIL') gear++;
+    gma += num(r[13]);
+  }
+  return { retail, ew, rsa, gma, gear };
+}
+function renderStorePerformance(){
+  const agg = computeStoreWideAgg();
+  const target = targetFor(null);
+  const achv = target ? agg.retail/target : 0;
+  // KN (Kanti Nagar) only — this is "what can we actually deliver" for the business, and VM
+  // (Vikas Marg) stock isn't ours to promise a customer (it's a separate store we can only
+  // informally ask to borrow from). VM's own numbers still show fully on the Stock tab itself.
+  const stockOpenKN = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN').length;
+  const stockTransitKN = STATE.stock.filter(r => up(r[17]) === 'IN-TRANSIT' && up(r[7]) === 'KN').length;
+  const agedStockKN = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN' && num(r[16]) >= AGED_STOCK_DAYS).length;
+  document.getElementById('kpiStorePerformance').innerHTML = [
+    kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed, whole showroom'),
+    kpiCard('Target', fmtInt(target), 'bikes (this filter)'),
+    kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100, target && achv < PERF_THRESHOLDS.achv ? 'Below target' : null),
+    kpiCard('Stock — Open', fmtInt(stockOpenKN), 'ready to deliver now'),
+    kpiCard('Stock — In-Transit', fmtInt(stockTransitKN), 'dispatched, arriving soon'),
+    kpiCard('Aged Stock', fmtInt(agedStockKN), `open ${AGED_STOCK_DAYS}+ days — see Stock tab`, undefined, agedStockKN ? 'Needs attention' : null),
+  ].join('');
 }
 
 /* ---------------- Sales Console ---------------- */
@@ -1293,6 +1493,8 @@ function targetFor(execName){
 // Performance thresholds Deepak asked for — a sales person gets flagged wherever they're
 // below these. Kept in one place so the numbers are easy to tune later.
 const PERF_THRESHOLDS = { achv: 1.0, ewPct: 0.70, rsaPct: 0.50, gmaPerBike: 7500 };
+// A bike sitting in "Open" stock this many days or more gets flagged as aged/slow-moving.
+const AGED_STOCK_DAYS = 60;
 
 function kpiCard(label, value, hint, meterPct, flagText){
   return `<div class="kpi-card${flagText ? ' kpi-below-target' : ''}">
@@ -1312,11 +1514,13 @@ function renderSalesConsole(){
   const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
   const gearPct = agg.retail ? agg.gear/agg.retail : 0;
   const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
-  // Total Stock shown right here too (not exec-specific — it's shared showroom inventory) so a
-  // sales person can see "how much stock is available" without needing admin access to the
-  // full Stock tab. See also renderStock() for the full model-wise breakdown.
-  const stockOpen = STATE.stock.filter(r => up(r[17]) === 'OPEN').length;
-  const stockTransit = STATE.stock.filter(r => up(r[17]) === 'IN-TRANSIT').length;
+  // Title flips to "My Performance" whenever this is scoped to one person (a locked sales/CRT
+  // login, or an Admin who's picked one name from the executive filter) — otherwise (Admin,
+  // filter = ALL) it stays "Sales Console" since it's already showing the whole store.
+  const titleEl = document.getElementById('salesConsoleTitle');
+  const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
+  titleEl.textContent = isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console';
+
   const el = document.getElementById('kpiSalesConsole');
   el.innerHTML = [
     kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed'),
@@ -1326,8 +1530,6 @@ function renderSalesConsole(){
     kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100, agg.retail && rsaPct < PERF_THRESHOLDS.rsaPct ? 'Below 50%' : null),
     kpiCard('Gear Attached', fmtInt(agg.gear), `${fmtPct(gearPct)} of retail`, gearPct*100),
     kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`, undefined, agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike ? 'Below ₹7,500/bike' : null),
-    kpiCard('Total Stock (Open)', fmtInt(stockOpen), 'available now, both stores'),
-    kpiCard('In-Transit Stock', fmtInt(stockTransit), 'dispatched, arriving soon'),
   ].join('');
 }
 
@@ -1360,10 +1562,48 @@ function renderEmployeeTable(){
     { key:'gearPct', label:'Gear %', num:true, fmt: fmtPct },
     { key:'gma', label:'GMA', num:true, fmt: fmtMoney },
     { key:'gmaPerBike', label:'GMA/Bike', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.gmaPerBike, fmtMoney(v)) },
-    { key:'overdue', label:'Overdue Deliveries', num:true, raw:true, fmt: (v) => v > 0 ? `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` : fmtInt(v) },
+    // Clickable: opens a popup listing that executive's own overdue bookings in full
+    // (slip no, customer, mobile, model, colour, TDD) so Deepak can see exactly whose
+    // deliveries have slipped without switching tabs or filtering by hand.
+    { key:'overdue', label:'Overdue Deliveries', num:true, raw:true, fmt: (v,row) => v > 0
+        ? `<button type="button" class="link-btn" data-overdue-exec="${esc(row.name)}" title="Click to see these bookings">⚠️ ${fmtInt(v)}</button>`
+        : fmtInt(v) },
   ];
   renderStaticTable('tblEmployee', cols, rows);
+
+  document.getElementById('tblEmployee').querySelectorAll('button[data-overdue-exec]').forEach(btn => {
+    btn.addEventListener('click', () => showOverdueDetail(btn.dataset.overdueExec));
+  });
 }
+
+// Popup showing one executive's overdue bookings in full. Reuses overdueRowsFor(name) so the
+// list always matches the number that was clicked.
+function showOverdueDetail(execName){
+  const today = todayMidnight();
+  const rows = overdueRowsFor(execName).map(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    return {
+      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]),
+      colour: str(r[4]), tdd: fmtDate(tdd),
+      daysLate: tdd ? Math.round((today - tdd) / 86400000) : 0,
+    };
+  }).sort((a,b) => b.daysLate - a.daysLate);
+
+  const body = rows.length
+    ? `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Slip / Receipt No</th><th>Customer Name</th><th>Mobile No</th><th>Model</th><th>Colour</th><th>TDD</th><th class="num">Days Overdue</th></tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td>${esc(r.slipNo)}</td><td>${esc(r.customer)}</td><td>${esc(r.mobile)}</td>
+          <td>${esc(r.model)}</td><td>${esc(r.colour)}</td><td>${esc(r.tdd)}</td>
+          <td class="num"><span class="table-flag">⚠️ ${fmtInt(r.daysLate)}</span></td>
+        </tr>`).join('')}</tbody></table></div>`
+    : '<div class="empty-note">No overdue bookings for this executive.</div>';
+
+  document.getElementById('modalTitle').textContent = `⏰ Overdue Deliveries — ${execName}`;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetailModal(){ document.getElementById('detailModal').classList.remove('open'); }
 
 /* ---------------- Enquiry Funnel ---------------- */
 function renderFunnel(){
@@ -1471,6 +1711,47 @@ function renderReviews(){
 }
 
 /* ---------------- Delivery tab ---------------- */
+// Executive x Model grid — "kaunsa sales person kaunsa model kitna bech raha hai" in one view.
+// Built from the same already-filtered billed-delivery rows renderDelivery() uses, so it always
+// agrees with the numbers directly above it. Models are columns, ordered by total units sold.
+function renderExecModelMatrix(rows){
+  const el = document.getElementById('execModelMatrix');
+  if (!el) return;
+  const grid = {}, modelTotals = {};
+  rows.forEach(r => {
+    const exec = str(r[18]) || '(unassigned)';
+    const model = str(r[6]) || '(unknown)';
+    (grid[exec] || (grid[exec] = {}))[model] = ((grid[exec] || {})[model] || 0) + 1;
+    modelTotals[model] = (modelTotals[model] || 0) + 1;
+  });
+  const models = Object.keys(modelTotals).sort((a,b) => modelTotals[b] - modelTotals[a]);
+  const execs = Object.keys(grid).sort((a,b) => {
+    const ta = Object.values(grid[a]).reduce((s,v) => s+v, 0);
+    const tb = Object.values(grid[b]).reduce((s,v) => s+v, 0);
+    return tb - ta;
+  });
+  if (!execs.length || !models.length) { el.innerHTML = '<div class="empty-note">No deliveries for this filter</div>'; return; }
+
+  const max = Math.max(1, ...execs.flatMap(e => Object.values(grid[e])));
+  const body = execs.map(e => {
+    const total = Object.values(grid[e]).reduce((s,v) => s+v, 0);
+    const cells = models.map(m => {
+      const v = grid[e][m] || 0;
+      const bg = v ? `color-mix(in srgb, var(--gold) ${Math.round((v/max) * 75)}%, transparent)` : 'transparent';
+      return `<td style="background:${bg};text-align:center;font-weight:700;">${v || ''}</td>`;
+    }).join('');
+    return `<tr><td>${esc(e)}</td>${cells}<td style="text-align:center;font-weight:800;">${total}</td></tr>`;
+  }).join('');
+  const totalRow = `<tr><td style="font-weight:800;">TOTAL</td>${
+    models.map(m => `<td style="text-align:center;font-weight:800;">${modelTotals[m]}</td>`).join('')
+  }<td style="text-align:center;font-weight:800;">${rows.length}</td></tr>`;
+
+  el.innerHTML = `<div class="table-wrap"><table class="data">
+    <thead><tr><th>Executive</th>${models.map(m => `<th>${esc(m)}</th>`).join('')}<th>Total</th></tr></thead>
+    <tbody>${body}${totalRow}</tbody>
+  </table></div>`;
+}
+
 function renderDelivery(){
   const filtered = STATE.delivery.filter(r => billedOk(r[9]) && dateInFilter(r[2]) && execInFilter(r[18]));
   let cash=0, fin=0, insCount=0, ewCount=0, rsaCount=0, gearCount=0, amcCount=0, discountSum=0, discountCount=0, gma=0;
@@ -1530,6 +1811,8 @@ function renderDelivery(){
     { key:'rsa', label:'RSA Attached', num:true },
     { key:'gear', label:'Gear Attached', num:true },
   ], modelRows);
+
+  renderExecModelMatrix(filtered);
 
   // full table
   const searchVal = str(document.getElementById('searchDelivery').value).toLowerCase();
@@ -1601,6 +1884,26 @@ function overdueRowsFor(execFilterName){
     return tdd && tdd < today;
   });
 }
+// A booking is "at risk" when its TDD is coming up within the next TDD_ALERT_DAYS days (and
+// hasn't passed yet — that's the separate "overdue" case) but the exact model+colour is NOT
+// currently in Open stock at KN. These are the deliveries most likely to break a promise to a
+// customer, so they're surfaced permanently in Today's Priorities for both Deepak and the
+// booking's own sales person, and listed in full on the Book vs Stock tab.
+const TDD_ALERT_DAYS = 10;
+function atRiskRowsFor(execFilterName){
+  const today = todayMidnight();
+  const limit = new Date(today); limit.setDate(limit.getDate() + TDD_ALERT_DAYS);
+  return STATE.booking.filter(r => {
+    if (execFilterName) { if (!execMatches(r[7], execFilterName)) return false; }
+    else { if (!execInFilter(r[7])) return false; }
+    const s = up(r[9]);
+    if (s === 'BILLED' || s === 'CANCEL') return false;
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    if (!tdd || tdd < today || tdd > limit) return false;   // past TDD = overdue, handled separately
+    return stockMatchFor(r[3], r[4]).exact === 0;           // bike not available in the booked colour
+  });
+}
+
 // Same "not billed, not cancelled" booking set as pendingRows(), but WITHOUT the month filter —
 // used by Today's Priorities, which is a right-now action list, not a monthly report.
 function allPendingRowsFor(execFilterName){
@@ -1628,6 +1931,13 @@ function computeTodayPriorities(){
       const breakdown = Object.entries(byExec).sort((a,b) => b[1]-a[1]).map(([n,c]) => `${n} (${c})`).join(', ');
       items.push({ icon: '⏰', text: `${overdueAll.length} overdue ${overdueAll.length===1?'delivery':'deliveries'} across the team — ${breakdown}.`, cls: 'urgent' });
     }
+    const atRiskAll = atRiskRowsFor(null);
+    if (atRiskAll.length) {
+      const byExecR = {};
+      atRiskAll.forEach(r => { const e = str(r[7]) || 'Unknown'; byExecR[e] = (byExecR[e]||0) + 1; });
+      const bd = Object.entries(byExecR).sort((a,b) => b[1]-a[1]).map(([n,c]) => `${n} (${c})`).join(', ');
+      items.push({ icon: '🚨', text: `${atRiskAll.length} booking${atRiskAll.length===1?'':'s'} due within ${TDD_ALERT_DAYS} days with NO matching bike in stock — ${bd}. Arrange stock or inform the customer now.`, cls: 'urgent' });
+    }
     const readyAll = allPendingRowsFor(null).filter(r => stockMatchFor(r[3], r[4]).exact > 0);
     if (readyAll.length) {
       items.push({ icon: '📦', text: `${readyAll.length} pending ${readyAll.length===1?'booking has':'bookings have'} matching stock now — remind the team to schedule these deliveries.`, cls: '' });
@@ -1651,6 +1961,10 @@ function computeTodayPriorities(){
     const overdue = overdueRowsFor(name);
     if (overdue.length) {
       items.push({ icon: '⏰', text: `Follow up on ${overdue.length} overdue ${overdue.length===1?'delivery':'deliveries'} — ${overdue.length===1?'a customer is':'customers are'} waiting.`, cls: 'urgent' });
+    }
+    const atRisk = atRiskRowsFor(name);
+    if (atRisk.length) {
+      items.push({ icon: '🚨', text: `${atRisk.length} of your booking${atRisk.length===1?' is':'s are'} due within ${TDD_ALERT_DAYS} days but the bike is NOT in stock — check the Book vs Stock tab and update the customer before the promised date.`, cls: 'urgent' });
     }
     const ready = allPendingRowsFor(name).filter(r => stockMatchFor(r[3], r[4]).exact > 0);
     if (ready.length) {
@@ -1718,10 +2032,12 @@ function renderPending(){
   const overdueRows = overdue.map(r => {
     const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
     const daysLate = tdd ? Math.round((today - tdd) / 86400000) : 0;
-    return { customer: str(r[5]), model: str(r[3]), colour: str(r[4]), exec: str(r[7]), tdd: fmtDate(tdd), daysLate, status: str(r[9]) };
+    return { slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]), exec: str(r[7]), tdd: fmtDate(tdd), daysLate, status: str(r[9]) };
   }).sort((a,b) => b.daysLate - a.daysLate);
   renderStaticTable('tblOverdue', [
-    { key:'customer', label:'Customer' },
+    { key:'slipNo', label:'Slip / Receipt No' },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No' },
     { key:'model', label:'Model' },
     { key:'colour', label:'Colour' },
     { key:'exec', label:'Executive' },
@@ -1729,6 +2045,31 @@ function renderPending(){
     { key:'daysLate', label:'Days Overdue', num:true, raw:true, fmt: v => `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` },
     { key:'status', label:'Status' },
   ], overdueRows);
+
+  const atRisk = atRiskRowsFor(null);
+  document.getElementById('atRiskNote').textContent =
+    `Bookings whose TDD falls within the next ${TDD_ALERT_DAYS} days where that exact model + colour is NOT currently Open in KN stock — the deliveries most likely to slip. Admin sees the whole team's; a sales login sees only their own.`;
+  const atRiskRows = atRisk.map(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    const daysLeft = tdd ? Math.round((tdd - today) / 86400000) : 0;
+    const { familyOnly } = stockMatchFor(r[3], r[4]);
+    return {
+      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]),
+      exec: str(r[7]), tdd: fmtDate(tdd), daysLeft,
+      alt: familyOnly > 0 ? `${familyOnly} in another colour` : 'none',
+    };
+  }).sort((a,b) => a.daysLeft - b.daysLeft);
+  renderStaticTable('tblAtRisk', [
+    { key:'slipNo', label:'Slip / Receipt No' },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'exec', label:'Executive' },
+    { key:'tdd', label:'TDD (Promised Date)' },
+    { key:'daysLeft', label:'Days Left', num:true, raw:true, fmt: v => `<span class="table-flag">🚨 ${fmtInt(v)}</span>` },
+    { key:'alt', label:'Same Model, Other Colour' },
+  ], atRiskRows);
 
   renderBarList('pendingModelBars', models, 'var(--s2)', null, { groupByPrefix: true });
 
@@ -1742,6 +2083,7 @@ function renderPending(){
   const stockByFamily = {};
   STATE.stock.forEach(r => {
     if (up(r[17]) !== 'OPEN') return; // only physically-available stock counts here
+    if (up(r[7]) !== 'KN') return; // VM is a separate store — not stock we can promise a customer
     const fam = modelFamilyKey(r[11] || r[9]);
     stockByFamily[fam] = (stockByFamily[fam] || 0) + 1;
   });
@@ -1754,9 +2096,37 @@ function renderPending(){
   renderStaticTable('tblPendingVsStock', [
     { key:'fam', label:'Model Family' },
     { key:'pending', label:'Pending Bookings', num:true },
-    { key:'stock', label:'Stock Available (Open)', num:true },
+    { key:'stock', label:'Stock Available (Open, KN only)', num:true },
     { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
   ], cmpRows);
+
+  // Same comparison at exact model+colour level (via stockMatchFor's "exact" count) — two
+  // different colours in the same family aren't interchangeable to a waiting customer, so this
+  // is more precise than the family-level table above.
+  const pendingByModelColour = {};
+  rows.forEach(r => {
+    const model = str(r[3]) || '(unknown)';
+    const colour = str(r[4]) || '(no colour)';
+    const key = model + '||' + colour;
+    const b = pendingByModelColour[key] || (pendingByModelColour[key] = { model, colour, pending: 0 });
+    b.pending++;
+  });
+  // Grouped for reading, not ranked by count: model family first, then model, then colour —
+  // so every colour of one model sits together instead of being scattered by pending count.
+  const colourCmpRows = Object.values(pendingByModelColour).map(b => {
+    const { exact } = stockMatchFor(b.model, b.colour);
+    return { fam: modelFamilyKey(b.model), model: b.model, colour: b.colour, pending: b.pending, stock: exact, gap: exact - b.pending };
+  }).sort((a,b) =>
+    a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model) || a.colour.localeCompare(b.colour)
+  );
+  renderStaticTable('tblPendingVsStockColour', [
+    { key:'fam', label:'Model Family' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'pending', label:'Pending Bookings', num:true },
+    { key:'stock', label:'Stock Available (Open, KN, exact colour)', num:true },
+    { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
+  ], colourCmpRows);
 
   // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
   // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
@@ -1813,10 +2183,12 @@ function renderStock(){
   const byStore = {};
   all.forEach(r => { const s = str(r[7]) || '(unknown)'; byStore[s] = (byStore[s]||0) + 1; });
 
+  const agedRows = openRows.filter(r => num(r[16]) >= AGED_STOCK_DAYS);
   document.getElementById('kpiStock').innerHTML = [
     kpiCard('Total Stock', fmtInt(all.length), 'Open + In-Transit'),
     kpiCard('Available Now (Open)', fmtInt(openRows.length)),
     kpiCard('In-Transit', fmtInt(transitRows.length), 'dispatched, not yet arrived'),
+    kpiCard('Aged Stock', fmtInt(agedRows.length), `open ${AGED_STOCK_DAYS}+ days — push these first`, undefined, agedRows.length ? 'Needs attention' : null),
     ...Object.entries(byStore).map(([store, n]) => kpiCard(`Store ${store}`, fmtInt(n))),
   ].join('');
 
@@ -1854,6 +2226,15 @@ function renderStock(){
     { key:'open', label:'Available (Open)', num:true },
     { key:'transit', label:'In-Transit', num:true },
   ], modelList);
+
+  renderStaticTable('tblAgedStock', [
+    { key:7, label:'Store' },
+    { key:11, label:'Model Name' },
+    { key:12, label:'Chassis No' },
+    { key:14, label:'DMS Receipt Date', fmt: fmtDate },
+    { key:16, label:'Ageing (Days)', num:true, raw:true, fmt: v => `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` },
+    { key:19, label:'MRP', num:true, fmt: fmtMoney },
+  ], agedRows.sort((a,b) => num(b[16]) - num(a[16])));
 
   const search = str(document.getElementById('searchStock').value).toLowerCase();
   const filtered = all.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
@@ -2353,6 +2734,65 @@ function renderAnalytics(){
   hBarChart('ratingBarChart', ratingItems);
 
   renderPerformanceHeatmap();
+  renderEnquiryQuality();
+}
+
+// Cross-references the RE Portal's "ENQUIRY STATMENT" sheet (which has rich Lead Status / Drop
+// Reason / Lead Lost Reason fields but NO sales-executive column) against the dealership's own
+// "enquiry" sheet (which DOES have an Owner/executive column) by matching ENQ Number — so we can
+// attribute drop/lost patterns to a specific sales person, which neither sheet can do alone.
+// Coverage is partial by nature (only enquiries present in both sheets match) — the note under
+// the table always states exactly how many matched.
+function renderEnquiryQuality(){
+  const noteEl = document.getElementById('enquiryQualityNote');
+  if (!noteEl) return;
+
+  const ownerByEnq = {};
+  STATE.enquiry.forEach(r => {
+    const enq = str(r[0]);
+    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[13]);
+  });
+
+  const byExec = {};
+  let matched = 0;
+  STATE.enqStatement.forEach(r => {
+    const enq = str(r[0]);
+    const ownerRaw = ownerByEnq[enq];
+    if (!ownerRaw) return;
+    const execName = STATE.execList.find(name => execMatches(ownerRaw, name)) || mapOwnerToExec(ownerRaw);
+    if (!execName) return;
+    matched++;
+    const bucket = byExec[execName] || (byExec[execName] = { total: 0, dropped: 0, reasons: {} });
+    bucket.total++;
+    const status = up(str(r[25]));
+    const lostReason = str(r[37]);
+    const dropReason = str(r[26]);
+    if (status.includes('DROP') || status.includes('LOST') || lostReason) {
+      bucket.dropped++;
+      const reasonKey = lostReason || dropReason || '(no reason given)';
+      bucket.reasons[reasonKey] = (bucket.reasons[reasonKey] || 0) + 1;
+    }
+  });
+
+  const rows = STATE.execList.map(name => {
+    const b = byExec[name] || { total: 0, dropped: 0, reasons: {} };
+    const topReason = Object.entries(b.reasons).sort((a,b) => b[1]-a[1])[0];
+    return {
+      name, total: b.total, dropped: b.dropped,
+      dropPct: b.total ? Math.round((b.dropped/b.total)*100) : 0,
+      topReason: topReason ? `${topReason[0]} (${topReason[1]})` : '—',
+    };
+  }).filter(r => r.total > 0).sort((a,b) => b.total - a.total);
+
+  renderStaticTable('tblEnquiryQuality', [
+    { key: 'name', label: 'Executive' },
+    { key: 'total', label: 'RE Portal Enquiries (matched)', num: true },
+    { key: 'dropped', label: 'Dropped / Lost', num: true },
+    { key: 'dropPct', label: 'Drop %', num: true, fmt: v => v + '%' },
+    { key: 'topReason', label: 'Top Drop Reason' },
+  ], rows);
+
+  noteEl.textContent = `Matched ${fmtInt(matched)} of ${fmtInt(STATE.enqStatement.length)} RE Portal enquiries to a sales executive via ENQ Number.`;
 }
 
 /* ---------------- Lead & Booking (MSD) analysis — Admin-only ----------------
