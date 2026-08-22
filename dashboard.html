@@ -600,6 +600,7 @@
       <button id="allMonthsBtn" title="One click to show all months' data">📅 Show All Months</button>
       <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
       <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
+      <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
       <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
     </div>
   </div>
@@ -631,6 +632,16 @@
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
     <div class="kpi-grid" id="kpiSalesConsole"></div>
+
+    <div id="personalTargetSection" style="display:none;">
+      <h2 class="section-title" id="personalTargetTitle">🎯 My Daily Target</h2>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Real calendar month, pace-adjusted to today's date — same logic as the store's Monthly Booking Target on Analytics, just for you.</p>
+      <div class="kpi-grid" id="kpiPersonalTarget"></div>
+    </div>
+
+    <h2 class="section-title">🏆 This Month's Champions</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Category-wise recognition for the selected month, so it's not always the same one or two names on top.</p>
+    <div class="kpi-grid" id="kpiChampions"></div>
 
     <h2 class="section-title">👤 Employee-wise Performance</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
@@ -932,9 +943,46 @@
 
 </div><!-- /#appShell -->
 
+<!-- OneSignal Web Push SDK — used to subscribe each logged-in employee's own device/browser for
+     push notifications, tagged with their name. See the ONESIGNAL_APP_ID note further down for
+     why the actual "send" button lives on OneSignal's own dashboard rather than on this page. -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes so the dashboard stays current without manual clicks
+
+/* ---------------- OneSignal push notifications (subscribe side only) ----------------
+   This page can subscribe each employee's own browser and tag it with their name — that part
+   works fine client-side. Actually SENDING a push needs a server-to-server call (OneSignal's
+   create-notification REST endpoint doesn't allow direct browser calls — no CORS headers, this
+   is a documented OneSignal limitation, not something fixable from this static page). So there's
+   deliberately no REST API key or "send" button in this file: sending is done from OneSignal's
+   own dashboard at https://dashboard.onesignal.com/apps/2b7b8dfe-c594-4bda-af83-38b6fadda684 —
+   log in there, pick "New Push", and either send to everyone or filter by the external_id tag
+   (each employee's execKey/name, set below) to reach just one person. A proper "Send" button
+   right here would need a small server-side proxy in front of the REST API — worth doing later
+   if this becomes a regular thing, but out of scope for a single static HTML file today.
+   Only the App ID lives here — that's meant to be public, same as any OneSignal web integration. */
+const ONESIGNAL_APP_ID = '2b7b8dfe-c594-4bda-af83-38b6fadda684';
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+});
+// Tags this browser with the logged-in person's execKey/name (an "External ID" in OneSignal) so
+// Deepak can target just them from OneSignal's dashboard later, and asks the browser for
+// notification permission. Called once, right as they enter the dashboard. Never blocks the
+// dashboard itself — push is a bonus, not a requirement, so failures here are swallowed.
+function linkOneSignalIdentity(){
+  if (!CURRENT_USER) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    try {
+      await OneSignal.login(CURRENT_USER.execKey || CURRENT_USER.name);
+      await OneSignal.Notifications.requestPermission();
+    } catch (e) { /* ignore — notification permission is optional, never block the app on it */ }
+  });
+}
 
 /* ---------------- theme ---------------- */
 (function initTheme(){
@@ -1028,6 +1076,7 @@ function enterDashboard(){
   document.getElementById('reFactOverlay').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
   applyRoleRestrictions();
+  linkOneSignalIdentity();
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
 }
@@ -1038,6 +1087,26 @@ function populateLoginDropdown(){
   sel.innerHTML = CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
 }
 populateLoginDropdown();
+
+// ===== Persistent login =====
+// Login once per device/browser, stay logged in after that — no localStorage/cookie was used
+// before, so every fresh page load always showed the login screen. Now a successful login saves
+// just the person's NAME (not the password) to localStorage; on the next visit that name is
+// looked up again in CREDENTIALS to rebuild CURRENT_USER, skipping straight past the login form
+// to today's Spotlight screen. This is meant for an employee's own phone, not a shared showroom
+// device — Logout below clears it, and each person doing that on their own device is enough.
+const SESSION_KEY = 'amarAutosSessionUser';
+function trySavedSession(){
+  let savedName;
+  try { savedName = localStorage.getItem(SESSION_KEY); } catch(e) { return false; }
+  if (!savedName) return false;
+  const user = CREDENTIALS.find(u => u.name === savedName);
+  if (!user) { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} return false; }
+  CURRENT_USER = user;
+  showReFact();
+  return true;
+}
+trySavedSession();
 
 function attemptLogin(){
   const name = document.getElementById('loginName').value;
@@ -1050,13 +1119,17 @@ function attemptLogin(){
   }
   errEl.textContent = '';
   CURRENT_USER = user;
+  try { localStorage.setItem(SESSION_KEY, user.name); } catch(e) {}
   showReFact();
 }
 document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); attemptLogin(); });
-// Nothing about the session is persisted (no localStorage/cookie) — the login screen is always
-// shown first on a fresh page load — so logging out is simply a full reload back to that state.
-// This also cleanly stops the 5-minute auto-refresh interval and clears CURRENT_USER/STATE.
-document.getElementById('logoutBtn').addEventListener('click', () => { location.reload(); });
+// Logout clears the saved session (so this device goes back to asking for a password next time)
+// and reloads — the reload also cleanly stops the 5-minute auto-refresh interval and resets
+// CURRENT_USER/STATE.
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  location.reload();
+});
 
 // Mobile header drawer — the filter/action controls used to wrap across several rows on a phone,
 // pushing the actual dashboard content below the fold. On phones they now live in this slide-in
@@ -1083,6 +1156,10 @@ function visibleExecList(){
 function applyRoleRestrictions(){
   if (!CURRENT_USER) return;
   const isAdmin = CURRENT_USER.role === 'Admin';
+  // Notify Team (WhatsApp broadcast) is an admin-only action — a sales/CRT login shouldn't be
+  // pinging the whole team.
+  const notifyBtn = document.getElementById('notifyTeamBtn');
+  if (notifyBtn) notifyBtn.style.display = isAdmin ? '' : 'none';
   // hide tabs that show company-wide / other-people's data from non-admin logins.
   // Riders (registration + feedback, merged into one tab) is the one exception: Deepak wants CRT
   // logins (Harsh handles riders) to see it too, alongside Admin — everyone else (Sales) still doesn't.
@@ -1464,6 +1541,8 @@ function renderAll(){
   renderTodayPriorities();
   renderStorePerformance();
   renderSalesConsole();
+  renderPersonalTarget();
+  renderChampions();
   renderEmployeeTable();
   renderFunnel();
   renderBookings();
@@ -1654,6 +1733,173 @@ function showOverdueDetail(execName){
   document.getElementById('detailModal').classList.add('open');
 }
 function closeDetailModal(){ document.getElementById('detailModal').classList.remove('open'); }
+
+/* ---------------- Notify Team (WhatsApp broadcast) ---------------- */
+// This is a static, backend-free page (see loadAll() / fetchSheetRaw() notes above) — there's no
+// server to push a real app notification from. WhatsApp is the practical stand-in: this opens
+// WhatsApp with a ready-made message and lets Deepak pick the sales-team group or a broadcast
+// list himself (wa.me with no phone number opens the contact/group picker instead of a single
+// chat, so it works for a group, a broadcast list, or individual chats without needing anyone's
+// number stored in this file).
+const DASHBOARD_LIVE_URL = 'https://amarauto87-source.github.io/amar-autos-review/dashboard.html';
+function defaultNotifyMessage(){
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `📢 *Amar Autos Dashboard Update*\n${today}\n\nDashboard update ho gaya hai — apna target, pending deliveries aur reviews check kar lo.\n\n👉 ${DASHBOARD_LIVE_URL}`;
+}
+function openNotifyTeamModal(){
+  document.getElementById('modalTitle').textContent = '📢 Notify Team';
+  document.getElementById('modalBody').innerHTML = `
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Edit the message if you want, then send — this opens WhatsApp with it ready to go. Pick your sales-team group (or a broadcast list) there and hit send.</p>
+    <textarea id="notifyMsgBox" rows="7" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);">${esc(defaultNotifyMessage())}</textarea>
+    <div style="margin-top:12px; text-align:right;">
+      <button type="button" id="notifySendBtn" class="primary">✅ Send via WhatsApp</button>
+    </div>
+    <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">🔔 Want it as an actual phone notification instead of WhatsApp? Every employee who's logged in on their own phone is already tagged and ready — send from OneSignal's own dashboard (it can target everyone, or just one person by name).</p>
+      <div style="text-align:right;">
+        <a href="https://dashboard.onesignal.com/apps/${ONESIGNAL_APP_ID}" target="_blank" rel="noopener" style="text-decoration:none;">
+          <button type="button">🔔 Open OneSignal Dashboard</button>
+        </a>
+      </div>
+    </div>`;
+  document.getElementById('notifySendBtn').addEventListener('click', () => {
+    const msg = document.getElementById('notifyMsgBox').value;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    closeDetailModal();
+  });
+  document.getElementById('detailModal').classList.add('open');
+}
+document.getElementById('notifyTeamBtn').addEventListener('click', openNotifyTeamModal);
+
+/* ---------------- My Daily Target (personal pace tracker) ---------------- */
+// Always the REAL current calendar month, pace-adjusted to today's date — deliberately mirrors
+// computeFunnelTargets()'s logic (store-wide, Analytics tab) but scoped to one executive, since
+// Sales/CRT logins never see the Analytics tab (it's in RESTRICTED_TABS) and previously had no
+// way to see how their own month is pacing day-by-day.
+function computePersonalTarget(execName){
+  if (!execName) return null;
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const monthIdx = month + 1; // 1=Jan..12=Dec — same column convention targetFor() uses
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayOfMonth = now.getDate();
+  const daysLeft = daysInMonth - dayOfMonth + 1; // today still counts as workable
+
+  const monthTarget = STATE.targets
+    .filter(r => up(r[0]) === up(execName))
+    .reduce((s, r) => s + num(r[monthIdx]), 0);
+
+  let retailSoFar = 0;
+  for (const r of STATE.delivery) {
+    if (!billedOk(r[9])) continue;
+    const d = r[2];
+    if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) continue;
+    if (!execMatches(r[18], execName)) continue;
+    retailSoFar++;
+  }
+
+  const expectedTillToday = Math.round(monthTarget * (dayOfMonth / daysInMonth));
+  const remaining = Math.max(0, monthTarget - retailSoFar);
+  const requiredPerDay = daysLeft > 0 ? remaining / daysLeft : 0;
+  const gapVsPace = retailSoFar - expectedTillToday;
+  const achievedPct = monthTarget ? retailSoFar / monthTarget : 0;
+
+  return { execName, monthTarget, retailSoFar, dayOfMonth, daysInMonth, daysLeft, expectedTillToday, remaining, requiredPerDay, gapVsPace, achievedPct };
+}
+
+// Shown for a locked Sales/CRT login (always, it's their own execKey) or for Admin only once
+// they've picked one specific name in the executive filter — hidden on "ALL" for Admin since a
+// single person's daily pace doesn't mean anything aggregated across the whole store.
+function renderPersonalTarget(){
+  const section = document.getElementById('personalTargetSection');
+  const el = document.getElementById('kpiPersonalTarget');
+  if (!section || !el) return;
+
+  const execName = (CURRENT_USER && CURRENT_USER.role !== 'Admin')
+    ? CURRENT_USER.execKey
+    : (STATE.filterExec && STATE.filterExec !== 'ALL' ? STATE.filterExec : null);
+
+  if (!execName) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const titleEl = document.getElementById('personalTargetTitle');
+  if (titleEl) titleEl.textContent = `🎯 My Daily Target — ${execName}`;
+
+  const p = computePersonalTarget(execName);
+  el.innerHTML = [
+    kpiCard("This Month's Target", fmtInt(p.monthTarget), `Day ${p.dayOfMonth} of ${p.daysInMonth}`),
+    kpiCard('Achieved So Far', fmtInt(p.retailSoFar), `${fmtPct(p.achievedPct)} of target`, p.achievedPct * 100,
+      p.monthTarget && p.gapVsPace < 0 ? `${fmtInt(Math.abs(p.gapVsPace))} behind pace` : null),
+    kpiCard('Expected By Today', fmtInt(p.expectedTillToday), 'at steady pace'),
+    kpiCard('Remaining', fmtInt(p.remaining), p.remaining ? 'to hit target' : 'Target achieved! 🎉'),
+    kpiCard('Needed Per Day', p.remaining ? p.requiredPerDay.toFixed(1) : '0',
+      p.daysLeft > 0 ? `for the next ${fmtInt(p.daysLeft)} days` : 'month over'),
+  ].join('');
+}
+
+/* ---------------- This Month's Champions (category-wise recognition badges) ---------------- */
+// Deliberately spread across 4 different categories rather than one "most bikes sold" board —
+// a single ranking always crowns the same senior person and demotivates everyone else. Splits
+// recognition so quality (GMA/bike, EW attach) and reviews matter as much as raw volume.
+// Uses STATE.execList (every executive), not visibleExecList() — a leaderboard's whole point is
+// visibility across the team, unlike the private Employee-wise table above which a Sales/CRT
+// login only ever sees its own row of.
+function computeCategoryBadges(){
+  const execs = STATE.execList;
+  if (!execs.length) return null;
+
+  const reviewCounts = {};
+  execs.forEach(e => { reviewCounts[e] = 0; });
+  STATE.review.forEach(r => {
+    if (!dateInFilter(r[0])) return;
+    const person = r[3];
+    execs.forEach(name => { if (execMatches(person, name)) reviewCounts[name]++; });
+  });
+
+  const stats = execs.map(name => {
+    const agg = computeDeliveryAgg(name);
+    return {
+      name,
+      retail: agg.retail,
+      reviews: reviewCounts[name] || 0,
+      gmaPerBike: agg.retail ? agg.gma / agg.retail : 0,
+      ewPct: agg.retail ? agg.ew / agg.retail : 0,
+    };
+  });
+
+  // requireRetail: exclude anyone with 0 bikes from quality-based categories (GMA/bike, EW %)
+  // so a person who delivered nothing doesn't "win" a per-bike ratio by default.
+  function topBy(key, requireRetail){
+    const eligible = stats.filter(s => !requireRetail || s.retail > 0);
+    if (!eligible.length) return null;
+    const max = Math.max(...eligible.map(s => s[key]));
+    if (max <= 0) return null;
+    const winners = eligible.filter(s => s[key] === max).map(s => s.name);
+    return { winners, value: max };
+  }
+
+  return {
+    retail: topBy('retail', false),
+    reviews: topBy('reviews', false),
+    gmaPerBike: topBy('gmaPerBike', true),
+    ewPct: topBy('ewPct', true),
+  };
+}
+
+function renderChampions(){
+  const el = document.getElementById('kpiChampions');
+  if (!el) return;
+  const b = computeCategoryBadges();
+  const badge = (label, hint, data, fmt) => data
+    ? kpiCard(label, esc(data.winners.join(' & ')), `${fmt(data.value)} ${hint}`)
+    : kpiCard(label, '—', 'No data yet');
+  el.innerHTML = !b ? '<div class="empty-note">No executives configured</div>' : [
+    badge('🏍️ Top Retail', 'bikes delivered', b.retail, fmtInt),
+    badge('⭐ Top Reviews', 'reviews collected', b.reviews, fmtInt),
+    badge('💰 Best GMA/Bike', 'value add per bike', b.gmaPerBike, fmtMoney),
+    badge('🛡️ Best EW Attach', 'of retail', b.ewPct, fmtPct),
+  ].join('');
+}
 
 /* ---------------- Enquiry Funnel ---------------- */
 function renderFunnel(){
