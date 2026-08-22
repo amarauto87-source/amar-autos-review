@@ -4,6 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Amar Autos — Master Dashboard</title>
+<!-- PWA: makes the dashboard installable (own icon, standalone window, works offline on the last
+     data it saw) — see manifest.json + OneSignalSDKWorker.js/pwa-cache.js uploaded alongside this
+     file. Browsers just need these three tags to offer "Add to Home Screen" / "Install app". -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#100e0b">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amar Autos">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
@@ -231,31 +240,6 @@
   details.section-collapse[open] > summary { border-bottom: 1px solid var(--border); }
   details.section-collapse > .details-body { padding: 16px; }
 
-  /* RE portal "In-Moment Sales" strip — same column shape Deepak already reads on the portal */
-  .portal-strip {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-top: 2px solid var(--gold-dim); border-radius: 11px; overflow: hidden;
-  }
-  .portal-cell { padding: 14px 12px; text-align: center; border-right: 1px solid var(--grid); }
-  .portal-cell:last-child { border-right: none; }
-  .portal-name {
-    font-family: var(--font-head); font-size: 11px; letter-spacing: 0.7px; text-transform: uppercase;
-    color: var(--gold); font-weight: 600; margin-bottom: 8px;
-  }
-  .portal-actual {
-    font-family: var(--font-head); font-size: 27px; font-weight: 700; line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .portal-target { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
-  @media (max-width: 640px) {
-    .portal-strip { grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); }
-    .portal-cell { padding: 11px 6px; }
-    .portal-name { font-size: 9.5px; letter-spacing: 0.3px; }
-    .portal-actual { font-size: 21px; }
-    .portal-target { font-size: 9.5px; }
-  }
-
   /* Inline "number you can click" — used for drill-downs like an executive's overdue list */
   .link-btn {
     background: none; border: none; padding: 0; font: inherit; cursor: pointer;
@@ -338,6 +322,7 @@
   .chat-item .chat-icon { font-size: 16px; flex-shrink: 0; }
   .chat-item.urgent { color: var(--critical); font-weight: 600; }
   .chat-item.ok { color: var(--good); font-weight: 600; }
+  .chat-item.tip { color: var(--text-secondary); font-style: italic; }
   .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
   .meter > div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; }
   /* charts */
@@ -383,9 +368,7 @@
   }
   .pill.good { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
   .pill.bad { background: color-mix(in srgb, var(--critical) 18%, transparent); color: var(--critical); }
-  .pill.warn { background: color-mix(in srgb, var(--warning) 22%, transparent); color: var(--warning); }
-  .pill.muted { background: color-mix(in srgb, var(--text-muted) 15%, transparent); color: var(--text-muted); }
-  .pill.info { background: color-mix(in srgb, var(--gold) 15%, transparent); color: var(--gold); }
+  .pill.warn { background: color-mix(in srgb, var(--warning) 25%, transparent); color: #8a5a00; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
   /* When a section title is the first thing inside a grid column, drop its top margin so both
      columns' headings line up on the same baseline instead of one sitting lower. */
@@ -546,25 +529,6 @@
     .login-card .banner { padding: 16px 20px 14px; }
     .login-card .fields { padding: 20px 20px 22px; }
   }
-  @media (max-width: 640px) {
-    table.data.sc-table .hint { display: none; }
-    table.data.sc-table { table-layout: fixed; width: 100%; }
-    table.data.sc-table th, table.data.sc-table td {
-      padding: 9px 5px; font-size: 10.5px; white-space: normal; overflow-wrap: anywhere; vertical-align: middle;
-    }
-    table.data.sc-table th:nth-child(1), table.data.sc-table td:nth-child(1) { width: 36%; }
-    table.data.sc-table th:nth-child(2), table.data.sc-table td:nth-child(2) { width: 21%; }
-    table.data.sc-table th:nth-child(3), table.data.sc-table td:nth-child(3) { width: 16%; }
-    table.data.sc-table th:nth-child(4), table.data.sc-table td:nth-child(4) { width: 27%; }
-    /* header words like "TARGET" were breaking mid-word in the narrow columns */
-    table.data.sc-table th { font-size: 9px; letter-spacing: 0.2px; overflow-wrap: normal; }
-    table.data.sc-table td:nth-child(3) { font-size: 12.5px; font-weight: 800; }
-    table.data.sc-table .pill { font-size: 9px; padding: 3px 5px; border-radius: 6px; display: inline-block; }
-    #scorecardBody .table-wrap { overflow-x: hidden; }
-    /* all four columns now fit, so this table needs no swipe hint */
-    #scorecardBody .table-wrap::after { display: none; }
-  }
-
   /* Tables stay horizontally scrollable on phones rather than wrapping — swipe hint */
   @media (max-width: 640px) {
     .table-wrap::after {
@@ -646,6 +610,8 @@
       <button id="allMonthsBtn" title="One click to show all months' data">📅 Show All Months</button>
       <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
       <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
+      <button id="reportCancelBtn" title="Flag a booking as cancelled on the ground, before the office has updated it">🚫 Report Cancellation</button>
+      <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
       <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
     </div>
   </div>
@@ -656,7 +622,6 @@
 
 <nav class="tabs" id="tabs">
   <button data-tab="overview" class="active">Overview</button>
-  <button data-tab="scorecard">🎯 Daily Scorecard</button>
   <button data-tab="analytics">Analytics</button>
   <button data-tab="delivery">Delivery</button>
   <button data-tab="pending">📦 Book vs Stock</button>
@@ -668,22 +633,6 @@
 <main>
   <div id="errorBox"></div>
 
-  <section class="tabpanel" id="tab-scorecard">
-    <h2 class="section-title">🎯 Daily Scorecard</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 12px;" id="scorecardIntro"></p>
-    <div id="scorecardBody"></div>
-
-    <div id="portalSection">
-      <h2 class="section-title" style="margin-top:30px;">📡 RE Portal — In-Moment Sales</h2>
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;" id="portalNote"></p>
-      <div id="portalStrip"></div>
-    </div>
-
-    <h2 class="section-title" style="margin-top:30px;">✅ Today's Discipline</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">The daily routine checklist. Ticks are saved on this device for today only and reset tomorrow — for permanent, team-wide tracking, add the <strong>Daily Checklist</strong> sheet described in the KPI plan.</p>
-    <div class="card" id="disciplineList"></div>
-  </section>
-
   <section class="tabpanel active" id="tab-overview">
     <h2 class="section-title">🤖 Today's Priorities</h2>
     <div class="chat-panel" id="todayPriorities"></div>
@@ -694,6 +643,16 @@
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
     <div class="kpi-grid" id="kpiSalesConsole"></div>
+
+    <div id="personalTargetSection" style="display:none;">
+      <h2 class="section-title" id="personalTargetTitle">🎯 My Daily Target</h2>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Real calendar month, pace-adjusted to today's date — same logic as the store's Monthly Booking Target on Analytics, just for you.</p>
+      <div class="kpi-grid" id="kpiPersonalTarget"></div>
+    </div>
+
+    <h2 class="section-title">🏆 This Month's Champions</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Category-wise recognition for the selected month, so it's not always the same one or two names on top.</p>
+    <div class="kpi-grid" id="kpiChampions"></div>
 
     <h2 class="section-title">👤 Employee-wise Performance</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
@@ -716,7 +675,13 @@
   </section>
 
   <section class="tabpanel" id="tab-analytics">
-    <h2 class="section-title">🎯 Monthly Booking Target &amp; Funnel</h2>
+    <h2 class="section-title">💡 Where To Focus — Smart Suggestions</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Data-driven pointers built fresh from your own numbers every time this loads (not a live AI model — that would mean either a security-risky client-exposed API key or a paid backend; this reads your actual Sheet data with clear rules instead, so it's free and it can't ever make something up). One general sales tactic also rotates in daily below.
+    </div>
+    <div id="smartSuggestions" class="card"></div>
+
+    <h2 class="section-title" style="margin-top:30px;">🎯 Monthly Booking Target &amp; Funnel</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;">Target is always tracked against the real calendar month (not the month filter above) and pace-adjusted to today's date — "Expected Till Today" is what you'd need to have booked by now to stay on track for the full month's target.</p>
     <div class="kpi-grid" id="kpiFunnelTargets"></div>
     <div class="table-wrap" style="margin-top:12px;"><table class="data" id="tblFunnelTargets"></table></div>
@@ -731,17 +696,6 @@
       <div class="card">
         <h3>Enquiry → Booking Conversion by Channel</h3>
         <div class="chart-wrap"><div id="funnelBarChart"></div></div>
-      </div>
-      <div class="card">
-        <h3>Best-Selling Models (current filter)</h3>
-        <div class="chart-wrap"><div id="modelBarChart"></div></div>
-      </div>
-    </div>
-
-    <div class="grid-2" style="margin-top:16px;">
-      <div class="card">
-        <h3>Executive Leaderboard — Retail (current filter)</h3>
-        <div class="chart-wrap"><div id="execBarChart"></div></div>
       </div>
       <div class="card">
         <h3>Review Rating Distribution (all time)</h3>
@@ -844,19 +798,14 @@
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
     <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
 
-    <h2 class="section-title">🏍️ Model &amp; Colour-wise — Pending Units</h2>
-    <div class="card"><div id="pendingModelBars"></div></div>
-
-    <h2 class="section-title">⚖️ Pending Bookings vs Stock Available</h2>
+    <h2 class="section-title">🔎 Model Finder — Bookings vs Stock by Colour</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      One table, model + colour wise. Use the filters to narrow it down — pick a model family first, then a colour. Red = stock is short of bookings. Stock counted here is Kanti Nagar (KN) only; Vikas Marg (VM) is a separate store and isn't counted as ours to promise a customer (see the Stock tab for VM's own numbers).
+      Pick a model to narrow the table, or leave it on "All Models". For every colour, shows how many are pending vs how many are Open in KN stock right now, plus who already holds those bookings — so if a fresh walk-in customer wants a colour, you can check in one glance whether it's already spoken for and by whom, instead of promising something that's not actually free.
     </div>
-    <div class="toolbar">
-      <select id="pvsFamily" title="Filter by model family"></select>
-      <select id="pvsColour" title="Filter by colour"></select>
-      <span class="status-line" id="pvsCount" style="color:var(--text-muted);"></span>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <select id="modelFinderSelect"></select>
     </div>
-    <div class="table-wrap"><table class="data" id="tblPendingVsStock"></table></div>
+    <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
 
     <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
@@ -994,9 +943,46 @@
 
 </div><!-- /#appShell -->
 
+<!-- OneSignal Web Push SDK — used to subscribe each logged-in employee's own device/browser for
+     push notifications, tagged with their name. See the ONESIGNAL_APP_ID note further down for
+     why the actual "send" button lives on OneSignal's own dashboard rather than on this page. -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes so the dashboard stays current without manual clicks
+
+/* ---------------- OneSignal push notifications (subscribe side only) ----------------
+   This page can subscribe each employee's own browser and tag it with their name — that part
+   works fine client-side. Actually SENDING a push needs a server-to-server call (OneSignal's
+   create-notification REST endpoint doesn't allow direct browser calls — no CORS headers, this
+   is a documented OneSignal limitation, not something fixable from this static page). So there's
+   deliberately no REST API key or "send" button in this file: sending is done from OneSignal's
+   own dashboard at https://dashboard.onesignal.com/apps/2b7b8dfe-c594-4bda-af83-38b6fadda684 —
+   log in there, pick "New Push", and either send to everyone or filter by the external_id tag
+   (each employee's execKey/name, set below) to reach just one person. A proper "Send" button
+   right here would need a small server-side proxy in front of the REST API — worth doing later
+   if this becomes a regular thing, but out of scope for a single static HTML file today.
+   Only the App ID lives here — that's meant to be public, same as any OneSignal web integration. */
+const ONESIGNAL_APP_ID = '2b7b8dfe-c594-4bda-af83-38b6fadda684';
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+});
+// Tags this browser with the logged-in person's execKey/name (an "External ID" in OneSignal) so
+// Deepak can target just them from OneSignal's dashboard later, and asks the browser for
+// notification permission. Called once, right as they enter the dashboard. Never blocks the
+// dashboard itself — push is a bonus, not a requirement, so failures here are swallowed.
+function linkOneSignalIdentity(){
+  if (!CURRENT_USER) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    try {
+      await OneSignal.login(CURRENT_USER.execKey || CURRENT_USER.name);
+      await OneSignal.Notifications.requestPermission();
+    } catch (e) { /* ignore — notification permission is optional, never block the app on it */ }
+  });
+}
 
 /* ---------------- theme ---------------- */
 (function initTheme(){
@@ -1076,6 +1062,37 @@ function getDailyFact(){
   return RE_FACTS[idx];
 }
 
+// A curated pool of dealership sales tactics — NOT generated live by any AI model (a real
+// generative-AI call would mean either a client-exposed API key, at real financial risk if
+// leaked, or a paid backend Deepak doesn't have; not worth that trade-off for a tips box). One
+// rotates in per day using the same day-of-year pattern as the Spotlight fact above, so it keeps
+// feeling fresh without ever claiming to be something it isn't.
+const GROWTH_TIPS = [
+  "Test ride khatam hote hi turant booking ka poochho — excitement us waqt peak par hota hai, thodi der baad thanda pad jaata hai.",
+  "Jo customer test ride le chuka hai par book nahi kiya, unhe 48 ghante ke andar follow-up karo — uske baad conversion chance tezi se girta hai.",
+  "Delivery ke waqt hi Google review maango — satisfaction us pal sabse zyada hoti hai.",
+  "EW aur RSA ko 'extra kharcha' ki tarah mat becho — 'peace of mind' aur 'resale value' ke angle se samjhao.",
+  "1+ saal purane customers ko unki free service due date se pehle khud call karo — service revenue aur trust dono badhta hai.",
+  "60+ din se pade stock par ek chhota accessory-bundle offer bana ke push karo, capital block nahi rehna chahiye.",
+  "Walk-in customer ke haath mein turant chaabi de do — touch-and-feel se decision jaldi banta hai.",
+  "Referral laane wale purane customer ko ek chhota gift/discount do — word-of-mouth sabse sasta aur strongest marketing hai.",
+  "Weekend/Sunday floor par extra staff rakho — footfall hafte ka sabse zyada usi din hota hai.",
+  "Web/phone se aayi enquiry ko utni hi priority do jitni walk-in ko — aksar wahi sabse zyada neglect hoti hai.",
+  "EMI/financing options pehle hi bata do, cost ka jhatka lagne se pehle — bahut log budget dekh kar hi chale jaate hain.",
+  "Delivery se pehle bike poori tarah clean/polish karke do — pehla impression sabse zyada yaad rehta hai.",
+  "Local riding club ya event mein dukaan ka banner/presence rakho — organic leads aur brand visibility milti hai.",
+  "Jo customer accessory nahi le raha, delivery ke kuch din baad unhe accessorized bike ki photo WhatsApp karo — impulse upsell ka acha mauka.",
+  "Festival season se 3-4 hafte pehle hi stock aur staff plan bana lo — last-moment mein demand miss ho jaati hai.",
+  "Koi booking cancel ho to turant waiting-list wale customer ko call karo — stock aise hi khaali mat rakho.",
+];
+function getDailyGrowthTip(){
+  const d = new Date();
+  const startOfYear = new Date(d.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((d - startOfYear) / 86400000);
+  const idx = ((dayOfYear % GROWTH_TIPS.length) + GROWTH_TIPS.length) % GROWTH_TIPS.length;
+  return GROWTH_TIPS[idx];
+}
+
 function showReFact(){
   const f = getDailyFact();
   document.getElementById('reFactTitle').textContent = f.title;
@@ -1090,6 +1107,7 @@ function enterDashboard(){
   document.getElementById('reFactOverlay').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
   applyRoleRestrictions();
+  linkOneSignalIdentity();
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
 }
@@ -1100,6 +1118,26 @@ function populateLoginDropdown(){
   sel.innerHTML = CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
 }
 populateLoginDropdown();
+
+// ===== Persistent login =====
+// Login once per device/browser, stay logged in after that — no localStorage/cookie was used
+// before, so every fresh page load always showed the login screen. Now a successful login saves
+// just the person's NAME (not the password) to localStorage; on the next visit that name is
+// looked up again in CREDENTIALS to rebuild CURRENT_USER, skipping straight past the login form
+// to today's Spotlight screen. This is meant for an employee's own phone, not a shared showroom
+// device — Logout below clears it, and each person doing that on their own device is enough.
+const SESSION_KEY = 'amarAutosSessionUser';
+function trySavedSession(){
+  let savedName;
+  try { savedName = localStorage.getItem(SESSION_KEY); } catch(e) { return false; }
+  if (!savedName) return false;
+  const user = CREDENTIALS.find(u => u.name === savedName);
+  if (!user) { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} return false; }
+  CURRENT_USER = user;
+  showReFact();
+  return true;
+}
+trySavedSession();
 
 function attemptLogin(){
   const name = document.getElementById('loginName').value;
@@ -1112,13 +1150,17 @@ function attemptLogin(){
   }
   errEl.textContent = '';
   CURRENT_USER = user;
+  try { localStorage.setItem(SESSION_KEY, user.name); } catch(e) {}
   showReFact();
 }
 document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); attemptLogin(); });
-// Nothing about the session is persisted (no localStorage/cookie) — the login screen is always
-// shown first on a fresh page load — so logging out is simply a full reload back to that state.
-// This also cleanly stops the 5-minute auto-refresh interval and clears CURRENT_USER/STATE.
-document.getElementById('logoutBtn').addEventListener('click', () => { location.reload(); });
+// Logout clears the saved session (so this device goes back to asking for a password next time)
+// and reloads — the reload also cleanly stops the 5-minute auto-refresh interval and resets
+// CURRENT_USER/STATE.
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  location.reload();
+});
 
 // Mobile header drawer — the filter/action controls used to wrap across several rows on a phone,
 // pushing the actual dashboard content below the fold. On phones they now live in this slide-in
@@ -1145,6 +1187,10 @@ function visibleExecList(){
 function applyRoleRestrictions(){
   if (!CURRENT_USER) return;
   const isAdmin = CURRENT_USER.role === 'Admin';
+  // Notify Team (WhatsApp broadcast) is an admin-only action — a sales/CRT login shouldn't be
+  // pinging the whole team.
+  const notifyBtn = document.getElementById('notifyTeamBtn');
+  if (notifyBtn) notifyBtn.style.display = isAdmin ? '' : 'none';
   // hide tabs that show company-wide / other-people's data from non-admin logins.
   // Riders (registration + feedback, merged into one tab) is the one exception: Deepak wants CRT
   // logins (Harsh handles riders) to see it too, alongside Admin — everyone else (Sales) still doesn't.
@@ -1206,12 +1252,6 @@ function parseCell(v){
 // that some browsers apply to fetch() when this dashboard is opened as a local file — script tags
 // are not subject to those restrictions, and Google's gviz endpoint is designed for this pattern.
 let __gvizCounter = 0;
-// For sheets Deepak hasn't created yet (RE Portal Daily, NPS & Complaints …). A missing sheet
-// resolves to an empty array instead of rejecting, so Promise.all in loadAll() never fails and
-// the rest of the dashboard loads normally — the dependent KPIs just stay "NOT CONNECTED".
-function fetchSheetOptional(name){
-  return fetchSheetRaw(name).catch(() => []);
-}
 function fetchSheetRaw(name){
   return new Promise((resolve, reject) => {
     const cbName = '__gvizCb_' + (++__gvizCounter) + '_' + Math.random().toString(36).slice(2);
@@ -1254,7 +1294,7 @@ function fetchSheetRaw(name){
 /* ---------------- global state ---------------- */
 const STATE = {
   booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [], stock: [],
-  enqStatement: [], bookingMsd: [], rePortal: [],
+  enqStatement: [], bookingMsd: [],
   execList: [], months: [], filterMonth: null, filterExec: 'ALL', lastLoaded: null, initialized: false
 };
 
@@ -1313,7 +1353,7 @@ async function loadAll(){
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, rePortal] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -1325,7 +1365,6 @@ async function loadAll(){
       fetchSheetRaw('Stock'),
       fetchSheetRaw('ENQUIRY STATMENT'),
       fetchSheetRaw('BOOKING MSD'),
-      fetchSheetOptional('RE Portal Daily'),
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -1364,15 +1403,6 @@ async function loadAll(){
     // IMPORTRANGE from RE's dealer portal, not filled in by hand by the sales team) — dealership
     // wide, no sales-executive column, so they're not filtered by exec anywhere. Row 0 is the
     // header row on both sheets, same as the other sheets.
-    // RE Portal Daily — Deepak types the numbers off the RE dealer portal (they live behind a
-    // portal login, so they can't be fetched automatically). Long format: Date | Metric | Actual | Target.
-    // Header rows are skipped by content, not by a fixed row count, so an extra title row is harmless.
-    STATE.rePortal = (rePortal || []).filter(r => {
-      const metric = up(str(r[1]));
-      if (!metric || metric === 'METRIC') return false;
-      return str(r[2]) !== '' || str(r[3]) !== '';
-    });
-
     STATE.enqStatement = enqStatement.slice(1).filter(r => str(r[0]));
     STATE.bookingMsd = bookingMsd.slice(1).filter(r => str(r[0]));
 
@@ -1540,9 +1570,10 @@ function ownerInFilter(owner){
 /* ---------------- render orchestrator ---------------- */
 function renderAll(){
   renderTodayPriorities();
-  renderScorecard();
   renderStorePerformance();
   renderSalesConsole();
+  renderPersonalTarget();
+  renderChampions();
   renderEmployeeTable();
   renderFunnel();
   renderBookings();
@@ -1554,426 +1585,6 @@ function renderAll(){
   renderExplorer();
   renderAnalytics();
   renderMsdAnalysis();
-}
-
-/* ================= DAILY SCORECARD =================
-   Deepak's KPI list, each shown as Target · Actual · Status. Everything here is measured against
-   the REAL current calendar month (not the month filter in the header) because this is a
-   "how are we doing right now" screen, same as the booking-target funnel.
-
-   IMPORTANT RULE: a KPI whose data does not exist in the Google Sheet is shown as
-   "NOT CONNECTED" in grey, with the sheet that would supply it — never a zero or a made-up
-   number. See claude/kpi-tracking-plan.md in the project for the full data mapping. */
-
-// ---- All targets in one place. Change a number here and the whole scorecard follows. ----
-const SCORECARD_TARGETS = {
-  walkinConv:        0.60,   // #1  walk-in enquiry -> booking conversion
-  webConv:           0.10,   // #3  web/online lead -> booking conversion
-  fieldServiceShare: 0.10,   // #4  field + service share of total bookings
-  financePenetration:0.60,   // #12 share of deliveries done on finance (not cash)
-  gmaPerBike:        7500,   // #8  minimum GMA per bike (₹)
-  ridesPerMonth:     2,      // #13 rides mandatory per month
-  ridersPerRide:     309,    // #13 riders required in one ride
-  npsMin:            60,     // #5  NPS score floor
-  complaintsPer100:  2,      // #6  max complaints per 100 bikes delivered (CSAT)
-  webLeadTatMins:    30,     // #2  web lead must be called within 30 minutes
-};
-
-// Calendar-month window, offset 0 = this month, -1 = last month.
-function monthWindow(offset){
-  const n = new Date();
-  const start = new Date(n.getFullYear(), n.getMonth() + (offset || 0), 1);
-  const end = new Date(n.getFullYear(), n.getMonth() + (offset || 0) + 1, 1);
-  return { start, end };
-}
-function inWindow(d, w){ return (d instanceof Date) && !isNaN(d) && d >= w.start && d < w.end; }
-function billedInMonth(offset){
-  const w = monthWindow(offset);
-  return STATE.delivery.filter(r => billedOk(r[9]) && inWindow(r[2], w));
-}
-// "Non-350" = the 440/450/650 machines (Guerrilla 450, Himalayan 450, GT 650 …)
-function isNon350(model){ return /\b(4[0-9]0|650|750)\b/.test(up(model)); }
-// Tripper Dash is only fitted to the 450 and 650 machines, so only those count as eligible.
-function isTripperEligible(model){ return /\b(450|650)\b/.test(up(model)); }
-function growthPct(now, prev){ return prev > 0 ? (now - prev) / prev : null; }
-
-// ---- RE Portal Daily ----
-// Deepak's RE dealer portal shows an "In-Moment Sales" strip (Web / Walk-In / Tele / Test Ride /
-// Booking / Delivery / QOC / Apparel) plus Customer Complaints per 100 Retail and the NPS survey
-// score. That data sits behind the portal login, so it cannot be pulled automatically by a static
-// page — he enters it into a "RE Portal Daily" sheet instead, in the format:
-//     Date | Metric | Actual | Target
-// This reads the most recent date present and returns { METRIC: {actual, target} }.
-// ===== MANUAL PORTAL FIGURES =====
-// Deepak reads these off the RE dealer portal and sends them across as a screenshot; they are
-// typed in here. Two things follow from that, and both are handled deliberately:
-//   1. They are a SNAPSHOT, not live data — `asOf` is shown on screen with every number so a
-//      stale figure can never be mistaken for a live one.
-//   2. If a "RE Portal Daily" sheet ever exists in the workbook, it WINS over this block, so the
-//      dashboard upgrades itself to live data with no code change.
-// To update: change asOf to the date of the screenshot and edit the numbers. Leave a metric out
-// (or set actual to null) and it shows as "no data" rather than a wrong number.
-const RE_PORTAL_MANUAL = {
-  asOf: '2026-08-21',            // date of the screenshot these came from (YYYY-MM-DD)
-  metrics: {
-    'Web':        { actual: 0,  target: 14 },
-    'Walk-In':    { actual: 75, target: 49 },
-    'Tele':       { actual: 14, target: 36 },
-    'Test Ride':  { actual: 67, target: 59 },
-    'Booking':    { actual: 29, target: 62 },
-    'Delivery':   { actual: 50, target: 52 },
-    'QOC':        { actual: 0,  target: 1 },
-    'Apparel':    { actual: 0,  target: 54 },
-    'Complaints': { actual: 6,  target: 2 },    // per 100 retail — lower is better
-    'NPS':        { actual: null, target: 60 },  // on the RE portal — send the screenshot
-    'Web TAT':    { actual: null, target: 30 },  // minutes to first call — RE portal, lower is better
-  },
-};
-
-const PORTAL_METRICS = ['Web','Walk-In','Tele','Test Ride','Booking','Delivery','QOC','Apparel'];
-// Metrics where a SMALLER number is better — complaints, obviously.
-const PORTAL_LOWER_IS_BETTER = ['COMPLAINTS'];
-
-function portalSnapshot(){
-  const rows = STATE.rePortal;
-  if (!rows.length) return manualPortalSnapshot();
-  // Use the latest date present; rows with no date are treated as always-current.
-  let latest = null;
-  rows.forEach(r => { const d = r[0]; if (d instanceof Date && !isNaN(d) && (!latest || d > latest)) latest = d; });
-  const keep = rows.filter(r => {
-    const d = r[0];
-    if (!(d instanceof Date) || isNaN(d)) return true;
-    return latest && d.getTime() === latest.getTime();
-  });
-  const map = {};
-  keep.forEach(r => {
-    const key = up(str(r[1])).replace(/[^A-Z0-9]/g, '');
-    if (!key) return;
-    map[key] = { actual: num(r[2]), target: num(r[3]), hasActual: str(r[2]) !== '', hasTarget: str(r[3]) !== '' };
-  });
-  return { date: latest, metrics: map };
-}
-// Falls back to the hand-entered RE_PORTAL_MANUAL block above when no sheet exists.
-function manualPortalSnapshot(){
-  const src = (typeof RE_PORTAL_MANUAL === 'object' && RE_PORTAL_MANUAL) || null;
-  if (!src || !src.metrics) return null;
-  const map = {};
-  Object.entries(src.metrics).forEach(([name, v]) => {
-    const key = up(name).replace(/[^A-Z0-9]/g, '');
-    map[key] = {
-      actual: num(v.actual), target: num(v.target),
-      hasActual: v.actual !== null && v.actual !== undefined && v.actual !== '',
-      hasTarget: v.target !== null && v.target !== undefined && v.target !== '',
-    };
-  });
-  const d = src.asOf ? new Date(src.asOf + 'T00:00:00') : null;
-  return { date: (d && !isNaN(d)) ? d : null, metrics: map, manual: true };
-}
-
-function portalGet(snap, name){
-  if (!snap) return null;
-  return snap.metrics[up(name).replace(/[^A-Z0-9]/g, '')] || null;
-}
-
-// Renders the portal's own "In-Moment Sales" strip, in the same Actual-over-Target shape Deepak
-// already reads on the portal, so the two screens look like the same report.
-function renderPortalStrip(){
-  const el = document.getElementById('portalStrip');
-  const noteEl = document.getElementById('portalNote');
-  if (!el) return;
-  // Owner-level panel — a sales login sees the NPS row on the scorecard, not this whole strip.
-  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
-  const section = document.getElementById('portalSection');
-  if (section) section.style.display = isAdmin ? '' : 'none';
-  if (!isAdmin) { el.innerHTML = ''; noteEl.textContent = ''; return; }
-  const snap = portalSnapshot();
-  if (!snap) {
-    noteEl.innerHTML = 'Not connected yet. Create a sheet named <strong>RE Portal Daily</strong> with the columns <strong>Date | Metric | Actual | Target</strong>, and type the numbers off the RE portal (Web, Walk-In, Tele, Test Ride, Booking, Delivery, QOC, Apparel, Complaints, NPS). This panel and the NPS / Complaints rows above will fill in automatically.';
-    el.innerHTML = '<div class="empty-note">No RE Portal Daily sheet found</div>';
-    return;
-  }
-  noteEl.innerHTML = snap.manual
-    ? `⚠️ <strong>Entered by hand from a portal screenshot${snap.date ? ' dated ' + esc(fmtDate(snap.date)) : ''}</strong> — this is a snapshot, not live data, and only changes when the figures are updated in the dashboard. Creating a <strong>RE Portal Daily</strong> sheet (Date | Metric | Actual | Target) would make it update itself.`
-    : `Live from the <strong>RE Portal Daily</strong> sheet${snap.date ? ' · figures as on ' + esc(fmtDate(snap.date)) : ''}`;
-
-  const cells = PORTAL_METRICS.map(m => {
-    const v = portalGet(snap, m);
-    if (!v || (!v.hasActual && !v.hasTarget)) {
-      return `<div class="portal-cell"><div class="portal-name">${esc(m)}</div>
-        <div class="portal-actual" style="color:var(--text-muted);">—</div>
-        <div class="portal-target">no data</div></div>`;
-    }
-    const ok = v.hasTarget ? v.actual >= v.target : true;
-    return `<div class="portal-cell">
-      <div class="portal-name">${esc(m)}</div>
-      <div class="portal-actual" style="color:${v.hasTarget ? (ok ? 'var(--good)' : 'var(--critical)') : 'var(--text-primary)'};">${fmtInt(v.actual)}</div>
-      <div class="portal-target">target ${v.hasTarget ? fmtInt(v.target) : '—'}</div>
-    </div>`;
-  }).join('');
-  el.innerHTML = `<div class="portal-strip">${cells}</div>`;
-}
-
-function computeScorecard(){
-  const G = [];   // groups of rows
-
-  // ---------- SALES FUNNEL ----------
-  const w = monthWindow(0);
-  let walkTot = 0, walkBk = 0, fsBk = 0, allBk = 0;
-  STATE.enquiry.forEach(r => {
-    if (!inWindow(r[14], w)) return;
-    const ch = classifyChannel(r[11]);
-    const booked = up(r[9]) === 'BOOKED';
-    if (booked) allBk++;
-    if (ch === 'walkin') { walkTot++; if (booked) walkBk++; }
-    if (ch === 'field' && booked) fsBk++;
-  });
-
-  // Web conversion comes from RE's own portal sheets (PrimarySource = "Online"); our own
-  // enquiry sheet has no web/online category. That sheet carries no executive column, so this
-  // is a dealership-wide number and cannot be split per sales person.
-  const isOnline = v => /ONLINE|WEB/.test(up(v));
-  const webEnq = STATE.enqStatement.filter(r => isOnline(r[14])).length;
-  const webBkg = STATE.bookingMsd.filter(r => isOnline(r[15])).length;
-
-  const ft = computeFunnelTargets();
-
-  G.push({ title: '📶 Sales Funnel', rows: [
-    { label: 'Walk-in conversion', target: fmtPct(SCORECARD_TARGETS.walkinConv),
-      actual: walkTot ? fmtPct(walkBk / walkTot) : '—',
-      status: walkTot ? statusOf(walkBk / walkTot, SCORECARD_TARGETS.walkinConv) : 'none',
-      note: walkTot ? `${walkBk} booked of ${walkTot} walk-in enquiries` : 'no walk-in enquiries this month' },
-
-    { label: 'Web / online lead conversion', target: fmtPct(SCORECARD_TARGETS.webConv),
-      actual: webEnq ? fmtPct(webBkg / webEnq) : '—',
-      status: webEnq ? statusOf(webBkg / webEnq, SCORECARD_TARGETS.webConv) : 'none',
-      note: webEnq ? `${webBkg} bookings from ${webEnq} online leads · RE portal, dealership-wide (no executive split available)` : 'RE Portal sheet has no "Online" source rows yet' },
-
-    { label: 'Field + Service share of bookings', target: fmtPct(SCORECARD_TARGETS.fieldServiceShare),
-      actual: allBk ? fmtPct(fsBk / allBk) : '—',
-      status: allBk ? statusOf(fsBk / allBk, SCORECARD_TARGETS.fieldServiceShare) : 'none',
-      note: allBk ? `${fsBk} of ${allBk} bookings this month` : 'no bookings recorded this month' },
-
-    { label: 'Booking pace (month to date)', target: fmtInt(ft.totalTargetTillToday) + ' by today',
-      actual: fmtInt(ft.totalActualBooked),
-      status: ft.totalTargetTillToday ? statusOf(ft.totalActualBooked, ft.totalTargetTillToday) : 'none',
-      note: `full-month target ${fmtInt(MONTHLY_BOOKING_TARGET)} · day ${ft.dayOfMonth} of ${ft.daysInMonth}` },
-
-    (() => {
-      // TAT is reported on the RE portal itself, so it rides in with the other portal figures.
-      // Lower is better here — a 20-minute TAT beats the 30-minute target.
-      const s = portalSnapshot();
-      const tat = portalGet(s, 'Web TAT');
-      const tgt = (tat && tat.hasTarget) ? tat.target : SCORECARD_TARGETS.webLeadTatMins;
-      return { label: 'Web lead response time (TAT)', target: 'within ' + tgt + ' min',
-        actual: (tat && tat.hasActual) ? tat.actual + ' min' : null,
-        status: (tat && tat.hasActual) ? (tat.actual <= tgt ? 'ok' : 'bad') : 'none',
-        note: (tat && tat.hasActual)
-          ? `lower is better · RE portal${s.date ? ' · as on ' + fmtDate(s.date) : ''}${s.manual ? ' · entered by hand, not live' : ''}`
-          : 'shown on the RE portal — send that screenshot and it goes in here' };
-    })(),
-  ]});
-
-  // ---------- DEAL QUALITY ----------
-  const cur = billedInMonth(0), prev = billedInMonth(-1);
-  const financed = cur.filter(r => up(r[8]) && up(r[8]) !== 'CASH').length;
-  const gmaTotal = cur.reduce((s,r) => s + num(r[13]), 0);
-  const gmaPer = cur.length ? gmaTotal / cur.length : 0;
-  const non350Now = cur.filter(r => isNon350(r[6])).length;
-  const non350Prev = prev.filter(r => isNon350(r[6])).length;
-  const non350Growth = growthPct(non350Now, non350Prev);
-  const gearNow = cur.reduce((s,r) => s + num(r[14]), 0);
-  const gearPrev = prev.reduce((s,r) => s + num(r[14]), 0);
-  const gearGrowth = growthPct(gearNow, gearPrev);
-
-  G.push({ title: '💰 Deal Quality', rows: [
-    { label: 'Finance penetration', target: fmtPct(SCORECARD_TARGETS.financePenetration),
-      actual: cur.length ? fmtPct(financed / cur.length) : '—',
-      status: cur.length ? statusOf(financed / cur.length, SCORECARD_TARGETS.financePenetration) : 'none',
-      note: cur.length ? `${financed} financed of ${cur.length} bikes billed this month` : 'no bikes billed this month' },
-
-    { label: 'GMA per bike', target: fmtMoney(SCORECARD_TARGETS.gmaPerBike),
-      actual: cur.length ? fmtMoney(gmaPer) : '—',
-      status: cur.length ? statusOf(gmaPer, SCORECARD_TARGETS.gmaPerBike) : 'none',
-      note: cur.length ? `${fmtMoney(gmaTotal)} total GMA this month` : 'no bikes billed this month' },
-
-    { label: 'Non-350cc sales (440 / 450 / 650)', target: '100% growth',
-      actual: non350Growth === null ? fmtInt(non350Now) + ' units' : (non350Growth >= 0 ? '+' : '') + Math.round(non350Growth*100) + '%',
-      status: non350Growth === null ? 'info' : statusOf(non350Growth, 1.0),
-      note: `${non350Now} this month vs ${non350Prev} last month` },
-
-    { label: 'Apparel / Gear revenue', target: 'growth vs last month',
-      actual: gearGrowth === null ? fmtMoney(gearNow) : (gearGrowth >= 0 ? '+' : '') + Math.round(gearGrowth*100) + '%',
-      status: gearGrowth === null ? 'info' : (gearGrowth > 0 ? 'ok' : 'bad'),
-      note: `${fmtMoney(gearNow)} this month vs ${fmtMoney(gearPrev)} last month (Gear column)` },
-  ]});
-
-  // ---------- CUSTOMER ----------
-  const revNow = STATE.review.filter(r => inWindow(r[0], w));
-  const ratings = revNow.map(r => parseRating(r[1])).filter(v => v !== null);
-  const avgRating = ratings.length ? ratings.reduce((s,v)=>s+v,0) / ratings.length : null;
-
-  // NPS and Complaints come off the RE dealer portal (behind its login) — read from the
-  // "RE Portal Daily" sheet Deepak types them into. Complaints is a LOWER-is-better metric.
-  const snap = portalSnapshot();
-  const npsV = portalGet(snap, 'NPS');
-  const cmpV = portalGet(snap, 'Complaints');
-  const npsTarget = (npsV && npsV.hasTarget) ? npsV.target : SCORECARD_TARGETS.npsMin;
-  const cmpTarget = (cmpV && cmpV.hasTarget) ? cmpV.target : SCORECARD_TARGETS.complaintsPer100;
-
-  G.push({ title: '🙂 Customer', rows: [
-    { label: 'NPS score', target: npsTarget + '+',
-      actual: (npsV && npsV.hasActual) ? fmtInt(npsV.actual) : null,
-      status: (npsV && npsV.hasActual) ? statusOf(npsV.actual, npsTarget) : 'none',
-      note: (npsV && npsV.hasActual)
-        ? `RE portal survey${snap.date ? ' · as on ' + fmtDate(snap.date) : ''}${snap.manual ? ' · entered by hand, not live' : ''}`
-        : 'NPS score not entered yet — send the portal screenshot and it goes in here' },
-
-    { label: 'Complaints per 100 retail (CSAT)', target: 'max ' + cmpTarget,
-      actual: (cmpV && cmpV.hasActual) ? fmtInt(cmpV.actual) : null,
-      status: (cmpV && cmpV.hasActual) ? (cmpV.actual <= cmpTarget ? 'ok' : 'bad') : 'none',
-      note: (cmpV && cmpV.hasActual)
-        ? `lower is better · RE portal${snap.date ? ' · as on ' + fmtDate(snap.date) : ''}${snap.manual ? ' · entered by hand, not live' : ''}`
-        : 'complaints figure not entered yet — send the portal screenshot and it goes in here' },
-    { label: 'Google reviews this month', target: '—',
-      actual: fmtInt(revNow.length) + (avgRating ? ` · ${avgRating.toFixed(2)}★` : ''),
-      status: 'info', note: 'tracked from the Google Review sheet' },
-  ]});
-
-  // ---------- ACTIVITY ----------
-  // Owner-level items. A sales login doesn't see this group at all (Deepak's call) — the one
-  // customer metric they should see, NPS, lives in the Customer group above.
-  // Manpower was dropped entirely: the team is fully staffed, so it isn't worth tracking.
-  const tripperEligible = cur.filter(r => isTripperEligible(r[6])).length;
-
-  G.push({ title: '🏍️ Activity & Growth', adminOnly: true, rows: [
-    { label: 'Rides this month', target: SCORECARD_TARGETS.ridesPerMonth + ' rides',
-      actual: null, status: 'none', note: 'needs the Rides & Activities sheet' },
-    { label: 'Riders in one ride', target: fmtInt(SCORECARD_TARGETS.ridersPerRide) + ' riders',
-      actual: null, status: 'none', note: 'needs the Rides & Activities sheet' },
-    { label: 'Digital activations (Meta / Insta)', target: 'leads generated',
-      actual: null, status: 'none', note: 'needs the Rides & Activities sheet' },
-    { label: 'CPC — canteen customer business', target: 'track monthly',
-      actual: null, status: 'none', note: 'needs a Customer Type column (Retail / CPC-Canteen) in DELIVERY SHEET' },
-    // Tripper Dash is only fitted to 450 / 650 machines, so the eligible count IS computable from
-    // the delivery sheet — only the activated-or-not flag is missing.
-    { label: 'Tripper Dash — eligible bikes (450 / 650)', target: 'activate on all',
-      actual: fmtInt(tripperEligible) + ' delivered', status: tripperEligible ? 'info' : 'none',
-      note: tripperEligible
-        ? `${fmtInt(tripperEligible)} of ${fmtInt(cur.length)} bikes billed this month can take a Tripper — add a "Tripper Activated (Y/N)" column in DELIVERY SHEET to track how many actually were`
-        : 'no 450 / 650 bikes billed this month' },
-  ]});
-
-  return G;
-}
-
-// ok / watch / bad against a target, where higher is better.
-function statusOf(actual, target){
-  if (!target) return 'info';
-  const r = actual / target;
-  if (r >= 1) return 'ok';
-  if (r >= 0.9) return 'watch';
-  return 'bad';
-}
-
-const SCORE_PILL = {
-  ok:    { cls: 'good',     text: '🟢 ON TARGET' },
-  watch: { cls: 'warn',     text: '🟡 CLOSE' },
-  bad:   { cls: 'bad',      text: '🔴 BELOW' },
-  none:  { cls: 'muted',    text: '⚪ NOT CONNECTED' },
-  info:  { cls: 'info',     text: 'ℹ️ FYI' },
-};
-
-function renderScorecard(){
-  const el = document.getElementById('scorecardBody');
-  if (!el) return;
-  const today = new Date();
-  document.getElementById('scorecardIntro').textContent =
-    `Every number below is for the real calendar month (${today.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}) — it ignores the month filter above, because this is a "where do we stand today" screen. Anything marked NOT CONNECTED has no data in the Google Sheet yet; it is never shown as zero.`;
-
-  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
-  el.innerHTML = computeScorecard().filter(g => isAdmin || !g.adminOnly).map(g => `
-    <div class="card" style="margin-bottom:16px;">
-      <h3>${g.title}</h3>
-      <div class="table-wrap" style="max-height:none;">
-        <table class="data sc-table">
-          <thead><tr><th>Metric</th><th>Target</th><th>Actual</th><th>Status</th></tr></thead>
-          <tbody>${g.rows.map(r => {
-            const p = SCORE_PILL[r.status] || SCORE_PILL.info;
-            return `<tr>
-              <td><div style="font-weight:600;">${esc(r.label)}</div>
-                  <div class="hint" style="white-space:normal;max-width:460px;">${esc(r.note || '')}</div></td>
-              <td style="white-space:nowrap;">${esc(r.target)}</td>
-              <td style="font-weight:800;font-size:14px;white-space:nowrap;">${r.actual === null ? '—' : esc(r.actual)}</td>
-              <td><span class="pill ${p.cls}">${p.text}</span></td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>
-      </div>
-    </div>`).join('');
-
-  renderPortalStrip();
-  renderDisciplineList();
-}
-
-// ---- Today's discipline checklist ----
-// Ticks are kept in this browser for today's date only (localStorage, guarded — some browsers
-// and preview panes block it, in which case the list still works, it just won't remember).
-const DISCIPLINE_ITEMS = [
-  'Morning meet — sales funnel reviewed',
-  'Vahan punching updated (daily / live)',
-  '5S hygiene — showroom neat and clean',
-  'Display bikes have name plates',
-  'Demo / test-ride bike cleaned',
-  'Field activity done (bank display / society / demo)',
-  'Digital activation checked (Meta / Insta campaign)',
-  'Competition & on-ground activity noted',
-  'Ride calendar checked and followed',
-];
-function disciplineKey(){ return 'amarDiscipline:' + new Date().toISOString().slice(0,10); }
-function loadDiscipline(){
-  try { return JSON.parse(localStorage.getItem(disciplineKey()) || '{}'); } catch (e) { return {}; }
-}
-function saveDiscipline(state){
-  try { localStorage.setItem(disciplineKey(), JSON.stringify(state)); } catch (e) { /* storage blocked — fine */ }
-}
-function renderDisciplineList(){
-  const el = document.getElementById('disciplineList');
-  if (!el) return;
-  const state = loadDiscipline();
-  const done = DISCIPLINE_ITEMS.filter((_,i) => state[i]).length;
-  el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-      <div data-disc-count style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--gold);">${done}/${DISCIPLINE_ITEMS.length}</div>
-      <div class="meter" style="flex:1;margin:0;"><div data-disc-meter style="width:${(done/DISCIPLINE_ITEMS.length)*100}%"></div></div>
-    </div>` +
-    DISCIPLINE_ITEMS.map((t,i) => `
-      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--grid);cursor:pointer;font-size:13px;">
-        <input type="checkbox" data-disc="${i}" ${state[i] ? 'checked' : ''} style="width:17px;height:17px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;" />
-        <span style="${state[i] ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${esc(t)}</span>
-      </label>`).join('');
-
-  el.querySelectorAll('input[data-disc]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const s = loadDiscipline();
-      s[cb.dataset.disc] = cb.checked;
-      saveDiscipline(s);
-      // Update in place — re-rendering the whole list here would drop keyboard focus and flicker.
-      const txt = cb.nextElementSibling;
-      if (txt) txt.style.cssText = cb.checked ? 'text-decoration:line-through;color:var(--text-muted);' : '';
-      updateDisciplineCount();
-    });
-  });
-  updateDisciplineCount();
-}
-function updateDisciplineCount(){
-  const el = document.getElementById('disciplineList');
-  if (!el) return;
-  const boxes = [...el.querySelectorAll('input[data-disc]')];
-  const done = boxes.filter(b => b.checked).length;
-  const countEl = el.querySelector('[data-disc-count]');
-  const meterEl = el.querySelector('[data-disc-meter]');
-  if (countEl) countEl.textContent = `${done}/${boxes.length}`;
-  if (meterEl) meterEl.style.width = (boxes.length ? (done / boxes.length) * 100 : 0) + '%';
 }
 
 /* ---------------- Store Performance (always whole-store, both branches) ---------------- */
@@ -2153,6 +1764,322 @@ function showOverdueDetail(execName){
   document.getElementById('detailModal').classList.add('open');
 }
 function closeDetailModal(){ document.getElementById('detailModal').classList.remove('open'); }
+
+/* ---------------- Notify Team (WhatsApp broadcast) ---------------- */
+// This is a static, backend-free page (see loadAll() / fetchSheetRaw() notes above) — there's no
+// server to push a real app notification from. WhatsApp is the practical stand-in: this opens
+// WhatsApp with a ready-made message and lets Deepak pick the sales-team group or a broadcast
+// list himself (wa.me with no phone number opens the contact/group picker instead of a single
+// chat, so it works for a group, a broadcast list, or individual chats without needing anyone's
+// number stored in this file).
+const DASHBOARD_LIVE_URL = 'https://amarauto87-source.github.io/amar-autos-review/dashboard.html';
+function defaultNotifyMessage(){
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `📢 *Amar Autos Dashboard Update*\n${today}\n\nDashboard update ho gaya hai — apna target, pending deliveries aur reviews check kar lo.\n\n👉 ${DASHBOARD_LIVE_URL}`;
+}
+function openNotifyTeamModal(){
+  document.getElementById('modalTitle').textContent = '📢 Notify Team';
+  document.getElementById('modalBody').innerHTML = `
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Edit the message if you want, then send — this opens WhatsApp with it ready to go. Pick your sales-team group (or a broadcast list) there and hit send.</p>
+    <textarea id="notifyMsgBox" rows="7" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);">${esc(defaultNotifyMessage())}</textarea>
+    <div style="margin-top:12px; text-align:right;">
+      <button type="button" id="notifySendBtn" class="primary">✅ Send via WhatsApp</button>
+    </div>
+    <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">🔔 Want it as an actual phone notification instead of WhatsApp? Every employee who's logged in on their own phone is already tagged and ready — send from OneSignal's own dashboard (it can target everyone, or just one person by name).</p>
+      <div style="text-align:right;">
+        <a href="https://dashboard.onesignal.com/apps/${ONESIGNAL_APP_ID}" target="_blank" rel="noopener" style="text-decoration:none;">
+          <button type="button">🔔 Open OneSignal Dashboard</button>
+        </a>
+      </div>
+    </div>`;
+  document.getElementById('notifySendBtn').addEventListener('click', () => {
+    const msg = document.getElementById('notifyMsgBox').value;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    closeDetailModal();
+  });
+  document.getElementById('detailModal').classList.add('open');
+}
+document.getElementById('notifyTeamBtn').addEventListener('click', openNotifyTeamModal);
+
+/* ---------------- Report Cancellation (write-back to the Google Sheet) ----------------
+   Everything else in this dashboard only READS the Sheet (via the public gviz endpoint — see
+   fetchSheetRaw() below). Writing back needs a different mechanism: a Google Apps Script "Web
+   App" deployed on top of the same Sheet, which exposes a URL this page can POST to. Deepak has
+   to create that once (Extensions → Apps Script in the Sheet, paste the doPost script, Deploy →
+   Web App → Anyone can access) and paste the resulting URL below — until then this feature
+   quietly tells whoever clicks it that it isn't set up yet, rather than failing silently.
+   CANCELLATION_WEBHOOK_URL left blank on purpose (nothing sensitive to hide here — this URL
+   only accepts a slip number + note, it can't read anything back).
+   The POST body is sent as text/plain rather than application/json — Apps Script Web Apps can't
+   answer a CORS preflight request, so application/json triggers one and silently fails; text/plain
+   is treated as a "simple request" and skips the preflight entirely (the script still JSON.parses
+   the raw body on its side). */
+const CANCELLATION_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycby4u1BNbO9x7UcC6XW9KQ8UGLlkXpCIb2d6iucGE3PZII5_Zzdg3SOyvkHViwpBC917DQ/exec';
+
+// Bookings that are still open (not already Billed or Cancelled) — same "not billed, not
+// cancelled" rule as allPendingRowsFor()/overdueRowsFor(), just without the exec-filter coupling
+// so this modal can list "my bookings" for a Sales/CRT login or "everyone's" for Admin regardless
+// of whatever the page's month/exec filter happens to be set to right now.
+function myOpenBookings(execName){
+  return STATE.booking
+    .filter(r => {
+      if (execName && !execMatches(r[7], execName)) return false;
+      const s = up(r[9]);
+      return s !== 'BILLED' && s !== 'CANCEL';
+    })
+    .sort((a, b) => (b[2] instanceof Date ? b[2].getTime() : 0) - (a[2] instanceof Date ? a[2].getTime() : 0));
+}
+
+// Small "🚫 Cancel" button used inline in the two pending-booking tables (Stock Status table and
+// the Full List) — this is the main, practical way to report a cancellation now: right next to
+// the booking itself, no separate picker. The header's "Report Cancellation" button (below) is
+// kept as a fallback for finding a booking by scrolling/searching rather than spotting it in a
+// table. Both paths end up in the same openReportCancelModal().
+function cancelActionButton(slipNo, row){
+  // row here is a {slipNo, customer, model, colour, exec, ...} object — from the Stock Status table
+  const label = `${slipNo} — ${row.model}${row.colour ? ' ('+row.colour+')' : ''} — ${row.customer}`;
+  return `<button type="button" class="cancel-row-btn" data-slip="${esc(slipNo)}" data-exec="${esc(row.exec)}" data-label="${esc(label)}">🚫 Cancel</button>`;
+}
+function cancelActionButtonRaw(v, row){
+  // row here is the raw ACTUL BOOKING array — 1=slip, 3=model, 4=colour, 5=customer, 7=exec
+  const slipNo = str(row[1]);
+  const label = `${slipNo} — ${str(row[3])}${str(row[4]) ? ' ('+str(row[4])+')' : ''} — ${str(row[5])}`;
+  return `<button type="button" class="cancel-row-btn" data-slip="${esc(slipNo)}" data-exec="${esc(str(row[7]))}" data-label="${esc(label)}">🚫 Cancel</button>`;
+}
+// Delegated listeners — attached once to the (stable) table elements, keeps working across every
+// re-render since only each table's innerHTML is replaced, not the table element itself.
+['tblBookingStockMatch', 'tblPendingAll'].forEach(id => {
+  document.getElementById(id).addEventListener('click', (e) => {
+    const btn = e.target.closest('.cancel-row-btn');
+    if (!btn) return;
+    openReportCancelModal({ slipNo: btn.dataset.slip, exec: btn.dataset.exec, label: btn.dataset.label });
+  });
+});
+
+// preSelected = { slipNo, exec, label } when opened from an inline "🚫 Cancel" button (skips
+// straight to confirm+reason, no picker). Omitted when opened from the header button, which
+// falls back to the searchable dropdown of every open booking.
+function openReportCancelModal(preSelected){
+  document.getElementById('modalTitle').textContent = '🚫 Report Cancellation';
+
+  if (preSelected) {
+    document.getElementById('modalBody').innerHTML = `
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Confirm this booking has actually been cancelled on the ground. This goes to Deepak for approval first — it only shows as cancelled in the Sheet once he ticks it off.</p>
+      <div style="font-weight:600; padding:8px 0;">${esc(preSelected.label)}</div>
+      <textarea id="cancelNoteBox" rows="3" placeholder="Reason (optional) — e.g. customer changed mind, financing fell through" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
+      <div id="cancelStatusMsg" style="margin-top:10px; font-size:13px;"></div>
+      <div style="margin-top:12px; text-align:right;">
+        <button type="button" id="cancelSubmitBtn" class="primary">🚫 Confirm Cancellation</button>
+      </div>`;
+    document.getElementById('cancelSubmitBtn').addEventListener('click', async () => {
+      const note = document.getElementById('cancelNoteBox').value;
+      await submitCancellationReport(preSelected.slipNo, preSelected.exec, note);
+    });
+    document.getElementById('detailModal').classList.add('open');
+    return;
+  }
+
+  const isAdmin = CURRENT_USER.role === 'Admin';
+  const rows = isAdmin ? myOpenBookings(null) : myOpenBookings(CURRENT_USER.execKey);
+
+  if (!rows.length) {
+    document.getElementById('modalBody').innerHTML = `<p class="empty-note" style="text-align:left;">No open bookings found${isAdmin ? '' : ' for you'} right now.</p>`;
+    document.getElementById('detailModal').classList.add('open');
+    return;
+  }
+
+  const optionsHtml = rows.map(r => {
+    const slip = esc(str(r[1]));
+    const model = esc(str(r[3]));
+    const colour = esc(str(r[4]));
+    const customer = esc(str(r[5]));
+    const exec = esc(str(r[7]));
+    const label = `${slip} — ${model}${colour ? ' ('+colour+')' : ''} — ${customer}${isAdmin ? ' — '+exec : ''}`;
+    return `<option value="${slip}" data-exec="${exec}">${label}</option>`;
+  }).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Tip: it's usually quicker to hit "🚫 Cancel" right on the booking itself in the Book vs Stock tab. Use this search if you can't spot it there.</p>
+    <select id="cancelSlipSelect" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border); margin-bottom:10px;">${optionsHtml}</select>
+    <textarea id="cancelNoteBox" rows="3" placeholder="Reason (optional) — e.g. customer changed mind, financing fell through" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
+    <div id="cancelStatusMsg" style="margin-top:10px; font-size:13px;"></div>
+    <div style="margin-top:12px; text-align:right;">
+      <button type="button" id="cancelSubmitBtn" class="primary">🚫 Report Cancellation</button>
+    </div>`;
+
+  document.getElementById('cancelSubmitBtn').addEventListener('click', async () => {
+    const sel = document.getElementById('cancelSlipSelect');
+    const slipNo = sel.value;
+    const execName = sel.selectedOptions[0].dataset.exec;
+    const note = document.getElementById('cancelNoteBox').value;
+    await submitCancellationReport(slipNo, execName, note);
+  });
+
+  document.getElementById('detailModal').classList.add('open');
+}
+document.getElementById('reportCancelBtn').addEventListener('click', () => openReportCancelModal());
+
+async function submitCancellationReport(slipNo, execName, note){
+  const statusEl = document.getElementById('cancelStatusMsg');
+  const btn = document.getElementById('cancelSubmitBtn');
+  if (!CANCELLATION_WEBHOOK_URL) {
+    statusEl.textContent = "This isn't wired up yet — Deepak still needs to deploy the Apps Script and add its URL. Nothing was sent.";
+    statusEl.style.color = 'var(--warning)';
+    return;
+  }
+  btn.disabled = true;
+  statusEl.textContent = 'Sending…';
+  statusEl.style.color = 'var(--text-secondary)';
+  try {
+    await fetch(CANCELLATION_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // see the note above CANCELLATION_WEBHOOK_URL — deliberate, not a mistake
+      body: JSON.stringify({
+        slipNo, execName, note,
+        reportedBy: CURRENT_USER.name,
+        reportedAt: new Date().toISOString(),
+      }),
+    });
+    statusEl.textContent = "✅ Sent to Deepak for approval — it'll show as cancelled here once he approves it.";
+    statusEl.style.color = 'var(--good)';
+    setTimeout(() => { closeDetailModal(); }, 1800);
+  } catch (e) {
+    statusEl.textContent = '⚠️ Could not reach the Sheet (check your internet connection) — nothing was saved. Try again.';
+    statusEl.style.color = 'var(--critical)';
+    btn.disabled = false;
+  }
+}
+
+/* ---------------- My Daily Target (personal pace tracker) ---------------- */
+// Always the REAL current calendar month, pace-adjusted to today's date — deliberately mirrors
+// computeFunnelTargets()'s logic (store-wide, Analytics tab) but scoped to one executive, since
+// Sales/CRT logins never see the Analytics tab (it's in RESTRICTED_TABS) and previously had no
+// way to see how their own month is pacing day-by-day.
+function computePersonalTarget(execName){
+  if (!execName) return null;
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const monthIdx = month + 1; // 1=Jan..12=Dec — same column convention targetFor() uses
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayOfMonth = now.getDate();
+  const daysLeft = daysInMonth - dayOfMonth + 1; // today still counts as workable
+
+  const monthTarget = STATE.targets
+    .filter(r => up(r[0]) === up(execName))
+    .reduce((s, r) => s + num(r[monthIdx]), 0);
+
+  let retailSoFar = 0;
+  for (const r of STATE.delivery) {
+    if (!billedOk(r[9])) continue;
+    const d = r[2];
+    if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) continue;
+    if (!execMatches(r[18], execName)) continue;
+    retailSoFar++;
+  }
+
+  const expectedTillToday = Math.round(monthTarget * (dayOfMonth / daysInMonth));
+  const remaining = Math.max(0, monthTarget - retailSoFar);
+  const requiredPerDay = daysLeft > 0 ? remaining / daysLeft : 0;
+  const gapVsPace = retailSoFar - expectedTillToday;
+  const achievedPct = monthTarget ? retailSoFar / monthTarget : 0;
+
+  return { execName, monthTarget, retailSoFar, dayOfMonth, daysInMonth, daysLeft, expectedTillToday, remaining, requiredPerDay, gapVsPace, achievedPct };
+}
+
+// Shown for a locked Sales/CRT login (always, it's their own execKey) or for Admin only once
+// they've picked one specific name in the executive filter — hidden on "ALL" for Admin since a
+// single person's daily pace doesn't mean anything aggregated across the whole store.
+function renderPersonalTarget(){
+  const section = document.getElementById('personalTargetSection');
+  const el = document.getElementById('kpiPersonalTarget');
+  if (!section || !el) return;
+
+  const execName = (CURRENT_USER && CURRENT_USER.role !== 'Admin')
+    ? CURRENT_USER.execKey
+    : (STATE.filterExec && STATE.filterExec !== 'ALL' ? STATE.filterExec : null);
+
+  if (!execName) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const titleEl = document.getElementById('personalTargetTitle');
+  if (titleEl) titleEl.textContent = `🎯 My Daily Target — ${execName}`;
+
+  const p = computePersonalTarget(execName);
+  el.innerHTML = [
+    kpiCard("This Month's Target", fmtInt(p.monthTarget), `Day ${p.dayOfMonth} of ${p.daysInMonth}`),
+    kpiCard('Achieved So Far', fmtInt(p.retailSoFar), `${fmtPct(p.achievedPct)} of target`, p.achievedPct * 100,
+      p.monthTarget && p.gapVsPace < 0 ? `${fmtInt(Math.abs(p.gapVsPace))} behind pace` : null),
+    kpiCard('Expected By Today', fmtInt(p.expectedTillToday), 'at steady pace'),
+    kpiCard('Remaining', fmtInt(p.remaining), p.remaining ? 'to hit target' : 'Target achieved! 🎉'),
+    kpiCard('Needed Per Day', p.remaining ? p.requiredPerDay.toFixed(1) : '0',
+      p.daysLeft > 0 ? `for the next ${fmtInt(p.daysLeft)} days` : 'month over'),
+  ].join('');
+}
+
+/* ---------------- This Month's Champions (category-wise recognition badges) ---------------- */
+// Deliberately spread across 4 different categories rather than one "most bikes sold" board —
+// a single ranking always crowns the same senior person and demotivates everyone else. Splits
+// recognition so quality (GMA/bike, EW attach) and reviews matter as much as raw volume.
+// Uses STATE.execList (every executive), not visibleExecList() — a leaderboard's whole point is
+// visibility across the team, unlike the private Employee-wise table above which a Sales/CRT
+// login only ever sees its own row of.
+function computeCategoryBadges(){
+  const execs = STATE.execList;
+  if (!execs.length) return null;
+
+  const reviewCounts = {};
+  execs.forEach(e => { reviewCounts[e] = 0; });
+  STATE.review.forEach(r => {
+    if (!dateInFilter(r[0])) return;
+    const person = r[3];
+    execs.forEach(name => { if (execMatches(person, name)) reviewCounts[name]++; });
+  });
+
+  const stats = execs.map(name => {
+    const agg = computeDeliveryAgg(name);
+    return {
+      name,
+      retail: agg.retail,
+      reviews: reviewCounts[name] || 0,
+      gmaPerBike: agg.retail ? agg.gma / agg.retail : 0,
+      ewPct: agg.retail ? agg.ew / agg.retail : 0,
+    };
+  });
+
+  // requireRetail: exclude anyone with 0 bikes from quality-based categories (GMA/bike, EW %)
+  // so a person who delivered nothing doesn't "win" a per-bike ratio by default.
+  function topBy(key, requireRetail){
+    const eligible = stats.filter(s => !requireRetail || s.retail > 0);
+    if (!eligible.length) return null;
+    const max = Math.max(...eligible.map(s => s[key]));
+    if (max <= 0) return null;
+    const winners = eligible.filter(s => s[key] === max).map(s => s.name);
+    return { winners, value: max };
+  }
+
+  return {
+    retail: topBy('retail', false),
+    reviews: topBy('reviews', false),
+    gmaPerBike: topBy('gmaPerBike', true),
+    ewPct: topBy('ewPct', true),
+  };
+}
+
+function renderChampions(){
+  const el = document.getElementById('kpiChampions');
+  if (!el) return;
+  const b = computeCategoryBadges();
+  const badge = (label, hint, data, fmt) => data
+    ? kpiCard(label, esc(data.winners.join(' & ')), `${fmt(data.value)} ${hint}`)
+    : kpiCard(label, '—', 'No data yet');
+  el.innerHTML = !b ? '<div class="empty-note">No executives configured</div>' : [
+    badge('🏍️ Top Retail', 'bikes delivered', b.retail, fmtInt),
+    badge('⭐ Top Reviews', 'reviews collected', b.reviews, fmtInt),
+    badge('💰 Best GMA/Bike', 'value add per bike', b.gmaPerBike, fmtMoney),
+    badge('🛡️ Best EW Attach', 'of retail', b.ewPct, fmtPct),
+  ].join('');
+}
 
 /* ---------------- Enquiry Funnel ---------------- */
 function renderFunnel(){
@@ -2553,66 +2480,11 @@ function pendingRows(){
     return s !== 'BILLED' && s !== 'CANCEL';
   });
 }
-// ---- Pending vs Stock: shared state + the two filter dropdowns ----
-// PVS_ROWS is rebuilt on every data refresh by renderPending(); the filters read from it so
-// changing a dropdown re-renders instantly without refetching anything.
-let PVS_ROWS = [];
-function pvsSelected(id){
-  const el = document.getElementById(id);
-  return el ? el.value : 'ALL';
-}
-// Rebuilds the dropdown options from the current data, preserving whatever the user had picked
-// (and silently falling back to ALL if that option no longer exists after a refresh).
-function refreshPvsFilters(resetColour){
-  const famSel = document.getElementById('pvsFamily');
-  const colSel = document.getElementById('pvsColour');
-  if (!famSel || !colSel) return;
-  const prevFam = famSel.value || 'ALL';
-  const fams = [...new Set(PVS_ROWS.map(r => r.fam))].sort();
-  famSel.innerHTML = `<option value="ALL">All model families</option>` +
-    fams.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
-  famSel.value = fams.includes(prevFam) ? prevFam : 'ALL';
-
-  // Colour list depends on the chosen family, so a family with no such colour can't be picked.
-  // When the family itself was just changed, the colour resets to All — the flow is "pick a
-  // family, then narrow by colour", so carrying an old colour across families is confusing.
-  const prevCol = resetColour ? 'ALL' : (colSel.value || 'ALL');
-  const scope = famSel.value === 'ALL' ? PVS_ROWS : PVS_ROWS.filter(r => r.fam === famSel.value);
-  const cols = [...new Set(scope.map(r => r.colour))].sort();
-  colSel.innerHTML = `<option value="ALL">All colours</option>` +
-    cols.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  colSel.value = cols.includes(prevCol) ? prevCol : 'ALL';
-}
-function renderPendingVsStock(){
-  const fam = pvsSelected('pvsFamily'), col = pvsSelected('pvsColour');
-  const shown = PVS_ROWS.filter(r => (fam === 'ALL' || r.fam === fam) && (col === 'ALL' || r.colour === col));
-
-  const countEl = document.getElementById('pvsCount');
-  if (countEl) {
-    const totPending = shown.reduce((s,r) => s + r.pending, 0);
-    const totStock = shown.reduce((s,r) => s + r.stock, 0);
-    countEl.textContent = shown.length
-      ? `${shown.length} model+colour combination${shown.length === 1 ? '' : 's'} · ${fmtInt(totPending)} pending vs ${fmtInt(totStock)} in stock`
-      : 'nothing matches these filters';
-  }
-
-  renderStaticTable('tblPendingVsStock', [
-    { key:'fam', label:'Model Family' },
-    { key:'model', label:'Model' },
-    { key:'colour', label:'Colour' },
-    { key:'pending', label:'Pending Bookings', num:true },
-    { key:'stock', label:'Stock Available (Open, KN)', num:true },
-    { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
-  ], shown);
-}
-document.getElementById('pvsFamily').addEventListener('change', () => { refreshPvsFilters(true); renderPendingVsStock(); });
-document.getElementById('pvsColour').addEventListener('change', renderPendingVsStock);
-
 function renderPending(){
   const rows = pendingRows();
-  // Colour-wise, not just model — "BULLET 350 - STEALTH BLACK" vs "BULLET 350 - BATTALION
-  // BLACK" as separate bars, so a sales exec can see exactly which colour is pending, same
-  // granularity as the Stock tab's Model Name breakdown.
+  // "Pending Models" KPI still needs a distinct model-colour count, even though the bar chart
+  // that used to sit here is gone (Deepak: not useful, and duplicated the two comparison tables
+  // below anyway).
   const models = {};
   rows.forEach(r => {
     const model = str(r[3]) || '(unknown)';
@@ -2675,30 +2547,53 @@ function renderPending(){
     { key:'alt', label:'Same Model, Other Colour' },
   ], atRiskRows);
 
-  renderBarList('pendingModelBars', models, 'var(--s2)', null, { groupByPrefix: true });
-
-  // Pending bookings vs stock on hand — ONE table at model + colour level, with a model-family
-  // and a colour filter above it (Deepak asked for the two separate family/colour tables to be
-  // merged into a single place). Only STATUS="Open" KN stock counts as available; "In-Transit"
-  // hasn't arrived, and VM is a separate store we can't promise a customer.
+  // Same comparison at exact model+colour level (via stockMatchFor's "exact" count) — merged
+  // with what used to be a separate family-level table, since showing both was just the same
+  // comparison twice at different granularities. This is now the ONE pending-vs-stock table,
+  // filterable by model (below) and showing who already holds each colour's bookings, so a sales
+  // person with a fresh walk-in can check in one place whether a colour is spoken for.
   const pendingByModelColour = {};
   rows.forEach(r => {
     const model = str(r[3]) || '(unknown)';
     const colour = str(r[4]) || '(no colour)';
     const key = model + '||' + colour;
-    const b = pendingByModelColour[key] || (pendingByModelColour[key] = { model, colour, pending: 0 });
+    const b = pendingByModelColour[key] || (pendingByModelColour[key] = { model, colour, pending: 0, execCounts: {} });
     b.pending++;
+    const execName = str(r[7]) || '(unknown)';
+    b.execCounts[execName] = (b.execCounts[execName] || 0) + 1;
   });
-  // Grouped for reading, not ranked by count: model family -> model -> colour, so every colour
-  // of one model sits together instead of being scattered by pending count.
-  PVS_ROWS = Object.values(pendingByModelColour).map(b => {
+  const formatExecCounts = (execCounts) => Object.entries(execCounts)
+    .sort((a,b) => b[1] - a[1])
+    .map(([name, count]) => count > 1 ? `${name} ×${count}` : name)
+    .join(', ');
+  // Grouped for reading, not ranked by count: model family first, then model, then colour —
+  // so every colour of one model sits together instead of being scattered by pending count.
+  const colourCmpRows = Object.values(pendingByModelColour).map(b => {
     const { exact } = stockMatchFor(b.model, b.colour);
-    return { fam: modelFamilyKey(b.model), model: b.model, colour: b.colour, pending: b.pending, stock: exact, gap: exact - b.pending };
+    return { fam: modelFamilyKey(b.model), model: b.model, colour: b.colour, pending: b.pending, stock: exact, gap: exact - b.pending, execs: formatExecCounts(b.execCounts) };
   }).sort((a,b) =>
     a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model) || a.colour.localeCompare(b.colour)
   );
-  refreshPvsFilters();
-  renderPendingVsStock();
+
+  // Model filter dropdown — repopulated every render (options can change as new models get
+  // booked), preserving whatever was already selected if it's still a valid choice.
+  const modelSel = document.getElementById('modelFinderSelect');
+  const prevModel = modelSel.value || 'ALL';
+  const distinctModels = Array.from(new Set(colourCmpRows.map(r => r.model))).sort();
+  modelSel.innerHTML = '<option value="ALL">All Models</option>' + distinctModels.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  modelSel.value = (prevModel === 'ALL' || distinctModels.includes(prevModel)) ? prevModel : 'ALL';
+  const selectedModel = modelSel.value;
+  const colourCmpRowsFiltered = selectedModel === 'ALL' ? colourCmpRows : colourCmpRows.filter(r => r.model === selectedModel);
+
+  renderStaticTable('tblPendingVsStockColour', [
+    { key:'fam', label:'Model Family' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'pending', label:'Pending Bookings', num:true },
+    { key:'stock', label:'Stock Available (Open, KN, exact colour)', num:true },
+    { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
+    { key:'execs', label:'Booked By' },
+  ], colourCmpRowsFiltered);
 
   // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
   // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
@@ -2713,7 +2608,7 @@ function renderPending(){
     if (exact > 0) { status = `✅ Available now (${exact} in stock)`; cls = 'good'; }
     else if (familyOnly > 0) { status = `🟡 Same model, other colour available (${familyOnly})`; cls = 'warn'; }
     else { status = '❌ Not in stock — check In-Transit / order'; cls = 'bad'; }
-    return { customer: str(r[5]), model, colour, exec: str(r[7]), tdd: str(r[8]) || str(r[10]), status, cls };
+    return { slipNo: str(r[1]), customer: str(r[5]), model, colour, exec: str(r[7]), tdd: str(r[8]) || str(r[10]), status, cls };
   }).sort((a,b) => (a.cls==='bad'?0:1) - (b.cls==='bad'?0:1));
   renderStaticTable('tblBookingStockMatch', [
     { key:'customer', label:'Customer' },
@@ -2722,6 +2617,7 @@ function renderPending(){
     { key:'exec', label:'Executive' },
     { key:'tdd', label:'TDD / Expected' },
     { key:'status', label:'Stock Status', raw:true },
+    { key:'slipNo', label:'Action', raw:true, fmt: cancelActionButton },
   ], bookingStockRows.map(r => ({ ...r, status: `<span class="pill ${r.cls}">${r.status}</span>` })));
 
   const search = str(document.getElementById('searchPending').value).toLowerCase();
@@ -2737,9 +2633,11 @@ function renderPending(){
     { key:8, label:'TDD' },
     { key:9, label:'Status' },
     { key:10, label:'Expected Delivery' },
+    { key:1, label:'Action', raw:true, fmt: cancelActionButtonRaw },
   ], filtered);
 }
 document.getElementById('searchPending').addEventListener('input', () => renderPending());
+document.getElementById('modelFinderSelect').addEventListener('change', () => renderPending());
 document.getElementById('exportPending').addEventListener('click', () => {
   exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows());
 });
@@ -3259,7 +3157,118 @@ function renderPerformanceHeatmap(){
   </table></div>`;
 }
 
+/* ---------------- Smart Suggestions (data-driven, no live AI call — see the note in the HTML
+   above for why) ---------------- */
+function computeSmartSuggestions(){
+  const items = [];
+
+  // 1. Weakest vs strongest converting enquiry channel — only compare channels with enough
+  // volume (5+) to mean anything, and only flag a real gap (10+ points), not noise.
+  const chGroups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
+  for (const r of STATE.enquiry) {
+    if (!dateInFilter(r[14])) continue;
+    if (!ownerInFilter(r[13])) continue;
+    const ch = classifyChannel(r[11]);
+    chGroups[ch].total++;
+    if (up(r[9]) === 'BOOKED') chGroups[ch].booked++;
+  }
+  const chStats = FUNNEL_CHANNELS.map(c => {
+    const g = chGroups[c.key];
+    return { label: c.label, total: g.total, pct: g.total ? (g.booked / g.total) * 100 : 0 };
+  }).filter(c => c.total >= 5);
+  if (chStats.length >= 2) {
+    const sorted = chStats.slice().sort((a, b) => a.pct - b.pct);
+    const weakest = sorted[0], strongest = sorted[sorted.length - 1];
+    if (strongest.pct - weakest.pct >= 10) {
+      items.push({ icon: '📉', text: `"${weakest.label}" enquiries sirf ${weakest.pct.toFixed(0)}% convert ho rahi hain (${fmtInt(weakest.total)} enquiries) — "${strongest.label}" (${strongest.pct.toFixed(0)}%) jaisa follow-up process yahan bhi try karo.` });
+    }
+  }
+
+  // 2. Executives whose attach rates (EW/RSA/GMA) are below the same thresholds Today's
+  // Priorities already uses — easy extra revenue per bike, not a volume problem.
+  const weakExecs = STATE.execList.map(name => {
+    const agg = computeDeliveryAgg(name);
+    if (!agg.retail) return null;
+    const gaps = [];
+    if ((agg.ew / agg.retail) < PERF_THRESHOLDS.ewPct) gaps.push('EW');
+    if ((agg.rsa / agg.retail) < PERF_THRESHOLDS.rsaPct) gaps.push('RSA');
+    if ((agg.gma / agg.retail) < PERF_THRESHOLDS.gmaPerBike) gaps.push('accessories/GMA');
+    return gaps.length ? `${name} (${gaps.join(', ')})` : null;
+  }).filter(Boolean);
+  if (weakExecs.length) {
+    items.push({ icon: '🛡️', text: `Attach-rate coaching chahiye: ${weakExecs.join('; ')} — billing ke time in items ko actively pitch karne ki yaad dilao, ye easy extra revenue hai.` });
+  }
+
+  // 3. Model families sitting in Open KN stock with zero pending bookings against them —
+  // capital tied up in something nobody's currently waiting on.
+  const stockByFamily = {};
+  STATE.stock.forEach(r => {
+    if (up(r[17]) !== 'OPEN') return;
+    if (up(r[7]) !== 'KN') return;
+    const fam = modelFamilyKey(r[11] || r[9]);
+    stockByFamily[fam] = (stockByFamily[fam] || 0) + 1;
+  });
+  const pendingByFamily = {};
+  pendingRows().forEach(r => {
+    const fam = modelFamilyKey(r[3]);
+    pendingByFamily[fam] = (pendingByFamily[fam] || 0) + 1;
+  });
+  const deadStock = Object.entries(stockByFamily)
+    .filter(([fam, count]) => count >= 2 && !pendingByFamily[fam])
+    .sort((a, b) => b[1] - a[1]);
+  if (deadStock.length) {
+    items.push({ icon: '📦', text: `${deadStock[0][0]} ke ${fmtInt(deadStock[0][1])} bikes stock mein hain lekin inke against koi booking pending nahi hai — chhota test-ride push ya offer chala sakte ho taaki capital block na rahe.` });
+  }
+
+  // 4. Aged stock — same 60-day threshold as the Stock tab.
+  const agedCount = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN' && num(r[16]) >= AGED_STOCK_DAYS).length;
+  if (agedCount) {
+    items.push({ icon: '⏳', text: `${fmtInt(agedCount)} bike${agedCount === 1 ? '' : 's'} ${AGED_STOCK_DAYS}+ din se stock mein khadi hai — Stock tab mein dekh kar in par pehle push karo, naye stock se pehle.` });
+  }
+
+  // 5. Most common reason enquiries are being lost, across the whole team (RE Portal data).
+  const ownerByEnq = {};
+  STATE.enquiry.forEach(r => {
+    const enq = str(r[0]);
+    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[13]);
+  });
+  let totalMatched = 0, totalDropped = 0;
+  const reasonCounts = {};
+  STATE.enqStatement.forEach(r => {
+    const enq = str(r[0]);
+    if (!ownerByEnq[enq]) return;
+    totalMatched++;
+    const status = up(str(r[25]));
+    const lostReason = str(r[37]);
+    const dropReason = str(r[26]);
+    if (status.includes('DROP') || status.includes('LOST') || lostReason) {
+      totalDropped++;
+      const key = lostReason || dropReason || '(reason not given)';
+      reasonCounts[key] = (reasonCounts[key] || 0) + 1;
+    }
+  });
+  const topReason = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1])[0];
+  if (topReason && totalMatched >= 10) {
+    const dropPct = Math.round((totalDropped / totalMatched) * 100);
+    items.push({ icon: '🗣️', text: `Sabse zyada leads "${topReason[0]}" ki wajah se gir rahi hain (${fmtInt(topReason[1])} baar, kul ${dropPct}% enquiries drop ho rahi hain) — is specific reason par team ke saath baat karo.` });
+  }
+
+  // Always end with one rotating general tip, clearly labelled as such (not data-driven).
+  items.push({ icon: '💡', text: getDailyGrowthTip(), cls: 'tip' });
+
+  return items;
+}
+function renderSmartSuggestions(){
+  const el = document.getElementById('smartSuggestions');
+  if (!el) return;
+  const items = computeSmartSuggestions();
+  el.innerHTML = items.map(it =>
+    `<div class="chat-item ${it.cls || ''}"><span class="chat-icon">${it.icon}</span><span>${it.cls === 'tip' ? '<strong>Aaj ka tip:</strong> ' : ''}${esc(it.text)}</span></div>`
+  ).join('');
+}
+
 function renderAnalytics(){
+  renderSmartSuggestions();
   renderFunnelTargets();
 
   const trend = computeMonthlyTrend();
@@ -3283,18 +3292,6 @@ function renderAnalytics(){
     return { label: c.label, value: g.total ? +((g.booked/g.total)*100).toFixed(1) : 0, color: CAT_SLOTS[i % CAT_SLOTS.length] };
   });
   hBarChart('funnelBarChart', funnelItems, { fmt: v => v + '%' });
-
-  // model-wise (reuse delivery filter logic)
-  const filtered = STATE.delivery.filter(r => billedOk(r[9]) && dateInFilter(r[2]) && execInFilter(r[18]));
-  const models = {};
-  filtered.forEach(r => { const m = str(r[6]) || '(unknown)'; models[m] = (models[m]||0) + 1; });
-  const modelItems = Object.entries(models).sort((a,b) => b[1]-a[1]).slice(0,10).map(([label,value]) => ({ label, value }));
-  hBarChart('modelBarChart', modelItems);
-
-  // executive leaderboard (retail)
-  const execItems = STATE.execList.map((name,i) => ({ label: name, value: computeDeliveryAgg(name).retail, color: CAT_SLOTS[i % CAT_SLOTS.length] }))
-    .filter(it => it.value > 0).sort((a,b) => b.value - a.value);
-  hBarChart('execBarChart', execItems);
 
   // rating distribution (all-time, all reviews)
   const buckets = {5:0,4:0,3:0,2:0,1:0};
@@ -3471,10 +3468,10 @@ function renderRawTable(tableId, cols, rows){
   const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
   const tbody = `<tbody>${rows.slice(0,1000).map(row => `<tr>${cols.map(c => {
     let v = row[c.key];
-    if (c.fmt) v = c.fmt(v);
+    if (c.fmt) v = c.fmt(v, row); // row passed through too, so a column can build off other fields (e.g. an action button needs the slip no + status together)
     else if (v instanceof Date) v = fmtDate(v);
     else if (typeof v === 'number') v = fmtInt(v);
-    return `<td class="${c.num ? 'num' : ''}">${esc(v)}</td>`;
+    return `<td class="${c.num ? 'num' : ''}">${c.raw ? v : esc(v)}</td>`;
   }).join('')}</tr>`).join('')}</tbody>`;
   table.innerHTML = thead + tbody;
 }
