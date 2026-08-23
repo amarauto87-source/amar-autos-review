@@ -146,7 +146,7 @@
   }
   button.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #241505; border-color: transparent; box-shadow: 0 4px 14px -4px var(--gold-dim); font-weight: 700; }
   button:hover { filter: brightness(1.08); }
-  header.top select, header.top input[type="text"], header.top button {
+  header.top select, header.top input[type="text"], header.top input[type="date"], header.top button {
     background: rgba(255,255,255,0.06); color: #f2f0ee; border-color: rgba(255,255,255,0.14);
     backdrop-filter: blur(4px);
   }
@@ -493,8 +493,8 @@
       box-shadow: -12px 0 34px rgba(0,0,0,0.45); flex-direction: column; align-items: stretch; gap: 10px;
     }
     .controls.open { display: flex; }
-    .controls a, .controls select, .controls button { width: 100%; }
-    .controls select, .controls input[type="text"] { flex: none; }
+    .controls a, .controls select, .controls button, .controls input[type="date"] { width: 100%; }
+    .controls select, .controls input[type="text"], .controls input[type="date"] { flex: none; }
     .controls button { flex: none; padding: 11px 10px; }
     /* The drawer's background follows the theme (var(--surface-1) — cream in light mode, dark in
        dark mode), but header.top's own button/select rule further up hardcodes near-white text
@@ -503,7 +503,7 @@
        mode. Without this override, light mode showed near-invisible pale-on-pale text in this
        drawer specifically (dark mode never had the problem, hence it going unnoticed until now).
        Higher specificity (header.top .controls ...) beats the original rule without !important. */
-    header.top .controls button, header.top .controls select, header.top .controls input[type="text"] {
+    header.top .controls button, header.top .controls select, header.top .controls input[type="text"], header.top .controls input[type="date"] {
       background: var(--surface-2); color: var(--text-primary); border-color: var(--border); backdrop-filter: none;
     }
     header.top .controls button.primary {
@@ -620,6 +620,9 @@
       <a href="ride.html" style="text-decoration:none;"><button type="button" title="Ride Feedback Form">🏍️ Ride FB</button></a>
       <a href="rider-registration.html" style="text-decoration:none;"><button type="button" title="Rider Registration Form">🪪 Register</button></a>
       <select id="monthFilter"></select>
+      <input type="date" id="dayFilterFrom" title="Day filter — from date (overrides Month filter while set)">
+      <input type="date" id="dayFilterTo" title="Day filter — to date (optional — leave blank to filter just the one day above)">
+      <button id="dayFilterClearBtn" title="Clear the day filter and go back to using Month filter">✕ Day Filter</button>
       <select id="execFilter"></select>
       <button id="allMonthsBtn" title="One click to show all months' data">📅 Show All Months</button>
       <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
@@ -1311,7 +1314,7 @@ function fetchSheetRaw(name){
 const STATE = {
   booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [], stock: [],
   enqStatement: [], bookingMsd: [],
-  execList: [], months: [], filterMonth: null, filterExec: 'ALL', lastLoaded: null, initialized: false
+  execList: [], months: [], filterMonth: null, filterExec: 'ALL', dayFilterFrom: null, dayFilterTo: null, lastLoaded: null, initialized: false
 };
 
 const COL = {
@@ -1474,8 +1477,7 @@ async function loadAll(){
     STATE.lastLoaded = new Date();
     renderAll();
     renderDataHealthBanner();
-    document.getElementById('statusLine').textContent =
-      `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
+    updateStatusLine();
   } catch (err) {
     console.error(err);
     document.getElementById('errorBox').innerHTML =
@@ -1538,7 +1540,28 @@ function populateFilters(){
   STATE.filterExec = execSel.value;
 }
 
-document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); renderDataHealthBanner(); });
+document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); renderDataHealthBanner(); updateStatusLine(); });
+// Day filter — parses the native <input type="date"> value ("YYYY-MM-DD") as a local date, not
+// UTC, so it lines up with how every other date in this app is compared.
+function parseDateInputValue(v){
+  if (!v) return null;
+  const [y,m,d] = v.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+document.getElementById('dayFilterFrom').addEventListener('change', e => {
+  STATE.dayFilterFrom = parseDateInputValue(e.target.value);
+  renderAll(); renderDataHealthBanner(); updateStatusLine();
+});
+document.getElementById('dayFilterTo').addEventListener('change', e => {
+  STATE.dayFilterTo = parseDateInputValue(e.target.value);
+  renderAll(); renderDataHealthBanner(); updateStatusLine();
+});
+document.getElementById('dayFilterClearBtn').addEventListener('click', () => {
+  STATE.dayFilterFrom = null; STATE.dayFilterTo = null;
+  document.getElementById('dayFilterFrom').value = '';
+  document.getElementById('dayFilterTo').value = '';
+  renderAll(); renderDataHealthBanner(); updateStatusLine();
+});
 document.getElementById('execFilter').addEventListener('change', e => { STATE.filterExec = e.target.value; renderAll(); renderDataHealthBanner(); });
 document.getElementById('refreshBtn').addEventListener('click', loadAll);
 // One-click "show everything" — a non-techie sales person doesn't need to understand month
@@ -1585,7 +1608,37 @@ function monthYearOfFilter(){
   const [y,m] = STATE.filterMonth.split('-').map(Number);
   return { year: y, month: m };
 }
+// Day filter (From/To date inputs in the header) — when set, it OVERRIDES the Month filter
+// entirely, since a specific day or date range is more specific than a whole month. Leaving "To"
+// blank filters just the single "From" day; filling both makes it a range. Clearing both goes
+// back to normal Month-filter behaviour. This is the one place that decision is made, since
+// dateInFilter() below is already the single choke-point every tab/table filters dates through.
+function dayFilterRange(){
+  if (!STATE.dayFilterFrom) return null;
+  const from = new Date(STATE.dayFilterFrom.getFullYear(), STATE.dayFilterFrom.getMonth(), STATE.dayFilterFrom.getDate());
+  const toBase = STATE.dayFilterTo || STATE.dayFilterFrom;
+  const to = new Date(toBase.getFullYear(), toBase.getMonth(), toBase.getDate(), 23, 59, 59, 999);
+  return { from, to };
+}
+// Rebuilds the "Last refreshed…" line, including which filter is actually in effect right now —
+// called after every load AND after every filter change (not just on data refresh), so it never
+// goes stale while the person is clicking around.
+function updateStatusLine(){
+  if (!STATE.lastLoaded) return;
+  const dayRange = dayFilterRange();
+  const fmtShort = d => d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  const filterText = dayRange
+    ? (STATE.dayFilterTo ? `Day filter: ${fmtShort(dayRange.from)} – ${fmtShort(dayRange.to)}` : `Day filter: ${fmtShort(dayRange.from)}`)
+    : (STATE.filterMonth === 'ALL' ? 'All Months' : 'Month filter active');
+  document.getElementById('statusLine').textContent =
+    `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
+}
 function dateInFilter(d){
+  const dayRange = dayFilterRange();
+  if (dayRange) {
+    if (!(d instanceof Date) || isNaN(d)) return false;
+    return d >= dayRange.from && d <= dayRange.to;
+  }
   const f = monthYearOfFilter();
   if (!f) return true;
   if (!(d instanceof Date) || isNaN(d)) return false;
