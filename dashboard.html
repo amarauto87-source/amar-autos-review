@@ -821,6 +821,7 @@
       <select id="modelFinderSelect"></select>
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
+    <div id="modelFinderUnmatched"></div>
 
     <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
@@ -1365,6 +1366,38 @@ function stockMatchFor(model, colour){
     if (isColourMatch) exact++; else familyOnly++;
   });
   return { exact, familyOnly };
+}
+
+// Royal Enfield's own stock feed carries a Model Code per exact colour/variant (column K in the
+// Stock sheet — confirmed against Deepak's "Vehicle Stock Ageing" export) — a far more reliable
+// join key than matching free-text names, which broke on typos like booking staff typing
+// "BATTLAION" for "BATTALION". This builds a clean, de-duplicated reference of every code
+// currently seen in stock; matchModelCode() below fuzzy-matches a booking's free-text model+
+// colour against THIS short list (rather than every noisy, duplicate-heavy raw stock row), and
+// once matched, the actual stock count for that code is exact — no more fuzziness at all for
+// the number itself, only for which code a booking's typed text resolves to. Used specifically
+// by the Model Finder table below; the rest of the app still uses stockMatchFor() above.
+function buildModelCodeMaster(){
+  const master = new Map(); // code -> { code, family, name }
+  STATE.stock.forEach(r => {
+    const code = str(r[10]);
+    if (!code) return;
+    if (master.has(code)) return;
+    const name = str(r[11] || r[9]);
+    master.set(code, { code, family: modelFamilyKey(name), name });
+  });
+  return master;
+}
+function matchModelCode(master, bookingModel, bookingColour){
+  const fam = modelFamilyKey(bookingModel);
+  const colourWords = up(bookingColour).split(/\s+/).filter(w => w.length > 2);
+  for (const entry of master.values()) {
+    if (entry.family !== fam) continue;
+    const name = up(entry.name);
+    const isColourMatch = !colourWords.length || colourWords.every(w => name.includes(w));
+    if (isColourMatch) return entry;
+  }
+  return null; // no stock entry currently carries a matching code — shown separately, never silently dropped
 }
 
 /* ---------------- data loading ---------------- */
@@ -2587,33 +2620,44 @@ function renderPending(){
     { key:'alt', label:'Same Model, Other Colour' },
   ], atRiskRows);
 
-  // Same comparison at exact model+colour level (via stockMatchFor's "exact" count) — merged
-  // with what used to be a separate family-level table, since showing both was just the same
-  // comparison twice at different granularities. This is now the ONE pending-vs-stock table,
-  // filterable by model (below) and showing who already holds each colour's bookings, so a sales
-  // person with a fresh walk-in can check in one place whether a colour is spoken for.
-  const pendingByModelColour = {};
+  // Same comparison at exact model+colour level — now joined via Model Code (see
+  // buildModelCodeMaster()/matchModelCode() above) instead of matching free text directly, so a
+  // typo in the booking's typed colour ("BATTLAION" vs "BATTALION") no longer produces a wrong or
+  // inflated stock count. Bookings that can't be matched to any current stock code are collected
+  // separately below the table rather than silently dropped, so nothing goes missing.
+  const codeMaster = buildModelCodeMaster();
+  const stockCountByCode = {};
+  STATE.stock.forEach(r => {
+    if (up(r[17]) !== 'OPEN') return;
+    if (up(r[7]) !== 'KN') return;
+    const code = str(r[10]);
+    if (!code) return;
+    stockCountByCode[code] = (stockCountByCode[code] || 0) + 1;
+  });
+
+  const pendingByCode = {};
+  const unmatchedBookings = [];
   rows.forEach(r => {
     const model = str(r[3]) || '(unknown)';
     const colour = str(r[4]) || '(no colour)';
-    const key = model + '||' + colour;
-    const b = pendingByModelColour[key] || (pendingByModelColour[key] = { model, colour, pending: 0, execCounts: {} });
-    b.pending++;
     const execName = str(r[7]) || '(unknown)';
+    const match = matchModelCode(codeMaster, model, colour);
+    if (!match) { unmatchedBookings.push({ model, colour, execName }); return; }
+    const b = pendingByCode[match.code] || (pendingByCode[match.code] = { code: match.code, family: match.family, name: match.name, pending: 0, execCounts: {} });
+    b.pending++;
     b.execCounts[execName] = (b.execCounts[execName] || 0) + 1;
   });
   const formatExecCounts = (execCounts) => Object.entries(execCounts)
     .sort((a,b) => b[1] - a[1])
     .map(([name, count]) => count > 1 ? `${name} ×${count}` : name)
     .join(', ');
-  // Grouped for reading, not ranked by count: model family first, then model, then colour —
-  // so every colour of one model sits together instead of being scattered by pending count.
-  const colourCmpRows = Object.values(pendingByModelColour).map(b => {
-    const { exact } = stockMatchFor(b.model, b.colour);
-    return { fam: modelFamilyKey(b.model), model: b.model, colour: b.colour, pending: b.pending, stock: exact, gap: exact - b.pending, execs: formatExecCounts(b.execCounts) };
-  }).sort((a,b) =>
-    a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model) || a.colour.localeCompare(b.colour)
-  );
+  // Grouped for reading, not ranked by count: model family first, then model name — so every
+  // colour of one model sits together instead of being scattered by pending count.
+  const colourCmpRows = Object.values(pendingByCode).map(b => ({
+    fam: b.family, model: b.name, code: b.code, pending: b.pending,
+    stock: stockCountByCode[b.code] || 0, gap: (stockCountByCode[b.code] || 0) - b.pending,
+    execs: formatExecCounts(b.execCounts),
+  })).sort((a,b) => a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model));
 
   // Model filter dropdown — repopulated every render (options can change as new models get
   // booked), preserving whatever was already selected if it's still a valid choice.
@@ -2631,13 +2675,18 @@ function renderPending(){
 
   renderStaticTable('tblPendingVsStockColour', [
     { key:'fam', label:'Model Family' },
-    { key:'model', label:'Model' },
-    { key:'colour', label:'Colour' },
+    { key:'model', label:'Model / Colour' },
+    { key:'code', label:'Model Code' },
     { key:'pending', label:'Pending Bookings', num:true },
-    { key:'stock', label:'Stock Available (Open, KN, exact colour)', num:true },
+    { key:'stock', label:'Stock Available (Open, KN)', num:true },
     { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
     { key:'execs', label:'Booked By' },
   ], colourCmpRowsFiltered);
+
+  const unmatchedEl = document.getElementById('modelFinderUnmatched');
+  if (unmatchedEl) {
+    unmatchedEl.innerHTML = !unmatchedBookings.length ? '' : `<div class="empty-note" style="text-align:left; padding-top:10px; color:var(--warning);">⚠️ ${unmatchedBookings.length} booking${unmatchedBookings.length===1?'':'s'} couldn't be matched to a current stock code — check the spelling of the Model/Colour on these: ${unmatchedBookings.map(u => `${esc(u.model)} ${esc(u.colour)} (${esc(u.execName)})`).join('; ')}.</div>`;
+  }
 
   // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
   // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
