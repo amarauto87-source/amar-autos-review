@@ -1330,17 +1330,26 @@ const COL = {
 // "Model Name" and ACTUL BOOKING's "Model" text onto the same key even though the two sheets
 // spell things slightly differently (colour variants, "NEW CLASSIC" vs "CLASSIC", typos like
 // "GUERRILA" vs "GUERRILLA"). This is a family-level match, not an exact colour/variant match.
-const MODEL_FAMILY_KEYWORDS = ['SUPER METEOR','CONTINENTAL GT','INTERCEPTOR','HIMALAYAN','GUERRIL','SCRAM','HUNTER','METEOR','CLASSIC','BULLET'];
+const MODEL_FAMILY_KEYWORDS = ['SUPER METEOR','CONTINENTAL GT','INTERCEPTOR','HIMALAYAN','GUERRIL','SCRAM','SHOTGUN','HUNTER','METEOR','CLASSIC','BULLET'];
 function modelFamilyKey(s){
   const u = up(s);
   let base = u.split(/\s+/)[0] || '(unknown)';
   for (const kw of MODEL_FAMILY_KEYWORDS) {
     if (u.includes(kw)) { base = (kw === 'GUERRIL' ? 'GUERRILLA' : kw); break; }
   }
-  // Append engine displacement (350/450/650/750...) when present, so e.g. "BULLET 350" and
-  // "BULLET 650" are compared as separate stock pools rather than lumped into one "BULLET" bucket.
-  const ccMatch = u.match(/\b([3-9]\d0)\b/);
-  return ccMatch ? `${base} ${ccMatch[1]}` : base;
+  // Displacement (350/650/etc.) is ONLY appended for "BULLET" — the one nameplate currently sold
+  // in two genuinely different displacements (350 and 650) that need to be told apart as separate
+  // stock pools. Every other family (Continental GT, Super Meteor 650, Shotgun 650, Hunter 350...)
+  // only comes in one displacement, and booking staff often type the model without it ("Continental
+  // GT" rather than "Continental GT 650") while the Stock sheet's official Model Name always
+  // includes it — appending displacement for every family made those two texts land in different
+  // "families" and fail to match at all, which is why a lot of otherwise-correct bookings were
+  // showing up as unmatched.
+  if (base === 'BULLET') {
+    const ccMatch = u.match(/\b([3-9]\d0)\b/);
+    if (ccMatch) return `${base} ${ccMatch[1]}`;
+  }
+  return base;
 }
 
 // Checks a pending booking's Model+Colour against current Open stock — KN (Kanti Nagar) only.
@@ -2620,11 +2629,14 @@ function renderPending(){
     { key:'alt', label:'Same Model, Other Colour' },
   ], atRiskRows);
 
-  // Same comparison at exact model+colour level — now joined via Model Code (see
-  // buildModelCodeMaster()/matchModelCode() above) instead of matching free text directly, so a
-  // typo in the booking's typed colour ("BATTLAION" vs "BATTALION") no longer produces a wrong or
-  // inflated stock count. Bookings that can't be matched to any current stock code are collected
-  // separately below the table rather than silently dropped, so nothing goes missing.
+  // Same comparison at exact model+colour level — grouped by the booking's own Model/Colour text
+  // (so every distinct booking always gets a row, never silently disappears), with the STOCK
+  // number itself pulled via Model Code when a match is found (see buildModelCodeMaster()/
+  // matchModelCode() above) — reliable once matched, since counting by exact code has no
+  // fuzziness left in it at all. When no code matches (colour typo, or genuinely zero stock ever
+  // seen in that colour), the row still shows with stock=0 and a ⚠️ in the Model Code column,
+  // rather than being hidden in a separate list — a real "we have zero of this" is exactly what
+  // this table exists to surface, so it needs to stay visible, just flagged for a spelling check.
   const codeMaster = buildModelCodeMaster();
   const stockCountByCode = {};
   STATE.stock.forEach(r => {
@@ -2635,29 +2647,33 @@ function renderPending(){
     stockCountByCode[code] = (stockCountByCode[code] || 0) + 1;
   });
 
-  const pendingByCode = {};
-  const unmatchedBookings = [];
+  const pendingByModelColour = {};
   rows.forEach(r => {
     const model = str(r[3]) || '(unknown)';
     const colour = str(r[4]) || '(no colour)';
-    const execName = str(r[7]) || '(unknown)';
-    const match = matchModelCode(codeMaster, model, colour);
-    if (!match) { unmatchedBookings.push({ model, colour, execName }); return; }
-    const b = pendingByCode[match.code] || (pendingByCode[match.code] = { code: match.code, family: match.family, name: match.name, pending: 0, execCounts: {} });
+    const key = model + '||' + colour;
+    const b = pendingByModelColour[key] || (pendingByModelColour[key] = { model, colour, pending: 0, execCounts: {} });
     b.pending++;
+    const execName = str(r[7]) || '(unknown)';
     b.execCounts[execName] = (b.execCounts[execName] || 0) + 1;
   });
   const formatExecCounts = (execCounts) => Object.entries(execCounts)
     .sort((a,b) => b[1] - a[1])
     .map(([name, count]) => count > 1 ? `${name} ×${count}` : name)
     .join(', ');
-  // Grouped for reading, not ranked by count: model family first, then model name — so every
-  // colour of one model sits together instead of being scattered by pending count.
-  const colourCmpRows = Object.values(pendingByCode).map(b => ({
-    fam: b.family, model: b.name, code: b.code, pending: b.pending,
-    stock: stockCountByCode[b.code] || 0, gap: (stockCountByCode[b.code] || 0) - b.pending,
-    execs: formatExecCounts(b.execCounts),
-  })).sort((a,b) => a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model));
+  // Grouped for reading, not ranked by count: model family first, then model, then colour —
+  // so every colour of one model sits together instead of being scattered by pending count.
+  const colourCmpRows = Object.values(pendingByModelColour).map(b => {
+    const match = matchModelCode(codeMaster, b.model, b.colour);
+    const stock = match ? (stockCountByCode[match.code] || 0) : 0;
+    return {
+      fam: modelFamilyKey(b.model), model: b.model, colour: b.colour,
+      code: match ? match.code : null,
+      pending: b.pending, stock, gap: stock - b.pending, execs: formatExecCounts(b.execCounts),
+    };
+  }).sort((a,b) =>
+    a.fam.localeCompare(b.fam) || a.model.localeCompare(b.model) || a.colour.localeCompare(b.colour)
+  );
 
   // Model filter dropdown — repopulated every render (options can change as new models get
   // booked), preserving whatever was already selected if it's still a valid choice.
@@ -2675,17 +2691,19 @@ function renderPending(){
 
   renderStaticTable('tblPendingVsStockColour', [
     { key:'fam', label:'Model Family' },
-    { key:'model', label:'Model / Colour' },
-    { key:'code', label:'Model Code' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'code', label:'Model Code', raw:true, fmt: v => v ? esc(v) : `<span style="color:var(--warning);" title="No stock code matched this colour — check the spelling against the Stock tab">⚠️ —</span>` },
     { key:'pending', label:'Pending Bookings', num:true },
     { key:'stock', label:'Stock Available (Open, KN)', num:true },
     { key:'gap', label:'Surplus / Shortfall', num:true, raw:true, fmt: v => `<span class="pill ${v < 0 ? 'bad' : 'good'}">${v > 0 ? '+' : ''}${fmtInt(v)}</span>` },
     { key:'execs', label:'Booked By' },
   ], colourCmpRowsFiltered);
 
+  const unmatchedCount = colourCmpRows.filter(r => !r.code).length;
   const unmatchedEl = document.getElementById('modelFinderUnmatched');
   if (unmatchedEl) {
-    unmatchedEl.innerHTML = !unmatchedBookings.length ? '' : `<div class="empty-note" style="text-align:left; padding-top:10px; color:var(--warning);">⚠️ ${unmatchedBookings.length} booking${unmatchedBookings.length===1?'':'s'} couldn't be matched to a current stock code — check the spelling of the Model/Colour on these: ${unmatchedBookings.map(u => `${esc(u.model)} ${esc(u.colour)} (${esc(u.execName)})`).join('; ')}.</div>`;
+    unmatchedEl.innerHTML = !unmatchedCount ? '' : `<div class="empty-note" style="text-align:left; padding-top:10px; color:var(--warning);">⚠️ ${unmatchedCount} colour${unmatchedCount===1?'':'s'} above (marked ⚠️ in Model Code) couldn't be matched to a current stock code — either genuinely zero stock in that colour, or the Model/Colour spelling doesn't match the Stock tab exactly.</div>`;
   }
 
   // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
