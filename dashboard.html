@@ -496,6 +496,20 @@
     .controls a, .controls select, .controls button { width: 100%; }
     .controls select, .controls input[type="text"] { flex: none; }
     .controls button { flex: none; padding: 11px 10px; }
+    /* The drawer's background follows the theme (var(--surface-1) — cream in light mode, dark in
+       dark mode), but header.top's own button/select rule further up hardcodes near-white text
+       and a barely-there white tint background — correct for the *inline* header bar, which is
+       always dark regardless of theme, but wrong here since the drawer itself goes light in light
+       mode. Without this override, light mode showed near-invisible pale-on-pale text in this
+       drawer specifically (dark mode never had the problem, hence it going unnoticed until now).
+       Higher specificity (header.top .controls ...) beats the original rule without !important. */
+    header.top .controls button, header.top .controls select, header.top .controls input[type="text"] {
+      background: var(--surface-2); color: var(--text-primary); border-color: var(--border); backdrop-filter: none;
+    }
+    header.top .controls button.primary {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #241505; border-color: transparent;
+    }
+    header.top select.controls option, .controls select option { color: #111; }
     .controls-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 240; }
     .controls-close {
       display:flex; position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 8px;
@@ -611,6 +625,7 @@
       <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
       <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
       <button id="reportCancelBtn" title="Flag a booking as cancelled on the ground, before the office has updated it">🚫 Report Cancellation</button>
+      <button id="reportBilledBtn" title="Flag a booking as billed/delivered on the ground, before the office has updated it">✅ Report Billed</button>
       <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
       <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
     </div>
@@ -1802,20 +1817,25 @@ function openNotifyTeamModal(){
 }
 document.getElementById('notifyTeamBtn').addEventListener('click', openNotifyTeamModal);
 
-/* ---------------- Report Cancellation (write-back to the Google Sheet) ----------------
+/* ---------------- Report Cancellation / Billed (write-back to the Google Sheet) ----------------
    Everything else in this dashboard only READS the Sheet (via the public gviz endpoint — see
    fetchSheetRaw() below). Writing back needs a different mechanism: a Google Apps Script "Web
    App" deployed on top of the same Sheet, which exposes a URL this page can POST to. Deepak has
    to create that once (Extensions → Apps Script in the Sheet, paste the doPost script, Deploy →
    Web App → Anyone can access) and paste the resulting URL below — until then this feature
    quietly tells whoever clicks it that it isn't set up yet, rather than failing silently.
-   CANCELLATION_WEBHOOK_URL left blank on purpose (nothing sensitive to hide here — this URL
-   only accepts a slip number + note, it can't read anything back).
+   STATUS_CHANGE_WEBHOOK_URL left blank on purpose (nothing sensitive to hide here — this URL
+   only accepts a slip number + remarks, it can't read anything back).
    The POST body is sent as text/plain rather than application/json — Apps Script Web Apps can't
    answer a CORS preflight request, so application/json triggers one and silently fails; text/plain
    is treated as a "simple request" and skips the preflight entirely (the script still JSON.parses
    the raw body on its side). */
-const CANCELLATION_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycby4u1BNbO9x7UcC6XW9KQ8UGLlkXpCIb2d6iucGE3PZII5_Zzdg3SOyvkHViwpBC917DQ/exec';
+const STATUS_CHANGE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzVDbmqyorvNM4yHHi4MLwEcxMqmYs1wS5Bg1XK1zAH2FC6UJ9npg6KARHL3LKzUnzoeA/exec';
+
+const STATUS_ACTIONS = {
+  CANCEL: { verb: 'Cancellation', icon: '🚫', pastTense: 'cancelled', confirmMsg: "Confirm this booking has actually been cancelled on the ground.", placeholder: 'e.g. customer changed mind, financing fell through' },
+  BILLED: { verb: 'Billed', icon: '✅', pastTense: 'billed', confirmMsg: "Confirm this booking has actually been billed/delivered on the ground.", placeholder: 'e.g. full payment received, delivered today' },
+};
 
 // Bookings that are still open (not already Billed or Cancelled) — same "not billed, not
 // cancelled" rule as allPendingRowsFor()/overdueRowsFor(), just without the exec-filter coupling
@@ -1831,51 +1851,68 @@ function myOpenBookings(execName){
     .sort((a, b) => (b[2] instanceof Date ? b[2].getTime() : 0) - (a[2] instanceof Date ? a[2].getTime() : 0));
 }
 
-// Small "🚫 Cancel" button used inline in the two pending-booking tables (Stock Status table and
-// the Full List) — this is the main, practical way to report a cancellation now: right next to
-// the booking itself, no separate picker. The header's "Report Cancellation" button (below) is
-// kept as a fallback for finding a booking by scrolling/searching rather than spotting it in a
-// table. Both paths end up in the same openReportCancelModal().
-function cancelActionButton(slipNo, row){
-  // row here is a {slipNo, customer, model, colour, exec, ...} object — from the Stock Status table
-  const label = `${slipNo} — ${row.model}${row.colour ? ' ('+row.colour+')' : ''} — ${row.customer}`;
-  return `<button type="button" class="cancel-row-btn" data-slip="${esc(slipNo)}" data-exec="${esc(row.exec)}" data-label="${esc(label)}">🚫 Cancel</button>`;
+// Two small inline buttons ("🚫 Cancel" / "✅ Billed") used in the two pending-booking tables
+// (Stock Status table and the Full List) — this is the main, practical way to report either now:
+// right next to the booking itself, no separate picker. The header's two buttons (below) are kept
+// as a fallback for finding a booking by scrolling/searching rather than spotting it in a table.
+// All four paths end up in the same openStatusChangeModal().
+function statusActionButtons(slipNo, exec, model, colour, customer){
+  const label = `${slipNo} — ${model}${colour ? ' ('+colour+')' : ''} — ${customer}`;
+  return `<div style="display:flex; gap:6px; flex-wrap:wrap;">`
+    + `<button type="button" class="status-row-btn" data-action="CANCEL" data-slip="${esc(slipNo)}" data-exec="${esc(exec)}" data-label="${esc(label)}">🚫 Cancel</button>`
+    + `<button type="button" class="status-row-btn" data-action="BILLED" data-slip="${esc(slipNo)}" data-exec="${esc(exec)}" data-label="${esc(label)}">✅ Billed</button>`
+    + `</div>`;
 }
-function cancelActionButtonRaw(v, row){
+function statusActionButtonsFromRow(v, row){
+  // row here is a {slipNo, customer, model, colour, exec, ...} object — from the Stock Status table
+  return statusActionButtons(row.slipNo, row.exec, row.model, row.colour, row.customer);
+}
+function statusActionButtonsRaw(v, row){
   // row here is the raw ACTUL BOOKING array — 1=slip, 3=model, 4=colour, 5=customer, 7=exec
-  const slipNo = str(row[1]);
-  const label = `${slipNo} — ${str(row[3])}${str(row[4]) ? ' ('+str(row[4])+')' : ''} — ${str(row[5])}`;
-  return `<button type="button" class="cancel-row-btn" data-slip="${esc(slipNo)}" data-exec="${esc(str(row[7]))}" data-label="${esc(label)}">🚫 Cancel</button>`;
+  return statusActionButtons(str(row[1]), str(row[7]), str(row[3]), str(row[4]), str(row[5]));
 }
 // Delegated listeners — attached once to the (stable) table elements, keeps working across every
 // re-render since only each table's innerHTML is replaced, not the table element itself.
 ['tblBookingStockMatch', 'tblPendingAll'].forEach(id => {
   document.getElementById(id).addEventListener('click', (e) => {
-    const btn = e.target.closest('.cancel-row-btn');
+    const btn = e.target.closest('.status-row-btn');
     if (!btn) return;
-    openReportCancelModal({ slipNo: btn.dataset.slip, exec: btn.dataset.exec, label: btn.dataset.label });
+    openStatusChangeModal(btn.dataset.action, { slipNo: btn.dataset.slip, exec: btn.dataset.exec, label: btn.dataset.label });
   });
 });
 
-// preSelected = { slipNo, exec, label } when opened from an inline "🚫 Cancel" button (skips
-// straight to confirm+reason, no picker). Omitted when opened from the header button, which
-// falls back to the searchable dropdown of every open booking.
-function openReportCancelModal(preSelected){
-  document.getElementById('modalTitle').textContent = '🚫 Report Cancellation';
+// preSelected = { slipNo, exec, label } when opened from an inline row button (skips straight to
+// confirm+remarks, no picker). Omitted when opened from a header button, which falls back to the
+// searchable dropdown of every open booking. Remarks are REQUIRED for both actions — Deepak wants
+// a reason on record every time, not just for cancellations.
+function openStatusChangeModal(action, preSelected){
+  const cfg = STATUS_ACTIONS[action];
+  document.getElementById('modalTitle').textContent = `${cfg.icon} Report ${cfg.verb}`;
+
+  const remarksHtml = `
+    <textarea id="statusNoteBox" rows="3" placeholder="Remarks (required) — ${cfg.placeholder}" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
+    <div id="statusNoteError" style="color:var(--critical); font-size:12px; margin-top:4px; display:none;">Remarks likhna zaroori hai — bina reason ke submit nahi hoga.</div>`;
+
+  function wireSubmit(getSlipAndExec){
+    document.getElementById('statusSubmitBtn').addEventListener('click', async () => {
+      const note = document.getElementById('statusNoteBox').value.trim();
+      if (!note) { document.getElementById('statusNoteError').style.display = 'block'; return; }
+      document.getElementById('statusNoteError').style.display = 'none';
+      const { slipNo, execName } = getSlipAndExec();
+      await submitStatusChangeReport(slipNo, execName, action, note);
+    });
+  }
 
   if (preSelected) {
     document.getElementById('modalBody').innerHTML = `
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Confirm this booking has actually been cancelled on the ground. This goes to Deepak for approval first — it only shows as cancelled in the Sheet once he ticks it off.</p>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">${cfg.confirmMsg} This goes to Deepak for approval first — it only shows as ${cfg.pastTense} in the Sheet once he ticks it off.</p>
       <div style="font-weight:600; padding:8px 0;">${esc(preSelected.label)}</div>
-      <textarea id="cancelNoteBox" rows="3" placeholder="Reason (optional) — e.g. customer changed mind, financing fell through" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
-      <div id="cancelStatusMsg" style="margin-top:10px; font-size:13px;"></div>
+      ${remarksHtml}
+      <div id="statusMsg" style="margin-top:10px; font-size:13px;"></div>
       <div style="margin-top:12px; text-align:right;">
-        <button type="button" id="cancelSubmitBtn" class="primary">🚫 Confirm Cancellation</button>
+        <button type="button" id="statusSubmitBtn" class="primary">${cfg.icon} Confirm ${cfg.verb}</button>
       </div>`;
-    document.getElementById('cancelSubmitBtn').addEventListener('click', async () => {
-      const note = document.getElementById('cancelNoteBox').value;
-      await submitCancellationReport(preSelected.slipNo, preSelected.exec, note);
-    });
+    wireSubmit(() => ({ slipNo: preSelected.slipNo, execName: preSelected.exec }));
     document.getElementById('detailModal').classList.add('open');
     return;
   }
@@ -1900,30 +1937,29 @@ function openReportCancelModal(preSelected){
   }).join('');
 
   document.getElementById('modalBody').innerHTML = `
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Tip: it's usually quicker to hit "🚫 Cancel" right on the booking itself in the Book vs Stock tab. Use this search if you can't spot it there.</p>
-    <select id="cancelSlipSelect" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border); margin-bottom:10px;">${optionsHtml}</select>
-    <textarea id="cancelNoteBox" rows="3" placeholder="Reason (optional) — e.g. customer changed mind, financing fell through" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
-    <div id="cancelStatusMsg" style="margin-top:10px; font-size:13px;"></div>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Tip: it's usually quicker to hit "${cfg.icon}" right on the booking itself in the Book vs Stock tab. Use this search if you can't spot it there.</p>
+    <select id="statusSlipSelect" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border); margin-bottom:10px;">${optionsHtml}</select>
+    ${remarksHtml}
+    <div id="statusMsg" style="margin-top:10px; font-size:13px;"></div>
     <div style="margin-top:12px; text-align:right;">
-      <button type="button" id="cancelSubmitBtn" class="primary">🚫 Report Cancellation</button>
+      <button type="button" id="statusSubmitBtn" class="primary">${cfg.icon} Report ${cfg.verb}</button>
     </div>`;
 
-  document.getElementById('cancelSubmitBtn').addEventListener('click', async () => {
-    const sel = document.getElementById('cancelSlipSelect');
-    const slipNo = sel.value;
-    const execName = sel.selectedOptions[0].dataset.exec;
-    const note = document.getElementById('cancelNoteBox').value;
-    await submitCancellationReport(slipNo, execName, note);
+  wireSubmit(() => {
+    const sel = document.getElementById('statusSlipSelect');
+    return { slipNo: sel.value, execName: sel.selectedOptions[0].dataset.exec };
   });
 
   document.getElementById('detailModal').classList.add('open');
 }
-document.getElementById('reportCancelBtn').addEventListener('click', () => openReportCancelModal());
+document.getElementById('reportCancelBtn').addEventListener('click', () => openStatusChangeModal('CANCEL'));
+document.getElementById('reportBilledBtn').addEventListener('click', () => openStatusChangeModal('BILLED'));
 
-async function submitCancellationReport(slipNo, execName, note){
-  const statusEl = document.getElementById('cancelStatusMsg');
-  const btn = document.getElementById('cancelSubmitBtn');
-  if (!CANCELLATION_WEBHOOK_URL) {
+async function submitStatusChangeReport(slipNo, execName, action, note){
+  const cfg = STATUS_ACTIONS[action];
+  const statusEl = document.getElementById('statusMsg');
+  const btn = document.getElementById('statusSubmitBtn');
+  if (!STATUS_CHANGE_WEBHOOK_URL) {
     statusEl.textContent = "This isn't wired up yet — Deepak still needs to deploy the Apps Script and add its URL. Nothing was sent.";
     statusEl.style.color = 'var(--warning)';
     return;
@@ -1932,16 +1968,16 @@ async function submitCancellationReport(slipNo, execName, note){
   statusEl.textContent = 'Sending…';
   statusEl.style.color = 'var(--text-secondary)';
   try {
-    await fetch(CANCELLATION_WEBHOOK_URL, {
+    await fetch(STATUS_CHANGE_WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // see the note above CANCELLATION_WEBHOOK_URL — deliberate, not a mistake
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // see the note above STATUS_CHANGE_WEBHOOK_URL — deliberate, not a mistake
       body: JSON.stringify({
-        slipNo, execName, note,
+        slipNo, execName, action, note,
         reportedBy: CURRENT_USER.name,
         reportedAt: new Date().toISOString(),
       }),
     });
-    statusEl.textContent = "✅ Sent to Deepak for approval — it'll show as cancelled here once he approves it.";
+    statusEl.textContent = `✅ Sent to Deepak for approval — it'll show as ${cfg.pastTense} here once he approves it.`;
     statusEl.style.color = 'var(--good)';
     setTimeout(() => { closeDetailModal(); }, 1800);
   } catch (e) {
@@ -2617,7 +2653,7 @@ function renderPending(){
     { key:'exec', label:'Executive' },
     { key:'tdd', label:'TDD / Expected' },
     { key:'status', label:'Stock Status', raw:true },
-    { key:'slipNo', label:'Action', raw:true, fmt: cancelActionButton },
+    { key:'slipNo', label:'Action', raw:true, fmt: statusActionButtonsFromRow },
   ], bookingStockRows.map(r => ({ ...r, status: `<span class="pill ${r.cls}">${r.status}</span>` })));
 
   const search = str(document.getElementById('searchPending').value).toLowerCase();
@@ -2633,7 +2669,7 @@ function renderPending(){
     { key:8, label:'TDD' },
     { key:9, label:'Status' },
     { key:10, label:'Expected Delivery' },
-    { key:1, label:'Action', raw:true, fmt: cancelActionButtonRaw },
+    { key:1, label:'Action', raw:true, fmt: statusActionButtonsRaw },
   ], filtered);
 }
 document.getElementById('searchPending').addEventListener('input', () => renderPending());
