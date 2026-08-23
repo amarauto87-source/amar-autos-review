@@ -1357,7 +1357,11 @@ function stockMatchFor(model, colour){
     if (up(r[7]) !== 'KN') return;
     const name = up(r[11] || r[9]);
     if (!name || modelFamilyKey(name) !== fam) return;
-    const isColourMatch = !colourWords.length || colourWords.some(w => name.includes(w));
+    // Every word of the colour must appear, not just any one of them — "BATTALION BLACK" and
+    // "MILITARY BLACK" both contain "BLACK", so matching on .some() let either colour match ANY
+    // black stock item, inflating counts (two different colours of the same model were showing
+    // the exact same total). .every() requires the full colour phrase to be present.
+    const isColourMatch = !colourWords.length || colourWords.every(w => name.includes(w));
     if (isColourMatch) exact++; else familyOnly++;
   });
   return { exact, familyOnly };
@@ -2615,7 +2619,11 @@ function renderPending(){
   // booked), preserving whatever was already selected if it's still a valid choice.
   const modelSel = document.getElementById('modelFinderSelect');
   const prevModel = modelSel.value || 'ALL';
-  const distinctModels = Array.from(new Set(colourCmpRows.map(r => r.model))).sort();
+  const distinctModels = Array.from(new Set(colourCmpRows.map(r => r.model)))
+    .sort((a, b) => {
+      const famA = modelFamilyKey(a), famB = modelFamilyKey(b);
+      return famA.localeCompare(famB) || a.localeCompare(b); // family first, then model name within that family
+    });
   modelSel.innerHTML = '<option value="ALL">All Models</option>' + distinctModels.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   modelSel.value = (prevModel === 'ALL' || distinctModels.includes(prevModel)) ? prevModel : 'ALL';
   const selectedModel = modelSel.value;
