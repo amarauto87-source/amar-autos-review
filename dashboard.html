@@ -117,6 +117,11 @@
     margin-top: 3px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600;
   }
   .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  /* Group headings and From/To captions are drawer-only — on the desktop header row the controls
+     sit inline and labelling each one would just add clutter (they keep their tooltips). */
+  .drawer-label { display: none; }
+  .date-field { display: inline-flex; align-items: center; gap: 6px; }
+  .date-field > span { font-size: 11px; color: rgba(246,240,228,0.6); }
   .menu-toggle {
     display: none; background: rgba(255,255,255,0.06); color: #f2f0ee; border: 1px solid rgba(255,255,255,0.14);
     border-radius: 8px; width: 38px; height: 38px; font-size: 18px; align-items:center; justify-content:center; padding:0;
@@ -153,6 +158,25 @@
   header.top button.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold)); border-color: transparent; color: #241505; }
   header.top select option { color: #111; }
   .status-line { font-size: 11px; color: rgba(246,240,228,0.52); margin-top: 9px; letter-spacing: 0.2px; }
+
+  /* "⋯ More" dropdown — holds the occasional actions (external forms, one-off reports, theme,
+     logout) so the header row stays short. On mobile the whole controls area is already a
+     drawer, so there the menu just renders inline (see the mobile media query). */
+  .more-menu-wrap { position: relative; }
+  .more-menu {
+    display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 40;
+    background: var(--surface-1); border: 1px solid var(--border); border-top: 2px solid var(--gold);
+    border-radius: 10px; padding: 6px; min-width: 220px;
+    box-shadow: 0 18px 44px -16px rgba(0,0,0,0.7);
+  }
+  .more-menu.open { display: block; }
+  .more-menu a { text-decoration: none; display: block; }
+  .more-menu button {
+    display: block; width: 100%; text-align: left; border: none; border-radius: 7px;
+    padding: 9px 11px; font-size: 13px; background: transparent; color: var(--text-primary);
+  }
+  .more-menu button:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); filter: none; }
+  .more-menu-sep { height: 1px; background: var(--border); margin: 5px 4px; }
   .data-health-banner {
     margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 700;
     background: color-mix(in srgb, var(--s3, #199e70) 16%, transparent);
@@ -323,6 +347,7 @@
   .chat-item.urgent { color: var(--critical); font-weight: 600; }
   .chat-item.ok { color: var(--good); font-weight: 600; }
   .chat-item.tip { color: var(--text-secondary); font-style: italic; }
+
   .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
   .meter > div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; }
   /* charts */
@@ -355,11 +380,17 @@
     border-bottom: 1px solid var(--gold-dim);
   }
   table.data th:hover { color: var(--gold-light); }
+  /* Zebra striping — long tables (pending bookings, stock, employee lists) were a flat wall of
+     rows that made it easy to read across into the wrong line. */
+  table.data tbody tr:nth-child(even) { background: color-mix(in srgb, var(--gold) 3%, transparent); }
   table.data tbody tr:hover { background: color-mix(in srgb, var(--gold) 7%, transparent); }
   table.data tbody tr:last-child td { border-bottom: none; }
   .table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
   .table-wrap table.data { border: none; border-radius: 0; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  /* Must be table.data-prefixed: "table.data th, table.data td { text-align: left }" above
+     outranks a bare ".num", so numeric columns were silently never right-aligning at all —
+     figures sat left-ragged and were hard to compare down a column. */
+  .num, table.data th.num, table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
   .toolbar input[type="text"] { min-width: 220px; }
   .pill {
@@ -369,7 +400,10 @@
   .pill.good { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
   .pill.bad { background: color-mix(in srgb, var(--critical) 18%, transparent); color: var(--critical); }
   .pill.warn { background: color-mix(in srgb, var(--warning) 25%, transparent); color: #8a5a00; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
+  /* Cards sitting side by side stretch to the same height — previously one card ending short
+     left a ragged, unfinished-looking gap next to its neighbour. */
+  .grid-2 > .card, .grid-3 > .card { height: 100%; }
   /* When a section title is the first thing inside a grid column, drop its top margin so both
      columns' headings line up on the same baseline instead of one sitting lower. */
   .grid-2 > div > h2.section-title:first-child { margin-top: 0; }
@@ -493,6 +527,32 @@
       box-shadow: -12px 0 34px rgba(0,0,0,0.45); flex-direction: column; align-items: stretch; gap: 10px;
     }
     .controls.open { display: flex; }
+    /* Inside the mobile drawer the controls are already a vertical list, so the "More" dropdown
+       would be a pointless second layer — flatten it out and hide its toggle button. */
+    .more-menu-wrap { width: 100%; }
+    #moreMenuBtn { display: none; }
+    .more-menu {
+      display: block; position: static; border: none; border-top: 1px solid var(--border);
+      border-radius: 0; padding: 6px 0 0; min-width: 0; box-shadow: none; background: transparent;
+      margin-top: 4px;
+    }
+    .more-menu button { text-align: center; padding: 11px 10px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 8px; }
+    /* Small group headings inside the drawer, so the long list reads as "filters, then actions"
+       rather than one undifferentiated column of buttons. */
+    .drawer-label {
+      display: block; font-family: var(--font-head); font-size: 10px; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--gold); font-weight: 700;
+      margin: 4px 2px 2px; padding-top: 6px;
+    }
+    .drawer-label:first-of-type { padding-top: 0; }
+    /* The two date inputs are identical empty "mm/dd/yyyy" boxes with nothing to tell them apart
+       in the drawer — these paired labels make From vs To obvious. */
+    .date-field { display: flex; align-items: center; gap: 10px; width: 100%; }
+    .date-field > span { font-size: 12px; color: var(--text-secondary); width: 38px; flex-shrink: 0; }
+    /* Needs to outrank ".controls input[type=date] { width: 100% }" below — that selector ties on
+       specificity and wins on source order, so match its [type] part too. min-width:0 lets the
+       input actually shrink inside the flex row instead of spilling past the drawer edge. */
+    .controls .date-field > input[type="date"] { flex: 1 1 auto; width: auto; min-width: 0; }
     .controls a, .controls select, .controls button, .controls input[type="date"] { width: 100%; }
     .controls select, .controls input[type="text"], .controls input[type="date"] { flex: none; }
     .controls button { flex: none; padding: 11px 10px; }
@@ -511,9 +571,12 @@
     }
     header.top select.controls option, .controls select option { color: #111; }
     .controls-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 240; }
-    .controls-close {
+    /* Needs .controls-prefixed specificity to beat the ".controls button { width: 100% }" rule
+       above — without it the ✕ stretched into a full-width bar across the top of the drawer
+       instead of sitting as a small square in the corner. */
+    .controls button.controls-close {
       display:flex; position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 8px;
-      align-items:center; justify-content:center; font-size: 16px;
+      align-items:center; justify-content:center; font-size: 16px; padding: 0; flex: none;
     }
     .status-line { font-size: 10px; }
     .data-health-banner { font-size: 12.5px; padding: 9px 12px; }
@@ -616,21 +679,34 @@
     <button id="menuToggle" class="menu-toggle" aria-label="Open menu" title="Menu">☰</button>
     <div class="controls" id="controlsPanel">
       <button type="button" class="controls-close" id="controlsClose" aria-label="Close menu">✕</button>
-      <a href="customer-experience.html" style="text-decoration:none;"><button type="button" title="Customer Experience">💬 Reviews</button></a>
-      <a href="ride.html" style="text-decoration:none;"><button type="button" title="Ride Feedback Form">🏍️ Ride FB</button></a>
-      <a href="rider-registration.html" style="text-decoration:none;"><button type="button" title="Rider Registration Form">🪪 Register</button></a>
+      <span class="drawer-label">Filters</span>
       <select id="monthFilter"></select>
-      <input type="date" id="dayFilterFrom" title="Day filter — from date (overrides Month filter while set)">
-      <input type="date" id="dayFilterTo" title="Day filter — to date (optional — leave blank to filter just the one day above)">
+      <label class="date-field"><span>From</span><input type="date" id="dayFilterFrom" title="Day filter — from date (overrides Month filter while set)"></label>
+      <label class="date-field"><span>To</span><input type="date" id="dayFilterTo" title="Day filter — to date (optional — leave blank to filter just the one day above)"></label>
       <button id="dayFilterClearBtn" title="Clear the day filter and go back to using Month filter">✕ Day Filter</button>
       <select id="execFilter"></select>
       <button id="allMonthsBtn" title="One click to show all months' data">📅 Show All Months</button>
-      <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
+      <span class="drawer-label">Tools</span>
+      <button id="quickSearchBtn" title="Search customer, mobile, model, or slip number across everything">🔍 Quick Search</button>
       <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
-      <button id="reportCancelBtn" title="Flag a booking as cancelled on the ground, before the office has updated it">🚫 Report Cancellation</button>
-      <button id="reportBilledBtn" title="Flag a booking as billed/delivered on the ground, before the office has updated it">✅ Report Billed</button>
-      <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
-      <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
+      <!-- Everything below is occasional (forms, one-off reports, theme, logout) — tucked into a
+           menu so the always-visible header stays down to just filters + search + refresh.
+           Previously all 16 controls sat inline and wrapped onto two crowded rows. -->
+      <div class="more-menu-wrap">
+        <button id="moreMenuBtn" title="More actions">⋯ More</button>
+        <div class="more-menu" id="moreMenu">
+          <a href="customer-experience.html"><button type="button">💬 Reviews Page</button></a>
+          <a href="ride.html"><button type="button">🏍️ Ride Feedback Form</button></a>
+          <a href="rider-registration.html"><button type="button">🪪 Rider Registration Form</button></a>
+          <div class="more-menu-sep"></div>
+          <button id="reportCancelBtn" title="Flag a booking as cancelled on the ground">🚫 Report Cancellation</button>
+          <button id="reportBilledBtn" title="Flag a booking as billed/delivered on the ground">✅ Report Billed</button>
+          <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
+          <div class="more-menu-sep"></div>
+          <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
+          <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="controls-backdrop" id="controlsBackdrop"></div>
@@ -645,6 +721,7 @@
   <button data-tab="pending">📦 Book vs Stock</button>
   <button data-tab="stock">Stock</button>
   <button data-tab="riders">Riders</button>
+  <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
 </nav>
 
@@ -655,37 +732,27 @@
     <h2 class="section-title">🤖 Today's Priorities</h2>
     <div class="chat-panel" id="todayPriorities"></div>
 
-    <h2 class="section-title">🏪 Store Performance — Amar Autos, Kanti Nagar</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Whole-showroom totals for every executive together — not affected by who's logged in or the executive filter above. All sales/booking/stock figures here are Kanti Nagar's own; Vikas Marg (VM) is a separate store and appears only as reference stock on the Stock tab.</p>
-    <div class="kpi-grid" id="kpiStorePerformance"></div>
+    <div id="storePerformanceSection">
+      <h2 class="section-title">🏪 Store Performance — Whole Showroom</h2>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Everyone's numbers combined, for context alongside your own below. Kanti Nagar only — Vikas Marg is a separate store and appears just as reference stock on the Stock tab.</p>
+      <div class="kpi-grid" id="kpiStorePerformance"></div>
+    </div>
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
     <div class="kpi-grid" id="kpiSalesConsole"></div>
 
     <div id="personalTargetSection" style="display:none;">
       <h2 class="section-title" id="personalTargetTitle">🎯 My Daily Target</h2>
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Real calendar month, pace-adjusted to today's date — same logic as the store's Monthly Booking Target on Analytics, just for you.</p>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Real calendar month, pace-adjusted to today.</p>
       <div class="kpi-grid" id="kpiPersonalTarget"></div>
     </div>
 
     <h2 class="section-title">🏆 This Month's Champions</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Category-wise recognition for the selected month, so it's not always the same one or two names on top.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Split across categories so it's not always the same one or two names on top.</p>
     <div class="kpi-grid" id="kpiChampions"></div>
 
     <h2 class="section-title">👤 Employee-wise Performance</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
-
-    <div class="grid-2">
-      <div>
-        <h2 class="section-title">🎯 Enquiry Funnel</h2>
-        <div class="table-wrap"><table class="data" id="tblFunnel"></table></div>
-      </div>
-      <div>
-        <h2 class="section-title">📋 Bookings — Active vs Cancelled</h2>
-        <div class="kpi-grid" id="kpiBookings"></div>
-        <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
-      </div>
-    </div>
 
     <h2 class="section-title">⭐ Google Reviews Summary</h2>
     <div class="kpi-grid" id="kpiReviews"></div>
@@ -695,12 +762,12 @@
   <section class="tabpanel" id="tab-analytics">
     <h2 class="section-title">💡 Where To Focus — Smart Suggestions</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Data-driven pointers built fresh from your own numbers every time this loads (not a live AI model — that would mean either a security-risky client-exposed API key or a paid backend; this reads your actual Sheet data with clear rules instead, so it's free and it can't ever make something up). One general sales tactic also rotates in daily below.
+      Built fresh from your own Sheet data each time this loads — plus one general sales tactic that rotates daily. Not a live AI model (that would need a paid backend or an exposed API key), so it can't ever invent a number.
     </div>
     <div id="smartSuggestions" class="card"></div>
 
     <h2 class="section-title" style="margin-top:30px;">🎯 Monthly Booking Target &amp; Funnel</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 12px;">Target is always tracked against the real calendar month (not the month filter above) and pace-adjusted to today's date — "Expected Till Today" is what you'd need to have booked by now to stay on track for the full month's target.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 12px;">Always the real calendar month (ignores the month filter), pace-adjusted to today — "Expected Till Today" is what you'd need by now to stay on track.</p>
     <div class="kpi-grid" id="kpiFunnelTargets"></div>
     <div class="table-wrap" style="margin-top:12px;"><table class="data" id="tblFunnelTargets"></table></div>
 
@@ -721,12 +788,15 @@
       </div>
     </div>
 
+    <h2 class="section-title" style="margin-top:30px;">🎯 Enquiry Funnel — by Source</h2>
+    <div class="table-wrap"><table class="data" id="tblFunnel"></table></div>
+
     <h2 class="section-title" style="margin-top:30px;">🔥 Executive × Channel Performance Map</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Booked count per executive per enquiry channel (respects the month filter above) — darker gold means more bookings won there. Empty/light cells show exactly where an executive isn't converting.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Bookings won per executive per channel — darker gold is more. Light cells show where someone isn't converting.</p>
     <div id="perfHeatmap"></div>
 
     <h2 class="section-title" style="margin-top:30px;">🗣️ Sales Person — Enquiry Quality (RE Portal, matched)</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 6px;">The RE Portal's own enquiry sheet has no sales-executive column — so this is built by matching each enquiry (via ENQ Number) back to your own "enquiry" sheet, which does record who owned it. Shows how many of each executive's enquiries ended up dropped/lost, and the most common reason why.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 6px;">RE's portal has no executive column, so enquiries are matched back to your own sheet by ENQ Number to show each person's drop rate and the most common reason.</p>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;" id="enquiryQualityNote"></p>
     <div class="table-wrap"><table class="data" id="tblEnquiryQuality"></table></div>
 
@@ -786,7 +856,7 @@
 
     <h2 class="section-title">👤 Executive × Model — Who Sold Which Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Units billed per executive per model for the current month/executive filter — darker gold means more units of that model sold by that person.
+      Units billed per executive per model — darker gold means more of that model sold by that person.
     </div>
     <div id="execModelMatrix"></div>
 
@@ -806,9 +876,13 @@
     <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
     <div class="kpi-grid" id="kpiPending"></div>
 
+    <h2 class="section-title">📋 Bookings — Active vs Cancelled</h2>
+    <div class="kpi-grid" id="kpiBookings"></div>
+    <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
+
     <h2 class="section-title">⏰ Overdue Deliveries — TDD has already passed</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      These bookings' TDD (tentative delivery date) is before today and the bike still hasn't been billed — the customer was expecting it already. Only rows where TDD is a real, readable date are checked (text like "HOLD"/"ASAP" is skipped, not guessed at). Admin sees every executive's overdue bookings here; a sales login sees only their own.
+      TDD has passed and the bike still isn't billed — the customer was expecting it already. Rows with text TDDs ("HOLD"/"ASAP") are skipped rather than guessed at.
     </div>
     <div class="table-wrap"><table class="data" id="tblOverdue"></table></div>
 
@@ -818,7 +892,7 @@
 
     <h2 class="section-title">🔎 Model Finder — Bookings vs Stock by Colour</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Pick a model to narrow the table, or leave it on "All Models". For every colour, shows how many are pending vs how many are Open in KN stock right now, plus who already holds those bookings — so if a fresh walk-in customer wants a colour, you can check in one glance whether it's already spoken for and by whom, instead of promising something that's not actually free.
+      Per colour: how many are pending vs how many are Open in KN stock right now, and who already holds those bookings — so you can tell a walk-in whether a colour is genuinely free before promising it.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <select id="modelFinderSelect"></select>
@@ -828,7 +902,7 @@
 
     <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      For every pending booking, shows whether that exact model+colour is currently "Open" in stock at Kanti Nagar (KN) — so you can tell a customer right away when their bike can be delivered. VM stock isn't counted here (it's a separate store, not ours to promise). Admin sees everyone's bookings, a sales login sees only their own.
+      Whether each pending booking's exact model+colour is Open in KN stock right now, so you can give a customer a straight answer on delivery. VM stock isn't counted — it's a separate store.
     </div>
     <div class="table-wrap"><table class="data" id="tblBookingStockMatch"></table></div>
 
@@ -863,7 +937,7 @@
     <div class="table-wrap"><table class="data" id="tblStockModel"></table></div>
 
     <h2 class="section-title">⏳ Aged Stock — Open 60+ Days</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">These bikes have been sitting as available ("Open") stock for a while — worth pushing to customers or discussing with RE before they tie up more capital.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Sitting as available stock for a while — worth pushing before they tie up more capital.</p>
     <div class="table-wrap"><table class="data" id="tblAgedStock"></table></div>
 
     <details class="section-collapse">
@@ -923,6 +997,17 @@
         <div class="table-wrap"><table class="data" id="tblRiderFbAll"></table></div>
       </div>
     </details>
+  </section>
+
+  <section class="tabpanel" id="tab-specs">
+    <h2 class="section-title">📖 Model Specifications — Royal Enfield Current Lineup</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      From royalenfield.com, checked Aug 2026. Prices are approximate ex-showroom starting points and vary by variant/colour/city — always confirm the exact figure before quoting a customer.
+    </div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <input type="text" id="specsSearch" placeholder="Search model or category…" />
+    </div>
+    <div class="table-wrap"><table class="data" id="tblModelSpecs"></table></div>
   </section>
 
   <section class="tabpanel" id="tab-qrcodes">
@@ -1112,6 +1197,102 @@ function getDailyGrowthTip(){
   return GROWTH_TIPS[idx];
 }
 
+// ===== Model Specifications — compiled from royalenfield.com (checked Aug 2026) =====
+// Static, not a live lookup — see the "Model Specs" tab's own note for why (same reasoning as
+// Smart Suggestions not being live AI: no safe way to call a model/API from a page with no
+// backend). Prices are approximate starting ex-showroom figures, variant-dependent — always
+// confirm the exact number before quoting a customer. Update this list by hand when RE changes
+// the lineup or a price revision happens.
+const MODEL_SPECS = [
+  { name: 'Hunter 350', category: 'Roadster', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '181 kg', fuelTank: '13 L', price: '₹1.50L – 1.83L*' },
+  { name: 'Bullet 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.73L – 2.10L*' },
+  { name: 'Classic 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.93L – 2.35L*' },
+  { name: 'Goan Classic 350', category: 'Cruiser (special edition)', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹2.00L – 2.21L*' },
+  { name: 'Meteor 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '765 mm', kerbWeight: '191 kg', fuelTank: '15 L', price: '₹1.99L – 2.31L*' },
+  { name: 'Scram 440', category: 'Scrambler', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '805 mm', kerbWeight: '187 kg', fuelTank: '15 L', price: '₹2.20L – 2.45L* — confirm exact figures, newest addition to the lineup' },
+  { name: 'Guerrilla 450', category: 'Roadster', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '780 mm', kerbWeight: '185 kg', fuelTank: '11 L', price: '₹2.39L – 2.85L*' },
+  { name: 'Himalayan 450', category: 'Adventure Tourer', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '825 mm (adjustable)', kerbWeight: '196 kg', fuelTank: '17 L', price: '₹2.85L – 3.20L*' },
+  { name: 'Interceptor 650', category: 'Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '804 mm', kerbWeight: '213 kg', fuelTank: '13.7 L', price: '₹3.31L – 3.60L*' },
+  { name: 'Continental GT 650', category: 'Café Racer (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '793 mm', kerbWeight: '211.5 kg', fuelTank: '12.5 L', price: '₹3.43L – 3.72L*' },
+  { name: 'Super Meteor 650', category: 'Cruiser (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '740 mm (low)', kerbWeight: '241 kg', fuelTank: '15.7 L', price: '₹3.66L – 4.18L*' },
+  { name: 'Shotgun 650', category: 'Bobber-Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '795 mm', kerbWeight: '240 kg (approx)', fuelTank: '13.8 L', price: '₹3.60L – 3.90L* — confirm exact figures' },
+  { name: 'Bullet 650', category: 'Cruiser (650 Twin)', engine: '647.95cc, air/oil-cooled, parallel-twin, SOHC', power: '34.6 kW (~46.4 bhp) @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.8 L', price: 'Confirm current ex-showroom — newest addition to the lineup' },
+  { name: 'Classic 650', category: 'Cruiser (650 Twin)', engine: '647.95cc, air/oil-cooled, parallel-twin, SOHC', power: '34.6 kW (~46.4 bhp) @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.7 L', price: '₹3.68L (Hotrod) – 3.82L (Chrome)*' },
+  { name: 'Bear 650', category: 'Scrambler (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '830 mm (approx)', kerbWeight: '216 kg (approx)', fuelTank: '13.7 L', price: '₹3.55L – 3.85L* — confirm exact figures' },
+];
+function renderModelSpecs(){
+  const search = str(document.getElementById('specsSearch').value).toLowerCase();
+  const rows = MODEL_SPECS.filter(m => !search || m.name.toLowerCase().includes(search) || m.category.toLowerCase().includes(search));
+  renderStaticTable('tblModelSpecs', [
+    { key:'name', label:'Model' },
+    { key:'category', label:'Category' },
+    { key:'engine', label:'Engine' },
+    { key:'power', label:'Power' },
+    { key:'torque', label:'Torque' },
+    { key:'gearbox', label:'Gearbox' },
+    { key:'seatHeight', label:'Seat Height' },
+    { key:'kerbWeight', label:'Kerb Weight' },
+    { key:'fuelTank', label:'Fuel Tank' },
+    { key:'price', label:'Ex-Showroom Price*' },
+  ], rows);
+}
+document.getElementById('specsSearch').addEventListener('input', renderModelSpecs);
+
+/* ---------------- Quick Search — searches bookings, deliveries, enquiries and reviews at once
+   for a customer name, mobile number, slip number, or model, so a sales person doesn't have to
+   know which tab something lives on. Deliberately NOT scoped by login/executive like the rest of
+   the app — Deepak wants any sales person to be able to look up any customer (mobile/slip no) and
+   see whose customer it is and their full history, e.g. for a walk-in who says "I enquired
+   before" when their usual executive isn't on the floor. Every result row already shows which
+   executive owns it, so nothing is hidden — just no longer filtered by who's searching. */
+function quickSearchAll(term){
+  const t = term.trim().toLowerCase();
+  if (!t) return null;
+  const matchRow = (r) => r.some(c => str(c).toLowerCase().includes(t));
+
+  const bookings = STATE.booking.filter(matchRow).slice(0, 25);
+  const deliveries = STATE.delivery.filter(matchRow).slice(0, 25);
+  const enquiries = STATE.enquiry.filter(matchRow).slice(0, 25);
+  const reviews = STATE.review.filter(matchRow).slice(0, 25);
+  return { bookings, deliveries, enquiries, reviews };
+}
+function renderQuickSearchResults(term){
+  const el = document.getElementById('quickSearchResults');
+  const results = quickSearchAll(term);
+  if (!results) { el.innerHTML = '<p class="empty-note">Type a customer name, mobile number, slip number, or model to search.</p>'; return; }
+  const { bookings, deliveries, enquiries, reviews } = results;
+  if (!bookings.length && !deliveries.length && !enquiries.length && !reviews.length) {
+    el.innerHTML = '<p class="empty-note">No matches found.</p>';
+    return;
+  }
+  const execTd = (name) => `<td style="color:var(--gold); font-weight:700;">${esc(str(name))}</td>`;
+  const section = (title, rows, thead, rowFmt) => !rows.length ? '' : `
+    <h4 style="font-family:var(--font-head); font-size:12.5px; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold); margin:16px 0 8px;">${esc(title)} (${rows.length})</h4>
+    <div class="table-wrap" style="max-height:220px;"><table class="data"><thead><tr>${thead.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(rowFmt).join('')}</tbody></table></div>`;
+
+  el.innerHTML =
+    section('Bookings', bookings, ['Slip No','Customer','Mobile','Model','Executive','Status'],
+      r => `<tr><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[6]))}</td><td>${esc(str(r[3]))} ${esc(str(r[4]))}</td>${execTd(r[7])}<td>${esc(str(r[9]))}</td></tr>`) +
+    section('Deliveries', deliveries, ['Bill Date','Customer','Mobile','Model','Executive'],
+      r => `<tr><td>${fmtDate(r[2])}</td><td>${esc(str(r[4]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[6]))} ${esc(str(r[7]))}</td>${execTd(r[18])}</tr>`) +
+    section('Enquiries', enquiries, ['ENQ No','Name','Mobile','Model','Stage','Owner'],
+      r => `<tr><td>${esc(str(r[0]))}</td><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[8]))}</td><td>${esc(str(r[9]))}</td>${execTd(r[13])}</tr>`) +
+    section('Reviews', reviews, ['Date','Rating','Model','Sales Person'],
+      r => `<tr><td>${fmtDate(r[0])}</td><td>⭐ ${esc(str(r[1]))}</td><td>${esc(str(r[2]))}</td>${execTd(r[3])}</tr>`);
+}
+function openQuickSearchModal(){
+  document.getElementById('modalTitle').textContent = '🔍 Quick Search';
+  document.getElementById('modalBody').innerHTML = `
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Searches every customer, not just your own — so if a walk-in mentions a mobile number or slip number, you can see whose customer it is and their full history, even if it's not yours.</p>
+    <input type="text" id="quickSearchInput" placeholder="Customer name, mobile, slip number, or model…" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);" autofocus>
+    <div id="quickSearchResults"></div>`;
+  document.getElementById('quickSearchInput').addEventListener('input', (e) => renderQuickSearchResults(e.target.value));
+  renderQuickSearchResults('');
+  document.getElementById('detailModal').classList.add('open');
+  setTimeout(() => document.getElementById('quickSearchInput').focus(), 50);
+}
+document.getElementById('quickSearchBtn').addEventListener('click', openQuickSearchModal);
+
 function showReFact(){
   const f = getDailyFact();
   document.getElementById('reFactTitle').textContent = f.title;
@@ -1188,9 +1369,20 @@ function toggleControlsDrawer(open){
   document.getElementById('controlsPanel').classList.toggle('open', open);
   document.getElementById('controlsBackdrop').classList.toggle('open', open);
 }
-document.getElementById('menuToggle').addEventListener('click', () => toggleControlsDrawer(true));
-document.getElementById('controlsClose').addEventListener('click', () => toggleControlsDrawer(false));
+document.getElementById('menuToggle').addEventListener('click', () => toggleControlsDrawer(true));document.getElementById('controlsClose').addEventListener('click', () => toggleControlsDrawer(false));
 document.getElementById('controlsBackdrop').addEventListener('click', () => toggleControlsDrawer(false));
+
+// "⋯ More" dropdown (desktop only — on mobile the media query flattens it into the drawer list).
+// Clicking any item inside also closes it, so the menu never lingers over the content.
+const moreMenuEl = document.getElementById('moreMenu');
+document.getElementById('moreMenuBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  moreMenuEl.classList.toggle('open');
+});
+moreMenuEl.addEventListener('click', () => moreMenuEl.classList.remove('open'));
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.more-menu-wrap')) moreMenuEl.classList.remove('open');
+});
 
 document.getElementById('modalClose').addEventListener('click', closeDetailModal);
 document.getElementById('detailModal').addEventListener('click', (e) => {
@@ -1697,6 +1889,7 @@ function renderAll(){
   renderStock();
   renderRiders();
   renderExplorer();
+  renderModelSpecs();
   renderAnalytics();
   renderMsdAnalysis();
 }
@@ -1719,6 +1912,15 @@ function computeStoreWideAgg(){
   return { retail, ew, rsa, gma, gear };
 }
 function renderStorePerformance(){
+  // When no single executive is selected, Sales Console below is ALREADY showing whole-store
+  // numbers — the two sections were rendering an identical Retail/Target/Achievement trio one
+  // above the other. Only show this store-wide block when it actually adds something: i.e. when
+  // the view is scoped to one person, so they can compare themselves against the whole showroom.
+  const section = document.getElementById('storePerformanceSection');
+  const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
+  if (section) section.style.display = isSingleExec ? '' : 'none';
+  if (!isSingleExec) return;
+
   const agg = computeStoreWideAgg();
   const target = targetFor(null);
   const achv = target ? agg.retail/target : 0;
@@ -3617,7 +3819,7 @@ document.getElementById('explorerExport').addEventListener('click', () => {
 function renderStaticTable(tableId, cols, rows){
   const table = document.getElementById(tableId);
   if (!rows.length) { table.innerHTML = `<tr><td class="empty-note">No data for this filter</td></tr>`; return; }
-  const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
+  const thead = `<thead><tr>${cols.map(c => `<th class="${c.num ? 'num' : ''}">${esc(c.label)}</th>`).join('')}</tr></thead>`;
   const tbody = `<tbody>${rows.map(r => `<tr>${cols.map(c => {
     let v = r[c.key];
     if (c.fmt) v = c.fmt(v, r); // fmt gets the whole row too, so a column can flag based on another field
@@ -3629,7 +3831,7 @@ function renderStaticTable(tableId, cols, rows){
 function renderRawTable(tableId, cols, rows){
   const table = document.getElementById(tableId);
   if (!rows.length) { table.innerHTML = `<tr><td class="empty-note">No rows match</td></tr>`; return; }
-  const thead = `<thead><tr>${cols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>`;
+  const thead = `<thead><tr>${cols.map(c => `<th class="${c.num ? 'num' : ''}">${esc(c.label)}</th>`).join('')}</tr></thead>`;
   const tbody = `<tbody>${rows.slice(0,1000).map(row => `<tr>${cols.map(c => {
     let v = row[c.key];
     if (c.fmt) v = c.fmt(v, row); // row passed through too, so a column can build off other fields (e.g. an action button needs the slip no + status together)
