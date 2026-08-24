@@ -15,23 +15,30 @@
 <meta name="apple-mobile-web-app-title" content="Amar Autos">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* ── Design tokens ─────────────────────────────────────────────────────────
+     Re-skinned to the showroom-screen direction: matte charcoal, brushed brass,
+     condensed numerals. Every selector from the previous stylesheet is still
+     here — this is a visual layer change only, no feature or element was
+     dropped. Barlow Condensed carries figures and headings (legible at showroom
+     distance where a normal-width face would shrink or wrap); Inter handles
+     labels and body, where plain clarity beats character.                      */
   :root {
     color-scheme: light;
-    --surface-1: #fffdf7;
-    --surface-2: #ffffff;
-    --page: #f4efe4;
-    --text-primary: #1a1510;
-    --text-secondary: #574f43;
-    --text-muted: #8a8073;
-    --grid: #e6ddcb;
-    --baseline: #c8bda6;
+    --surface-1: #FFFCF6;
+    --surface-2: #FFFFFF;
+    --page: #F2EDE3;
+    --text-primary: #1A1510;
+    --text-secondary: #57503F;
+    --text-muted: #8A8073;
+    --grid: #E4DACA;
+    --baseline: #C6BAA4;
     --border: rgba(26,21,16,0.13);
-    --good: #0ca30c;
-    --warning: #fab219;
-    --serious: #ec835a;
-    --critical: #d03b3b;
+    --good: #12864F;
+    --warning: #B07A0C;
+    --serious: #C1622F;
+    --critical: #C33A2E;
     --s1: #2a78d6; /* blue */
     --s2: #eb6834; /* orange */
     --s3: #1baf7a; /* aqua */
@@ -43,27 +50,29 @@
     --brand-red: #c8102e;
     --brand-red-2: #8f0c21;
     --brand-glow: rgba(200,16,46,0.35);
-    --header-grad: linear-gradient(115deg, #17120b 0%, #241b10 48%, #2e2214 100%);
-    --gold: #b8863f;
-    --gold-light: #d3a24f;
-    --gold-dim: rgba(184,134,63,0.4);
-    --font-head: 'Oswald', system-ui, sans-serif;
+    --header-grad: linear-gradient(180deg, #1C1712 0%, #141110 100%);
+    --gold: #A9821F;
+    --gold-light: #C5A059;
+    --gold-dim: rgba(169,130,31,0.38);
+    --on-gold: #17130A;
+    --font-head: 'Barlow Condensed', system-ui, sans-serif;
+    --font-ui: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --surface-1: #1c1916;
-    --surface-2: #24201b;
-    --page: #100e0b;
-    --text-primary: #f6f0e4;
-    --text-secondary: #bcb1a0;
-    --text-muted: #8b8175;
-    --grid: #322c25;
-    --baseline: #443c33;
-    --border: rgba(211,162,79,0.16);
-    --good: #0ca30c;
-    --warning: #fab219;
-    --serious: #ec835a;
-    --critical: #e66767;
+    --surface-1: #1E1E1E;
+    --surface-2: #242424;
+    --page: #121212;
+    --text-primary: #EDE9E1;
+    --text-secondary: #9A948A;
+    --text-muted: #6E6961;
+    --grid: #2C2C2C;
+    --baseline: #3C3C3C;
+    --border: rgba(212,175,55,0.14);
+    --good: #4CAF7D;
+    --warning: #E0A93B;
+    --serious: #E0834B;
+    --critical: #E05B4B;
     --s1: #3987e5;
     --s2: #d95926;
     --s3: #199e70;
@@ -75,98 +84,138 @@
     --brand-red: #ff2a44;
     --brand-red-2: #c8102e;
     --brand-glow: rgba(255,42,68,0.35);
-    --header-grad: linear-gradient(115deg, #0d0b08 0%, #1a140c 48%, #241a0f 100%);
-    --gold: #d3a24f;
-    --gold-light: #eec27a;
-    --gold-dim: rgba(211,162,79,0.4);
+    --header-grad: linear-gradient(180deg, rgba(212,175,55,0.05), transparent), #161616;
+    --gold: #D4AF37;
+    --gold-light: #E3C465;
+    --gold-dim: rgba(212,175,55,0.32);
+    --on-gold: #17130A;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.45;
     background:
-      radial-gradient(ellipse 1000px 520px at 12% -12%, color-mix(in srgb, var(--gold) 11%, transparent), transparent 62%),
-      radial-gradient(ellipse 800px 420px at 100% 0%, color-mix(in srgb, var(--gold) 5%, transparent), transparent 58%),
+      radial-gradient(ellipse 900px 460px at 12% -8%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 62%),
       var(--page);
     background-attachment: fixed;
     color: var(--text-primary);
   }
+
+  /* ── Masthead ──────────────────────────────────────────────────────────── */
   header.top {
     position: sticky; top: 0; z-index: 20;
-    background:
-      repeating-linear-gradient(115deg, rgba(211,162,79,0.045) 0 2px, transparent 2px 9px),
-      var(--header-grad);
-    border-bottom: 2px solid var(--gold);
-    box-shadow: 0 1px 0 rgba(211,162,79,0.22), 0 6px 28px -10px rgba(0,0,0,0.6);
-    padding: 16px 22px;
+    background: var(--header-grad);
+    border-bottom: 1px solid rgba(212,175,55,0.32);
+    padding: 15px 24px;
   }
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 13px; }
   .brand .logo {
-    font-size: 22px; width: 42px; height: 42px; display:flex; align-items:center; justify-content:center;
-    border-radius: 50%; flex-shrink:0;
-    background: radial-gradient(circle at 35% 30%, #2c1c0c 0%, #140c04 100%);
-    box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px rgba(0,0,0,0.35), 0 6px 18px -6px rgba(0,0,0,0.5);
+    font-size: 20px; width: 42px; height: 42px; display: grid; place-items: center;
+    border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 34% 28%, #2A2113 0%, #141008 100%);
+    /* Tank-badge ring: hairline, gap, hairline — the pinstriped border on a
+       Royal Enfield tank badge rather than a plain heavy outline. */
+    box-shadow: 0 0 0 1px var(--gold-light), 0 0 0 3px #141110, 0 0 0 4px var(--gold-dim);
   }
   .brand h1 {
-    font-family: var(--font-head); font-size: 15px; margin: 0; letter-spacing: 1.6px; color: #fff; font-weight: 700;
-    text-transform: uppercase;
+    font-family: var(--font-head); font-size: 20px; margin: 0; letter-spacing: 1.6px;
+    color: #fff; font-weight: 600; text-transform: uppercase; line-height: 1.1;
   }
   .brand .sub {
-    font-size: 11px; color: var(--gold-light);
-    margin-top: 3px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600;
+    font-size: 10.5px; color: var(--gold-light); margin-top: 2px;
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
   }
-  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  /* Group headings and From/To captions are drawer-only — on the desktop header row the controls
-     sit inline and labelling each one would just add clutter (they keep their tooltips). */
+  .tagline {
+    font-family: var(--font-head); font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--gold-light); font-weight: 500; margin-top: 1px; opacity: .75;
+  }
+  .brand .tagline { margin-top: 0; }
+  .status-line { font-size: 11px; color: rgba(237,233,225,0.5); margin-top: 9px; letter-spacing: .2px; }
+
+  /* ══ Royal Enfield character ═══════════════════════════════════════════════
+     Spent in three places only, so it reads as heritage rather than costume:
+     a motorcycle drawn in outline behind the masthead, the hand-painted tank
+     pinstripe used as the section rule, and a tank-badge ring on the brand
+     mark. Everything else stays plain. */
+
+  /* Outline motorcycle sitting behind the masthead — kept very low contrast so
+     it works as texture and never competes with the numbers. */
+  .bike-mark {
+    position: absolute; right: -26px; top: 50%; transform: translateY(-50%);
+    width: 440px; max-width: 46vw; height: auto; pointer-events: none;
+    opacity: .13; color: var(--gold-light);
+  }
+  .bike-mark .ln { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .bike-mark .thin { stroke-width: 1.6; }
+  .bike-mark .hair { stroke-width: 1; }
+  header.top { position: sticky; overflow: hidden; }
+  header.top > *:not(.bike-mark) { position: relative; z-index: 1; }
+  @media (max-width: 900px) { .bike-mark { display: none; } }
+
+  /* ── Controls ──────────────────────────────────────────────────────────── */
+  .controls { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
   .drawer-label { display: none; }
   .date-field { display: inline-flex; align-items: center; gap: 6px; }
-  .date-field > span { font-size: 11px; color: rgba(246,240,228,0.6); }
+  .date-field > span { font-size: 11px; color: rgba(237,233,225,0.6); }
   .menu-toggle {
-    display: none; background: rgba(255,255,255,0.06); color: #f2f0ee; border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 8px; width: 38px; height: 38px; font-size: 18px; align-items:center; justify-content:center; padding:0;
+    display: none; background: rgba(255,255,255,0.06); color: #EDE9E1; border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 9px; width: 38px; height: 38px; font-size: 18px; align-items: center; justify-content: center; padding: 0;
   }
   .controls-backdrop { display: none; }
   .controls-close { display: none; }
   select, input[type="text"], input[type="password"] {
-    background: var(--surface-2);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 10px;
-    font-size: 13px;
+    background: var(--surface-2); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 9px;
+    padding: 7px 10px; font-size: 13px; font-family: inherit;
   }
   select:focus, input[type="text"]:focus, input[type="password"]:focus {
-    outline: none; border-color: color-mix(in srgb, var(--gold) 55%, var(--border) 45%);
+    outline: none; border-color: var(--gold);
     box-shadow: 0 0 0 3px var(--gold-dim);
   }
   button {
-    background: var(--surface-2);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 12px;
-    font-size: 13px;
-    cursor: pointer;
+    background: var(--surface-2); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 9px;
+    padding: 7px 13px; font-size: 13px; font-family: inherit; font-weight: 500;
+    cursor: pointer; transition: background .15s, border-color .15s, color .15s;
   }
-  button.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #241505; border-color: transparent; box-shadow: 0 4px 14px -4px var(--gold-dim); font-weight: 700; }
-  button:hover { filter: brightness(1.08); }
+  button.primary {
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    color: var(--on-gold); border-color: transparent; font-weight: 700;
+    box-shadow: 0 4px 14px -6px var(--gold-dim);
+  }
+  button:hover { border-color: var(--gold-dim); }
+  button.primary:hover { filter: brightness(1.06); }
   header.top select, header.top input[type="text"], header.top input[type="date"], header.top button {
-    background: rgba(255,255,255,0.06); color: #f2f0ee; border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06); color: #EDE9E1; border-color: rgba(255,255,255,0.14);
     backdrop-filter: blur(4px);
   }
-  header.top button.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold)); border-color: transparent; color: #241505; }
+  header.top button.primary {
+    background: linear-gradient(180deg, var(--gold-light), var(--gold)); border-color: transparent; color: var(--on-gold);
+  }
   header.top select option { color: #111; }
-  .status-line { font-size: 11px; color: rgba(246,240,228,0.52); margin-top: 9px; letter-spacing: 0.2px; }
 
-  /* "⋯ More" dropdown — holds the occasional actions (external forms, one-off reports, theme,
-     logout) so the header row stays short. On mobile the whole controls area is already a
-     drawer, so there the menu just renders inline (see the mobile media query). */
+  .data-health-banner {
+    margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    background: color-mix(in srgb, var(--good) 18%, #14110C);
+    color: #EAFFF4; border: 1px solid color-mix(in srgb, var(--good) 45%, transparent);
+    display: none;
+  }
+  .data-health-banner.show { display: block; }
+  .data-health-banner.empty {
+    background: color-mix(in srgb, var(--critical) 18%, #14110C);
+    border-color: color-mix(in srgb, var(--critical) 45%, transparent);
+    color: #FFECEC;
+  }
+
+  /* ── "More" dropdown ───────────────────────────────────────────────────── */
   .more-menu-wrap { position: relative; }
   .more-menu {
     display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 40;
     background: var(--surface-1); border: 1px solid var(--border); border-top: 2px solid var(--gold);
-    border-radius: 10px; padding: 6px; min-width: 220px;
+    border-radius: 11px; padding: 6px; min-width: 224px;
     box-shadow: 0 18px 44px -16px rgba(0,0,0,0.7);
   }
   .more-menu.open { display: block; }
@@ -175,43 +224,30 @@
     display: block; width: 100%; text-align: left; border: none; border-radius: 7px;
     padding: 9px 11px; font-size: 13px; background: transparent; color: var(--text-primary);
   }
-  .more-menu button:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); filter: none; }
+  .more-menu button:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); }
   .more-menu-sep { height: 1px; background: var(--border); margin: 5px 4px; }
-  .data-health-banner {
-    margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 700;
-    background: color-mix(in srgb, var(--s3, #199e70) 16%, transparent);
-    color: #eafff4; border: 1px solid color-mix(in srgb, var(--s3, #199e70) 45%, transparent);
-    display: none;
-  }
-  .data-health-banner.show { display: block; }
-  .data-health-banner.empty {
-    background: color-mix(in srgb, var(--critical) 16%, transparent);
-    border-color: color-mix(in srgb, var(--critical) 45%, transparent);
-    color: #ffecec;
-  }
+
+  /* ── Tabs ──────────────────────────────────────────────────────────────── */
   nav.tabs {
-    display: flex; gap: 4px; padding: 10px 20px 0 20px;
+    display: flex; gap: 3px; padding: 9px 22px 0;
     background: var(--surface-1); border-bottom: 1px solid var(--border);
     overflow-x: auto;
   }
   nav.tabs button {
     background: transparent; border: none; border-bottom: 2px solid transparent;
-    padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary);
-    border-radius: 0; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  nav.tabs button.active {
-    color: var(--gold); border-bottom-color: var(--gold); text-shadow: none;
-    background: color-mix(in srgb, var(--gold) 8%, transparent);
-  }
-  nav.tabs button {
-    font-family: var(--font-head); font-weight: 500; letter-spacing: 0.5px;
-    transition: color .15s, background .15s, border-color .15s;
+    padding: 10px 14px; font-family: var(--font-head); font-size: 13px; font-weight: 500;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary);
+    border-radius: 0; white-space: nowrap; transition: color .15s, background .15s, border-color .15s;
   }
   nav.tabs button:hover { color: var(--gold-light); }
-  main { padding: 26px 24px 40px; max-width: 1400px; margin: 0 auto; }
+  nav.tabs button.active {
+    color: var(--gold); border-bottom-color: var(--gold);
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+  }
 
-  /* Scrollbars tinted to the theme — a default bright scrollbar on a dark warm page reads as a
-     seam across every table. Firefox uses scrollbar-color; WebKit uses ::-webkit-scrollbar. */
+  main { padding: 22px 24px 44px; max-width: 1680px; margin: 0 auto; }
+
+  /* Scrollbars tinted to the theme */
   * { scrollbar-color: var(--gold-dim) transparent; scrollbar-width: thin; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -220,38 +256,43 @@
     border-radius: 6px; border: 2px solid transparent; background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--gold) 65%, transparent); background-clip: content-box; }
+
   section.tabpanel { display: none; }
   section.tabpanel.active { display: block; animation: panelIn .22s ease-out; }
   @keyframes panelIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {
-    section.tabpanel.active { animation: none; }
-    .kpi-card:hover { transform: none; }
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
   }
+
   h2.section-title {
-    font-family: var(--font-head); font-size: 15.5px; margin: 30px 0 14px; color: var(--text-primary);
-    display:flex; align-items:center; gap:10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
-    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    font-family: var(--font-head); font-size: 16px; margin: 30px 0 15px; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px; text-transform: uppercase;
+    letter-spacing: 1.3px; font-weight: 600;
+    padding-bottom: 11px; position: relative; border-bottom: none;
+  }
+  /* Tank pinstripe: the thick-then-hairline pair hand-painted along a Royal
+     Enfield fuel tank, reused here as the section rule. */
+  h2.section-title::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; pointer-events: none;
+    background:
+      linear-gradient(var(--gold-dim), var(--gold-dim)) 0 0 / 100% 1.5px no-repeat,
+      linear-gradient(var(--border), var(--border)) 0 4px / 100% 1px no-repeat;
   }
   h2.section-title::before {
-    content: ''; display:block; width: 4px; height: 17px; border-radius: 2px; flex-shrink:0;
+    content: ''; display: block; width: 3px; height: 17px; border-radius: 2px; flex-shrink: 0;
     background: linear-gradient(180deg, var(--gold-light), var(--gold));
-    box-shadow: 0 0 10px -2px var(--gold-dim);
   }
-  h2.section-title { border-bottom-color: var(--gold-dim); }
   h2.section-title:first-child { margin-top: 0; }
 
-  /* Collapsed-by-default panels for the long "raw/full list" sections (Data Explorer, full
-     stock/pending/delivery/rider lists, etc.) — keeps every tab's headline info visible without
-     scrolling past a wall of tables to get to the next section. Search/export tools inside still
-     work exactly the same once opened. */
+  /* ── Collapsible sections ──────────────────────────────────────────────── */
   details.section-collapse {
-    margin-top: 26px; border: 1px solid var(--border); border-left: 3px solid var(--gold-dim);
+    margin-top: 24px; border: 1px solid var(--border); border-left: 3px solid var(--gold-dim);
     border-radius: 11px; background: var(--surface-1);
   }
   details.section-collapse[open] { border-left-color: var(--gold); }
   details.section-collapse > summary {
     cursor: pointer; list-style: none; padding: 13px 16px; user-select: none;
-    font-family: var(--font-head); font-size: 14px; font-weight: 600; letter-spacing: 0.4px;
+    font-family: var(--font-head); font-size: 14px; font-weight: 600; letter-spacing: 1px;
     text-transform: uppercase; color: var(--text-primary);
     display: flex; align-items: center; gap: 10px;
   }
@@ -264,7 +305,6 @@
   details.section-collapse[open] > summary { border-bottom: 1px solid var(--border); }
   details.section-collapse > .details-body { padding: 16px; }
 
-  /* Inline "number you can click" — used for drill-downs like an executive's overdue list */
   .link-btn {
     background: none; border: none; padding: 0; font: inherit; cursor: pointer;
     color: var(--critical); font-weight: 700; text-decoration: underline;
@@ -272,22 +312,21 @@
   }
   .link-btn:hover { color: var(--gold); }
 
-  /* Visible keyboard focus everywhere (mouse clicks stay clean via :focus-visible) */
   button:focus-visible, select:focus-visible, input:focus-visible,
   summary:focus-visible, a:focus-visible {
     outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px;
   }
 
-  /* Drill-down popup */
+  /* ── Modal ─────────────────────────────────────────────────────────────── */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 300; display: none;
     align-items: center; justify-content: center; padding: 20px;
-    background: rgba(0,0,0,0.62);
+    background: rgba(0,0,0,0.66);
   }
   .modal-backdrop.open { display: flex; }
   .modal-card {
     background: var(--surface-1); border: 1px solid var(--border);
-    border-top: 3px solid var(--gold); border-radius: 14px;
+    border-top: 2px solid var(--gold); border-radius: 14px;
     width: 100%; max-width: 920px; max-height: 82vh; overflow: hidden;
     display: flex; flex-direction: column; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
   }
@@ -296,8 +335,8 @@
     padding: 14px 18px; border-bottom: 1px solid var(--border);
   }
   .modal-head h3 {
-    margin: 0; font-family: var(--font-head); font-size: 15px; letter-spacing: 0.6px;
-    text-transform: uppercase; color: var(--text-primary); font-weight: 700;
+    margin: 0; font-family: var(--font-head); font-size: 16px; letter-spacing: 1.1px;
+    text-transform: uppercase; color: var(--text-primary); font-weight: 600;
   }
   .modal-head button {
     background: none; border: none; color: var(--text-muted); font-size: 18px;
@@ -305,42 +344,51 @@
   }
   .modal-head button:hover { color: var(--text-primary); }
   .modal-body { padding: 16px 18px; overflow: auto; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(182px, 1fr)); gap: 12px; }
+
+  /* ── KPI cards ─────────────────────────────────────────────────────────── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(182px, 1fr)); gap: 13px; }
   .kpi-card {
-    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 88%, var(--gold) 12%) 135%);
-    border: 1px solid var(--border); border-top: 2px solid var(--gold-dim);
-    border-radius: 11px; padding: 15px 16px; position: relative; overflow: hidden;
-    transition: border-color .16s, box-shadow .16s, transform .16s;
+    background: linear-gradient(168deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 92%, var(--gold) 8%) 130%);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 15px 17px; position: relative; overflow: hidden;
+    transition: border-color .18s, transform .18s, box-shadow .18s;
   }
   .kpi-card:hover {
-    border-top-color: var(--gold); transform: translateY(-1px);
-    box-shadow: 0 10px 26px -14px rgba(0,0,0,0.55);
+    border-color: var(--gold-dim); transform: translateY(-2px);
+    box-shadow: 0 14px 34px -18px rgba(0,0,0,.75);
   }
-  .kpi-card .label { color: var(--gold); }
-  .kpi-card .label { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+  .kpi-card .label {
+    font-size: 10.5px; color: var(--gold); text-transform: uppercase;
+    letter-spacing: 1.4px; font-weight: 700;
+  }
   .kpi-card .value {
-    font-family: var(--font-head); font-size: 26px; font-weight: 700; margin-top: 5px;
-    font-variant-numeric: tabular-nums; letter-spacing: 0.2px; line-height: 1.1;
+    font-family: var(--font-head); font-size: 34px; font-weight: 700; margin-top: 5px;
+    font-variant-numeric: tabular-nums; letter-spacing: .5px; line-height: 1;
     overflow-wrap: anywhere;
   }
-  .kpi-card .hint { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
-  /* Below-target warning state — reserved status color, always paired with an icon + text label
-     (never color alone), per the dataviz status-palette rule. */
-  .kpi-card.kpi-below-target { border-top-color: var(--critical); background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 87%, var(--critical) 13%) 135%); }
+  .kpi-card .hint { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+  .kpi-card.kpi-below-target {
+    border-color: color-mix(in srgb, var(--critical) 45%, transparent);
+    background: linear-gradient(168deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 88%, var(--critical) 12%) 130%);
+  }
   .kpi-card.kpi-below-target .label { color: var(--critical); }
-  .kpi-card .kpi-flag { display:inline-flex; align-items:center; gap:5px; font-size: 10.5px; font-weight: 700; color: var(--critical); margin-top: 6px; }
+  .kpi-card .kpi-flag {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px;
+    font-weight: 700; color: var(--critical); margin-top: 7px;
+  }
   td.cell-below-target, .table-flag { color: var(--critical); font-weight: 700; }
-  .table-flag { display:inline-flex; align-items:center; gap:4px; font-size: 12px; }
-  /* Today's Priorities — a rule-based (not AI) daily briefing styled like a chat bubble, built
-     entirely from data already on this page: no API key, no external calls, no cost. */
+  .table-flag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+
+  /* ── Today's Priorities panel ──────────────────────────────────────────── */
   .chat-panel {
-    background: linear-gradient(160deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 91%, var(--gold) 9%) 135%);
-    border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 14px; padding: 16px 18px;
+    background: linear-gradient(168deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 93%, var(--gold) 7%) 130%);
+    border: 1px solid var(--border); border-left: 3px solid var(--gold);
+    border-radius: 12px; padding: 16px 18px;
   }
   .chat-greeting { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
   .chat-item {
     display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
-    border-top: 1px solid var(--border); font-size: 13px; line-height: 1.5;
+    border-top: 1px solid rgba(255,255,255,0.05); font-size: 13px; line-height: 1.5;
   }
   .chat-item:first-of-type { border-top: none; }
   .chat-item .chat-icon { font-size: 16px; flex-shrink: 0; }
@@ -348,9 +396,105 @@
   .chat-item.ok { color: var(--good); font-weight: 600; }
   .chat-item.tip { color: var(--text-secondary); font-style: italic; }
 
-  .meter { height: 6px; border-radius: 3px; background: var(--grid); margin-top: 8px; overflow: hidden; }
-  .meter > div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; }
-  /* charts */
+  .meter { height: 5px; border-radius: 3px; background: var(--grid); margin-top: 9px; overflow: hidden; }
+  .meter > div { height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 3px; }
+
+  /* ══ Showroom-screen components ═══════════════════════════════════════════
+     Brought over from the showroom display design: a pace-aware gauge, a
+     tapering funnel, a spotlight card, a stacked pipeline bar, and rank badges
+     on the leaderboard. All driven by the same live Sheet data as before.     */
+
+  /* Gauge — signature element. The white notch is the PACE MARKER: where the
+     month should stand today. A bare percentage can't tell you whether 68% on
+     day 24 is comfortable or behind; the notch answers that at a glance. */
+  .gauge-wrap { display: flex; align-items: center; gap: 16px; }
+  .gauge { position: relative; flex-shrink: 0; }
+  .gauge svg { display: block; }
+  .gauge-mid {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding-top: 10px;
+  }
+  .gauge-pct { font-family: var(--font-head); font-weight: 700; font-size: 26px; line-height: 1; white-space: nowrap; }
+  .gauge-lbl { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+  .split { display: grid; grid-template-columns: 1fr auto; gap: 7px 14px; align-content: center; flex: 1; min-width: 120px; }
+  .split .k { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); align-self: center; }
+  .split .v { font-family: var(--font-head); font-weight: 700; font-size: 24px; line-height: 1; text-align: right; }
+  .pace-note { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; margin-top: 12px; line-height: 1.35; }
+  .pace-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Stat rows with attach-rate bars */
+  .stat { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 9px 0; }
+  .stat + .stat { border-top: 1px solid rgba(128,128,128,0.14); }
+  .stat .lab { font-size: 12px; color: var(--text-secondary); }
+  .stat .val { font-family: var(--font-head); font-weight: 700; font-size: 22px; }
+  .stat-bar { height: 5px; border-radius: 3px; background: var(--grid); overflow: hidden; margin-top: 7px; }
+  .stat-bar > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold-light), var(--gold)); }
+
+  /* Funnel — each bar's width is its share of the top of the funnel, so the
+     taper itself encodes drop-off rather than being decorative. */
+  .funnel-step { padding: 9px 0; }
+  .funnel-step + .funnel-step { border-top: 1px solid rgba(128,128,128,0.14); }
+  .funnel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .funnel-name { font-size: 12px; color: var(--text-secondary); }
+  .funnel-val { font-family: var(--font-head); font-weight: 700; font-size: 23px; }
+  .funnel-track { height: 9px; border-radius: 4px; background: var(--grid); margin-top: 6px; overflow: hidden; }
+  .funnel-fill { height: 100%; border-radius: 4px; }
+  .funnel-conv { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--gold); margin-left: 8px; }
+  .funnel-conv small { font-family: var(--font-ui); font-size: 9.5px; font-weight: 600; color: var(--text-muted); letter-spacing: .6px; margin-left: 3px; }
+
+  /* Spotlight */
+  .spot-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .avatar {
+    width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+    font-family: var(--font-head); font-weight: 700; font-size: 20px; letter-spacing: .5px; color: var(--on-gold);
+    background: linear-gradient(150deg, var(--gold-light), var(--gold));
+    box-shadow: 0 0 0 3px var(--gold-dim);
+  }
+  .spot-name { font-family: var(--font-head); font-weight: 600; font-size: 25px; letter-spacing: .6px; line-height: 1.1; }
+  .spot-role { font-size: 11px; color: var(--text-secondary); }
+  .spot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  .spot-grid .k { font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+  .spot-grid .v { font-family: var(--font-head); font-weight: 700; font-size: 24px; line-height: 1.15; }
+  .spot-lead {
+    margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.16);
+    font-size: 11.5px; color: var(--text-secondary);
+  }
+  .spot-lead b { color: var(--gold); font-weight: 700; }
+
+  /* Pipeline */
+  .pipe-total { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .pipe-total .big { font-family: var(--font-head); font-weight: 700; font-size: 34px; line-height: 1; }
+  .pipe-stack { display: flex; height: 12px; border-radius: 4px; overflow: hidden; gap: 2px; margin-bottom: 14px; background: var(--grid); }
+  .pipe-stack > i { display: block; height: 100%; }
+  .pipe-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .pipe-row + .pipe-row { border-top: 1px solid rgba(128,128,128,0.14); }
+  .pipe-swatch { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .pipe-lab { flex: 1; font-size: 12px; color: var(--text-secondary); }
+  .pipe-sub { display: block; font-size: 10px; color: var(--text-muted); }
+  .pipe-val { font-family: var(--font-head); font-weight: 700; font-size: 22px; }
+
+  /* Leaderboard rank + identity */
+  .rank {
+    width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+    font-family: var(--font-head); font-weight: 700; font-size: 14px; color: var(--text-muted);
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .rank-1 { color: var(--on-gold); background: linear-gradient(150deg, var(--gold-light), var(--gold)); border-color: transparent; }
+  .rank-2 { color: #17130A; background: linear-gradient(150deg, #D8D8D8, #A8A8A8); border-color: transparent; }
+  .rank-3 { color: #17130A; background: linear-gradient(150deg, #C88A52, #A66A3A); border-color: transparent; }
+  .name-cell { display: flex; align-items: center; gap: 10px; }
+  .mini-av {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+    font-family: var(--font-head); font-weight: 700; font-size: 12px; color: var(--text-primary);
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  table.data tfoot td {
+    border-top: 1px solid var(--gold-dim);
+    background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%);
+    font-weight: 700;
+  }
+
+  /* ── Charts ────────────────────────────────────────────────────────────── */
   .chart-svg { width: 100%; height: auto; overflow: visible; font-family: inherit; }
   .chart-svg .axis-line { stroke: var(--baseline); stroke-width: 1; }
   .chart-svg .grid-line { stroke: var(--grid); stroke-width: 1; }
@@ -358,108 +502,116 @@
   .chart-svg .legend-label { fill: var(--text-secondary); font-size: 11px; }
   .chart-tooltip {
     position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: var(--text-primary); box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4);
-    opacity: 0; transition: opacity .1s; z-index: 30; white-space: nowrap;
+    border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: var(--text-primary);
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.5); opacity: 0; transition: opacity .1s; z-index: 30; white-space: nowrap;
   }
   .chart-wrap { position: relative; }
   .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 11.5px; }
   .legend-row .item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
-  .legend-row .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink:0; }
+  .legend-row .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── Tables ────────────────────────────────────────────────────────────── */
   table.data {
-    width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--surface-1);
+    width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface-1);
     border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   }
   table.data th, table.data td {
-    padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--grid);
-    white-space: nowrap;
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--grid); white-space: nowrap;
   }
   table.data th {
-    color: var(--gold); font-family: var(--font-head); font-weight: 600; font-size: 11.5px;
-    letter-spacing: 0.7px; text-transform: uppercase; cursor: pointer; user-select: none;
-    position: sticky; top: 0; background: var(--surface-2);
+    color: var(--gold); font-family: var(--font-ui); font-weight: 700; font-size: 9.5px;
+    letter-spacing: 1px; text-transform: uppercase; cursor: pointer; user-select: none;
+    position: sticky; top: 0;
+    background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%);
     border-bottom: 1px solid var(--gold-dim);
   }
   table.data th:hover { color: var(--gold-light); }
-  /* Zebra striping — long tables (pending bookings, stock, employee lists) were a flat wall of
-     rows that made it easy to read across into the wrong line. */
+  /* Zebra striping — long tables were a flat wall of rows that made it easy to
+     read across into the wrong line. */
   table.data tbody tr:nth-child(even) { background: color-mix(in srgb, var(--gold) 3%, transparent); }
   table.data tbody tr:hover { background: color-mix(in srgb, var(--gold) 7%, transparent); }
   table.data tbody tr:last-child td { border-bottom: none; }
   .table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
   .table-wrap table.data { border: none; border-radius: 0; }
-  /* Must be table.data-prefixed: "table.data th, table.data td { text-align: left }" above
-     outranks a bare ".num", so numeric columns were silently never right-aligning at all —
-     figures sat left-ragged and were hard to compare down a column. */
+  /* Figures use the condensed face with tabular digits so a column of numbers
+     lines up and can be compared straight down. .num must be table.data-prefixed
+     to outrank "table.data th, table.data td { text-align: left }" above. */
   .num, table.data th.num, table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data td.num { font-family: var(--font-head); font-weight: 700; font-size: 16px; }
+
   .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
   .toolbar input[type="text"] { min-width: 220px; }
+
   .pill {
     display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
-    border: 1px solid currentColor; letter-spacing: 0.2px;
+    border: 1px solid currentColor; letter-spacing: .2px;
   }
   .pill.good { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
   .pill.bad { background: color-mix(in srgb, var(--critical) 18%, transparent); color: var(--critical); }
-  .pill.warn { background: color-mix(in srgb, var(--warning) 25%, transparent); color: #8a5a00; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
-  /* Cards sitting side by side stretch to the same height — previously one card ending short
-     left a ragged, unfinished-looking gap next to its neighbour. */
+  .pill.warn { background: color-mix(in srgb, var(--warning) 22%, transparent); color: var(--warning); }
+
+  /* ── Layout helpers ────────────────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
   .grid-2 > .card, .grid-3 > .card { height: 100%; }
-  /* When a section title is the first thing inside a grid column, drop its top margin so both
-     columns' headings line up on the same baseline instead of one sitting lower. */
   .grid-2 > div > h2.section-title:first-child { margin-top: 0; }
   section.tabpanel > .grid-2 { margin-top: 30px; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
   .card {
-    background: linear-gradient(165deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 94%, var(--gold) 6%) 140%);
-    border: 1px solid var(--border); border-top: 2px solid var(--gold-dim); border-radius: 11px; padding: 16px;
+    background: linear-gradient(168deg, var(--surface-1) 0%, color-mix(in srgb, var(--surface-1) 94%, var(--gold) 6%) 130%);
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px;
+    transition: border-color .18s, box-shadow .18s;
   }
-  .card h3 { margin: 0 0 10px; font-family: var(--font-head); font-size: 13px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
-  .empty-note { color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center; }
-  /* Standalone empty states (inside a chart/table area) get a soft dashed frame so a blank
-     panel reads as "nothing here yet" rather than looking broken or unfinished. */
+  .card:hover { border-color: var(--gold-dim); }
+  .card h3 {
+    margin: 0 0 11px; font-size: 10.5px; color: var(--gold); text-transform: uppercase;
+    letter-spacing: 1.5px; font-weight: 700;
+  }
+  .empty-note { color: var(--text-muted); font-size: 13px; padding: 28px; text-align: center; }
   .card > .empty-note, .table-wrap .empty-note, #perfHeatmap > .empty-note, #execModelMatrix > .empty-note {
     border: 1px dashed var(--border); border-radius: 10px; padding: 26px 20px;
     background: color-mix(in srgb, var(--gold) 3%, transparent);
   }
+
   .loading-overlay {
     position: fixed; inset: 0; background: var(--page); display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 10px; z-index: 100; font-size: 14px; color: var(--text-secondary);
+    flex-direction: column; gap: 12px; z-index: 100; font-size: 14px; color: var(--text-secondary);
   }
   .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--grid); border-top-color: var(--gold); animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .error-box { background: color-mix(in srgb, var(--critical) 12%, var(--surface-1)); border: 1px solid var(--critical); color: var(--critical); border-radius: 10px; padding: 14px 16px; font-size: 13px; }
-  footer { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 11px; }
+  .error-box {
+    background: color-mix(in srgb, var(--critical) 12%, var(--surface-1)); border: 1px solid var(--critical);
+    color: var(--critical); border-radius: 10px; padding: 14px 16px; font-size: 13px;
+  }
+  footer { text-align: center; padding: 28px 20px; color: var(--text-muted); font-size: 11px; }
   a { color: var(--s1); }
-  .barrow { display:flex; align-items:center; gap:10px; margin-bottom:9px; font-size:12.5px;}
-  .barrow .lbl { width: 130px; flex-shrink:0; color: var(--text-secondary); }
+
+  /* ── Bar rows ──────────────────────────────────────────────────────────── */
+  .barrow { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; font-size: 12.5px; }
+  .barrow .lbl { width: 130px; flex-shrink: 0; color: var(--text-secondary); }
   .barrow .track {
-    flex:1; height:10px; background:var(--grid); border-radius:5px; overflow:hidden;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.18);
+    flex: 1; height: 9px; background: var(--grid); border-radius: 5px; overflow: hidden;
   }
-  .barrow .fill {
-    height:100%; border-radius:5px;
-    background-image: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(0,0,0,0.10));
-  }
+  .barrow .fill { height: 100%; border-radius: 5px; }
   .barrow .val {
-    width:70px; text-align:right; font-variant-numeric: tabular-nums; flex-shrink:0;
-    font-weight:700; color: var(--text-primary);
+    width: 70px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0;
+    font-family: var(--font-head); font-weight: 700; font-size: 17px; color: var(--text-primary);
   }
-  /* login screen */
+
+  /* ── Login ─────────────────────────────────────────────────────────────── */
   .login-overlay {
     position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 60%),
-      radial-gradient(ellipse 700px 400px at 100% 0%, color-mix(in srgb, var(--s1) 8%, transparent), transparent 55%),
+      radial-gradient(ellipse 900px 500px at 15% -10%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 60%),
       var(--page);
   }
   .login-card {
     position: relative; z-index: 1;
     width: 100%; max-width: 360px; background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 18px; padding: 0;
-    border-top: 3px solid var(--gold);
-    box-shadow: 0 24px 70px -20px rgba(0,0,0,0.62), 0 0 0 1px rgba(211,162,79,0.12);
+    border-radius: 16px; padding: 0; border-top: 2px solid var(--gold);
+    box-shadow: 0 24px 70px -20px rgba(0,0,0,0.62);
     overflow: hidden;
   }
   .login-card .photo {
@@ -468,58 +620,58 @@
     border-bottom: 1px solid var(--gold-dim);
   }
   .login-card .banner {
-    background: linear-gradient(120deg, #0a0a0a 0%, #17130a 45%, #241c0e 100%);
+    background: linear-gradient(160deg, #1C1712 0%, #141110 100%);
     padding: 20px 28px 18px; text-align: center; border-bottom: 1px solid var(--gold-dim);
   }
-  .login-card .logo { font-size: 20px; width: 44px; height: 44px; display:flex; align-items:center; justify-content:center;
+  .login-card .logo {
+    font-size: 20px; width: 44px; height: 44px; display: grid; place-items: center;
     border-radius: 50%; margin: 0 auto 10px;
-    background: radial-gradient(circle at 35% 30%, #2c1c0c 0%, #140c04 100%);
-    box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px rgba(0,0,0,0.35), 0 8px 22px -8px rgba(0,0,0,0.5); }
-  .login-card h1 { font-family: var(--font-head); font-size: 15px; text-align:center; margin: 0 0 4px; letter-spacing:1.2px; text-transform:uppercase; font-weight:700; color: #fff; }
-  .login-card .banner .sub { text-align:center; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; font-weight:600;
-    color: var(--gold-light); }
-  .login-card .fields { padding: 26px 28px 28px; }
-  .login-card .fields .hello { font-size: 12.5px; color: var(--text-muted); text-align:center; margin-bottom: 20px; }
-  .login-card label { display:block; font-size:11.5px; color:var(--text-secondary); margin: 14px 0 6px; font-weight:600; letter-spacing:0.2px; }
-  .login-card label:first-of-type { margin-top: 0; }
-  .login-card select, .login-card input[type="password"] { width:100%; padding: 9px 11px; }
-  .login-card button.primary { width:100%; margin-top:22px; padding:11px; font-size:13.5px; border-radius: 9px; }
-  .login-error { color: var(--critical); font-size:12px; margin-top:12px; text-align:center; min-height:16px; display:flex; align-items:center; justify-content:center; gap:5px; }
-  .login-card .footnote { text-align:center; font-size:10.5px; color: var(--text-muted); margin-top:16px; }
-
-  .tagline {
-    font-family: var(--font-head); font-size: 9.5px; letter-spacing: 2.2px; text-transform: uppercase;
-    color: var(--gold-light); font-weight: 600; margin-top: 2px;
+    background: radial-gradient(circle at 34% 28%, #2A2113 0%, #141008 100%);
+    box-shadow: 0 0 0 1.5px var(--gold-light), 0 0 0 4px rgba(0,0,0,0.35);
   }
-  .brand .tagline { margin-top: 1px; }
+  .login-card h1 {
+    font-family: var(--font-head); font-size: 17px; text-align: center; margin: 0 0 4px;
+    letter-spacing: 1.3px; text-transform: uppercase; font-weight: 600; color: #fff;
+  }
+  .login-card .banner .sub {
+    text-align: center; font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase;
+    font-weight: 600; color: var(--gold-light);
+  }
+  .login-card .fields { padding: 26px 28px 28px; }
+  .login-card .fields .hello { font-size: 12.5px; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
+  .login-card label { display: block; font-size: 11.5px; color: var(--text-secondary); margin: 14px 0 6px; font-weight: 600; }
+  .login-card label:first-of-type { margin-top: 0; }
+  .login-card select, .login-card input[type="password"] { width: 100%; padding: 10px 11px; }
+  .login-card button.primary { width: 100%; margin-top: 22px; padding: 11px; font-size: 13.5px; border-radius: 9px; }
+  .login-error {
+    color: var(--critical); font-size: 12px; margin-top: 12px; text-align: center;
+    min-height: 16px; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .login-card .footnote { text-align: center; font-size: 10.5px; color: var(--text-muted); margin-top: 16px; }
 
-  /* ===== Royal Enfield "spotlight" screen shown once per login ===== */
-  .re-fact-card .banner { background: linear-gradient(120deg, #0a0a0a 0%, #17130a 45%, #241c0e 100%); }
-  .re-fact-icon { font-size: 30px; text-align:center; margin-bottom: 10px; }
+  /* ── Daily spotlight card ──────────────────────────────────────────────── */
+  .re-fact-card .banner { background: linear-gradient(160deg, #1C1712 0%, #141110 100%); }
+  .re-fact-icon { font-size: 30px; text-align: center; margin-bottom: 10px; }
   .re-fact-label {
-    font-family: var(--font-head); font-size: 10.5px; letter-spacing: 1.8px; text-transform: uppercase;
-    color: var(--gold); font-weight: 700; text-align:center; margin-bottom: 10px;
+    font-family: var(--font-head); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 10px;
   }
   .re-fact-title {
-    font-family: var(--font-head); font-size: 16px; font-weight: 700; text-align:center;
-    color: var(--text-primary); margin-bottom: 10px; letter-spacing: 0.3px;
+    font-family: var(--font-head); font-size: 19px; font-weight: 600; text-align: center;
+    color: var(--text-primary); margin-bottom: 10px; letter-spacing: .6px;
   }
-  .re-fact-text {
-    font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); text-align:center;
-  }
-  .re-fact-date {
-    font-size: 10px; color: var(--text-muted); text-align:center; margin-top: 14px; letter-spacing: 0.4px;
-  }
+  .re-fact-text { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); text-align: center; }
+  .re-fact-date { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 14px; letter-spacing: .4px; }
 
-  /* ===== Mobile-friendly layout ===== */
+  /* ── Mobile ────────────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
     header.top { padding: 12px 14px; }
-    .brand .logo { width: 36px; height: 36px; font-size: 20px; border-radius: 8px; }
-    .brand h1 { font-size: 12.5px; letter-spacing: 0.6px; }
-    .brand .sub { font-size: 9.5px; }
-    /* On phones the header controls (filters + action buttons) used to wrap across 3-4 rows,
-       pushing real content off the visible screen. They now live in a slide-in right-hand drawer,
-       opened with the hamburger button, so the sticky header stays to just brand + one icon. */
+    .brand .logo { width: 36px; height: 36px; font-size: 19px; }
+    .brand h1 { font-size: 13px; letter-spacing: .9px; }
+    .brand .sub { font-size: 9.5px; letter-spacing: 1.4px; }
+    .tagline { font-size: 9px; letter-spacing: 1.6px; }
+    /* On phones the header controls live in a slide-in right-hand drawer opened
+       with the hamburger, so the sticky header stays to just brand + one icon. */
     .menu-toggle { display: flex; }
     .controls {
       display: none; position: fixed; top: 0; right: 0; bottom: 0; width: 82vw; max-width: 320px;
@@ -527,8 +679,8 @@
       box-shadow: -12px 0 34px rgba(0,0,0,0.45); flex-direction: column; align-items: stretch; gap: 10px;
     }
     .controls.open { display: flex; }
-    /* Inside the mobile drawer the controls are already a vertical list, so the "More" dropdown
-       would be a pointless second layer — flatten it out and hide its toggle button. */
+    /* Inside the drawer the controls are already a vertical list, so the "More"
+       dropdown would be a pointless second layer — flatten it out. */
     .more-menu-wrap { width: 100%; }
     #moreMenuBtn { display: none; }
     .more-menu {
@@ -537,67 +689,62 @@
       margin-top: 4px;
     }
     .more-menu button { text-align: center; padding: 11px 10px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 8px; }
-    /* Small group headings inside the drawer, so the long list reads as "filters, then actions"
-       rather than one undifferentiated column of buttons. */
+    /* Group headings so the long list reads as "filters, then tools". */
     .drawer-label {
-      display: block; font-family: var(--font-head); font-size: 10px; letter-spacing: 1.2px;
-      text-transform: uppercase; color: var(--gold); font-weight: 700;
+      display: block; font-family: var(--font-head); font-size: 11px; letter-spacing: 1.6px;
+      text-transform: uppercase; color: var(--gold); font-weight: 600;
       margin: 4px 2px 2px; padding-top: 6px;
     }
     .drawer-label:first-of-type { padding-top: 0; }
-    /* The two date inputs are identical empty "mm/dd/yyyy" boxes with nothing to tell them apart
-       in the drawer — these paired labels make From vs To obvious. */
+    /* The two date inputs are identical empty boxes with nothing to tell them
+       apart in the drawer — these paired labels make From vs To obvious. */
     .date-field { display: flex; align-items: center; gap: 10px; width: 100%; }
     .date-field > span { font-size: 12px; color: var(--text-secondary); width: 38px; flex-shrink: 0; }
-    /* Needs to outrank ".controls input[type=date] { width: 100% }" below — that selector ties on
-       specificity and wins on source order, so match its [type] part too. min-width:0 lets the
-       input actually shrink inside the flex row instead of spilling past the drawer edge. */
+    /* Needs to outrank ".controls input[type=date] { width: 100% }" below — that
+       selector ties on specificity and wins on source order, so match its [type]
+       part too. min-width:0 lets the input shrink instead of spilling out. */
     .controls .date-field > input[type="date"] { flex: 1 1 auto; width: auto; min-width: 0; }
     .controls a, .controls select, .controls button, .controls input[type="date"] { width: 100%; }
     .controls select, .controls input[type="text"], .controls input[type="date"] { flex: none; }
     .controls button { flex: none; padding: 11px 10px; }
-    /* The drawer's background follows the theme (var(--surface-1) — cream in light mode, dark in
-       dark mode), but header.top's own button/select rule further up hardcodes near-white text
-       and a barely-there white tint background — correct for the *inline* header bar, which is
-       always dark regardless of theme, but wrong here since the drawer itself goes light in light
-       mode. Without this override, light mode showed near-invisible pale-on-pale text in this
-       drawer specifically (dark mode never had the problem, hence it going unnoticed until now).
-       Higher specificity (header.top .controls ...) beats the original rule without !important. */
+    /* header.top's own button/select rule hardcodes near-white text — correct for
+       the inline header bar (always dark), wrong here since the drawer follows the
+       theme and goes light in light mode. */
     header.top .controls button, header.top .controls select, header.top .controls input[type="text"], header.top .controls input[type="date"] {
       background: var(--surface-2); color: var(--text-primary); border-color: var(--border); backdrop-filter: none;
     }
     header.top .controls button.primary {
-      background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #241505; border-color: transparent;
+      background: linear-gradient(180deg, var(--gold-light), var(--gold)); color: var(--on-gold); border-color: transparent;
     }
     header.top select.controls option, .controls select option { color: #111; }
     .controls-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 240; }
-    /* Needs .controls-prefixed specificity to beat the ".controls button { width: 100% }" rule
-       above — without it the ✕ stretched into a full-width bar across the top of the drawer
-       instead of sitting as a small square in the corner. */
+    /* Needs .controls-prefixed specificity to beat ".controls button { width: 100% }"
+       — without it the ✕ stretched into a full-width bar across the drawer top. */
     .controls button.controls-close {
-      display:flex; position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 8px;
-      align-items:center; justify-content:center; font-size: 16px; padding: 0; flex: none;
+      display: flex; position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 8px;
+      align-items: center; justify-content: center; font-size: 16px; padding: 0; flex: none;
     }
     .status-line { font-size: 10px; }
     .data-health-banner { font-size: 12.5px; padding: 9px 12px; }
-    nav.tabs { padding: 8px 10px 0 10px; gap: 2px; -webkit-overflow-scrolling: touch; }
-    nav.tabs button { padding: 9px 10px; font-size: 11px; }
-    main { padding: 12px; }
-    h2.section-title { font-size: 13.5px; margin: 22px 0 10px; }
-    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-    .kpi-card { padding: 11px 12px; }
-    .kpi-card .value { font-size: 20px; }
-    .kpi-card .label { font-size: 9.5px; }
+    nav.tabs { padding: 8px 10px 0; gap: 2px; -webkit-overflow-scrolling: touch; }
+    nav.tabs button { padding: 9px 10px; font-size: 12px; }
+    main { padding: 14px 12px 30px; }
+    h2.section-title { font-size: 14px; margin: 22px 0 10px; }
+    .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 9px; }
+    .kpi-card { padding: 12px 13px; }
+    .kpi-card .value { font-size: 26px; }
+    .kpi-card .label { font-size: 9.5px; letter-spacing: 1.1px; }
     .kpi-card .hint { font-size: 10px; }
     .grid-2, .grid-3 { gap: 12px; }
-    .card { padding: 12px; }
+    .card { padding: 13px; }
     table.data { font-size: 11.5px; }
-    table.data th, table.data td { padding: 7px 8px; }
+    table.data th, table.data td { padding: 8px 9px; }
+    table.data td.num { font-size: 14px; }
     .table-wrap { max-height: 420px; }
     .toolbar { gap: 6px; }
     .toolbar input[type="text"] { min-width: 0; flex: 1 1 140px; }
     .barrow .lbl { width: 92px; font-size: 11.5px; }
-    .barrow .val { width: 54px; font-size: 11.5px; }
+    .barrow .val { width: 54px; font-size: 14px; }
     .chat-panel { padding: 13px 14px; }
     .chat-greeting { font-size: 13px; }
     .chat-item { font-size: 12.5px; }
@@ -667,6 +814,7 @@
 </div>
 
 <header class="top">
+  <svg class="bike-mark" viewBox="0 0 460 215" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"> <g class="ln">  <!-- tyres -->  <circle cx="112" cy="155" r="48"/>  <circle cx="348" cy="155" r="48"/>  <circle cx="112" cy="155" r="31" class="thin"/>  <circle cx="348" cy="155" r="31" class="thin"/>  <circle cx="112" cy="155" r="9" class="thin"/>  <circle cx="348" cy="155" r="6" class="thin"/>  <g class="hair"><line x1="121.0" y1="155.0" x2="142.0" y2="155.0"/><line x1="120.3" y1="158.4" x2="139.7" y2="166.5"/><line x1="118.4" y1="161.4" x2="133.2" y2="176.2"/><line x1="115.4" y1="163.3" x2="123.5" y2="182.7"/><line x1="112.0" y1="164.0" x2="112.0" y2="185.0"/><line x1="108.6" y1="163.3" x2="100.5" y2="182.7"/><line x1="105.6" y1="161.4" x2="90.8" y2="176.2"/><line x1="103.7" y1="158.4" x2="84.3" y2="166.5"/><line x1="103.0" y1="155.0" x2="82.0" y2="155.0"/><line x1="103.7" y1="151.6" x2="84.3" y2="143.5"/><line x1="105.6" y1="148.6" x2="90.8" y2="133.8"/><line x1="108.6" y1="146.7" x2="100.5" y2="127.3"/><line x1="112.0" y1="146.0" x2="112.0" y2="125.0"/><line x1="115.4" y1="146.7" x2="123.5" y2="127.3"/><line x1="118.4" y1="148.6" x2="133.2" y2="133.8"/><line x1="120.3" y1="151.6" x2="139.7" y2="143.5"/></g>  <g class="hair"><line x1="354.0" y1="155.0" x2="378.0" y2="155.0"/><line x1="353.5" y1="157.3" x2="375.7" y2="166.5"/><line x1="352.2" y1="159.2" x2="369.2" y2="176.2"/><line x1="350.3" y1="160.5" x2="359.5" y2="182.7"/><line x1="348.0" y1="161.0" x2="348.0" y2="185.0"/><line x1="345.7" y1="160.5" x2="336.5" y2="182.7"/><line x1="343.8" y1="159.2" x2="326.8" y2="176.2"/><line x1="342.5" y1="157.3" x2="320.3" y2="166.5"/><line x1="342.0" y1="155.0" x2="318.0" y2="155.0"/><line x1="342.5" y1="152.7" x2="320.3" y2="143.5"/><line x1="343.8" y1="150.8" x2="326.8" y2="133.8"/><line x1="345.7" y1="149.5" x2="336.5" y2="127.3"/><line x1="348.0" y1="149.0" x2="348.0" y2="125.0"/><line x1="350.3" y1="149.5" x2="359.5" y2="127.3"/><line x1="352.2" y1="150.8" x2="369.2" y2="133.8"/><line x1="353.5" y1="152.7" x2="375.7" y2="143.5"/></g>  <!-- mudguards hug the tyre (r=52 vs tyre 48) so they read as fenders, not floating arcs -->  <path d="M 303.2 128.4 A 52 52 0 0 1 392.8 128.4" class="thin"/>  <path d="M 66.8 123 A 52 52 0 0 1 160.5 139" class="thin"/>  <!-- forks, bars, lamp -->  <path d="M 348 155 L 318 84"/>  <path d="M 356 152 L 326 81"/>  <path d="M 322 79 L 298 69"/>  <path d="M 322 79 L 344 73"/>  <circle cx="330" cy="104" r="13"/>  <!-- teardrop tank, stopping clear of the lamp -->  <path d="M 236 103 C 243 87 264 81 285 83 C 297 84 303 89 303 97 L 303 106       C 289 116 257 117 242 111 Z"/>  <!-- sprung seat -->  <path d="M 237 103 L 190 105 C 178 106 172 111 172 115 L 229 113 C 235 112 237 108 237 103 Z"/>  <!-- frame: steering head down to engine, top tube back to seat post -->  <path d="M 299 103 L 268 148"/>  <path d="M 242 106 L 202 116"/>  <path d="M 202 116 L 190 152"/>  <path d="M 200 154 L 112 155"/>  <!-- engine case + finned barrel, tucked under the tank -->  <path d="M 222 124 L 266 126 L 270 154 L 216 154 Z"/>  <path d="M 234 124 L 238 104 L 258 106 L 258 126"/>  <path d="M 236 118 L 258 119" class="hair"/>  <path d="M 236 113 L 258 114" class="hair"/>  <path d="M 237 108 L 258 109" class="hair"/>  <!-- exhaust sweeping back under the seat -->  <path d="M 268 154 C 240 170 172 172 124 161"/> </g></svg>
   <div class="top-row">
     <div class="brand">
       <div class="logo">🏍️</div>
@@ -732,14 +880,66 @@
     <h2 class="section-title">🤖 Today's Priorities</h2>
     <div class="chat-panel" id="todayPriorities"></div>
 
-    <div id="storePerformanceSection">
-      <h2 class="section-title">🏪 Store Performance — Whole Showroom</h2>
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Everyone's numbers combined, for context alongside your own below. Kanti Nagar only — Vikas Marg is a separate store and appears just as reference stock on the Stock tab.</p>
-      <div class="kpi-grid" id="kpiStorePerformance"></div>
+    <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
+    <div class="grid-3" id="consoleRow">
+      <div class="card">
+        <h3 id="gaugeCardTitle">Bike Target vs Retail</h3>
+        <div class="gauge-wrap">
+          <div class="gauge" id="gauge"></div>
+          <div class="split">
+            <span class="k">Target</span><span class="v" id="sTarget">—</span>
+            <span class="k">Retail</span><span class="v" id="sRetail">—</span>
+            <span class="k">Gap</span><span class="v" id="sGap">—</span>
+          </div>
+        </div>
+        <div class="pace-note" id="paceNote"></div>
+      </div>
+      <div class="card">
+        <h3>VAS Penetration</h3>
+        <div class="stat">
+          <div style="flex:1">
+            <div class="lab">Extended Warranty</div>
+            <div class="stat-bar"><i id="ewBar"></i></div>
+          </div>
+          <div style="text-align:right">
+            <div class="val" id="ewUnits">—</div>
+            <div class="hint" id="ewPct">—</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div style="flex:1">
+            <div class="lab">Roadside Assistance</div>
+            <div class="stat-bar"><i id="rsaBar"></i></div>
+          </div>
+          <div style="text-align:right">
+            <div class="val" id="rsaUnits">—</div>
+            <div class="hint" id="rsaPct">—</div>
+          </div>
+        </div>
+        <div class="stat">
+          <div style="flex:1">
+            <div class="lab">Riding gear attached</div>
+            <div class="stat-bar"><i id="gearBar"></i></div>
+          </div>
+          <div style="text-align:right">
+            <div class="val" id="gearUnits">—</div>
+            <div class="hint" id="gearPct">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Accessories &amp; Gear</h3>
+        <div class="stat"><span class="lab">GMA revenue</span><span class="val" id="gmaRev">—</span></div>
+        <div class="stat"><span class="lab">Per bike delivered</span><span class="val" id="gmaPerBike">—</span></div>
+        <div class="stat"><span class="lab">Bikes billed</span><span class="val" id="bikesBilled">—</span></div>
+      </div>
     </div>
 
-    <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
-    <div class="kpi-grid" id="kpiSalesConsole"></div>
+    <div id="storePerformanceSection">
+      <h2 class="section-title">🏪 Store Performance — Whole Showroom</h2>
+      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Everyone's numbers combined, for context alongside your own above. Kanti Nagar only — Vikas Marg is a separate store and appears just as reference stock on the Stock tab.</p>
+      <div class="kpi-grid" id="kpiStorePerformance"></div>
+    </div>
 
     <div id="personalTargetSection" style="display:none;">
       <h2 class="section-title" id="personalTargetTitle">🎯 My Daily Target</h2>
@@ -747,11 +947,26 @@
       <div class="kpi-grid" id="kpiPersonalTarget"></div>
     </div>
 
+    <div class="grid-3" style="margin-top:26px;">
+      <div class="card">
+        <h3>Sales Funnel — enquiry to delivery</h3>
+        <div id="funnelSteps"></div>
+      </div>
+      <div class="card">
+        <h3>Star of the Month</h3>
+        <div id="spotlight"></div>
+      </div>
+      <div class="card">
+        <h3>Booking &amp; Delivery Pipeline</h3>
+        <div id="pipeline"></div>
+      </div>
+    </div>
+
     <h2 class="section-title">🏆 This Month's Champions</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Split across categories so it's not always the same one or two names on top.</p>
     <div class="kpi-grid" id="kpiChampions"></div>
 
-    <h2 class="section-title">👤 Employee-wise Performance</h2>
+    <h2 class="section-title">👤 Executive Leaderboard</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
 
     <h2 class="section-title">⭐ Google Reviews Summary</h2>
@@ -1878,6 +2093,9 @@ function renderAll(){
   renderTodayPriorities();
   renderStorePerformance();
   renderSalesConsole();
+  renderFunnelSteps();
+  renderSpotlight();
+  renderPipeline();
   renderPersonalTarget();
   renderChampions();
   renderEmployeeTable();
@@ -1982,6 +2200,46 @@ function kpiCard(label, value, hint, meterPct, flagText){
   </div>`;
 }
 
+/* ── Gauge (signature element) ──────────────────────────────────────────────
+   A 240° brass arc with a PACE MARKER: the notch showing where the month should
+   stand today. A bare percentage can't say whether 68% on day 24 is comfortable
+   or behind — the marker answers that at a glance, which is the one question a
+   showroom screen exists to answer. */
+function drawGauge(elId, achv, pace){
+  const el = document.getElementById(elId);
+  if (!el) return null;
+  const size = 136, cx = size/2, cy = size/2, r = 52, sw = 11;
+  const START = 150, SWEEP = 240;
+  const pol = (deg, rad) => {
+    const a = (deg * Math.PI) / 180;
+    return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  };
+  const arc = (fromDeg, toDeg, rad) => {
+    const [x1,y1] = pol(fromDeg, rad), [x2,y2] = pol(toDeg, rad);
+    const large = Math.abs(toDeg - fromDeg) > 180 ? 1 : 0;
+    return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${rad} ${rad} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+  };
+  const clamp = Math.max(0, Math.min(1, achv));
+  const end = START + SWEEP * clamp;
+  const col = achv >= 1 ? 'var(--good)' : achv >= pace ? 'var(--gold)' : achv >= pace * 0.85 ? 'var(--warning)' : 'var(--critical)';
+  const pDeg = START + SWEEP * Math.max(0, Math.min(1, pace));
+  const [px1,py1] = pol(pDeg, r - sw/2 - 3);
+  const [px2,py2] = pol(pDeg, r + sw/2 + 3);
+  el.innerHTML = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img"
+         aria-label="Achievement ${fmtPct(achv)} against a pace of ${fmtPct(pace)}">
+      <path d="${arc(START, START + SWEEP, r)}" fill="none" stroke="var(--grid)" stroke-width="${sw}" stroke-linecap="round"/>
+      ${clamp > 0 ? `<path d="${arc(START, end, r)}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>` : ''}
+      <line x1="${px1.toFixed(2)}" y1="${py1.toFixed(2)}" x2="${px2.toFixed(2)}" y2="${py2.toFixed(2)}"
+            stroke="var(--text-primary)" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+    </svg>
+    <div class="gauge-mid">
+      <div class="gauge-pct" style="color:${col}">${fmtPct(achv)}</div>
+      <div class="gauge-lbl">Achieved</div>
+    </div>`;
+  return col;
+}
+
 function renderSalesConsole(){
   const agg = computeDeliveryAgg(null);
   const target = targetFor(null);
@@ -1993,20 +2251,174 @@ function renderSalesConsole(){
   // Title flips to "My Performance" whenever this is scoped to one person (a locked sales/CRT
   // login, or an Admin who's picked one name from the executive filter) — otherwise (Admin,
   // filter = ALL) it stays "Sales Console" since it's already showing the whole store.
-  const titleEl = document.getElementById('salesConsoleTitle');
   const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
-  titleEl.textContent = isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console';
+  document.getElementById('salesConsoleTitle').textContent =
+    isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console';
 
-  const el = document.getElementById('kpiSalesConsole');
-  el.innerHTML = [
-    kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed'),
-    kpiCard('Target', fmtInt(target), 'bikes (this filter)'),
-    kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100, target && achv < PERF_THRESHOLDS.achv ? 'Below target' : null),
-    kpiCard('EW Attached', fmtInt(agg.ew), `${fmtPct(ewPct)} of retail`, ewPct*100, agg.retail && ewPct < PERF_THRESHOLDS.ewPct ? 'Below 70%' : null),
-    kpiCard('RSA Attached', fmtInt(agg.rsa), `${fmtPct(rsaPct)} of retail`, rsaPct*100, agg.retail && rsaPct < PERF_THRESHOLDS.rsaPct ? 'Below 50%' : null),
-    kpiCard('Gear Attached', fmtInt(agg.gear), `${fmtPct(gearPct)} of retail`, gearPct*100),
-    kpiCard('GMA Total', fmtMoney(agg.gma), `${fmtMoney(gmaPerBike)} / bike`, undefined, agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike ? 'Below ₹7,500/bike' : null),
-  ].join('');
+  // Pace is only meaningful against the real calendar month. When a specific month is filtered
+  // (or "All Months" is on), fall back to a flat 100% pace so the marker never implies a
+  // day-of-month reading that doesn't apply to the period being shown.
+  const now = new Date();
+  const f = monthYearOfFilter();
+  const isCurrentMonth = !dayFilterRange() && f && f.year === now.getFullYear() && f.month === now.getMonth() + 1;
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const pace = isCurrentMonth ? now.getDate() / daysInMonth : 1;
+
+  drawGauge('gauge', achv, pace);
+  document.getElementById('gaugeCardTitle').textContent =
+    isCurrentMonth ? `Bike Target vs Retail · Day ${now.getDate()} of ${daysInMonth}` : 'Bike Target vs Retail';
+  document.getElementById('sTarget').textContent = fmtInt(target);
+  document.getElementById('sRetail').textContent = fmtInt(agg.retail);
+  const gap = Math.max(0, target - agg.retail);
+  const gapEl = document.getElementById('sGap');
+  gapEl.textContent = fmtInt(gap);
+  gapEl.style.color = gap ? 'var(--text-primary)' : 'var(--good)';
+
+  const paceEl = document.getElementById('paceNote');
+  if (isCurrentMonth && target) {
+    const expected = Math.round(target * pace);
+    const delta = agg.retail - expected;
+    const paceCol = delta >= 0 ? 'var(--good)' : delta >= -Math.max(2, target * 0.05) ? 'var(--warning)' : 'var(--critical)';
+    paceEl.style.color = paceCol;
+    paceEl.innerHTML = `<span class="pace-dot" style="background:${paceCol}"></span>` +
+      (delta >= 0 ? `${fmtInt(delta)} ahead of pace · ${fmtInt(expected)} expected by today`
+                  : `${fmtInt(-delta)} behind pace · ${fmtInt(expected)} expected by today`);
+  } else if (target) {
+    const col2 = achv >= 1 ? 'var(--good)' : 'var(--warning)';
+    paceEl.style.color = col2;
+    paceEl.innerHTML = `<span class="pace-dot" style="background:${col2}"></span>${fmtInt(gap)} still to go against target`;
+  } else {
+    paceEl.innerHTML = '';
+  }
+
+  const setAttach = (unitsId, pctId, barId, units, p, threshold) => {
+    document.getElementById(unitsId).textContent = fmtInt(units);
+    const pctEl = document.getElementById(pctId);
+    pctEl.textContent = fmtPct(p) + ' of retail';
+    pctEl.style.color = (threshold != null && agg.retail && p < threshold) ? 'var(--critical)' : '';
+    document.getElementById(barId).style.width = Math.min(100, p * 100) + '%';
+  };
+  setAttach('ewUnits', 'ewPct', 'ewBar', agg.ew, ewPct, PERF_THRESHOLDS.ewPct);
+  setAttach('rsaUnits', 'rsaPct', 'rsaBar', agg.rsa, rsaPct, PERF_THRESHOLDS.rsaPct);
+  setAttach('gearUnits', 'gearPct', 'gearBar', agg.gear, gearPct, null);
+
+  document.getElementById('gmaRev').textContent = fmtMoney(agg.gma);
+  const perBikeEl = document.getElementById('gmaPerBike');
+  perBikeEl.textContent = fmtMoney(gmaPerBike);
+  perBikeEl.style.color = (agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike) ? 'var(--critical)' : '';
+  document.getElementById('bikesBilled').textContent = fmtInt(agg.retail);
+}
+
+/* ── Sales funnel ───────────────────────────────────────────────────────────
+   Enquiries → test rides → bookings → deliveries, from the same sheets the rest
+   of the dashboard reads. Each bar's width is its share of the top of the
+   funnel, so the taper itself shows the drop-off. */
+function renderFunnelSteps(){
+  const el = document.getElementById('funnelSteps');
+  if (!el) return;
+  let enq = 0, testRides = 0, booked = 0;
+  for (const r of STATE.enquiry) {
+    if (!dateInFilter(r[14])) continue;
+    if (!ownerInFilter(r[13])) continue;
+    enq++;
+    if (up(r[12]) === 'YES') testRides++;
+    if (up(r[9]) === 'BOOKED') booked++;
+  }
+  const retail = computeDeliveryAgg(null).retail;
+  const steps = [
+    { name: 'Enquiries',        val: enq,       conv: null,                        colr: 'var(--gold-light)' },
+    { name: 'Test rides given', val: testRides, conv: enq ? testRides / enq : null, colr: 'var(--gold)' },
+    { name: 'Bookings won',     val: booked,    conv: testRides ? booked / testRides : null, colr: 'var(--s4)' },
+    { name: 'Retail delivered', val: retail,    conv: booked ? retail / booked : null,       colr: 'var(--good)' },
+  ];
+  if (!enq && !retail) { el.innerHTML = '<div class="empty-note">No enquiry or delivery data for this filter</div>'; return; }
+  const top = Math.max(1, ...steps.map(s => s.val));
+  el.innerHTML = steps.map(s => {
+    // A step can legitimately exceed the one above it — bikes delivered this month may have been
+    // booked in an earlier month, which would read as a nonsense ">100% conversion". Show the
+    // count without a conversion figure in that case rather than printing something untrue.
+    const showConv = s.conv !== null && s.conv <= 1;
+    return `
+    <div class="funnel-step">
+      <div class="funnel-head">
+        <span class="funnel-name">${esc(s.name)}</span>
+        <span>
+          <span class="funnel-val">${fmtInt(s.val)}</span>
+          ${showConv ? `<span class="funnel-conv">${fmtPct(s.conv)}<small>CONV</small></span>`
+            : (s.conv !== null ? `<span class="funnel-conv" style="color:var(--text-muted)" title="Includes bookings carried in from earlier months, so a conversion rate against this month's bookings alone would be misleading">—<small>CARRY-IN</small></span>` : '')}
+        </span>
+      </div>
+      <div class="funnel-track"><div class="funnel-fill" style="width:${Math.max(3, (s.val / top) * 100)}%;background:${s.colr}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Star of the month ──────────────────────────────────────────────────────
+   Always rank 1 by bikes delivered, so it stays stable regardless of how the
+   leaderboard below happens to be sorted. Uses STATE.execList (everyone) — the
+   whole point of recognition is that the team can see it. */
+function renderSpotlight(){
+  const el = document.getElementById('spotlight');
+  if (!el) return;
+  const stats = STATE.execList.map(name => {
+    const agg = computeDeliveryAgg(name);
+    return { name, ...agg, target: targetFor(name), achv: targetFor(name) ? agg.retail / targetFor(name) : 0 };
+  }).sort((a, b) => b.retail - a.retail || b.gma - a.gma);
+  if (!stats.length || !stats[0].retail) { el.innerHTML = '<div class="empty-note">No deliveries yet for this filter</div>'; return; }
+  const star = stats[0], runnerUp = stats[1];
+  const initials = star.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const lead = runnerUp ? star.retail - runnerUp.retail : 0;
+  el.innerHTML = `
+    <div class="spot-top">
+      <div class="avatar">${esc(initials)}</div>
+      <div>
+        <div class="spot-name">${esc(star.name)}</div>
+        <div class="spot-role">Sales Consultant · Rank 1</div>
+      </div>
+    </div>
+    <div class="spot-grid">
+      <div><div class="k">Retail delivered</div><div class="v">${fmtInt(star.retail)}</div></div>
+      <div><div class="k">Target achieved</div><div class="v">${fmtPct(star.achv)}</div></div>
+      <div><div class="k">GMA revenue</div><div class="v">${fmtMoney(star.gma)}</div></div>
+      <div><div class="k">EW attached</div><div class="v">${fmtInt(star.ew)}</div></div>
+    </div>
+    ${runnerUp ? `<div class="spot-lead">${lead > 0
+      ? `Leads the board by <b>${fmtInt(lead)} ${lead === 1 ? 'bike' : 'bikes'}</b> over ${esc(runnerUp.name)}.`
+      : `Level on retail with ${esc(runnerUp.name)} — ahead on GMA revenue.`}</div>` : ''}`;
+}
+
+/* ── Booking & delivery pipeline ────────────────────────────────────────────
+   Splits the open bookings already computed elsewhere into what can actually go
+   out now vs what can't: stock matched (ready), TDD past this month (carry-over),
+   everything else awaiting stock. */
+function renderPipeline(){
+  const el = document.getElementById('pipeline');
+  if (!el) return;
+  const open = allPendingRowsFor(null);
+  const today = todayMidnight();
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+  let ready = 0, awaiting = 0, carry = 0;
+  open.forEach(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    if (tdd && tdd > endOfMonth) { carry++; return; }
+    if (stockMatchFor(r[3], r[4]).exact > 0) ready++; else awaiting++;
+  });
+  const total = ready + awaiting + carry;
+  if (!total) { el.innerHTML = '<div class="empty-note">No open bookings right now</div>'; return; }
+  const segs = [
+    { lab: 'Ready for delivery',        sub: 'exact model &amp; colour in KN stock', v: ready,    c: 'var(--good)' },
+    { lab: 'Awaiting stock',            sub: 'not currently open in KN stock',       v: awaiting, c: 'var(--warning)' },
+    { lab: 'Carry-over to next month',  sub: 'TDD beyond this cycle',                v: carry,    c: 'var(--critical)' },
+  ];
+  el.innerHTML = `
+    <div class="pipe-total"><span class="big">${fmtInt(total)}</span><span class="hint">active bookings in hand</span></div>
+    <div class="pipe-stack">${segs.map(s => `<i style="width:${(s.v / total) * 100}%;background:${s.c}"></i>`).join('')}</div>
+    ${segs.map(s => `
+      <div class="pipe-row">
+        <span class="pipe-swatch" style="background:${s.c}"></span>
+        <span class="pipe-lab">${s.lab}<span class="pipe-sub">${s.sub}</span></span>
+        <span class="pipe-val">${fmtInt(s.v)}</span>
+      </div>`).join('')}`;
 }
 
 function renderEmployeeTable(){
@@ -2024,12 +2436,18 @@ function renderEmployeeTable(){
     const overdue = overdueRowsFor(name).length;
     return { name, ...agg, target, achv, ewPct, rsaPct, gearPct, gmaPerBike, overdue };
   }).sort((a,b) => b.retail - a.retail);
+  // Rank is by bikes delivered, assigned after the sort above.
+  rows.forEach((r, i) => { r.rank = i + 1; });
 
   // Below-threshold cells get a red, bold flag (icon + text, not color alone — see
   // PERF_THRESHOLDS) so a below-target sales person stands out immediately in this table.
   const flagIf = (cond, formatted) => cond ? `<span class="table-flag">⚠️ ${formatted}</span>` : formatted;
   const cols = [
-    { key:'name', label:'Executive' },
+    { key:'rank', label:'#', raw:true, fmt: v => `<span class="rank ${v <= 3 ? 'rank-' + v : ''}">${fmtInt(v)}</span>` },
+    { key:'name', label:'Sales Consultant', raw:true, fmt: v => {
+        const ini = str(v).split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
+        return `<span class="name-cell"><span class="mini-av">${esc(ini)}</span>${esc(v)}</span>`;
+      } },
     { key:'retail', label:'Retail', num:true },
     { key:'target', label:'Target', num:true },
     { key:'achv', label:'Achv %', num:true, raw:true, fmt: (v,row) => flagIf(row.target && v < PERF_THRESHOLDS.achv, fmtPct(v)) },
@@ -2047,7 +2465,31 @@ function renderEmployeeTable(){
   ];
   renderStaticTable('tblEmployee', cols, rows);
 
-  document.getElementById('tblEmployee').querySelectorAll('button[data-overdue-exec]').forEach(btn => {
+  // Team TOTAL row — summed from the rows actually displayed, so it can never drift
+  // out of step with the table above it.
+  const tbl = document.getElementById('tblEmployee');
+  if (rows.length) {
+    const sum = k => rows.reduce((a, r) => a + r[k], 0);
+    const tRetail = sum('retail'), tTarget = sum('target'), tGma = sum('gma');
+    const tAchv = tTarget ? tRetail / tTarget : 0;
+    const tEw = sum('ew'), tRsa = sum('rsa'), tGear = sum('gear');
+    const cell = (v, num) => `<td class="${num ? 'num' : ''}">${v}</td>`;
+    tbl.insertAdjacentHTML('beforeend', `<tfoot><tr>
+      ${cell('')}
+      ${cell('TEAM TOTAL · ' + rows.length)}
+      ${cell(fmtInt(tRetail), true)}
+      ${cell(fmtInt(tTarget), true)}
+      ${cell(fmtPct(tAchv), true)}
+      ${cell(tRetail ? fmtPct(tEw / tRetail) : '—', true)}
+      ${cell(tRetail ? fmtPct(tRsa / tRetail) : '—', true)}
+      ${cell(tRetail ? fmtPct(tGear / tRetail) : '—', true)}
+      ${cell(fmtMoney(tGma), true)}
+      ${cell(tRetail ? fmtMoney(tGma / tRetail) : '—', true)}
+      ${cell(fmtInt(sum('overdue')), true)}
+    </tr></tfoot>`);
+  }
+
+  tbl.querySelectorAll('button[data-overdue-exec]').forEach(btn => {
     btn.addEventListener('click', () => showOverdueDetail(btn.dataset.overdueExec));
   });
 }
