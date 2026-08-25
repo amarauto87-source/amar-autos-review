@@ -135,6 +135,54 @@
   .brand .tagline { margin-top: 0; }
   .status-line { font-size: 11px; color: rgba(237,233,225,0.5); margin-top: 9px; letter-spacing: .2px; }
 
+  /* ══ Wall-display panels ═══════════════════════════════════════════════════
+     The showroom-screen look from Deepak's reference: every panel wears a solid
+     brass name-plate across its top with dark stamped lettering, the way the
+     header strip sits on a dealer-portal board. */
+  .panel {
+    background: var(--surface-1);
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .panel:hover { border-color: var(--gold); box-shadow: 0 12px 30px -18px rgba(0,0,0,.75); }
+  .panel-bar {
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    color: var(--on-gold);
+    font-family: var(--font-ui); font-weight: 800; font-size: 9.5px;
+    letter-spacing: 1.3px; text-transform: uppercase;
+    padding: 6px 11px; text-align: center; line-height: 1.35;
+  }
+  .panel-body { padding: 13px 14px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .panel-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 11px; }
+  @media (max-width: 1450px) { .panel-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 820px)  { .panel-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px)  { .panel-grid { grid-template-columns: 1fr; } }
+  .panel-row2 { display: grid; grid-template-columns: 2.1fr 1fr 1.15fr; gap: 11px; margin-top: 11px; }
+  @media (max-width: 1300px) { .panel-row2 { grid-template-columns: 1fr; } }
+
+  /* Big centred figure used inside the wall panels */
+  .big-fig { font-family: var(--font-head); font-weight: 700; font-size: 40px; line-height: 1; text-align: center; letter-spacing: .5px; }
+  .big-sub { font-size: 10.5px; color: var(--text-secondary); text-align: center; margin-top: 5px; }
+  .mini-split { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; font-size: 11px; margin-top: 10px; }
+  .mini-split .k { color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; font-size: 9.5px; align-self: center; }
+  .mini-split .v { font-family: var(--font-head); font-weight: 700; font-size: 17px; text-align: right; line-height: 1; }
+
+  /* Tapered funnel — the bands narrow in proportion to the counts, so the
+     silhouette itself is the drop-off rather than a decorative cone. */
+  .funnel-svg { width: 100%; height: auto; display: block; }
+  .funnel-svg text { font-family: var(--font-ui); }
+
+  /* Pipeline expressed as motorcycle glyphs — one bike per unit, which reads
+     faster on a wall screen than a number alone. */
+  .bike-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; }
+  .bike-row + .bike-row { border-top: 1px solid rgba(128,128,128,.14); }
+  .bike-glyphs { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 18px; }
+  .bike-glyphs svg { width: 22px; height: 12px; flex-shrink: 0; }
+  .bike-count { font-family: var(--font-head); font-weight: 700; font-size: 20px; min-width: 26px; text-align: right; }
+  .bike-lab { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px; }
+
   /* ══ Royal Enfield character ═══════════════════════════════════════════════
      Spent in three places only, so it reads as heritage rather than costume:
      a motorcycle drawn in outline behind the masthead, the hand-painted tank
@@ -881,57 +929,90 @@
     <div class="chat-panel" id="todayPriorities"></div>
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
-    <div class="grid-3" id="consoleRow">
-      <div class="card">
-        <h3 id="gaugeCardTitle">Bike Target vs Retail</h3>
-        <div class="gauge-wrap">
-          <div class="gauge" id="gauge"></div>
-          <div class="split">
+
+    <div class="panel-grid">
+      <div class="panel">
+        <div class="panel-bar" id="barRetail">Bike Retail</div>
+        <div class="panel-body">
+          <div class="gauge" id="gauge" style="margin:0 auto"></div>
+          <div class="mini-split">
             <span class="k">Target</span><span class="v" id="sTarget">—</span>
             <span class="k">Retail</span><span class="v" id="sRetail">—</span>
             <span class="k">Gap</span><span class="v" id="sGap">—</span>
           </div>
         </div>
-        <div class="pace-note" id="paceNote"></div>
       </div>
-      <div class="card">
-        <h3>VAS Penetration</h3>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Extended Warranty</div>
-            <div class="stat-bar"><i id="ewBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="ewUnits">—</div>
-            <div class="hint" id="ewPct">—</div>
-          </div>
+
+      <div class="panel">
+        <div class="panel-bar">Retail Achievement %</div>
+        <div class="panel-body">
+          <div class="big-fig" id="achvBig">—</div>
+          <div class="big-sub" id="achvSub">—</div>
+          <div class="meter" style="margin-top:12px"><div id="achvMeter"></div></div>
+          <div class="pace-note" id="paceNote" style="justify-content:center"></div>
         </div>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Roadside Assistance</div>
-            <div class="stat-bar"><i id="rsaBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="rsaUnits">—</div>
-            <div class="hint" id="rsaPct">—</div>
-          </div>
-        </div>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Riding gear attached</div>
-            <div class="stat-bar"><i id="gearBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="gearUnits">—</div>
-            <div class="hint" id="gearPct">—</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-bar">EW · RSA · Gear · GMA</div>
+        <div class="panel-body">
+          <div class="big-fig" id="gmaRev">—</div>
+          <div class="big-sub">GMA revenue · <span id="gmaPerBike">—</span> / bike</div>
+          <div class="mini-split">
+            <span class="k">EW attached</span><span class="v" id="ewUnits">—</span>
+            <span class="k">RSA attached</span><span class="v" id="rsaUnits">—</span>
+            <span class="k">Gear attached</span><span class="v" id="gearUnits">—</span>
           </div>
         </div>
       </div>
-      <div class="card">
-        <h3>Accessories &amp; Gear</h3>
-        <div class="stat"><span class="lab">GMA revenue</span><span class="val" id="gmaRev">—</span></div>
-        <div class="stat"><span class="lab">Per bike delivered</span><span class="val" id="gmaPerBike">—</span></div>
-        <div class="stat"><span class="lab">Bikes billed</span><span class="val" id="bikesBilled">—</span></div>
+
+      <div class="panel">
+        <div class="panel-bar">Sales Funnel</div>
+        <div class="panel-body"><div id="funnelSteps"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-bar">Bookings In Hand</div>
+        <div class="panel-body">
+          <div class="big-fig" id="bkgBig">—</div>
+          <div class="big-sub">open bookings, all months</div>
+          <div class="mini-split">
+            <span class="k">Booked this filter</span><span class="v" id="bkgFiltered">—</span>
+            <span class="k">Cancelled</span><span class="v" id="bkgCancelled">—</span>
+            <span class="k">Overdue</span><span class="v" id="bkgOverdue">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-bar">Customer Satisfaction</div>
+        <div class="panel-body">
+          <div class="big-fig" id="csatBig">—</div>
+          <div class="big-sub"><span id="csatCount">—</span> Google reviews</div>
+          <div style="text-align:center;margin-top:8px;letter-spacing:3px;color:var(--gold);font-size:15px" id="csatStars"></div>
+          <div class="mini-split">
+            <span class="k">Riders added</span><span class="v" id="csatRiders">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-row2">
+      <div class="panel">
+        <div class="panel-bar">Executive Leaderboard</div>
+        <div class="panel-body" style="padding:0">
+          <div class="table-wrap" style="border:none;border-radius:0;max-height:none">
+            <table class="data" id="tblEmployee"></table>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">Top Performer of the Month</div>
+        <div class="panel-body"><div id="spotlight"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">Booking &amp; Delivery Pipeline</div>
+        <div class="panel-body"><div id="pipeline"></div></div>
       </div>
     </div>
 
@@ -947,27 +1028,9 @@
       <div class="kpi-grid" id="kpiPersonalTarget"></div>
     </div>
 
-    <div class="grid-3" style="margin-top:26px;">
-      <div class="card">
-        <h3>Sales Funnel — enquiry to delivery</h3>
-        <div id="funnelSteps"></div>
-      </div>
-      <div class="card">
-        <h3>Star of the Month</h3>
-        <div id="spotlight"></div>
-      </div>
-      <div class="card">
-        <h3>Booking &amp; Delivery Pipeline</h3>
-        <div id="pipeline"></div>
-      </div>
-    </div>
-
     <h2 class="section-title">🏆 This Month's Champions</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Split across categories so it's not always the same one or two names on top.</p>
     <div class="kpi-grid" id="kpiChampions"></div>
-
-    <h2 class="section-title">👤 Executive Leaderboard</h2>
-    <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
 
     <h2 class="section-title">⭐ Google Reviews Summary</h2>
     <div class="kpi-grid" id="kpiReviews"></div>
@@ -1111,6 +1174,11 @@
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <select id="modelFinderSelect"></select>
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;">
+        <input type="checkbox" id="shortfallOnly" style="width:16px;height:16px;cursor:pointer;">
+        Only show shortfall (booked but not in stock)
+      </label>
+      <button id="exportShortfallBtn" title="Download the rows below as a CSV file you can open in Excel">⬇ Export CSV</button>
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
     <div id="modelFinderUnmatched"></div>
@@ -1325,18 +1393,30 @@ function linkOneSignalIdentity(){
    HARSH, SANDEEP, KASHISH) — confirmed against Deepak's final credentials list, all 9 non-admin
    logins now map 1:1 onto the real execList codes.
 */
+// Passwords are stored as salted SHA-256 hashes, not plain text — so opening "View Source" on
+// this page no longer reveals anyone's actual password. On login the typed password is hashed the
+// same way and compared. NOTE: this is obfuscation, not server-grade security — with no backend,
+// a determined person could still brute-force weak passwords offline. For real protection the app
+// would need a server. This raises the bar a lot for the everyday case (a curious employee peeking
+// at the source) without changing anything about how people log in.
+const LOGIN_SALT = 'amar-autos-re-2026';
 const CREDENTIALS = [
-  { name: 'Deepak',  password: 'Superman@123', role: 'Admin', execKey: null },
-  { name: 'ASLAM',   password: 'Khan@786',     role: 'Sales', execKey: 'ASLAM' },
-  { name: 'RAKESH',  password: 'Mishra@111',   role: 'Sales', execKey: 'RAKESH' },
-  { name: 'SANDEEP', password: 'Sanjeet@123',  role: 'Sales', execKey: 'SANDEEP' },
-  { name: 'POOJA',   password: 'Negi@111',     role: 'Sales', execKey: 'POOJA' },
-  { name: 'SIMMI',   password: 'Khan@786',     role: 'Sales', execKey: 'SIMMI' },
-  { name: 'PRAKSHI', password: 'Prakshi@123',  role: 'Sales', execKey: 'PRAKSHI' },
-  { name: 'SHAISTA', password: 'Shaista@123',  role: 'Sales', execKey: 'SHAISTA' },
-  { name: 'HARSH',   password: 'Sharma@111',   role: 'CRT',   execKey: 'HARSH' },
-  { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
+  { name: 'Deepak', hash: '8fe556607dcdc669a4324a58c684988331f28c37d69271e81047b13e6a28a71d', role: 'Admin', execKey: null },
+  { name: 'ASLAM', hash: '4748237a92fea4b1815f186e87455d8d17d46bccd33a639e1706f1db7bada65e', role: 'Sales', execKey: 'ASLAM' },
+  { name: 'RAKESH', hash: 'f6042c1bc303f204c6c5107ea18c903c301c59c35c78d10e82777658650b1a12', role: 'Sales', execKey: 'RAKESH' },
+  { name: 'SANDEEP', hash: '04185ede0689b0253771bb9ad108af9789c709006df426e48d0afb163b036d4a', role: 'Sales', execKey: 'SANDEEP' },
+  { name: 'POOJA', hash: '6efb614e25457309233ab3c8da3f7b6687f37ad9a49749ea98dc549a1d0adbb2', role: 'Sales', execKey: 'POOJA' },
+  { name: 'SIMMI', hash: '4748237a92fea4b1815f186e87455d8d17d46bccd33a639e1706f1db7bada65e', role: 'Sales', execKey: 'SIMMI' },
+  { name: 'PRAKSHI', hash: '56b43e5561104c0e7c22cdb82b3352901bfd75c366088a7984de7b10f1a85253', role: 'Sales', execKey: 'PRAKSHI' },
+  { name: 'SHAISTA', hash: '790f4104df1c54b3fcb75ddf881d7b9aea683d620a02a7198dbecef3b32c1c98', role: 'Sales', execKey: 'SHAISTA' },
+  { name: 'HARSH', hash: 'f664de95a6bd0512c9c8e596b2e7434d0f0af825a6ca26b5fc80bf7641d983f1', role: 'CRT', execKey: 'HARSH' },
+  { name: 'KASHISH', hash: '57fa2c5f6dbb8c3b6d5eaf2b146b0f715828421c74cbb57cb7e721a17d087deb', role: 'Sales', execKey: 'KASHISH' },
 ];
+async function hashPassword(pw){
+  const bytes = new TextEncoder().encode(LOGIN_SALT + ':' + pw);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 let CURRENT_USER = null;
 // Tabs a non-Admin login should NOT see — company-wide data not specific to one person.
 // Stock ab sabko dikhta hai (Deepak's request) — ye shared showroom inventory hai, kisi ek
@@ -1549,16 +1629,34 @@ function trySavedSession(){
   const user = CREDENTIALS.find(u => u.name === savedName);
   if (!user) { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} return false; }
   CURRENT_USER = user;
-  showReFact();
+  // Already logged in on this device → go STRAIGHT into the dashboard. Previously every refresh
+  // stopped at the daily Spotlight screen and waited for a click; if anything hiccuped there the
+  // page could sit on a dark overlay ("black screen on refresh"). The Spotlight is a nice-to-have
+  // shown once at a fresh login, not something to gate every reload behind.
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('reFactOverlay').style.display = 'none';
+  enterDashboard();
   return true;
 }
 trySavedSession();
 
-function attemptLogin(){
+async function attemptLogin(){
   const name = document.getElementById('loginName').value;
   const pass = document.getElementById('loginPass').value;
-  const user = CREDENTIALS.find(u => u.name === name && u.password === pass);
   const errEl = document.getElementById('loginError');
+  const named = CREDENTIALS.find(u => u.name === name);
+  let user = null;
+  if (named) {
+    try {
+      const typedHash = await hashPassword(pass);
+      if (typedHash === named.hash) user = named;
+    } catch (e) {
+      // crypto.subtle needs a secure context (https / localhost / file://). GitHub Pages is
+      // https, so this works in production; this branch is just a guard.
+      errEl.textContent = 'Login could not run in this browser. Try Chrome, or open over https.';
+      return;
+    }
+  }
   if (!user) {
     errEl.textContent = 'Wrong password. Please try again.';
     return;
@@ -2248,25 +2346,20 @@ function renderSalesConsole(){
   const rsaPct = agg.retail ? agg.rsa/agg.retail : 0;
   const gearPct = agg.retail ? agg.gear/agg.retail : 0;
   const gmaPerBike = agg.retail ? agg.gma/agg.retail : 0;
-  // Title flips to "My Performance" whenever this is scoped to one person (a locked sales/CRT
-  // login, or an Admin who's picked one name from the executive filter) — otherwise (Admin,
-  // filter = ALL) it stays "Sales Console" since it's already showing the whole store.
   const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
   document.getElementById('salesConsoleTitle').textContent =
     isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console';
 
-  // Pace is only meaningful against the real calendar month. When a specific month is filtered
-  // (or "All Months" is on), fall back to a flat 100% pace so the marker never implies a
-  // day-of-month reading that doesn't apply to the period being shown.
   const now = new Date();
   const f = monthYearOfFilter();
   const isCurrentMonth = !dayFilterRange() && f && f.year === now.getFullYear() && f.month === now.getMonth() + 1;
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const pace = isCurrentMonth ? now.getDate() / daysInMonth : 1;
 
+  // ── Panel 1: Bike Retail gauge ──
   drawGauge('gauge', achv, pace);
-  document.getElementById('gaugeCardTitle').textContent =
-    isCurrentMonth ? `Bike Target vs Retail · Day ${now.getDate()} of ${daysInMonth}` : 'Bike Target vs Retail';
+  document.getElementById('barRetail').textContent =
+    isCurrentMonth ? `Bike Retail · Day ${now.getDate()}/${daysInMonth}` : 'Bike Retail';
   document.getElementById('sTarget').textContent = fmtInt(target);
   document.getElementById('sRetail').textContent = fmtInt(agg.retail);
   const gap = Math.max(0, target - agg.retail);
@@ -2274,6 +2367,13 @@ function renderSalesConsole(){
   gapEl.textContent = fmtInt(gap);
   gapEl.style.color = gap ? 'var(--text-primary)' : 'var(--good)';
 
+  // ── Panel 2: Retail Achievement % ──
+  const achvBig = document.getElementById('achvBig');
+  const achvCol = achv >= 1 ? 'var(--good)' : achv >= pace ? 'var(--gold)' : achv >= pace * 0.85 ? 'var(--warning)' : 'var(--critical)';
+  achvBig.textContent = fmtPct(achv);
+  achvBig.style.color = achvCol;
+  document.getElementById('achvSub').textContent = `${fmtInt(agg.retail)} of ${fmtInt(target)} target`;
+  document.getElementById('achvMeter').style.width = Math.min(100, achv * 100) + '%';
   const paceEl = document.getElementById('paceNote');
   if (isCurrentMonth && target) {
     const expected = Math.round(target * pace);
@@ -2281,32 +2381,63 @@ function renderSalesConsole(){
     const paceCol = delta >= 0 ? 'var(--good)' : delta >= -Math.max(2, target * 0.05) ? 'var(--warning)' : 'var(--critical)';
     paceEl.style.color = paceCol;
     paceEl.innerHTML = `<span class="pace-dot" style="background:${paceCol}"></span>` +
-      (delta >= 0 ? `${fmtInt(delta)} ahead of pace · ${fmtInt(expected)} expected by today`
-                  : `${fmtInt(-delta)} behind pace · ${fmtInt(expected)} expected by today`);
+      (delta >= 0 ? `${fmtInt(delta)} ahead of pace` : `${fmtInt(-delta)} behind pace`);
   } else if (target) {
     const col2 = achv >= 1 ? 'var(--good)' : 'var(--warning)';
     paceEl.style.color = col2;
-    paceEl.innerHTML = `<span class="pace-dot" style="background:${col2}"></span>${fmtInt(gap)} still to go against target`;
-  } else {
-    paceEl.innerHTML = '';
-  }
+    paceEl.innerHTML = `<span class="pace-dot" style="background:${col2}"></span>${fmtInt(gap)} still to go`;
+  } else { paceEl.innerHTML = ''; }
 
-  const setAttach = (unitsId, pctId, barId, units, p, threshold) => {
-    document.getElementById(unitsId).textContent = fmtInt(units);
-    const pctEl = document.getElementById(pctId);
-    pctEl.textContent = fmtPct(p) + ' of retail';
-    pctEl.style.color = (threshold != null && agg.retail && p < threshold) ? 'var(--critical)' : '';
-    document.getElementById(barId).style.width = Math.min(100, p * 100) + '%';
-  };
-  setAttach('ewUnits', 'ewPct', 'ewBar', agg.ew, ewPct, PERF_THRESHOLDS.ewPct);
-  setAttach('rsaUnits', 'rsaPct', 'rsaBar', agg.rsa, rsaPct, PERF_THRESHOLDS.rsaPct);
-  setAttach('gearUnits', 'gearPct', 'gearBar', agg.gear, gearPct, null);
-
+  // ── Panel 3: EW · RSA · Gear · GMA ──
   document.getElementById('gmaRev').textContent = fmtMoney(agg.gma);
   const perBikeEl = document.getElementById('gmaPerBike');
   perBikeEl.textContent = fmtMoney(gmaPerBike);
   perBikeEl.style.color = (agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike) ? 'var(--critical)' : '';
-  document.getElementById('bikesBilled').textContent = fmtInt(agg.retail);
+  const setUnits = (id, units, p, threshold) => {
+    const el = document.getElementById(id);
+    el.textContent = `${fmtInt(units)} · ${fmtPct(p)}`;
+    el.style.color = (threshold != null && agg.retail && p < threshold) ? 'var(--critical)' : '';
+  };
+  setUnits('ewUnits', agg.ew, ewPct, PERF_THRESHOLDS.ewPct);
+  setUnits('rsaUnits', agg.rsa, rsaPct, PERF_THRESHOLDS.rsaPct);
+  setUnits('gearUnits', agg.gear, gearPct, null);
+
+  // ── Panel 5: Bookings in hand ──
+  const openBookings = STATE.booking.filter(r => {
+    const s = up(r[9]); return s !== 'BILLED' && s !== 'CANCEL' && s !== 'CANCELLED' && execInFilter(r[7]);
+  }).length;
+  let cancelled = 0, filteredBookings = 0;
+  STATE.booking.forEach(r => {
+    if (!dateInFilter(r[2]) || !execInFilter(r[7])) return;
+    filteredBookings++;
+    const s = up(r[9]); if (s === 'CANCEL' || s === 'CANCELLED') cancelled++;
+  });
+  document.getElementById('bkgBig').textContent = fmtInt(openBookings);
+  document.getElementById('bkgFiltered').textContent = fmtInt(filteredBookings);
+  document.getElementById('bkgCancelled').textContent = fmtInt(cancelled);
+  const overdue = allPendingRowsFor(null).filter(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    return tdd && tdd < todayMidnight();
+  }).length;
+  const ovEl = document.getElementById('bkgOverdue');
+  ovEl.textContent = fmtInt(overdue);
+  ovEl.style.color = overdue ? 'var(--critical)' : '';
+
+  // ── Panel 6: Customer Satisfaction ──
+  let sumRating = 0, nRating = 0;
+  STATE.review.forEach(r => {
+    if (!dateInFilter(r[0])) return;
+    if (!ownerInFilter(r[3])) return;
+    const rt = num(r[1]); if (rt > 0) { sumRating += rt; nRating++; }
+  });
+  const avg = nRating ? sumRating / nRating : 0;
+  document.getElementById('csatBig').textContent = nRating ? avg.toFixed(1) + ' / 5' : '—';
+  document.getElementById('csatCount').textContent = fmtInt(nRating);
+  const full = Math.round(avg);
+  document.getElementById('csatStars').textContent = nRating ? '★'.repeat(full) + '☆'.repeat(5 - full) : '';
+  let riders = 0;
+  STATE.riderReg.forEach(r => { if (dateInFilter(r[0]) || true) riders++; });
+  document.getElementById('csatRiders').textContent = fmtInt(STATE.riderReg.length);
 }
 
 /* ── Sales funnel ───────────────────────────────────────────────────────────
@@ -2332,25 +2463,33 @@ function renderFunnelSteps(){
     { name: 'Retail delivered', val: retail,    conv: booked ? retail / booked : null,       colr: 'var(--good)' },
   ];
   if (!enq && !retail) { el.innerHTML = '<div class="empty-note">No enquiry or delivery data for this filter</div>'; return; }
+
+  // Tapered funnel drawn as an SVG: each band's width is proportional to its count, so the shape
+  // narrows step by step and the silhouette itself shows the drop-off (matching Deepak's
+  // reference). Conversion % sits to the right of each band.
   const top = Math.max(1, ...steps.map(s => s.val));
-  el.innerHTML = steps.map(s => {
-    // A step can legitimately exceed the one above it — bikes delivered this month may have been
-    // booked in an earlier month, which would read as a nonsense ">100% conversion". Show the
-    // count without a conversion figure in that case rather than printing something untrue.
+  const W = 300, bandH = 34, gap = 7, maxW = 150, minW = 30;
+  const cx = W * 0.30;
+  const widthFor = v => minW + (maxW - minW) * (v / top);
+  let y = 0;
+  const bands = steps.map((s, i) => {
+    const wTop = widthFor(s.val);
+    const next = steps[i + 1] ? steps[i + 1].val : s.val * 0.7;
+    const wBot = widthFor(Math.min(s.val, next));
+    const yt = y, yb = y + bandH;
+    y += bandH + gap;
+    const pts = `${cx - wTop/2},${yt} ${cx + wTop/2},${yt} ${cx + wBot/2},${yb} ${cx - wBot/2},${yb}`;
     const showConv = s.conv !== null && s.conv <= 1;
+    const convTxt = showConv ? fmtPct(s.conv) : (s.conv !== null ? '— carry-in' : '');
     return `
-    <div class="funnel-step">
-      <div class="funnel-head">
-        <span class="funnel-name">${esc(s.name)}</span>
-        <span>
-          <span class="funnel-val">${fmtInt(s.val)}</span>
-          ${showConv ? `<span class="funnel-conv">${fmtPct(s.conv)}<small>CONV</small></span>`
-            : (s.conv !== null ? `<span class="funnel-conv" style="color:var(--text-muted)" title="Includes bookings carried in from earlier months, so a conversion rate against this month's bookings alone would be misleading">—<small>CARRY-IN</small></span>` : '')}
-        </span>
-      </div>
-      <div class="funnel-track"><div class="funnel-fill" style="width:${Math.max(3, (s.val / top) * 100)}%;background:${s.colr}"></div></div>
-    </div>`;
+      <polygon points="${pts}" fill="${s.colr}" opacity="0.92"/>
+      <text x="${cx}" y="${yt + bandH/2 + 5}" text-anchor="middle" font-size="15" font-weight="700"
+            fill="var(--on-gold)" style="font-family:var(--font-head)">${fmtInt(s.val)}</text>
+      <text x="${cx + maxW/2 + 12}" y="${yt + bandH/2 - 1}" font-size="10.5" fill="var(--text-secondary)">${esc(s.name)}</text>
+      ${convTxt ? `<text x="${cx + maxW/2 + 12}" y="${yt + bandH/2 + 12}" font-size="10" font-weight="700" fill="var(--gold)" style="font-family:var(--font-head)">${convTxt}</text>` : ''}`;
   }).join('');
+  const totalH = steps.length * (bandH + gap);
+  el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${totalH}" role="img" aria-label="Sales funnel">${bands}</svg>`;
 }
 
 /* ── Star of the month ──────────────────────────────────────────────────────
@@ -3384,7 +3523,13 @@ function renderPending(){
   modelSel.innerHTML = '<option value="ALL">All Models</option>' + distinctModels.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   modelSel.value = (prevModel === 'ALL' || distinctModels.includes(prevModel)) ? prevModel : 'ALL';
   const selectedModel = modelSel.value;
-  const colourCmpRowsFiltered = selectedModel === 'ALL' ? colourCmpRows : colourCmpRows.filter(r => r.model === selectedModel);
+  let colourCmpRowsFiltered = selectedModel === 'ALL' ? colourCmpRows : colourCmpRows.filter(r => r.model === selectedModel);
+  // "Only shortfall" = bookings that can't be met from current KN stock (gap < 0), i.e. booking
+  // hai par stock nahi. This is the set most worth acting on and exporting.
+  const shortfallOnly = document.getElementById('shortfallOnly') && document.getElementById('shortfallOnly').checked;
+  if (shortfallOnly) colourCmpRowsFiltered = colourCmpRowsFiltered.filter(r => r.gap < 0);
+  // Kept for the CSV export button, which downloads exactly what's shown in the table.
+  MODEL_FINDER_VISIBLE = colourCmpRowsFiltered;
 
   renderStaticTable('tblPendingVsStockColour', [
     { key:'fam', label:'Model Family' },
@@ -3446,6 +3591,38 @@ function renderPending(){
 }
 document.getElementById('searchPending').addEventListener('input', () => renderPending());
 document.getElementById('modelFinderSelect').addEventListener('change', () => renderPending());
+document.getElementById('shortfallOnly').addEventListener('change', () => renderPending());
+
+// CSV export of exactly the rows currently shown in the Model Finder table (respects the model
+// dropdown and the shortfall-only toggle). Built as a Blob and downloaded client-side — no server.
+let MODEL_FINDER_VISIBLE = [];
+function csvCell(v){
+  const s = String(v == null ? '' : v);
+  // Quote if the value contains a comma, quote or newline; double up any inner quotes.
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+document.getElementById('exportShortfallBtn').addEventListener('click', () => {
+  const rows = MODEL_FINDER_VISIBLE || [];
+  if (!rows.length) { alert('Nothing to export for the current filter.'); return; }
+  const header = ['Model Family', 'Model', 'Colour', 'Model Code', 'Pending Bookings', 'Stock Available (Open, KN)', 'Surplus/Shortfall', 'Booked By'];
+  const lines = [header.join(',')];
+  rows.forEach(r => {
+    lines.push([
+      r.fam, r.model, r.colour, r.code || 'NO MATCH',
+      r.pending, r.stock, (r.gap > 0 ? '+' : '') + r.gap, r.execs,
+    ].map(csvCell).join(','));
+  });
+  const shortfallOnly = document.getElementById('shortfallOnly').checked;
+  const stamp = new Date().toISOString().slice(0, 10);
+  const fname = `amar-autos-${shortfallOnly ? 'shortfall' : 'bookings-vs-stock'}-${stamp}.csv`;
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' }); // BOM so Excel reads UTF-8
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
 document.getElementById('exportPending').addEventListener('click', () => {
   exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows());
 });
