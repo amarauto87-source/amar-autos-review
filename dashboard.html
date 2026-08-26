@@ -1236,15 +1236,21 @@
     <div class="kpi-grid" id="kpiBookings"></div>
     <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
 
-    <h2 class="section-title">⏰ Overdue Deliveries — TDD has already passed</h2>
+    <h2 class="section-title">⏰ Deliveries by TDD — overdue &amp; upcoming</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      TDD has passed and the bike still isn't billed — the customer was expecting it already. Rows with text TDDs ("HOLD"/"ASAP") are skipped rather than guessed at.
+      Every open booking with its TDD, in one list. <b>Days column is negative when a delivery is past due</b> (−2 = two days late) and positive when it's still ahead. Text TDDs are handled by priority: <b>ASAP</b> sorts with the most urgent (top when Old→New), <b>HOLD</b> always sits at the very bottom. Admin sees the whole team; a sales login sees only their own.
     </div>
-    <div class="table-wrap"><table class="data" id="tblOverdue"></table></div>
-
-    <h2 class="section-title">🚨 At Risk — Delivery Due Soon, Bike Not In Stock</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
-    <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
+        Sort by TDD:
+        <select id="tddSortOrder">
+          <option value="oldToNew">Old → New (most urgent first)</option>
+          <option value="newToOld">New → Old (latest first)</option>
+        </select>
+      </label>
+      <button id="exportTddBtn" title="Download this table as a CSV you can open in Excel">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblTdd"></table></div>
 
     <h2 class="section-title">🔎 Model Finder — Bookings vs Stock by Colour</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
@@ -2369,9 +2375,17 @@ function renderDashFunnel(retail){
   ];
   if (!enq && !retail) { el.innerHTML = '<div class="empty-note" style="padding:16px">No enquiry / delivery data for this filter</div>'; return; }
   const top = Math.max(1, ...steps.map(s=>s.val));
-  const W=300, bandH=32, gap=7, maxW=150, minW=30, cx=W*0.30;
+  // Geometry. The funnel bands sit on the left; each band's label + conversion % sit to the RIGHT
+  // of the widest band. viewBox width/height are derived from the actual content so nothing clips:
+  //   - labelX is where text starts; W leaves generous room to the right of the longest label
+  //   - height = last band's bottom + a little, and text drops at most ~12px below a band centre,
+  //     so we pad the viewBox bottom by that much (the old code cut off the final label).
+  const bandH=30, gap=8, maxW=140, minW=28, padTop=4, padBottom=14;
+  const cx = 4 + maxW/2;                 // widest band fully inside the left edge
+  const labelX = cx + maxW/2 + 14;       // labels start just past the widest band
+  const W = labelX + 150;                // room for "Test rides given" + conv % without clipping
   const widthFor = v => minW + (maxW-minW)*(v/top);
-  let y=0;
+  let y = padTop;
   const bands = steps.map((s,i) => {
     const wTop=widthFor(s.val), next=steps[i+1]?steps[i+1].val:s.val*0.7, wBot=widthFor(Math.min(s.val,next));
     const yt=y, yb=y+bandH; y+=bandH+gap;
@@ -2380,10 +2394,11 @@ function renderDashFunnel(retail){
     const convTxt = showConv?fmtPct(s.conv):(s.conv!==null?'— carry-in':'');
     return `<polygon points="${pts}" fill="${s.colr}" opacity="0.92"/>
       <text x="${cx}" y="${yt+bandH/2+5}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--on-gold)" style="font-family:var(--font-head)">${fmtInt(s.val)}</text>
-      <text x="${cx+maxW/2+12}" y="${yt+bandH/2-1}" font-size="10.5" fill="var(--text-secondary)">${esc(s.name)}</text>
-      ${convTxt?`<text x="${cx+maxW/2+12}" y="${yt+bandH/2+12}" font-size="10" font-weight="700" fill="var(--gold)" style="font-family:var(--font-head)">${convTxt}</text>`:''}`;
+      <text x="${labelX}" y="${yt+bandH/2-1}" font-size="10.5" fill="var(--text-secondary)">${esc(s.name)}</text>
+      ${convTxt?`<text x="${labelX}" y="${yt+bandH/2+12}" font-size="10" font-weight="700" fill="var(--gold)" style="font-family:var(--font-head)">${convTxt}</text>`:''}`;
   }).join('');
-  el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${steps.length*(bandH+gap)}" role="img" aria-label="Sales funnel">${bands}</svg>`;
+  const H = (y - gap) + padBottom;       // bottom of last band (no trailing gap) + room for its label
+  el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales funnel">${bands}</svg>`;
 }
 function renderDashLeaderboard(){
   const rows = STATE.execList.map(name => {
@@ -3453,6 +3468,96 @@ function parseTddDate(v, bookingDate){
   return isNaN(d) ? null : d;
 }
 function todayMidnight(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+// Sort + render for the unified TDD table (Change 4+5). Ordering is priority-aware:
+//   Old→New (most urgent first): ASAP at the very top, then dates ascending (most overdue →
+//     furthest out), then unknown/blank, then HOLD pinned last.
+//   New→Old: dates descending, but ASAP still ranks as most-urgent- ... actually in New→Old the
+//     user wants the latest dates first, so ASAP (no date, but urgent) goes to the BOTTOM of the
+//     dated rows yet still ABOVE HOLD. HOLD is always dead last either way.
+// Implemented with a (tier, value) comparator so the text priorities never sort as if they were
+// dates.
+let TDD_ROWS_CACHE = [];
+function sortTddRows(rows, order){
+  const oldToNew = order !== 'newToOld';
+  // tier: lower = higher up the list. HOLD is always the largest tier (bottom).
+  const tierOf = (r) => {
+    if (r.priorityClass === 'hold') return 3;
+    if (r.priorityClass === 'unknown') return 2;
+    if (r.priorityClass === 'asap') return oldToNew ? 0 : 1; // urgent at top in Old→New; with the "no-date" group otherwise
+    return 1; // real dates
+  };
+  return rows.slice().sort((a, b) => {
+    const ta = tierOf(a), tb = tierOf(b);
+    if (ta !== tb) return ta - tb;
+    // within the dated tier, order by the actual day offset
+    if (a.priorityClass === 'date' && b.priorityClass === 'date') {
+      return oldToNew ? a.days - b.days : b.days - a.days;
+    }
+    // ASAP vs ASAP or same non-date tier — keep stable by customer name
+    return str(a.customer).localeCompare(str(b.customer));
+  });
+}
+function renderTddTable(rows){
+  TDD_ROWS_CACHE = rows;
+  const order = (document.getElementById('tddSortOrder') || {}).value || 'oldToNew';
+  const sorted = sortTddRows(rows, order);
+  renderStaticTable('tblTdd', [
+    { key:'slipNo', label:'Slip / Receipt No' },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No' },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'exec', label:'Executive' },
+    { key:'tdd', label:'TDD', raw:true, fmt: (v, row) => {
+        if (row.priorityClass === 'asap') return '<span class="pill bad">ASAP</span>';
+        if (row.priorityClass === 'hold') return '<span class="pill warn">HOLD</span>';
+        return esc(v);
+      } },
+    { key:'days', label:'Days (− = overdue)', num:true, raw:true, fmt: (v, row) => {
+        if (row.priorityClass === 'asap') return '<span class="table-flag">🚨 now</span>';
+        if (v == null) return '<span style="color:var(--text-muted)">—</span>';
+        // negative = overdue (red flag); zero = due today; positive = still ahead
+        if (v < 0)  return `<span class="table-flag">⚠️ ${fmtInt(v)}</span>`;
+        if (v === 0) return '<span style="color:var(--warning);font-weight:700">today</span>';
+        return `<span style="color:var(--good)">+${fmtInt(v)}</span>`;
+      } },
+    { key:'stockText', label:'Stock Status' },
+    { key:'status', label:'Booking Status' },
+  ], sorted);
+}
+// Wire the sort dropdown + CSV export once, after first render. Guarded so we don't stack
+// listeners on every re-render.
+function wireTddControls(){
+  const sortSel = document.getElementById('tddSortOrder');
+  if (sortSel && !sortSel.dataset.wired) {
+    sortSel.dataset.wired = '1';
+    sortSel.addEventListener('change', () => renderTddTable(TDD_ROWS_CACHE));
+  }
+  const btn = document.getElementById('exportTddBtn');
+  if (btn && !btn.dataset.wired) {
+    btn.dataset.wired = '1';
+    btn.addEventListener('click', () => {
+      const order = (document.getElementById('tddSortOrder') || {}).value || 'oldToNew';
+      const sorted = sortTddRows(TDD_ROWS_CACHE, order);
+      if (!sorted.length) { alert('Nothing to export for the current filter.'); return; }
+      const header = ['Slip/Receipt No', 'Customer', 'Mobile', 'Model', 'Colour', 'Executive', 'TDD', 'Days (negative = overdue)', 'Stock Status', 'Booking Status'];
+      const csvCell = v => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+      const lines = [header.join(',')];
+      sorted.forEach(r => lines.push([
+        r.slipNo, r.customer, r.mobile, r.model, r.colour, r.exec, r.tdd,
+        (r.days == null ? r.tdd : r.days), r.stockText.replace(/[✅🟡❌]/g, '').trim(), r.status,
+      ].map(csvCell).join(',')));
+      const stamp = new Date().toISOString().slice(0, 10);
+      const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `amar-autos-tdd-deliveries-${stamp}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+}
+
 // Overdue = TDD (or, failing that, Expected Delivery) has a parseable date before today, and
 // the booking is still open (not billed, not cancelled). execFilterName mirrors
 // computeDeliveryAgg()'s pattern — pass a name to get one executive's count regardless of the
@@ -3614,47 +3719,44 @@ function renderPending(){
   ].join('');
 
   const today = todayMidnight();
-  const overdueRows = overdue.map(r => {
-    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
-    const daysLate = tdd ? Math.round((today - tdd) / 86400000) : 0;
-    return { slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]), exec: str(r[7]), tdd: fmtDate(tdd), daysLate, status: str(r[9]) };
-  }).sort((a,b) => b.daysLate - a.daysLate);
-  renderStaticTable('tblOverdue', [
-    { key:'slipNo', label:'Slip / Receipt No' },
-    { key:'customer', label:'Customer Name' },
-    { key:'mobile', label:'Mobile No' },
-    { key:'model', label:'Model' },
-    { key:'colour', label:'Colour' },
-    { key:'exec', label:'Executive' },
-    { key:'tdd', label:'TDD (Tentative Delivery Date)' },
-    { key:'daysLate', label:'Days Overdue', num:true, raw:true, fmt: v => `<span class="table-flag">⚠️ ${fmtInt(v)}</span>` },
-    { key:'status', label:'Status' },
-  ], overdueRows);
 
-  const atRisk = atRiskRowsFor(null);
-  document.getElementById('atRiskNote').textContent =
-    `Bookings whose TDD falls within the next ${TDD_ALERT_DAYS} days where that exact model + colour is NOT currently Open in KN stock — the deliveries most likely to slip. Admin sees the whole team's; a sales login sees only their own.`;
-  const atRiskRows = atRisk.map(r => {
-    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
-    const daysLeft = tdd ? Math.round((tdd - today) / 86400000) : 0;
-    const { familyOnly } = stockMatchFor(r[3], r[4]);
+  // ── Unified TDD table (Change 4+5) ──────────────────────────────────────────
+  // Every open booking (not billed / not cancelled), each with its TDD, in ONE list — replacing
+  // the old separate "Overdue" and "At-Risk" tables. Text TDDs like ASAP/HOLD used to be dropped
+  // (parseTddDate returns null for them); here they're kept and ordered by priority instead:
+  //   • a real date  → sorts by the date, and shows "days" as a signed number
+  //                     (negative = past due, e.g. −2; positive = still ahead)
+  //   • ASAP          → highest urgency: rank alongside the most overdue (top when Old→New)
+  //   • HOLD          → lowest: pinned to the very bottom in BOTH sort directions
+  //   • blank/other   → treated as unknown, sits just above HOLD
+  const tddRows = allPendingRowsFor(null).map(r => {
+    const rawTdd = str(r[8]) || str(r[10]);
+    const tddDate = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    const upTdd = up(rawTdd);
+    let tddText, days, priorityClass;
+    if (tddDate) {
+      // Signed days: negative when past due. (today − tdd) was "days late" (positive); flip it so
+      // a delivery 2 days overdue reads as −2 and one due in 3 days reads as +3.
+      days = Math.round((tddDate - today) / 86400000);
+      tddText = fmtDate(tddDate);
+      priorityClass = 'date';
+    } else if (upTdd === 'ASAP') {
+      days = null; tddText = 'ASAP'; priorityClass = 'asap';
+    } else if (upTdd === 'HOLD') {
+      days = null; tddText = 'HOLD'; priorityClass = 'hold';
+    } else {
+      days = null; tddText = rawTdd || '—'; priorityClass = 'unknown';
+    }
+    const { exact, familyOnly } = stockMatchFor(r[3], r[4]);
+    const stockText = exact > 0 ? `✅ ${exact} in stock`
+      : familyOnly > 0 ? `🟡 ${familyOnly} other colour` : '❌ not in stock';
     return {
       slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]),
-      exec: str(r[7]), tdd: fmtDate(tdd), daysLeft,
-      alt: familyOnly > 0 ? `${familyOnly} in another colour` : 'none',
+      exec: str(r[7]), tdd: tddText, days, priorityClass, stockText, status: str(r[9]),
     };
-  }).sort((a,b) => a.daysLeft - b.daysLeft);
-  renderStaticTable('tblAtRisk', [
-    { key:'slipNo', label:'Slip / Receipt No' },
-    { key:'customer', label:'Customer Name' },
-    { key:'mobile', label:'Mobile No' },
-    { key:'model', label:'Model' },
-    { key:'colour', label:'Colour' },
-    { key:'exec', label:'Executive' },
-    { key:'tdd', label:'TDD (Promised Date)' },
-    { key:'daysLeft', label:'Days Left', num:true, raw:true, fmt: v => `<span class="table-flag">🚨 ${fmtInt(v)}</span>` },
-    { key:'alt', label:'Same Model, Other Colour' },
-  ], atRiskRows);
+  });
+  renderTddTable(tddRows);
+  wireTddControls();
 
   // Same comparison at exact model+colour level — grouped by the booking's own Model/Colour text
   // (so every distinct booking always gets a row, never silently disappears), with the STOCK
@@ -3733,12 +3835,19 @@ function renderPending(){
     unmatchedEl.innerHTML = !unmatchedCount ? '' : `<div class="empty-note" style="text-align:left; padding-top:10px; color:var(--warning);">⚠️ ${unmatchedCount} colour${unmatchedCount===1?'':'s'} above (marked ⚠️ in Model Code) couldn't be matched to a current stock code — either genuinely zero stock in that colour, or the Model/Colour spelling doesn't match the Stock tab exactly.</div>`;
   }
 
-  // Issue #4: customer-wise "whose booking vs which exact model/colour is available right now"
-  // — pull straight from ACTUL BOOKING, match against Open stock at the Model Name (colour)
-  // level, not just family, so a sales person can tell a waiting customer exactly where things
-  // stand without going back to the sheet and filtering manually. (stockMatchFor is now a
-  // module-level function — see below renderStock() — so Today's Priorities can reuse it too.)
-  const bookingStockRows = rows.map(r => {
+  // Customer-wise "whose booking vs which exact model/colour is available right now".
+  // Change 2 — this table is deliberately GLOBAL (every executive store-wide), NOT limited to the
+  // logged-in person like the rest of the tab. The point is First-Come-First-Served: when a bike
+  // arrives, everyone can see which customer booked that model+colour earliest, so it goes to the
+  // executive whose customer was first in line rather than whoever happens to be looking. It reads
+  // straight from ACTUL BOOKING (all open bookings, ignoring the exec filter) and is ordered by
+  // booking date so the earliest booking sits on top within each stock-status group.
+  const bookingIndex = (r) => STATE.booking.indexOf(r); // original sheet order = booking order
+  const globalOpenBookings = STATE.booking.filter(r => {
+    const s = up(r[9]);
+    return s !== 'BILLED' && s !== 'CANCEL';
+  });
+  const bookingStockRows = globalOpenBookings.map((r, i) => {
     const model = str(r[3]) || '(unknown)';
     const colour = str(r[4]);
     const { exact, familyOnly } = stockMatchFor(model, colour);
@@ -3746,8 +3855,15 @@ function renderPending(){
     if (exact > 0) { status = `✅ Available now (${exact} in stock)`; cls = 'good'; }
     else if (familyOnly > 0) { status = `🟡 Same model, other colour available (${familyOnly})`; cls = 'warn'; }
     else { status = '❌ Not in stock — check In-Transit / order'; cls = 'bad'; }
-    return { slipNo: str(r[1]), customer: str(r[5]), model, colour, exec: str(r[7]), tdd: str(r[8]) || str(r[10]), status, cls };
-  }).sort((a,b) => (a.cls==='bad'?0:1) - (b.cls==='bad'?0:1));
+    // bookingDate drives FCFS ordering; fall back to original row order when the date won't parse.
+    const bd = parseTddDate(r[2], null);
+    return { slipNo: str(r[1]), customer: str(r[5]), model, colour, exec: str(r[7]),
+             tdd: str(r[8]) || str(r[10]), status, cls,
+             _order: bd ? bd.getTime() : i, };
+  }).sort((a,b) =>
+    // available-first grouping preserved, then earliest booking first within each group (FCFS)
+    (a.cls==='bad'?0:1) - (b.cls==='bad'?0:1) || a._order - b._order
+  );
   renderStaticTable('tblBookingStockMatch', [
     { key:'customer', label:'Customer' },
     { key:'model', label:'Model' },
@@ -4173,21 +4289,25 @@ const MONTHLY_BOOKING_TARGET = 213;
 // Channel split of the monthly booking target, and (for Walk-in only, per Deepak) how many
 // enquiries are needed to reach that many bookings. Everything is proportional to whatever
 // MONTHLY_BOOKING_TARGET is set to above — change the number there, not here.
+// Note: these percentages deliberately add up to 110% (60+30+5+5+10), not 100% — Deepak wants the
+// extra 10% as a built-in buffer, so the channel targets sum slightly above the headline target.
 const FUNNEL_CHANNELS = [
-  { key: 'walkin', label: 'Walk-in',          pct: 0.60, enqMultiplier: 2 },
-  { key: 'tele',   label: 'Telephonic',       pct: 0.30 },
-  { key: 'field',  label: 'Field & Service', pct: 0.10 },
-  { key: 'web',    label: 'Web / Other',      pct: 0.10 },
+  { key: 'walkin',  label: 'Walk-in',      pct: 0.60, enqMultiplier: 2 },
+  { key: 'tele',    label: 'Telephonic',   pct: 0.30 },
+  { key: 'service', label: 'Service',      pct: 0.05 },
+  { key: 'field',   label: 'Field',        pct: 0.05 },
+  { key: 'web',     label: 'Web / Other',  pct: 0.10 },
 ];
 
-// Maps a raw "Type of Enquiry" value onto one of the four channels above. Anything that isn't
-// Walk In / Telephonic / Field Generation / Service Referral (e.g. "Company", blank, or a future
-// "Web" value RE might add) falls into Web / Other by default.
+// Maps a raw "Type of Enquiry" value onto one of the channels above. Service Referral → Service,
+// Field Generation → Field (kept separate now, per Deepak). Anything that isn't Walk In /
+// Telephonic / Field / Service (e.g. "Company", blank, or a future "Web" value) → Web / Other.
 function classifyChannel(type){
   const t = up(type);
   if (t === 'WALK IN') return 'walkin';
   if (t === 'TELEPHONIC') return 'tele';
-  if (t === 'FIELD GENERATION' || t === 'SERVICE REFERRAL') return 'field';
+  if (t === 'SERVICE REFERRAL') return 'service';
+  if (t === 'FIELD GENERATION') return 'field';
   return 'web';
 }
 
@@ -4201,7 +4321,7 @@ function computeFunnelTargets(){
   const dayOfMonth = now.getDate();
   const frac = dayOfMonth / daysInMonth;
 
-  const counts = { walkin: {enq:0,booked:0}, tele: {enq:0,booked:0}, field: {enq:0,booked:0}, web: {enq:0,booked:0} };
+  const counts = { walkin: {enq:0,booked:0}, tele: {enq:0,booked:0}, service: {enq:0,booked:0}, field: {enq:0,booked:0}, web: {enq:0,booked:0} };
   STATE.enquiry.forEach(r => {
     const d = r[14];
     if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) return;
@@ -4266,7 +4386,7 @@ function renderPerformanceHeatmap(){
   if (!execs.length) { el.innerHTML = '<div class="empty-note">No executives configured</div>'; return; }
 
   const grid = {};
-  execs.forEach(e => { grid[e] = { walkin:0, tele:0, field:0, web:0 }; });
+  execs.forEach(e => { grid[e] = { walkin:0, tele:0, service:0, field:0, web:0 }; });
   STATE.enquiry.forEach(r => {
     if (!dateInFilter(r[14])) return;
     if (up(r[9]) !== 'BOOKED') return;
@@ -4279,7 +4399,7 @@ function renderPerformanceHeatmap(){
   const max = Math.max(1, ...execs.flatMap(e => Object.values(grid[e])));
   const rows = execs.map(e => {
     const row = grid[e];
-    const total = row.walkin + row.tele + row.field + row.web;
+    const total = row.walkin + row.tele + row.service + row.field + row.web;
     const cells = FUNNEL_CHANNELS.map(c => {
       const v = row[c.key];
       const intensity = v / max;
@@ -4302,7 +4422,7 @@ function computeSmartSuggestions(){
 
   // 1. Weakest vs strongest converting enquiry channel — only compare channels with enough
   // volume (5+) to mean anything, and only flag a real gap (10+ points), not noise.
-  const chGroups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
+  const chGroups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, service:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
   for (const r of STATE.enquiry) {
     if (!dateInFilter(r[14])) continue;
     if (!ownerInFilter(r[13])) continue;
@@ -4417,7 +4537,7 @@ function renderAnalytics(){
 
   // funnel conversion % — same four channels as the target section above, for one consistent
   // vocabulary across the tab
-  const groups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
+  const groups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, service:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
   for (const r of STATE.enquiry) {
     if (!dateInFilter(r[14])) continue;
     if (!ownerInFilter(r[13])) continue;
