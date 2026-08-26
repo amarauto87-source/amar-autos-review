@@ -454,6 +454,33 @@
   .name-cell { display: flex; align-items: center; gap: 10px; }
   .mini-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-family: var(--font-head); font-weight: 700; font-size: 12px; color: var(--text-primary); background: var(--surface-2); border: 1px solid var(--border); }
   #dashLeaderboard tfoot td { border-top: 1px solid var(--gold-dim); background: color-mix(in srgb, var(--surface-2) 92%, var(--gold) 8%); font-weight: 700; }
+  /* Dashboard quick-jump shortcut bar (Kaam 4) */
+  .dash-shortcuts { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 20px; }
+  .dash-shortcuts button {
+    background: var(--surface-1); border: 1px solid var(--gold-dim); color: var(--text-primary);
+    border-radius: 999px; padding: 8px 15px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    transition: background .15s, border-color .15s, transform .12s;
+  }
+  .dash-shortcuts button:hover { background: color-mix(in srgb, var(--gold) 14%, transparent); border-color: var(--gold); transform: translateY(-1px); }
+  @media (max-width: 640px) { .dash-shortcuts button { padding: 7px 12px; font-size: 12px; } }
+  /* Model Specs — expandable cards (deep details + Hinglish selling points) */
+  .spec-card { border: 1px solid var(--border); border-left: 3px solid var(--gold-dim); border-radius: 11px; background: var(--surface-1); margin-bottom: 10px; overflow: hidden; }
+  .spec-card[open] { border-left-color: var(--gold); }
+  .spec-card > summary { cursor: pointer; list-style: none; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .spec-card > summary::-webkit-details-marker { display: none; }
+  .spec-card > summary::before { content: '▸'; color: var(--gold); font-size: 12px; margin-right: 8px; transition: transform .15s; }
+  .spec-card[open] > summary::before { transform: rotate(90deg); }
+  .spec-card > summary:hover { background: var(--surface-2); }
+  .spec-name { font-family: var(--font-head); font-size: 18px; font-weight: 600; letter-spacing: .4px; flex: 1; }
+  .spec-cat { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--on-gold); background: linear-gradient(180deg, var(--gold-light), var(--gold)); padding: 3px 10px; border-radius: 999px; }
+  .spec-body { padding: 4px 16px 16px; }
+  .spec-hinglish { background: color-mix(in srgb, var(--gold) 9%, transparent); border: 1px solid var(--gold-dim); border-radius: 9px; padding: 11px 13px; font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
+  .spec-line { display: flex; gap: 12px; padding: 7px 0; border-top: 1px solid rgba(128,128,128,.12); font-size: 12.5px; }
+  .spec-line .spec-k { flex-shrink: 0; width: 90px; }
+  .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,.12); }
+  .spec-grid > div { display: flex; flex-direction: column; gap: 2px; }
+  .spec-k { font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
+  .spec-v { font-size: 13px; color: var(--text-primary); }
 
   /* ══ Showroom-screen components ═══════════════════════════════════════════
      Brought over from the showroom display design: a pace-aware gauge, a
@@ -853,7 +880,7 @@
       <div class="sub">Something special, every day</div>
     </div>
     <div class="fields">
-      <div class="re-fact-label" id="reFactLabel">TODAY'S SPOTLIGHT</div>
+      <div class="re-fact-label" id="reFactLabel">KYA AAP JAANTE HAIN?</div>
       <div class="re-fact-title" id="reFactTitle"></div>
       <div class="re-fact-text" id="reFactText"></div>
       <button type="button" id="reFactContinue" class="primary" style="width:100%;margin-top:22px;padding:11px;font-size:13.5px;border-radius:9px;">Enter Dashboard →</button>
@@ -935,6 +962,17 @@
 
   <section class="tabpanel active" id="tab-dashboard">
     <h2 class="section-title" id="dashTitle">🏍️ Overall Store KPI</h2>
+    <!-- Kaam 4: quick jump buttons. Each one switches to the relevant tab (and, where useful,
+         scrolls to a specific section on it) so the wall-display Dashboard doubles as a launcher. -->
+    <div class="dash-shortcuts" id="dashShortcuts">
+      <button type="button" data-jump="pending" data-scroll="atRiskTitle">🚨 At-Risk (stock nahi)</button>
+      <button type="button" data-jump="pending" data-scroll="modelFinderTitle">🔎 Stock Availability</button>
+      <button type="button" data-jump="pending">📦 Book vs Stock</button>
+      <button type="button" data-jump="delivery">🚚 Delivery</button>
+      <button type="button" data-jump="stock">🏭 Stock</button>
+      <button type="button" data-jump="analytics" data-scroll="funnelTargetTitle">🎯 Booking Funnel</button>
+      <button type="button" data-jump="specs">📖 Model Specs</button>
+    </div>
     <div class="panel-grid">
       <div class="panel">
         <div class="panel-bar" id="barRetail">Bike Retail</div>
@@ -1122,7 +1160,7 @@
     </div>
     <div id="smartSuggestions" class="card"></div>
 
-    <h2 class="section-title" style="margin-top:30px;">🎯 Monthly Booking Target &amp; Funnel</h2>
+    <h2 class="section-title" id="funnelTargetTitle" style="margin-top:30px;">🎯 Monthly Booking Target &amp; Funnel</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;">Always the real calendar month (ignores the month filter), pace-adjusted to today — "Expected Till Today" is what you'd need by now to stay on track.</p>
     <div class="kpi-grid" id="kpiFunnelTargets"></div>
     <div class="table-wrap" style="margin-top:12px;"><table class="data" id="tblFunnelTargets"></table></div>
@@ -1236,6 +1274,10 @@
     <div class="kpi-grid" id="kpiBookings"></div>
     <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
 
+    <h2 class="section-title" id="atRiskTitle">🚨 At Risk — due soon &amp; bike NOT in stock</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
+    <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
+
     <h2 class="section-title">⏰ Deliveries by TDD — overdue &amp; upcoming</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Every open booking with its TDD, in one list. <b>Days column is negative when a delivery is past due</b> (−2 = two days late) and positive when it's still ahead. Text TDDs are handled by priority: <b>ASAP</b> sorts with the most urgent (top when Old→New), <b>HOLD</b> always sits at the very bottom. Admin sees the whole team; a sales login sees only their own.
@@ -1252,7 +1294,7 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblTdd"></table></div>
 
-    <h2 class="section-title">🔎 Model Finder — Bookings vs Stock by Colour</h2>
+    <h2 class="section-title" id="modelFinderTitle">🔎 Model Finder — Bookings vs Stock by Colour</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Per colour: how many are pending vs how many are Open in KN stock right now, and who already holds those bookings — so you can tell a walk-in whether a colour is genuinely free before promising it.
     </div>
@@ -1364,12 +1406,12 @@
   <section class="tabpanel" id="tab-specs">
     <h2 class="section-title">📖 Model Specifications — Royal Enfield Current Lineup</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      From royalenfield.com, checked Aug 2026. Prices are approximate ex-showroom starting points and vary by variant/colour/city — always confirm the exact figure before quoting a customer.
+      Kisi bhi model par click karo — poori details + customer ko Hinglish me kaise samjhana hai, sab khul jayega. Data Royal Enfield ke official positioning se hai; jahan koi number 100% pakka nahi wahan "confirm karein" likha hai — customer ko quote karne se pehle price list se check kar lena. Prices approximate ex-showroom hain, variant/colour/city se badalti hain.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
-      <input type="text" id="specsSearch" placeholder="Search model or category…" />
+      <input type="text" id="specsSearch" placeholder="Model, category ya 'best for' search karo…" />
     </div>
-    <div class="table-wrap"><table class="data" id="tblModelSpecs"></table></div>
+    <div id="specsCards"></div>
   </section>
 
   <section class="tabpanel" id="tab-qrcodes">
@@ -1490,41 +1532,38 @@ let CURRENT_USER = null;
 // sales person ki private data nahi, isliye sales person ke liye restrict karne ki zaroorat nahi.
 const RESTRICTED_TABS = ['analytics', 'riders'];
 
-// ===== Royal Enfield "Spotlight" — a different fact/spec shown once per day at login =====
+// ===== Royal Enfield "Spotlight" — a random Hinglish fact shown at each login =====
 // Pure offline/rule-based (no API, no network call) — same philosophy as the rest of this
-// dashboard. The array index is picked from the day-of-year, so every employee sees the SAME
-// fact on a given day, and it automatically rotates forward tomorrow with zero maintenance.
+// dashboard. A random fact is picked on every login, so each executive sees something different
+// each time. All facts are official RE information, written in Hinglish for the sales team.
 const RE_FACTS = [
-  { title: "Est. 1901 — the oldest name in motorcycling", text: "Royal Enfield is the oldest global motorcycle brand in continuous production — older than Harley-Davidson, older than BMW Motorrad. The company motto since day one: \"Made Like a Gun, Goes Like a Bullet.\"" },
-  { title: "From Redditch to Chennai", text: "Royal Enfield began in Redditch, England in 1901. Production later shifted entirely to India, and today Chennai is home to the brand's largest manufacturing base and its global engineering hub." },
-  { title: "Himalayan 450 — built for the mountains", text: "The Himalayan 450 runs the all-new liquid-cooled Sherpa 450 engine — a big step up from the old air-cooled 411, with a proper 6-speed gearbox, upside-down forks and a full-colour TFT navigation display." },
-  { title: "Classic 350 — the best-seller", text: "The Classic 350 is Royal Enfield's biggest seller worldwide, built on the modern J-series platform. It's the bike that most keeps that unmistakable thump-thump exhaust note alive today." },
-  { title: "The legendary 'thump'", text: "Royal Enfield's single-cylinder engines are famous for their deep, low-rpm exhaust note — riders and fans simply call it \"the thump\". It's one of the most recognisable sounds in motorcycling." },
-  { title: "Hunter 350 — the roadster", text: "The Hunter 350 shares its J-series 349cc engine with the Classic and Meteor, but in a shorter, lighter roadster body aimed at younger riders wanting a nimble city bike." },
-  { title: "Meteor 350 — the cruiser", text: "The Meteor 350 was Royal Enfield's first bike to get the Tripper — a small round navigation pod on the handlebar showing turn-by-turn directions from a paired phone." },
-  { title: "Scram 411 — the scrambler", text: "The Scram 411 takes the older Himalayan 411's rugged chassis and long-travel suspension and wraps it in a lighter, road-friendly scrambler body with a 19-inch front wheel." },
-  { title: "Continental GT 650 — the café racer", text: "Part of the 650 Twins family, the Continental GT 650 is Royal Enfield's café-racer — clip-on bars, a racing crouch, and the smooth 648cc parallel-twin engine shared with the Interceptor." },
-  { title: "Interceptor 650 — the classic roadster twin", text: "The Interceptor 650 revived a nameplate from Royal Enfield's 1960s lineup, now powered by a modern air/oil-cooled 648cc parallel-twin known for its balanced, torquey delivery." },
-  { title: "Super Meteor 650 — the cruiser twin", text: "The Super Meteor 650 is Royal Enfield's cruiser take on the 650 Twin platform — a longer wheelbase, forward-set footpegs and a relaxed riding stance for highway touring." },
-  { title: "Shotgun 650 — the bobber-roadster", text: "The Shotgun 650 blends bobber styling with roadster ergonomics, and was designed with an easily customisable subframe so owners can reshape the tail section." },
-  { title: "The 650 Twin platform", text: "The Interceptor 650, Continental GT 650, Super Meteor 650 and Shotgun 650 all share the same 648cc parallel-twin engine — proof that one well-built motor can wear four very different characters." },
-  { title: "A one-cylinder heritage, reinvented", text: "For most of its history Royal Enfield was known purely for single-cylinder thumpers. The 650 Twins, launched in 2018, marked the brand's first modern step into multi-cylinder territory." },
-  { title: "Built for every terrain", text: "From the highway-cruising Super Meteor to the Himalaya-ready Himalayan 450, Royal Enfield's current lineup is deliberately spread across cruiser, roadster, scrambler and adventure-touring categories." },
-  { title: "The Bullet — still in the family", text: "The Bullet nameplate dates back to 1932 in England, making it one of the longest continuously-produced motorcycle model names in the world. It remains part of Royal Enfield's line today in its modern 350 form." },
-  { title: "Real gearbox, real skill", text: "Royal Enfield's manual-clutch, foot-shift motorcycles reward a rider who's actually learned to ride — no shortcuts. That connection between rider and machine is central to the brand's whole identity." },
-  { title: "Community over showroom", text: "Royal Enfield actively builds owner communities — ride-outs, the Himalayan Odyssey, and city-level rider groups — treating every buyer as joining a riding culture, not just buying a vehicle." },
-  { title: "Make in India, ride the world", text: "Royal Enfield motorcycles built in Chennai are exported and ridden across more than 60 countries — an Indian-made motorcycle brand with genuine global reach." },
-  { title: "Simplicity is the point", text: "While rivals chase ever more electronics, Royal Enfield has stayed deliberately close to an analogue riding experience — the appeal is the ride itself, not a screen full of settings." },
-  { title: "East Delhi's own Amar Autos", text: "Every Royal Enfield that leaves our East Delhi showroom carries over 120 years of this heritage — from the first Redditch workshop to the bike parked in our showroom today." },
-  { title: "Test rides matter", text: "Because the thump, the torque, and the riding feel are so distinctive, most Royal Enfield buyers say the test ride is what actually closes the sale — numbers on paper rarely do it justice." },
-  { title: "A logo with history", text: "The Royal Enfield cannon logo traces back to the company's early-1900s roots supplying precision parts to the British armed forces — hence the brand motto tying the bike to a bullet." },
+  { title: "1901 se — motorcycling ka sabse purana naam", text: "Royal Enfield duniya ka sabse purana motorcycle brand hai jo aaj bhi continuously ban raha hai — Harley-Davidson se bhi purana, BMW se bhi. Pehle din se motto: \"Made Like a Gun, Goes Like a Bullet.\"" },
+  { title: "Redditch se Chennai tak", text: "Royal Enfield 1901 me England ke Redditch me shuru hua tha. Baad me poora production India shift ho gaya — aaj Chennai brand ki sabse badi factory aur global engineering hub hai." },
+  { title: "Himalayan 450 — pahaadon ke liye bani", text: "Himalayan 450 me naya liquid-cooled Sherpa 450 engine hai — purane air-cooled 411 se bahut bada step. 6-speed gearbox, USD forks aur full-colour TFT navigation display milta hai." },
+  { title: "Classic 350 — sabse zyada bikne wali", text: "Classic 350 Royal Enfield ki duniya bhar me sabse zyada bikne wali bike hai, modern J-series platform par bani. Wahi classic thump-thump exhaust note isi ki pehchaan hai." },
+  { title: "Woh legendary 'thump'", text: "Royal Enfield ke single-cylinder engine apni deep, low-rpm exhaust note ke liye famous hain — riders ise seedha \"thump\" kehte hain. Motorcycling ki sabse pehchani awaazon me se ek." },
+  { title: "Hunter 350 — the roadster", text: "Hunter 350 ka 349cc J-series engine Classic aur Meteor jaisa hi hai, par chhoti, halki roadster body me — young riders aur city ke liye nimble bike." },
+  { title: "Meteor 350 — the cruiser", text: "Meteor 350 pehli RE bike thi jisme Tripper mila — handlebar par ek chhota round navigation pod jo phone se turn-by-turn directions dikhata hai." },
+  { title: "Continental GT 650 — café racer", text: "650 Twins family ka hissa, Continental GT 650 RE ka café-racer hai — clip-on bars, sporty crouch, aur wahi smooth 648cc parallel-twin engine jo Interceptor me hai." },
+  { title: "Interceptor 650 — classic roadster twin", text: "Interceptor 650 ne 1960s ke ek purane naam ko wapas zinda kiya, ab modern air/oil-cooled 648cc parallel-twin ke saath — balanced aur torquey delivery ke liye jaana jaata hai." },
+  { title: "Super Meteor 650 — cruiser twin", text: "Super Meteor 650 650-Twin platform par RE ka cruiser hai — lamba wheelbase, aage set footpegs, aur highway touring ke liye relaxed riding stance." },
+  { title: "650 Twin platform", text: "Interceptor 650, Continental GT 650, Super Meteor 650 aur Shotgun 650 — sab ek hi 648cc parallel-twin engine share karte hain. Ek achha engine, chaar alag personalities." },
+  { title: "Bullet — aaj bhi parivaar me", text: "Bullet naam 1932 ka hai (England) — duniya ke sabse lambe time se continuously bante model naamo me se ek. Aaj bhi RE ki lineup me hai, modern 350 (aur ab 650) form me." },
+  { title: "Asli gearbox, asli skill", text: "Royal Enfield ki manual-clutch, foot-shift bikes us rider ko reward karti hain jisne sach me chalana seekha ho. Rider aur machine ke beech ka yahi connection brand ki pehchaan hai." },
+  { title: "Showroom se zyada — community", text: "Royal Enfield owner communities banati hai — ride-outs, Himalayan Odyssey, city rider groups. Har buyer ek riding culture join karta hai, sirf gaadi nahi khareedta." },
+  { title: "Make in India, ride the world", text: "Chennai me bani Royal Enfield bikes 60+ deshon me export aur ride hoti hain — ek Indian-made motorcycle brand jiski sach me global pehchaan hai." },
+  { title: "Simplicity hi asli baat hai", text: "Jab dusre zyada se zyada electronics daal rahe hain, RE jaan-boojh kar analogue riding experience ke kareeb rehta hai — mazaa ride me hai, screen ke settings me nahi." },
+  { title: "East Delhi ka apna Amar Autos", text: "Hamare East Delhi showroom se nikalne wali har Royal Enfield 120+ saal ki heritage leke jaati hai — pehli Redditch workshop se leke aaj showroom me khadi bike tak." },
+  { title: "Test ride sab kuch hai", text: "Thump, torque aur riding feel itni distinctive hai ki zyaadatar RE buyers kehte hain — sale to test ride par hi close hoti hai. Kaagaz ke numbers ye feel nahi de paate." },
+  { title: "Logo me itihaas", text: "Royal Enfield ka cannon logo company ki 1900s ki jadon se aata hai jab wo British armed forces ko precision parts supply karti thi — isi liye motto bike ko bullet se jodta hai." },
+  { title: "Har terrain ke liye", text: "Highway cruiser Super Meteor se leke Himalaya-ready Himalayan 450 tak — RE ki aaj ki lineup jaan-boojh kar cruiser, roadster, scrambler aur adventure-touring me faili hui hai." },
+  { title: "Guerrilla 450 — naya roadster", text: "Guerrilla 450 me Himalayan wala liquid-cooled Sherpa 450 engine hai (40 bhp), par sheher/street ke liye roadster form me. 350 se upgrade chahne walon ke liye modern option." },
 ];
 
+// Every login shows a RANDOM fact (not one fixed per day), so each executive — and each time they
+// log in — sees something different. Kept in Hinglish and to official RE facts only.
 function getDailyFact(){
-  const d = new Date();
-  const startOfYear = new Date(d.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((d - startOfYear) / 86400000);
-  const idx = ((dayOfYear % RE_FACTS.length) + RE_FACTS.length) % RE_FACTS.length;
+  const idx = Math.floor(Math.random() * RE_FACTS.length);
   return RE_FACTS[idx];
 }
 
@@ -1565,38 +1604,121 @@ function getDailyGrowthTip(){
 // backend). Prices are approximate starting ex-showroom figures, variant-dependent — always
 // confirm the exact number before quoting a customer. Update this list by hand when RE changes
 // the lineup or a price revision happens.
+// Royal Enfield line-up. Data is from Royal Enfield's own positioning; where an exact figure isn't
+// 100% confirmed it says "confirm karein" rather than guessing, so no one quotes a wrong number to
+// a customer. Categories corrected per RE's actual positioning:
+//   • Classic 350 / Bullet 350 = Roadster / Modern-Classic (retro street bikes), NOT "Cruiser".
+//     People often call the Classic a cruiser because of its vintage look, but its riding position
+//     and design are roadster — only the Meteor / Super Meteor are true cruisers.
+// `hinglish` = ready-to-say selling points for the executive (Hinglish, official facts only).
 const MODEL_SPECS = [
-  { name: 'Hunter 350', category: 'Roadster', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '181 kg', fuelTank: '13 L', price: '₹1.50L – 1.83L*' },
-  { name: 'Bullet 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.73L – 2.10L*' },
-  { name: 'Classic 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.93L – 2.35L*' },
-  { name: 'Goan Classic 350', category: 'Cruiser (special edition)', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹2.00L – 2.21L*' },
-  { name: 'Meteor 350', category: 'Cruiser', engine: '349cc, air/oil-cooled, single-cylinder', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '765 mm', kerbWeight: '191 kg', fuelTank: '15 L', price: '₹1.99L – 2.31L*' },
-  { name: 'Scram 440', category: 'Scrambler', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '805 mm', kerbWeight: '187 kg', fuelTank: '15 L', price: '₹2.20L – 2.45L* — confirm exact figures, newest addition to the lineup' },
-  { name: 'Guerrilla 450', category: 'Roadster', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '780 mm', kerbWeight: '185 kg', fuelTank: '11 L', price: '₹2.39L – 2.85L*' },
-  { name: 'Himalayan 450', category: 'Adventure Tourer', engine: '452cc, liquid-cooled, single-cylinder', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '825 mm (adjustable)', kerbWeight: '196 kg', fuelTank: '17 L', price: '₹2.85L – 3.20L*' },
-  { name: 'Interceptor 650', category: 'Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '804 mm', kerbWeight: '213 kg', fuelTank: '13.7 L', price: '₹3.31L – 3.60L*' },
-  { name: 'Continental GT 650', category: 'Café Racer (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '793 mm', kerbWeight: '211.5 kg', fuelTank: '12.5 L', price: '₹3.43L – 3.72L*' },
-  { name: 'Super Meteor 650', category: 'Cruiser (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '740 mm (low)', kerbWeight: '241 kg', fuelTank: '15.7 L', price: '₹3.66L – 4.18L*' },
-  { name: 'Shotgun 650', category: 'Bobber-Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '795 mm', kerbWeight: '240 kg (approx)', fuelTank: '13.8 L', price: '₹3.60L – 3.90L* — confirm exact figures' },
-  { name: 'Bullet 650', category: 'Cruiser (650 Twin)', engine: '647.95cc, air/oil-cooled, parallel-twin, SOHC', power: '34.6 kW (~46.4 bhp) @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.8 L', price: 'Confirm current ex-showroom — newest addition to the lineup' },
-  { name: 'Classic 650', category: 'Cruiser (650 Twin)', engine: '647.95cc, air/oil-cooled, parallel-twin, SOHC', power: '34.6 kW (~46.4 bhp) @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.7 L', price: '₹3.68L (Hotrod) – 3.82L (Chrome)*' },
-  { name: 'Bear 650', category: 'Scrambler (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '34.6 kW (~46.4 bhp) @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '830 mm (approx)', kerbWeight: '216 kg (approx)', fuelTank: '13.7 L', price: '₹3.55L – 3.85L* — confirm exact figures' },
+  { name: 'Hunter 350', category: 'Roadster (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '181 kg', fuelTank: '13 L', price: '₹1.50L – 1.83L*',
+    bestFor: 'City + young riders — sabse light aur nimble 350',
+    features: 'Sabse halka 350, chhota turning radius, sporty street stance. Metro (single-channel ABS) aur Retro (dual-channel ABS + alloy wheels) variants.',
+    hinglish: 'Sabse light 350 hai (181 kg) — sheher me chalane, U-turn, traffic ke liye best. Naye rider ya kam height wale customer ko confidently suggest karo. Retro variant me dual-channel ABS aur alloy wheels milte hain.' },
+
+  { name: 'Bullet 350', category: 'Roadster / Modern Classic (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.73L – 2.10L*',
+    bestFor: 'Legacy buyers — "asli Bullet" feel chahne wale',
+    features: 'RE ka sabse purana naam, tigmark ke saath classic thump. Hand-painted pinstripe, casted/spoke options. NOT a cruiser — ye ek roadster/street classic hai.',
+    hinglish: 'Ye "asli Bullet" hai — jise decades se log jaante hain. Jo customer heritage aur naam ke liye aata hai, use yahi chahiye. Isko cruiser mat bolna — ye roadster/classic street bike hai. Thump aur build quality iska USP hai.' },
+
+  { name: 'Classic 350', category: 'Roadster / Modern Classic (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.93L – 2.35L*',
+    bestFor: 'Sabse popular — retro look chahne wale har customer',
+    features: 'RE ki sabse zyada bikne wali bike. 1950s Classic styling, J-platform. Single-channel se dual-channel ABS, spoke/alloy, kai colours & variants (Redditch, Halcyon, Signals, Dark, Chrome).',
+    hinglish: 'IMPORTANT: Ye CRUISER NAHI hai — ye Modern Classic / Roadster hai. Log iski vintage look ki wajah se cruiser samajh lete hain, par riding position upright/roadster hai. Sabse zyada bikne wali RE — retro look, best resale, har budget me variant. Confused customer ko yahi safe recommendation hai.' },
+
+  { name: 'Goan Classic 350', category: 'Modern Classic (350, special edition)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹2.00L – 2.21L* — confirm exact figures',
+    bestFor: 'Classic ka style-conscious buyer — bobber/beach vibe',
+    features: 'Classic 350 platform par bobber-style theme — ape-hanger style bars, whitewall tyres, dual-tone paint. Special-edition, limited appeal.',
+    hinglish: 'Ye Classic 350 ka hi platform hai par "Goan beach / bobber" theme ke saath — whitewall tyres, alag handlebar, dual-tone. Jo customer thoda hatke style chahta hai unke liye. Engine-performance Classic 350 jaisa hi hai.' },
+
+  { name: 'Meteor 350', category: 'Cruiser (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '765 mm', kerbWeight: '191 kg', fuelTank: '15 L', price: '₹1.99L – 2.31L*',
+    bestFor: 'Highway cruising + easy low-seat riders',
+    features: 'Asli 350 cruiser — teardrop tank, forward-set feet, relaxed geometry. Sabse low seat (765 mm), Tripper navigation. Fireball / Stellar / Supernova variants.',
+    hinglish: 'Ye ASLI cruiser hai (Classic/Bullet nahi). Low seat 765 mm — chhoti height wale aur ladies ko comfortable. Highway pe relaxed long ride ke liye best, feet aage, tank bada (15L). Tripper navigation milta hai. Comfort chahne wale ko yahi bolo.' },
+
+  { name: 'Scram 440', category: 'Scrambler (450 platform)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa)', power: 'confirm karein (~40 bhp class)', torque: 'confirm karein', gearbox: '6-Speed', seatHeight: 'confirm karein', kerbWeight: 'confirm karein', fuelTank: 'confirm karein', price: 'Newest addition — confirm current ex-showroom & full specs from RE site',
+    bestFor: 'Light scrambler / mixed road-trail',
+    features: 'Naya model (Scram range ka bada engine version). Poore specs abhi RE site se confirm karke hi customer ko batayein.',
+    hinglish: 'Ye bahut naya model hai — iske exact numbers (power, weight, price) main abhi 100% confirm nahi keh sakta. Customer ko dene se pehle RE ki official site ya price list se cross-check zaroor kar lo, taaki galat spec na chala jaye.' },
+
+  { name: 'Guerrilla 450', category: 'Roadster (450)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa 450)', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '780 mm', kerbWeight: '185 kg', fuelTank: '11 L', price: '₹2.39L – 2.85L*',
+    bestFor: 'Modern street/roadster — liquid-cooled power',
+    features: 'Himalayan 450 wala Sherpa liquid-cooled engine, roadster form. Peppy, refined, TFT/round LCD options. Analogue / Dash / Flash trims.',
+    hinglish: 'Modern roadster hai — Himalayan wala liquid-cooled 450 engine (40 bhp), par sheher/street ke liye. Jo customer 350 se upgrade chahta hai aur zyada power+refinement chahta hai, unke liye. Halka (185 kg) aur peppy hai.' },
+
+  { name: 'Himalayan 450', category: 'Adventure Tourer (450)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa 450)', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '805–845 mm (adjustable)', kerbWeight: '196 kg', fuelTank: '17 L', price: '₹2.85L – 3.20L*',
+    bestFor: 'Serious touring + off-road / mountain trips',
+    features: 'RE ki flagship ADV. Full TFT (Google Maps), adjustable seat & windscreen, long-travel suspension, spoke tubeless. Base/Pass/Summit + special editions.',
+    hinglish: 'Ye RE ki asli adventure/touring machine hai — Ladakh, off-road, lambe tour ke liye. 17L tank, adjustable seat height (chhoti aur lambi dono height ke rider set kar sakte hain), full TFT me Google Maps. Jo customer serious touring karta hai usko yahi.' },
+
+  { name: 'Interceptor 650', category: 'Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '804 mm', kerbWeight: '213 kg', fuelTank: '13.7 L', price: '₹3.31L – 3.60L*',
+    bestFor: 'Twin-cylinder entry — smooth all-rounder',
+    features: 'Sabse accessible 650 twin. Upright relaxed roadster, butter-smooth engine, easy for highway. Kai colour/variant options.',
+    hinglish: 'Ye sabse aasaan aur popular 650 twin hai. Twin-cylinder ka smooth power aur highway cruising — par baithne ki position comfortable/upright. 350 se upgrade karne wale ya do-cylinder chahne wale ko yahi suggest karo. Value-for-money 650 hai.' },
+
+  { name: 'Continental GT 650', category: 'Café Racer (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '793 mm', kerbWeight: '211.5 kg', fuelTank: '12.5 L', price: '₹3.43L – 3.72L*',
+    bestFor: 'Sporty riders — café-racer style',
+    features: 'Interceptor wala hi engine, par café-racer stance — clip-on bars, sporty posture, single/twin seat. Style-focused.',
+    hinglish: 'Engine Interceptor jaisa hi hai, par ye café-racer look ke liye hai — jhuki hui sporty riding position (clip-on handlebar). Jo customer sporty/stylish look chahta hai unke liye. Lambe traffic-commute me thodi aage jhukni padti hai, ye customer ko pehle bata do.' },
+
+  { name: 'Super Meteor 650', category: 'Cruiser (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '740 mm (low)', kerbWeight: '241 kg', fuelTank: '15.7 L', price: '₹3.66L – 4.18L*',
+    bestFor: 'Big relaxed highway cruiser',
+    features: 'RE ka bada cruiser — forward controls, low 740 mm seat, USD forks. Astral / Interstellar / Celestial trims.',
+    hinglish: 'Ye bada asli cruiser hai — sabse low seat (740 mm), feet aage, highway pe relaxed lambi ride ke liye. Bhaari (241 kg) hai isliye city-only customer ko soch ke bechna. Jo customer premium cruiser aur long tour chahta hai, uska pick.' },
+
+  { name: 'Shotgun 650', category: 'Roadster / Bobber (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '795 mm', kerbWeight: '240 kg (approx — confirm)', fuelTank: '13.8 L', price: '₹3.60L – 3.90L* — confirm exact figures',
+    bestFor: 'Custom/bobber style, single-seat cruiser look',
+    features: 'Bobber-roadster styling, single-seat convertible. Style-heavy custom-culture bike. Kuch figures confirm karein.',
+    hinglish: 'Ye custom/bobber style ka bike hai — single seat, muscular look. Style-conscious customer ke liye. Kuch exact numbers (weight, price) main pura confirm nahi keh sakta — RE list se check kar lena.' },
+
+  { name: 'Bullet 650', category: 'Roadster / Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.8 L', price: 'Newest addition — confirm current ex-showroom',
+    bestFor: 'Bullet legacy + twin-cylinder power',
+    features: 'Bullet naam ab 650 twin me. Classic Bullet styling + parallel-twin refinement. Bahut naya — price confirm karein.',
+    hinglish: 'Ye ekdum naya hai — purane "Bullet" ke look me ab 650 twin engine. Jo customer Bullet ka naam/heritage chahta hai par twin-cylinder power bhi, unke liye. Price abhi confirm karke hi batana, bahut recent launch hai.' },
+
+  { name: 'Classic 650', category: 'Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.7 L', price: '₹3.68L (Hotrod) – 3.82L (Chrome)* — confirm',
+    bestFor: 'Classic look + 650 twin smoothness',
+    features: 'Classic 350 ki styling, ab 650 twin ke saath. Hotrod / Chrome variants. Premium modern-classic.',
+    hinglish: 'Popular Classic look ab bade 650 twin engine me. Jo customer Classic 350 ka design pasand karta hai par zyada power aur premium feel chahta hai, unke liye. Do variants — Hotrod aur Chrome. Price confirm kar lena.' },
+
+  { name: 'Bear 650', category: 'Scrambler (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm (confirm)', gearbox: '6-Speed', seatHeight: '830 mm (approx — confirm)', kerbWeight: '216 kg (approx — confirm)', fuelTank: '13.7 L', price: '₹3.55L – 3.85L* — confirm exact figures',
+    bestFor: 'Scrambler style on the 650 twin',
+    features: 'Interceptor-based scrambler — taller stance, off-road-inspired. Newer model, kuch figures confirm karein.',
+    hinglish: 'Ye 650 twin par scrambler style hai — thoda ooncha, rugged look, halka off-road flavour. Style aur twin power dono chahne wale ko. Kuch numbers (seat height, weight) exact confirm karke hi batana.' },
 ];
 function renderModelSpecs(){
   const search = str(document.getElementById('specsSearch').value).toLowerCase();
-  const rows = MODEL_SPECS.filter(m => !search || m.name.toLowerCase().includes(search) || m.category.toLowerCase().includes(search));
-  renderStaticTable('tblModelSpecs', [
-    { key:'name', label:'Model' },
-    { key:'category', label:'Category' },
-    { key:'engine', label:'Engine' },
-    { key:'power', label:'Power' },
-    { key:'torque', label:'Torque' },
-    { key:'gearbox', label:'Gearbox' },
-    { key:'seatHeight', label:'Seat Height' },
-    { key:'kerbWeight', label:'Kerb Weight' },
-    { key:'fuelTank', label:'Fuel Tank' },
-    { key:'price', label:'Ex-Showroom Price*' },
-  ], rows);
+  const rows = MODEL_SPECS.filter(m => !search
+    || m.name.toLowerCase().includes(search)
+    || m.category.toLowerCase().includes(search)
+    || (m.bestFor && m.bestFor.toLowerCase().includes(search)));
+  const el = document.getElementById('specsCards');
+  if (!rows.length) { el.innerHTML = '<div class="empty-note">Koi model nahi mila — dusra naam try karo.</div>'; return; }
+  // Expandable cards: model name + category always visible; click to open full specs + Hinglish
+  // selling points. Deep detail lives inside so the executive can read it out to a customer.
+  el.innerHTML = rows.map((m, i) => `
+    <details class="spec-card"${rows.length === 1 ? ' open' : ''}>
+      <summary>
+        <span class="spec-name">${esc(m.name)}</span>
+        <span class="spec-cat">${esc(m.category)}</span>
+      </summary>
+      <div class="spec-body">
+        <div class="spec-hinglish">💬 <b>Customer ko kaise samjhayein:</b><br>${esc(m.hinglish)}</div>
+        ${m.bestFor ? `<div class="spec-line"><span class="spec-k">Best for</span><span class="spec-v">${esc(m.bestFor)}</span></div>` : ''}
+        ${m.features ? `<div class="spec-line"><span class="spec-k">Highlights</span><span class="spec-v">${esc(m.features)}</span></div>` : ''}
+        <div class="spec-grid">
+          <div><span class="spec-k">Engine</span><span class="spec-v">${esc(m.engine)}</span></div>
+          <div><span class="spec-k">Power</span><span class="spec-v">${esc(m.power)}</span></div>
+          <div><span class="spec-k">Torque</span><span class="spec-v">${esc(m.torque)}</span></div>
+          <div><span class="spec-k">Gearbox</span><span class="spec-v">${esc(m.gearbox)}</span></div>
+          <div><span class="spec-k">Seat Height</span><span class="spec-v">${esc(m.seatHeight)}</span></div>
+          <div><span class="spec-k">Kerb Weight</span><span class="spec-v">${esc(m.kerbWeight)}</span></div>
+          <div><span class="spec-k">Fuel Tank</span><span class="spec-v">${esc(m.fuelTank)}</span></div>
+          <div><span class="spec-k">Ex-Showroom*</span><span class="spec-v">${esc(m.price)}</span></div>
+        </div>
+      </div>
+    </details>`).join('');
 }
 document.getElementById('specsSearch').addEventListener('input', renderModelSpecs);
 
@@ -1634,11 +1756,11 @@ function renderQuickSearchResults(term){
 
   el.innerHTML =
     section('Bookings', bookings, ['Slip No','Customer','Mobile','Model','Executive','Status'],
-      r => `<tr><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[6]))}</td><td>${esc(str(r[3]))} ${esc(str(r[4]))}</td>${execTd(r[7])}<td>${esc(str(r[9]))}</td></tr>`) +
+      r => `<tr><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${maskMobile(r[6], r[7])}</td><td>${esc(str(r[3]))} ${esc(str(r[4]))}</td>${execTd(r[7])}<td>${esc(str(r[9]))}</td></tr>`) +
     section('Deliveries', deliveries, ['Bill Date','Customer','Mobile','Model','Executive'],
-      r => `<tr><td>${fmtDate(r[2])}</td><td>${esc(str(r[4]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[6]))} ${esc(str(r[7]))}</td>${execTd(r[18])}</tr>`) +
+      r => `<tr><td>${fmtDate(r[2])}</td><td>${esc(str(r[4]))}</td><td>${maskMobile(r[5], r[18])}</td><td>${esc(str(r[6]))} ${esc(str(r[7]))}</td>${execTd(r[18])}</tr>`) +
     section('Enquiries', enquiries, ['ENQ No','Name','Mobile','Model','Stage','Owner'],
-      r => `<tr><td>${esc(str(r[0]))}</td><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${esc(str(r[8]))}</td><td>${esc(str(r[9]))}</td>${execTd(r[13])}</tr>`) +
+      r => `<tr><td>${esc(str(r[0]))}</td><td>${esc(str(r[1]))}</td><td>${maskMobile(r[5], r[13])}</td><td>${esc(str(r[8]))}</td><td>${esc(str(r[9]))}</td>${execTd(r[13])}</tr>`) +
     section('Reviews', reviews, ['Date','Rating','Model','Sales Person'],
       r => `<tr><td>${fmtDate(r[0])}</td><td>⭐ ${esc(str(r[1]))}</td><td>${esc(str(r[2]))}</td>${execTd(r[3])}</tr>`);
 }
@@ -1772,6 +1894,13 @@ function applyRoleRestrictions(){
     const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
     btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) ? 'none' : '';
   });
+  // Same rule for the Dashboard quick-jump shortcut buttons — hide any that jump to a tab this
+  // user can't open, so a sales login doesn't get a "Booking Funnel" button that leads nowhere.
+  document.querySelectorAll('#dashShortcuts button[data-jump]').forEach(btn => {
+    const tab = btn.dataset.jump;
+    const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
+    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) ? 'none' : '';
+  });
   if (!isAdmin) {
     // land on the Dashboard tab (the default landing view), not whatever tab happened to be active
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'dashboard'));
@@ -1792,6 +1921,37 @@ function fmtInt(v){ return Math.round(v).toLocaleString('en-IN'); }
 function fmtMoney(v){ return '₹' + Math.round(v).toLocaleString('en-IN'); }
 function fmtPct(v){ return (v*100).toFixed(0) + '%'; }
 function esc(s){ return str(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Customer mobile numbers are sensitive. A sales executive can see WHOSE booking a bike is and the
+// customer's name (needed for FCFS — see the Book vs Stock tab), but NOT other executives' customer
+// phone numbers. Rule: the number is shown only to Admin (Deepak) and to the executive who actually
+// owns that booking/enquiry; everyone else sees it masked. `ownerField` is the SE/Owner cell from
+// the same row, so we can tell whether the current user owns it.
+// Plain-text version of maskMobile for CSV exports (no HTML). Same rule: full number only for
+// Admin or the booking's own executive; masked otherwise.
+function maskMobilePlain(mobileValue, ownerField){
+  const raw = str(mobileValue);
+  if (!raw) return '';
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const ownsIt = CURRENT_USER && CURRENT_USER.execKey && execMatches(ownerField, CURRENT_USER.execKey);
+  if (isAdmin || ownsIt) return raw;
+  const digits = raw.replace(/\D/g, '');
+  const tail = digits.length >= 2 ? digits.slice(-2) : '';
+  return 'XXXXXX' + tail;
+}
+
+function maskMobile(mobileValue, ownerField){
+  const raw = str(mobileValue);
+  if (!raw) return '';
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const ownsIt = CURRENT_USER && CURRENT_USER.execKey && execMatches(ownerField, CURRENT_USER.execKey);
+  if (isAdmin || ownsIt) return esc(raw);
+  // Masked: keep the last 2 digits so an executive can still sanity-check "is this the same person"
+  // without exposing the full number.
+  const digits = raw.replace(/\D/g, '');
+  const tail = digits.length >= 2 ? digits.slice(-2) : '';
+  return `<span title="Hidden — not your customer" style="color:var(--text-muted);letter-spacing:1px;">••••••${tail}</span>`;
+}
 function fmtId(v){ if (v === null || v === undefined || v === '') return ''; const n = Number(v); return isFinite(n) ? String(Math.round(n)) : String(v); }
 function fmtDate(d){
   if (!(d instanceof Date) || isNaN(d)) return '';
@@ -2365,6 +2525,50 @@ function renderDashboard(){
 }
 function renderDashFunnel(retail){
   const el = document.getElementById('dFunnel'); if (!el) return;
+  // Channel-wise booking funnel against the monthly target (Walk-in 60%, Tele 30%, Service 5%,
+  // Field 5%, Web 10% of MONTHLY_BOOKING_TARGET). Uses the SAME computeFunnelTargets() the
+  // Analytics tab uses, so the two never disagree. Each band shows the channel's booking target
+  // for the month; the number printed is how many are actually booked so far, and the little note
+  // to the right shows "booked / target". This replaced the old generic Enquiry→Retail funnel,
+  // which didn't line up with the channel targets Deepak set.
+  const f = computeFunnelTargets();
+  const palette = ['var(--gold-light)', 'var(--gold)', 'var(--s4)', 'var(--s2)', 'var(--good)'];
+  const steps = f.rows.map((r, i) => ({
+    name: r.label,
+    target: r.targetFull,
+    booked: r.actualBooked,
+    colr: palette[i % palette.length],
+  }));
+  const anyData = steps.some(s => s.target > 0 || s.booked > 0);
+  if (!anyData) { el.innerHTML = '<div class="empty-note" style="padding:16px">No target / booking data for this month</div>'; return; }
+
+  // Band width is proportional to each channel's TARGET (so the taper reflects the planned split),
+  // and a filled overlay shows how much of that target is booked so far.
+  const top = Math.max(1, ...steps.map(s => s.target));
+  const bandH = 26, gap = 8, maxW = 150, minW = 26, padTop = 4, padBottom = 14;
+  const cx = 4 + maxW / 2;
+  const labelX = cx + maxW / 2 + 14;
+  const W = labelX + 168;
+  const widthFor = v => minW + (maxW - minW) * (v / top);
+  let y = padTop;
+  const bands = steps.map((s, i) => {
+    const wTop = widthFor(s.target);
+    const next = steps[i + 1] ? steps[i + 1].target : s.target * 0.7;
+    const wBot = widthFor(Math.min(s.target, next));
+    const yt = y, yb = y + bandH; y += bandH + gap;
+    const pts = `${cx - wTop/2},${yt} ${cx + wTop/2},${yt} ${cx + wBot/2},${yb} ${cx - wBot/2},${yb}`;
+    const behind = s.booked < Math.round(s.target * (f.dayOfMonth / f.daysInMonth));
+    const noteColor = behind ? 'var(--critical)' : 'var(--good)';
+    return `<polygon points="${pts}" fill="${s.colr}" opacity="0.9"/>
+      <text x="${cx}" y="${yt+bandH/2+5}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-gold)" style="font-family:var(--font-head)">${fmtInt(s.booked)}</text>
+      <text x="${labelX}" y="${yt+bandH/2-1}" font-size="10.5" fill="var(--text-secondary)">${esc(s.name)}</text>
+      <text x="${labelX}" y="${yt+bandH/2+12}" font-size="10" font-weight="700" fill="${noteColor}" style="font-family:var(--font-head)">${fmtInt(s.booked)} / ${fmtInt(s.target)} booked</text>`;
+  }).join('');
+  const H = (y - gap) + padBottom;
+  el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Channel-wise booking funnel vs target">${bands}</svg>`;
+}
+function renderDashFunnel_OLD_UNUSED(retail){
+  const el = document.getElementById('dFunnel'); if (!el) return;
   let enq=0, testRides=0, booked=0;
   for (const r of STATE.enquiry) { if(!dateInFilter(r[14]))continue; if(!ownerInFilter(r[13]))continue; enq++; if(up(r[12])==='YES')testRides++; if(up(r[9])==='BOOKED')booked++; }
   const steps = [
@@ -2375,15 +2579,10 @@ function renderDashFunnel(retail){
   ];
   if (!enq && !retail) { el.innerHTML = '<div class="empty-note" style="padding:16px">No enquiry / delivery data for this filter</div>'; return; }
   const top = Math.max(1, ...steps.map(s=>s.val));
-  // Geometry. The funnel bands sit on the left; each band's label + conversion % sit to the RIGHT
-  // of the widest band. viewBox width/height are derived from the actual content so nothing clips:
-  //   - labelX is where text starts; W leaves generous room to the right of the longest label
-  //   - height = last band's bottom + a little, and text drops at most ~12px below a band centre,
-  //     so we pad the viewBox bottom by that much (the old code cut off the final label).
   const bandH=30, gap=8, maxW=140, minW=28, padTop=4, padBottom=14;
-  const cx = 4 + maxW/2;                 // widest band fully inside the left edge
-  const labelX = cx + maxW/2 + 14;       // labels start just past the widest band
-  const W = labelX + 150;                // room for "Test rides given" + conv % without clipping
+  const cx = 4 + maxW/2;
+  const labelX = cx + maxW/2 + 14;
+  const W = labelX + 150;
   const widthFor = v => minW + (maxW-minW)*(v/top);
   let y = padTop;
   const bands = steps.map((s,i) => {
@@ -2397,7 +2596,7 @@ function renderDashFunnel(retail){
       <text x="${labelX}" y="${yt+bandH/2-1}" font-size="10.5" fill="var(--text-secondary)">${esc(s.name)}</text>
       ${convTxt?`<text x="${labelX}" y="${yt+bandH/2+12}" font-size="10" font-weight="700" fill="var(--gold)" style="font-family:var(--font-head)">${convTxt}</text>`:''}`;
   }).join('');
-  const H = (y - gap) + padBottom;       // bottom of last band (no trailing gap) + room for its label
+  const H = (y - gap) + padBottom;
   el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales funnel">${bands}</svg>`;
 }
 function renderDashLeaderboard(){
@@ -2846,7 +3045,7 @@ function showOverdueDetail(execName){
   const rows = overdueRowsFor(execName).map(r => {
     const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
     return {
-      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]),
+      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), owner: str(r[7]), model: str(r[3]),
       colour: str(r[4]), tdd: fmtDate(tdd),
       daysLate: tdd ? Math.round((today - tdd) / 86400000) : 0,
     };
@@ -2856,7 +3055,7 @@ function showOverdueDetail(execName){
     ? `<div class="table-wrap"><table class="data">
         <thead><tr><th>Slip / Receipt No</th><th>Customer Name</th><th>Mobile No</th><th>Model</th><th>Colour</th><th>TDD</th><th class="num">Days Overdue</th></tr></thead>
         <tbody>${rows.map(r => `<tr>
-          <td>${esc(r.slipNo)}</td><td>${esc(r.customer)}</td><td>${esc(r.mobile)}</td>
+          <td>${esc(r.slipNo)}</td><td>${esc(r.customer)}</td><td>${maskMobile(r.mobile, r.owner)}</td>
           <td>${esc(r.model)}</td><td>${esc(r.colour)}</td><td>${esc(r.tdd)}</td>
           <td class="num"><span class="table-flag">⚠️ ${fmtInt(r.daysLate)}</span></td>
         </tr>`).join('')}</tbody></table></div>`
@@ -3504,7 +3703,7 @@ function renderTddTable(rows){
   renderStaticTable('tblTdd', [
     { key:'slipNo', label:'Slip / Receipt No' },
     { key:'customer', label:'Customer Name' },
-    { key:'mobile', label:'Mobile No' },
+    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) },
     { key:'model', label:'Model' },
     { key:'colour', label:'Colour' },
     { key:'exec', label:'Executive' },
@@ -3544,7 +3743,7 @@ function wireTddControls(){
       const csvCell = v => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
       const lines = [header.join(',')];
       sorted.forEach(r => lines.push([
-        r.slipNo, r.customer, r.mobile, r.model, r.colour, r.exec, r.tdd,
+        r.slipNo, r.customer, maskMobilePlain(r.mobile, r.exec), r.model, r.colour, r.exec, r.tdd,
         (r.days == null ? r.tdd : r.days), r.stockText.replace(/[✅🟡❌]/g, '').trim(), r.status,
       ].map(csvCell).join(',')));
       const stamp = new Date().toISOString().slice(0, 10);
@@ -3758,6 +3957,36 @@ function renderPending(){
   renderTddTable(tddRows);
   wireTddControls();
 
+  // Dedicated "At Risk" table (Kaam 3): bookings whose TDD falls within the next TDD_ALERT_DAYS
+  // days AND whose exact model+colour is NOT currently Open in KN stock — the deliveries most
+  // likely to break a promise. This got folded into the unified TDD table earlier, but Deepak
+  // wants it back as its own focused list. atRiskRowsFor(null) already respects the exec filter
+  // (Admin sees all; a sales login sees only their own).
+  const atRisk = atRiskRowsFor(null);
+  document.getElementById('atRiskNote').textContent =
+    `Bookings due within the next ${TDD_ALERT_DAYS} days where that exact model + colour is NOT currently Open in KN stock — arrange stock or update the customer now. Admin sees the whole team's; a sales login sees only their own.`;
+  const atRiskRows = atRisk.map(r => {
+    const tdd = parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]);
+    const daysLeft = tdd ? Math.round((tdd - today) / 86400000) : 0;
+    const { familyOnly } = stockMatchFor(r[3], r[4]);
+    return {
+      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]),
+      exec: str(r[7]), tdd: fmtDate(tdd), daysLeft,
+      alt: familyOnly > 0 ? `${familyOnly} in another colour` : 'none',
+    };
+  }).sort((a,b) => a.daysLeft - b.daysLeft);
+  renderStaticTable('tblAtRisk', [
+    { key:'slipNo', label:'Slip / Receipt No' },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) },
+    { key:'model', label:'Model' },
+    { key:'colour', label:'Colour' },
+    { key:'exec', label:'Executive' },
+    { key:'tdd', label:'TDD (Promised Date)' },
+    { key:'daysLeft', label:'Days Left', num:true, raw:true, fmt: v => `<span class="table-flag">🚨 ${fmtInt(v)}</span>` },
+    { key:'alt', label:'Same Model, Other Colour' },
+  ], atRiskRows);
+
   // Same comparison at exact model+colour level — grouped by the booking's own Model/Colour text
   // (so every distinct booking always gets a row, never silently disappears), with the STOCK
   // number itself pulled via Model Code when a match is found (see buildModelCodeMaster()/
@@ -3882,7 +4111,7 @@ function renderPending(){
     { key:3, label:'Model' },
     { key:4, label:'Colour' },
     { key:5, label:'Customer' },
-    { key:6, label:'Mobile', fmt: fmtId },
+    { key:6, label:'Mobile', raw:true, fmt: (v, row) => maskMobile(v, row[7]) },
     { key:7, label:'Executive' },
     { key:8, label:'TDD' },
     { key:9, label:'Status' },
@@ -3893,7 +4122,7 @@ function renderPending(){
 document.getElementById('searchPending').addEventListener('input', () => renderPending());
 document.getElementById('modelFinderSelect').addEventListener('change', () => renderPending());
 document.getElementById('exportPending').addEventListener('click', () => {
-  exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows());
+  exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows(), { mobileCol: 6, ownerCol: 7 });
 });
 
 /* ---------------- Stock tab ----------------
@@ -4734,11 +4963,14 @@ function renderRawTable(tableId, cols, rows){
   table.innerHTML = thead + tbody;
 }
 
-function exportCsv(filename, headers, rows){
+function exportCsv(filename, headers, rows, maskOpt){
+  // maskOpt (optional): { mobileCol, ownerCol } → masks the customer mobile column for anyone who
+  // isn't Admin or that row's own executive, so exported booking lists don't leak phone numbers.
   const lines = [headers.map(h => `"${h.replace(/"/g,'""')}"`).join(',')];
   rows.forEach(r => {
-    lines.push(r.map(c => {
+    lines.push(r.map((c, idx) => {
       let v = c instanceof Date ? fmtDate(c) : str(c);
+      if (maskOpt && idx === maskOpt.mobileCol) v = maskMobilePlain(v, r[maskOpt.ownerCol]);
       return `"${v.replace(/"/g,'""')}"`;
     }).join(','));
   });
@@ -4751,12 +4983,36 @@ function exportCsv(filename, headers, rows){
 }
 
 /* ---------------- tabs ---------------- */
+function switchToTab(tabName, scrollToId){
+  const btn = document.querySelector(`#tabs button[data-tab="${tabName}"]`);
+  if (btn) document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
+  if (scrollToId) {
+    // let the panel become visible first, then scroll the target section into view
+    setTimeout(() => {
+      const el = document.getElementById(scrollToId);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 document.getElementById('tabs').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-tab]');
   if (!btn) return;
-  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
-  document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab));
+  switchToTab(btn.dataset.tab);
 });
+// Dashboard quick-jump shortcuts (Kaam 4)
+const dashShortcuts = document.getElementById('dashShortcuts');
+if (dashShortcuts) {
+  dashShortcuts.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-jump]');
+    if (!btn) return;
+    // respect tab restrictions — if a restricted tab's button somehow shows, switchToTab still
+    // works, but restricted tabs are hidden for non-admins anyway so their buttons won't fire.
+    switchToTab(btn.dataset.jump, btn.dataset.scroll || null);
+  });
+}
 
 /* ---------------- boot ----------------
    loadAll() now only starts after a successful login — see attemptLogin() above. */
