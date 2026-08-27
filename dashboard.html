@@ -481,6 +481,11 @@
   .spec-grid > div { display: flex; flex-direction: column; gap: 2px; }
   .spec-k { font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
   .spec-v { font-size: 13px; color: var(--text-primary); }
+  /* Book vs Stock — per-colour FIFO blocks */
+  .bvs-colour { margin-bottom: 18px; border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .bvs-colour-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 11px 14px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+  .bvs-colour-name { font-family: var(--font-head); font-size: 17px; font-weight: 600; letter-spacing: .4px; }
+  .bvs-colour .table-wrap { border: none; border-radius: 0; margin: 0; }
 
   /* ══ Showroom-screen components ═══════════════════════════════════════════
      Brought over from the showroom display design: a pace-aware gauge, a
@@ -948,9 +953,10 @@
 <nav class="tabs" id="tabs">
   <button data-tab="dashboard" class="active">📊 Dashboard</button>
   <button data-tab="overview">Overview</button>
-  <button data-tab="analytics">Analytics</button>
+  <button data-tab="analytics">🎯 Funnel</button>
   <button data-tab="delivery">Delivery</button>
-  <button data-tab="pending">📦 Book vs Stock</button>
+  <button data-tab="booking">📋 Booking</button>
+  <button data-tab="pending">🔎 Book vs Stock</button>
   <button data-tab="stock">Stock</button>
   <button data-tab="riders">Riders</button>
   <button data-tab="specs">📖 Model Specs</button>
@@ -965,9 +971,9 @@
     <!-- Kaam 4: quick jump buttons. Each one switches to the relevant tab (and, where useful,
          scrolls to a specific section on it) so the wall-display Dashboard doubles as a launcher. -->
     <div class="dash-shortcuts" id="dashShortcuts">
-      <button type="button" data-jump="pending" data-scroll="atRiskTitle">🚨 At-Risk (stock nahi)</button>
-      <button type="button" data-jump="pending" data-scroll="modelFinderTitle">🔎 Stock Availability</button>
-      <button type="button" data-jump="pending">📦 Book vs Stock</button>
+      <button type="button" data-jump="booking" data-scroll="atRiskTitle">🚨 At-Risk (stock nahi)</button>
+      <button type="button" data-jump="booking">📋 Booking</button>
+      <button type="button" data-jump="pending">🔎 Book vs Stock</button>
       <button type="button" data-jump="delivery">🚚 Delivery</button>
       <button type="button" data-jump="stock">🏭 Stock</button>
       <button type="button" data-jump="analytics" data-scroll="funnelTargetTitle">🎯 Booking Funnel</button>
@@ -1151,16 +1157,20 @@
     <h2 class="section-title">⭐ Google Reviews Summary</h2>
     <div class="kpi-grid" id="kpiReviews"></div>
     <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblReviewsEmp"></table></div>
+
+    <!-- Two data-hygiene trackers (Overview only). Both respect STATE.filterExec, so Admin sees
+         everyone and a sales login sees only their own rows. Customer mobile is masked. -->
+    <h2 class="section-title">🚨 Enquiry Not Punched — Walk-in aaya, enquiry nahi bani</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo customer showroom aaye (Actual Walk-in register me) par unka mobile enquiry me nahi mila — inki enquiry banani zaroori hai, kyunki followup MSD ke through hi hota hai.</p>
+    <div class="table-wrap"><table class="data" id="tblWalkinMissing"></table></div>
+
+    <h2 class="section-title">⚠️ Booking Not Punched — Booking hui, system me nahi</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo booking humare paas hai (Actual Booking sheet) par customer ka mobile RE Portal (BOOKING MSD) me nahi mila — ye bookings system me punch karni zaroori hain.</p>
+    <div class="table-wrap"><table class="data" id="tblBookingNotInSystem"></table></div>
   </section>
 
   <section class="tabpanel" id="tab-analytics">
-    <h2 class="section-title">💡 Where To Focus — Smart Suggestions</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Built fresh from your own Sheet data each time this loads — plus one general sales tactic that rotates daily. Not a live AI model (that would need a paid backend or an exposed API key), so it can't ever invent a number.
-    </div>
-    <div id="smartSuggestions" class="card"></div>
-
-    <h2 class="section-title" id="funnelTargetTitle" style="margin-top:30px;">🎯 Monthly Booking Target &amp; Funnel</h2>
+    <h2 class="section-title" id="funnelTargetTitle">🎯 Monthly Booking Target &amp; Funnel</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;">Always the real calendar month (ignores the month filter), pace-adjusted to today — "Expected Till Today" is what you'd need by now to stay on track.</p>
     <div class="kpi-grid" id="kpiFunnelTargets"></div>
     <div class="table-wrap" style="margin-top:12px;"><table class="data" id="tblFunnelTargets"></table></div>
@@ -1171,63 +1181,17 @@
       <div class="chart-wrap"><div id="trendChart"></div></div>
     </div>
 
-    <div class="grid-2" style="margin-top:16px;">
-      <div class="card">
-        <h3>Enquiry → Booking Conversion by Channel</h3>
-        <div class="chart-wrap"><div id="funnelBarChart"></div></div>
-      </div>
-      <div class="card">
-        <h3>Review Rating Distribution (all time)</h3>
-        <div class="chart-wrap"><div id="ratingBarChart"></div></div>
-      </div>
-    </div>
-
     <h2 class="section-title" style="margin-top:30px;">🎯 Enquiry Funnel — by Source</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Har enquiry source se kitni enquiry aayi aur kitni booking me badli — conversion % ke saath.</p>
     <div class="table-wrap"><table class="data" id="tblFunnel"></table></div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Enquiry → Booking Conversion by Channel</h3>
+      <div class="chart-wrap"><div id="funnelBarChart"></div></div>
+    </div>
 
     <h2 class="section-title" style="margin-top:30px;">🔥 Executive × Channel Performance Map</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Bookings won per executive per channel — darker gold is more. Light cells show where someone isn't converting.</p>
     <div id="perfHeatmap"></div>
-
-    <h2 class="section-title" style="margin-top:30px;">🗣️ Sales Person — Enquiry Quality (RE Portal, matched)</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 6px;">RE's portal has no executive column, so enquiries are matched back to your own sheet by ENQ Number to show each person's drop rate and the most common reason.</p>
-    <p class="empty-note" style="text-align:left;padding:0 0 12px;" id="enquiryQualityNote"></p>
-    <div class="table-wrap"><table class="data" id="tblEnquiryQuality"></table></div>
-
-    <details class="section-collapse">
-      <summary>📊 RE Portal Snapshot</summary>
-      <div class="details-body">
-        <p class="empty-note" style="text-align:left;padding:0 0 12px;">From Royal Enfield's own "ENQUIRY STATMENT" / "BOOKING MSD" portal sheets — dealership-wide, all-time, not split by executive.</p>
-        <div class="kpi-grid" id="kpiMsd"></div>
-        <div class="card" style="margin-top:12px;">
-          <h3>Bookings by Status</h3>
-          <div id="msdBookingStatus"></div>
-        </div>
-      </div>
-    </details>
-
-    <details class="section-collapse">
-      <summary>🔍 Data Explorer — Browse Any Sheet</summary>
-      <div class="details-body">
-        <div class="toolbar">
-          <select id="explorerSheet">
-            <option value="ACTUL BOOKING">ACTUL BOOKING</option>
-            <option value="DELIVERY SHEET">DELIVERY SHEET</option>
-            <option value="enquiry">enquiry</option>
-            <option value="Google Review">Google Review</option>
-            <option value="RIDER FEEDBACK">RIDER FEEDBACK</option>
-            <option value="RIDER REGISTRATION">RIDER REGISTRATION</option>
-            <option value="Stock">Stock</option>
-            <option value="ENQUIRY STATMENT">ENQUIRY STATMENT (RE Portal)</option>
-            <option value="BOOKING MSD">BOOKING MSD (RE Portal)</option>
-          </select>
-          <input type="text" id="explorerSearch" placeholder="Search across all columns…" />
-          <button id="explorerExport">⬇ Export CSV</button>
-          <span class="status-line" id="explorerCount"></span>
-        </div>
-        <div class="table-wrap"><table class="data" id="tblExplorer"></table></div>
-      </div>
-    </details>
   </section>
 
   <section class="tabpanel" id="tab-delivery">
@@ -1245,10 +1209,7 @@
       </div>
     </div>
 
-    <h2 class="section-title">🏍️ Model-wise Deliveries</h2>
-    <div class="table-wrap"><table class="data" id="tblModelWise"></table></div>
-
-    <h2 class="section-title">👤 Executive × Model — Who Sold Which Model</h2>
+    <h2 class="section-title">👤 Sales Person-wise Model Sales — Who Sold Which Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Units billed per executive per model — darker gold means more of that model sold by that person.
     </div>
@@ -1266,13 +1227,9 @@
     </details>
   </section>
 
-  <section class="tabpanel" id="tab-pending">
+  <section class="tabpanel" id="tab-booking">
     <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
     <div class="kpi-grid" id="kpiPending"></div>
-
-    <h2 class="section-title">📋 Bookings — Active vs Cancelled</h2>
-    <div class="kpi-grid" id="kpiBookings"></div>
-    <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblBookingsEmp"></table></div>
 
     <h2 class="section-title" id="atRiskTitle">🚨 At Risk — due soon &amp; bike NOT in stock</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
@@ -1294,22 +1251,6 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblTdd"></table></div>
 
-    <h2 class="section-title" id="modelFinderTitle">🔎 Model Finder — Bookings vs Stock by Colour</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Per colour: how many are pending vs how many are Open in KN stock right now, and who already holds those bookings — so you can tell a walk-in whether a colour is genuinely free before promising it.
-    </div>
-    <div class="toolbar" style="margin-bottom:10px;">
-      <select id="modelFinderSelect"></select>
-    </div>
-    <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
-    <div id="modelFinderUnmatched"></div>
-
-    <h2 class="section-title">🎯 Whose Booking vs Which Model Is Available — customer-wise (exact colour match)</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Whether each pending booking's exact model+colour is Open in KN stock right now, so you can give a customer a straight answer on delivery. VM stock isn't counted — it's a separate store.
-    </div>
-    <div class="table-wrap"><table class="data" id="tblBookingStockMatch"></table></div>
-
     <details class="section-collapse">
       <summary>📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery)</summary>
       <div class="details-body">
@@ -1320,6 +1261,35 @@
         <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
       </div>
     </details>
+  </section>
+
+  <section class="tabpanel" id="tab-pending">
+    <h2 class="section-title">🔎 Book vs Stock — Model Select karke dekho</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Model chuno — us model ki har colour ka stock (FREE hai ya nahi) aur uspe kiski booking hai, sab dikhega. Bookings <b>FIFO</b> order me hain (jisne pehle booking kiya wo pehle) — jab bike aaye to sabse upar wale customer ko milegi. Sabhi sales person ki booking sabko dikhti hai; customer ka mobile chhupa rehta hai.
+    </div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
+        Model:
+        <select id="bvsModelSelect"></select>
+      </label>
+    </div>
+    <div id="bvsResult"></div>
+
+    <h2 class="section-title" id="modelFinderTitle" style="margin-top:30px;">🔎 Model Finder — Bookings vs Stock by Colour (summary)</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Per colour: how many are pending vs how many are Open in KN stock right now. Shortfall = booking hai par stock nahi.
+    </div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <select id="modelFinderSelect"></select>
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;">
+        <input type="checkbox" id="shortfallOnly" style="width:16px;height:16px;cursor:pointer;">
+        Only show shortfall (booked but not in stock)
+      </label>
+      <button id="exportShortfallBtn" title="Download the rows below as a CSV file you can open in Excel">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
+    <div id="modelFinderUnmatched"></div>
   </section>
 
   <section class="tabpanel" id="tab-stock">
@@ -2027,7 +1997,7 @@ function fetchSheetRaw(name){
 /* ---------------- global state ---------------- */
 const STATE = {
   booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [], stock: [],
-  enqStatement: [], bookingMsd: [],
+  enqStatement: [], bookingMsd: [], walkin: [],
   execList: [], months: [], filterMonth: null, filterExec: 'ALL', dayFilterFrom: null, dayFilterTo: null, lastLoaded: null, initialized: false
 };
 
@@ -2041,6 +2011,7 @@ const COL = {
   STOCK: ['Region','State','District','City','RE City','Category','Company','Store Code','Store','Model Family','Model Code','Model Name','Chassis No','Engine No','DMS Receipt Date','SAP Invoice Date','Ageing (Days)','Status','Basic Price','MRP'],
   ENQ_STMT: ['ENQ Number','Conversion Date','Region','State','District','City','Dealer Code','Dealer Name','ASM','First Name','Last Name','Test Ride Taken','Enquiry Status','Type of Enquiry','Primary Source','Secondary Source','Campaign Name','Postal Code','Mobile','Email','Model ID','Main Consideration Model','Persona','Owns 4 Wheeler','2W Exchange','Lead Status','Drop Reason','Disqualification Date','SAP Parent Code','Created On','Invoice Type','Lead Creation Date/Time','UTM Source','Model Name','Model Family','Sub Family','Status','Lead Lost Reason'],
   BOOKING_MSD: ['Booking Number','Booking Date','Model Name','Region','State','City','Postal ID','Dealer Category','SAP Parent Code','Dealer Code','Dealer Name','Customer Name','Phone No','Enquiry Models','Enquiry Date','Primary Enquiry Source','Test Ride Taken','Status','Invoice Number','Enquiry Number','Booking Status Date','Invoiced Date','Model Code','Family','Financer Name','Offer Date','Tentative Delivery Days','Cancellation Date','Cancellation Reason','Booking Email','Enquiry Email','Delivery Date','Current 4 Wheeler','Current 2 Wheeler','Sale Amount','Type of Enquiry','Ownership Status','Enquiry Number 2','INS Number','Invoice Type','Booking Financer','Sub Family'],
+  WALKIN: ['Date','Sales Person','Customer','Mobile'],
 };
 
 // Royal Enfield model-family keywords, longest/most-specific first, used to group Stock's
@@ -2075,21 +2046,32 @@ function modelFamilyKey(s){
 // as "available" here. Shared by the Pending tab's "Whose Booking vs Which Model Is Available"
 // table and Today's Priorities. (VM stock still shows normally on the Stock tab itself — that's
 // purely for Deepak's own reference, this function is the only place it's deliberately excluded.)
+// Generic colour words that many different colours share ("MILITARY BLACK", "BATTALION BLACK",
+// "STEALTH BLACK" all contain BLACK). On their own they must NOT make two different colours match,
+// so when a colour has a more distinctive word (MILITARY, BATTALION, STEALTH...) we require that
+// distinctive word to be present in the stock name, not just the shared generic one.
+const GENERIC_COLOUR_WORDS = new Set(['BLACK','WHITE','RED','BLUE','GREEN','GREY','GRAY','SILVER','BROWN','YELLOW','ORANGE','GOLD','MAROON','DUAL','TONE','METALLIC','MATT','MATTE','GLOSS','CHROME']);
+function colourMatches(stockName, bookingColour){
+  const name = up(stockName);
+  const words = up(bookingColour).split(/\s+/).filter(w => w.length > 2);
+  if (!words.length) return true;
+  const distinctive = words.filter(w => !GENERIC_COLOUR_WORDS.has(w));
+  // If the colour has a distinctive word (e.g. BATTALION, MILITARY), the stock name must contain
+  // EVERY distinctive word — this is what separates "Battalion Black" from "Military Black".
+  if (distinctive.length) return distinctive.every(w => name.includes(w));
+  // Otherwise the colour is only generic words (e.g. just "Black") — fall back to requiring all of
+  // them, the previous behaviour.
+  return words.every(w => name.includes(w));
+}
 function stockMatchFor(model, colour){
   const fam = modelFamilyKey(model);
-  const colourWords = up(colour).split(/\s+/).filter(w => w.length > 2);
   let exact = 0, familyOnly = 0;
   STATE.stock.forEach(r => {
     if (up(r[17]) !== 'OPEN') return;
     if (up(r[7]) !== 'KN') return;
     const name = up(r[11] || r[9]);
     if (!name || modelFamilyKey(name) !== fam) return;
-    // Every word of the colour must appear, not just any one of them — "BATTALION BLACK" and
-    // "MILITARY BLACK" both contain "BLACK", so matching on .some() let either colour match ANY
-    // black stock item, inflating counts (two different colours of the same model were showing
-    // the exact same total). .every() requires the full colour phrase to be present.
-    const isColourMatch = !colourWords.length || colourWords.every(w => name.includes(w));
-    if (isColourMatch) exact++; else familyOnly++;
+    if (colourMatches(name, colour)) exact++; else familyOnly++;
   });
   return { exact, familyOnly };
 }
@@ -2116,12 +2098,9 @@ function buildModelCodeMaster(){
 }
 function matchModelCode(master, bookingModel, bookingColour){
   const fam = modelFamilyKey(bookingModel);
-  const colourWords = up(bookingColour).split(/\s+/).filter(w => w.length > 2);
   for (const entry of master.values()) {
     if (entry.family !== fam) continue;
-    const name = up(entry.name);
-    const isColourMatch = !colourWords.length || colourWords.every(w => name.includes(w));
-    if (isColourMatch) return entry;
+    if (colourMatches(entry.name, bookingColour)) return entry;
   }
   return null; // no stock entry currently carries a matching code — shown separately, never silently dropped
 }
@@ -2131,7 +2110,7 @@ async function loadAll(){
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -2143,6 +2122,7 @@ async function loadAll(){
       fetchSheetRaw('Stock'),
       fetchSheetRaw('ENQUIRY STATMENT'),
       fetchSheetRaw('BOOKING MSD'),
+      fetchSheetRaw('ACTUL WALKIN'),
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -2183,6 +2163,11 @@ async function loadAll(){
     // header row on both sheets, same as the other sheets.
     STATE.enqStatement = enqStatement.slice(1).filter(r => str(r[0]));
     STATE.bookingMsd = bookingMsd.slice(1).filter(r => str(r[0]));
+    // ACTUL WALKIN: hand-filled log of showroom walk-ins. Columns: Date | Sales Person | Customer |
+    // Mobile. Row 0 is the header. Keep only rows that actually have a customer + mobile, since the
+    // walk-in-vs-enquiry match is done on the mobile number. Used ONLY by the two new Overview
+    // tables (renderWalkinChecks) — nowhere else in the dashboard.
+    STATE.walkin = walkin.slice(1).filter(r => str(r[2]) || str(r[3]));
 
     STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
     buildMonthList();
@@ -2408,16 +2393,14 @@ function renderAll(){
   renderChampions();
   renderEmployeeTable();
   renderFunnel();
-  renderBookings();
   renderReviews();
+  renderWalkinChecks();
   renderDelivery();
   renderPending();
   renderStock();
   renderRiders();
-  renderExplorer();
   renderModelSpecs();
   renderAnalytics();
-  renderMsdAnalysis();
 }
 
 /* ══ Dashboard tab — showroom wall-display, driven by the same live data ═══════
@@ -3161,7 +3144,9 @@ function statusActionButtonsRaw(v, row){
 // Delegated listeners — attached once to the (stable) table elements, keeps working across every
 // re-render since only each table's innerHTML is replaced, not the table element itself.
 ['tblBookingStockMatch', 'tblPendingAll'].forEach(id => {
-  document.getElementById(id).addEventListener('click', (e) => {
+  const tblEl = document.getElementById(id);
+  if (!tblEl) return; // tblBookingStockMatch was replaced by the FIFO model view
+  tblEl.addEventListener('click', (e) => {
     const btn = e.target.closest('.status-row-btn');
     if (!btn) return;
     openStatusChangeModal(btn.dataset.action, { slipNo: btn.dataset.slip, exec: btn.dataset.exec, label: btn.dataset.label });
@@ -3433,38 +3418,6 @@ function renderFunnel(){
   renderStaticTable('tblFunnel', cols, rows);
 }
 
-/* ---------------- Bookings ---------------- */
-function renderBookings(){
-  let active=0, cancelled=0;
-  const byExec = {};
-  for (const r of STATE.booking) {
-    if (!dateInFilter(r[2])) continue;
-    if (!execInFilter(r[7])) continue;
-    const isCancel = up(r[9]) === 'CANCEL';
-    if (isCancel) cancelled++; else active++;
-    STATE.execList.forEach(name => {
-      if (execMatches(r[7], name)) {
-        const e = byExec[name] || (byExec[name] = { active:0, cancelled:0 });
-        if (isCancel) e.cancelled++; else e.active++;
-      }
-    });
-  }
-  const coverage = active ? (computeDeliveryAgg(null).retail/active) : 0;
-  document.getElementById('kpiBookings').innerHTML = [
-    kpiCard('Active Bookings', fmtInt(active)),
-    kpiCard('Cancelled', fmtInt(cancelled)),
-    kpiCard('Coverage', fmtPct(coverage), 'retail ÷ active bookings'),
-  ].join('');
-
-  const rows = visibleExecList().map(name => ({ name, active: (byExec[name]||{}).active||0, cancelled: (byExec[name]||{}).cancelled||0 }))
-    .sort((a,b) => b.active - a.active);
-  renderStaticTable('tblBookingsEmp', [
-    { key:'name', label:'Executive' },
-    { key:'active', label:'Active', num:true },
-    { key:'cancelled', label:'Cancelled', num:true },
-  ], rows);
-}
-
 /* ---------------- Reviews ---------------- */
 function parseRating(v){
   const s = str(v);
@@ -3509,7 +3462,66 @@ function renderReviews(){
   ], rows);
 }
 
-/* ---------------- Delivery tab ---------------- */
+/* ---------------- Overview-only data-hygiene audits ----------------
+   Two tables, both scoped ONLY to the Overview tab and both respecting STATE.filterExec (Admin
+   sees everyone; a sales login sees only their own rows). Neither of these datasets or this logic
+   is used anywhere else in the dashboard.
+   1. Walk-ins not punched in enquiry — customers in ACTUL WALKIN whose mobile isn't in enquiry.
+   2. Actual bookings not in system — bookings in ACTUL BOOKING whose customer mobile isn't in
+      BOOKING MSD (the RE portal).
+   Matching is done on the last 10 digits of the phone number, so "+91 98xxxx", "098xxxx" and
+   "98xxxx" all compare equal and formatting differences don't cause false "missing" hits. */
+function phoneKey(v){
+  const digits = str(v).replace(/\D/g, '');
+  return digits.length >= 10 ? digits.slice(-10) : digits;
+}
+function renderWalkinChecks(){
+  // ── Feature 1: walk-ins missing from the enquiry sheet ──
+  // Both trackers are filtered to the SAME month as the top filter (dateInFilter), because the
+  // enquiry sheet and the RE-portal MSD sheet only ever hold the current month's data. Comparing
+  // an older walk-in/booking against a this-month-only enquiry/MSD list would wrongly flag every
+  // past record as "not punched". So we only look at walk-ins / bookings inside the selected month.
+  const enquiryPhones = new Set();
+  STATE.enquiry.forEach(r => { const k = phoneKey(r[5]); if (k) enquiryPhones.add(k); });
+
+  const walkinRows = STATE.walkin
+    // ACTUL WALKIN cols: Date(0) | Sales Person(1) | Customer(2) | Mobile(3)
+    .filter(r => dateInFilter(r[0]))              // same month only (enquiry sheet is month-scoped)
+    .filter(r => execInFilter(r[1]))              // respect the executive filter (sales person col)
+    .map(r => ({ date: r[0], salesperson: str(r[1]), customer: str(r[2]), mobile: str(r[3]), key: phoneKey(r[3]) }))
+    .filter(row => row.key && !enquiryPhones.has(row.key)); // has a real number, not in enquiry
+
+  renderStaticTable('tblWalkinMissing', [
+    { key:'salesperson', label:'Sales Person' },
+    { key:'date', label:'Date', fmt: fmtDate },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.salesperson) },
+    { key:'status', label:'Status', raw:true, fmt: () => '<span class="pill bad">Enquiry Not Punched</span>' },
+  ], walkinRows);
+
+  // ── Feature 2: actual bookings not entered in the MSD (RE portal) system ──
+  const msdPhones = new Set();
+  STATE.bookingMsd.forEach(r => { const k = phoneKey(r[12]); if (k) msdPhones.add(k); });
+
+  const notInSystem = STATE.booking
+    // ACTUL BOOKING cols: BkgDate(2) Model(3) Customer(5) Mobile(6) SE(7)
+    .filter(r => dateInFilter(r[2]))              // same month only (MSD sheet is month-scoped)
+    .filter(r => {
+      const s = up(r[9]); // skip cancelled — no point flagging a dead booking as "not punched"
+      return s !== 'CANCEL' && s !== 'CANCELLED';
+    })
+    .filter(r => execInFilter(r[7]))              // respect the executive filter (SE col)
+    .map(r => ({ salesperson: str(r[7]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), key: phoneKey(r[6]) }))
+    .filter(row => row.key && !msdPhones.has(row.key));
+
+  renderStaticTable('tblBookingNotInSystem', [
+    { key:'salesperson', label:'Sales Person' },
+    { key:'customer', label:'Customer Name' },
+    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.salesperson) },
+    { key:'model', label:'Model' },
+    { key:'status', label:'Status', raw:true, fmt: () => '<span class="pill bad">Booking Not Punched</span>' },
+  ], notInSystem);
+}
 // Executive x Model grid — "kaunsa sales person kaunsa model kitna bech raha hai" in one view.
 // Built from the same already-filtered billed-delivery rows renderDelivery() uses, so it always
 // agrees with the numbers directly above it. Models are columns, ordered by total units sold.
@@ -3588,28 +3600,6 @@ function renderDelivery(){
     barRow('RSA', rsaCount, n, 'var(--s5)') +
     barRow('Gear', gearCount, n, 'var(--s6)') +
     barRow('AMC', amcCount, n, 'var(--s7)');
-
-  // Model-wise
-  const models = {};
-  for (const r of filtered) {
-    const model = str(r[6]) || '(unknown)';
-    const m = models[model] || (models[model] = { count:0, gma:0, ew:0, rsa:0, gear:0 });
-    m.count++; m.gma += num(r[13]);
-    if (num(r[11])>0) m.ew++;
-    if (num(r[12])>0) m.rsa++;
-    if (str(r[14]) && up(r[14]) !== 'NIL') m.gear++;
-  }
-  const modelRows = Object.entries(models).map(([model,v]) => ({ model, ...v, avgGma: v.count ? v.gma/v.count : 0 }))
-    .sort((a,b) => b.count - a.count);
-  renderStaticTable('tblModelWise', [
-    { key:'model', label:'Model' },
-    { key:'count', label:'Units', num:true },
-    { key:'gma', label:'Total GMA', num:true, fmt: fmtMoney },
-    { key:'avgGma', label:'Avg GMA/Unit', num:true, fmt: fmtMoney },
-    { key:'ew', label:'EW Attached', num:true },
-    { key:'rsa', label:'RSA Attached', num:true },
-    { key:'gear', label:'Gear Attached', num:true },
-  ], modelRows);
 
   renderExecModelMatrix(filtered);
 
@@ -4076,32 +4066,10 @@ function renderPending(){
     const s = up(r[9]);
     return s !== 'BILLED' && s !== 'CANCEL';
   });
-  const bookingStockRows = globalOpenBookings.map((r, i) => {
-    const model = str(r[3]) || '(unknown)';
-    const colour = str(r[4]);
-    const { exact, familyOnly } = stockMatchFor(model, colour);
-    let status, cls;
-    if (exact > 0) { status = `✅ Available now (${exact} in stock)`; cls = 'good'; }
-    else if (familyOnly > 0) { status = `🟡 Same model, other colour available (${familyOnly})`; cls = 'warn'; }
-    else { status = '❌ Not in stock — check In-Transit / order'; cls = 'bad'; }
-    // bookingDate drives FCFS ordering; fall back to original row order when the date won't parse.
-    const bd = parseTddDate(r[2], null);
-    return { slipNo: str(r[1]), customer: str(r[5]), model, colour, exec: str(r[7]),
-             tdd: str(r[8]) || str(r[10]), status, cls,
-             _order: bd ? bd.getTime() : i, };
-  }).sort((a,b) =>
-    // available-first grouping preserved, then earliest booking first within each group (FCFS)
-    (a.cls==='bad'?0:1) - (b.cls==='bad'?0:1) || a._order - b._order
-  );
-  renderStaticTable('tblBookingStockMatch', [
-    { key:'customer', label:'Customer' },
-    { key:'model', label:'Model' },
-    { key:'colour', label:'Colour' },
-    { key:'exec', label:'Executive' },
-    { key:'tdd', label:'TDD / Expected' },
-    { key:'status', label:'Stock Status', raw:true },
-    { key:'slipNo', label:'Action', raw:true, fmt: statusActionButtonsFromRow },
-  ], bookingStockRows.map(r => ({ ...r, status: `<span class="pill ${r.cls}">${r.status}</span>` })));
+  // The old customer-wise "Whose Booking" table is replaced by the model-dropdown FIFO view
+  // (renderBvsModel), which is easier to read: pick a model, see every colour's free stock and the
+  // FIFO booking queue on it. globalOpenBookings feeds that renderer.
+  renderBvsModel(globalOpenBookings);
 
   const search = str(document.getElementById('searchPending').value).toLowerCase();
   const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
@@ -4124,6 +4092,124 @@ document.getElementById('modelFinderSelect').addEventListener('change', () => re
 document.getElementById('exportPending').addEventListener('click', () => {
   exportCsv('pending_delivery_plan.csv', COL.BOOKING, pendingRows(), { mobileCol: 6, ownerCol: 7 });
 });
+
+/* ---------------- Book vs Stock — model dropdown + FIFO queue ----------------
+   Deepak's "sabki booking sabko dikhe" view. Pick a model; for each colour of that model it shows
+   how many are FREE in KN stock right now and the queue of open bookings on it, ordered FIFO
+   (earliest booking date first). When a bike arrives it goes to whoever is at the top of that
+   colour's queue. Store-wide (every executive's bookings, ignores the exec filter, so the whole
+   team sees one shared queue); customer mobile is masked. */
+let BVS_ALL_BOOKINGS = [];
+function renderBvsModel(globalOpenBookings){
+  BVS_ALL_BOOKINGS = globalOpenBookings;
+  const sel = document.getElementById('bvsModelSelect');
+  const result = document.getElementById('bvsResult');
+  if (!sel || !result) return;
+
+  // Model list = one entry per MODEL (family), never per colour. Booking model names ("Bullet
+  // 350") and stock names ("BULLET 350 BATTALION BLACK") are both collapsed to their family via
+  // modelFamilyKey, and we keep the nicest human label we've seen for each family. This is why the
+  // dropdown shows just "Bullet 350" / "Classic 350" — picking one then lists ALL its colours
+  // below, instead of the dropdown itself being cluttered with every colour.
+  const familyLabel = {}; // familyKey -> best display label
+  const noteFamily = (raw) => {
+    const s = str(raw); if (!s) return;
+    const key = modelFamilyKey(s);
+    // Prefer a booking-style label (short, no colour) — take the model + displacement words only.
+    const cleaned = s.split(/\s+/).slice(0, 2).join(' '); // e.g. "Bullet 350", "Classic 350"
+    if (!familyLabel[key] || cleaned.length < familyLabel[key].length) familyLabel[key] = cleaned;
+  };
+  globalOpenBookings.forEach(r => noteFamily(r[3]));
+  STATE.stock.forEach(r => { if (up(r[17]) === 'OPEN' && up(r[7]) === 'KN') noteFamily(r[11] || r[9]); });
+  // Build the option list keyed by family, sorted by label.
+  const familyEntries = Object.entries(familyLabel).sort((a,b) => a[1].localeCompare(b[1]));
+  const models = familyEntries.map(([, label]) => label);
+
+  // Preserve the current selection across re-renders; default to the first model.
+  const prev = sel.value;
+  sel.innerHTML = models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  if (prev && models.includes(prev)) sel.value = prev;
+  const selectedModel = sel.value || models[0];
+  if (!selectedModel) { result.innerHTML = '<div class="empty-note">Koi model nahi mila (na booking, na stock).</div>'; return; }
+
+  // Group this model's open bookings by colour, each queue FIFO by booking date.
+  const fam = modelFamilyKey(selectedModel);
+  const byColour = {};
+  globalOpenBookings.forEach((r, i) => {
+    if (modelFamilyKey(str(r[3])) !== fam) return;
+    const colour = str(r[4]) || '(no colour)';
+    const bd = parseTddDate(r[2], null);
+    (byColour[colour] || (byColour[colour] = [])).push({
+      slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), colour,
+      exec: str(r[7]), bookingDate: bd, tdd: str(r[8]) || str(r[10]),
+      _order: bd ? bd.getTime() : i,
+    });
+  });
+  Object.values(byColour).forEach(list => list.sort((a,b) => a._order - b._order)); // FIFO
+
+  // Colours to show = booking colours PLUS any stock colour not already covered by a booking.
+  // We must not add the full stock NAME ("CLASSIC 350 STEALTH BLACK") as a separate bucket next to
+  // the booking colour ("Stealth Black") — that showed the same colour twice. Instead, for each KN
+  // open-stock item of this family, check whether its name already matches one of the booking
+  // colours (every colour word present); only if NO booking colour matches do we surface it as a
+  // free-stock-only colour, using a cleaned-up label (stock name minus the model family words).
+  const colours = new Set(Object.keys(byColour));
+  const famWords = new Set(up(selectedModel).split(/\s+/).filter(w => w.length > 2));
+  STATE.stock.forEach(r => {
+    if (up(r[17]) !== 'OPEN' || up(r[7]) !== 'KN') return;
+    const name = up(r[11] || r[9]);
+    if (!name || modelFamilyKey(name) !== fam) return;
+    // does this stock item already match one of the booking colours?
+    const matchesExisting = [...Object.keys(byColour)].some(bc => colourMatches(name, bc));
+    if (matchesExisting) return;
+    // strip model/family words to get just the colour part, and Title Case it so a stock-only
+    // colour reads "Halcyon Green" rather than the sheet's raw "HALCYON GREEN".
+    const rawLabel = (r[11] ? str(r[11]) : str(r[9]))
+      .split(/\s+/).filter(w => !famWords.has(up(w)) && !/^\d+$/.test(w)).join(' ').trim() || str(r[11] || r[9]);
+    const colourLabel = rawLabel.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    colours.add(colourLabel);
+  });
+
+  // Build one block per colour.
+  const blocks = [...colours].sort((a,b) => a.localeCompare(b)).map(colour => {
+    const queue = byColour[colour] || [];
+    const { exact } = stockMatchFor(selectedModel, colour);
+    const free = exact;                       // FREE units of this exact colour in KN stock
+    const booked = queue.length;
+    const netFree = free - booked;            // >0 means walk-in can be promised immediately
+    let badge, badgeCls;
+    if (booked === 0 && free > 0) { badge = `✅ FREE — ${free} in stock, koi booking nahi`; badgeCls = 'good'; }
+    else if (free === 0) { badge = booked ? `❌ Stock nahi — ${booked} booking waiting` : '❌ Stock nahi'; badgeCls = 'bad'; }
+    else if (netFree > 0) { badge = `🟡 ${free} in stock, ${booked} booked — ${netFree} abhi bhi free`; badgeCls = 'warn'; }
+    else { badge = `🟡 ${free} in stock, ${booked} booked — sab allotted (FIFO)`; badgeCls = 'warn'; }
+
+    const rowsHtml = queue.length
+      ? queue.map((q, idx) => `<tr>
+          <td class="num">${idx + 1}</td>
+          <td>${esc(q.customer)}</td>
+          <td>${maskMobile(q.mobile, q.exec)}</td>
+          <td>${esc(q.exec)}</td>
+          <td>${q.bookingDate ? esc(fmtDate(q.bookingDate)) : esc(str(q.slipNo))}</td>
+          <td>${esc(q.tdd)}</td>
+          <td>${idx < free ? '<span class="pill good">Ready — allot</span>' : '<span class="pill warn">Wait for stock</span>'}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="7" class="empty-note">Is colour pe koi booking nahi — poora stock free hai.</td></tr>`;
+
+    return `<div class="bvs-colour">
+      <div class="bvs-colour-head">
+        <span class="bvs-colour-name">${esc(colour)}</span>
+        <span class="pill ${badgeCls}">${badge}</span>
+      </div>
+      <div class="table-wrap"><table class="data">
+        <thead><tr><th class="num">#</th><th>Customer</th><th>Mobile</th><th>Sales Person</th><th>Booking Date</th><th>TDD</th><th>Allotment (FIFO)</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table></div>
+    </div>`;
+  });
+
+  result.innerHTML = blocks.length ? blocks.join('') : '<div class="empty-note">Is model ki na booking hai na stock.</div>';
+}
+document.getElementById('bvsModelSelect').addEventListener('change', () => renderBvsModel(BVS_ALL_BOOKINGS));
 
 /* ---------------- Stock tab ----------------
    Reads the "Stock" sheet — every row is bike currently either "Open" (physically in stock,
@@ -4545,9 +4631,19 @@ function classifyChannel(type){
 // above (which is for browsing other tabs' historical data).
 function computeFunnelTargets(){
   const now = new Date();
-  const year = now.getFullYear(), month = now.getMonth();
+  // Follow the top month filter. The enquiry sheet only holds one month's data at a time, so the
+  // funnel must count enquiries from the SAME month the user has selected — otherwise a mismatch
+  // (e.g. filter on August, but funnel counting "current calendar month") shows wrong numbers.
+  // When the filter is "All Months" we fall back to the real current month, since pace/target only
+  // make sense against a specific month.
+  const f = monthYearOfFilter(); // {year, month(1-12)} or null for ALL
+  const year = f ? f.year : now.getFullYear();
+  const month = f ? f.month - 1 : now.getMonth(); // JS month is 0-based
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const dayOfMonth = now.getDate();
+  // Pace only applies when the selected month IS the real current month; for a past/future month
+  // the whole month has effectively "elapsed" for target purposes.
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
+  const dayOfMonth = isCurrentMonth ? now.getDate() : daysInMonth;
   const frac = dayOfMonth / daysInMonth;
 
   const counts = { walkin: {enq:0,booked:0}, tele: {enq:0,booked:0}, service: {enq:0,booked:0}, field: {enq:0,booked:0}, web: {enq:0,booked:0} };
@@ -4755,7 +4851,6 @@ function renderSmartSuggestions(){
 }
 
 function renderAnalytics(){
-  renderSmartSuggestions();
   renderFunnelTargets();
 
   const trend = computeMonthlyTrend();
@@ -4764,7 +4859,7 @@ function renderAnalytics(){
     { name: 'Target', color: 'var(--s1)', values: trend.target },
   ], trend.labels, { legendId: 'trendLegend' });
 
-  // funnel conversion % — same four channels as the target section above, for one consistent
+  // funnel conversion % — same channels as the target section above, for one consistent
   // vocabulary across the tab
   const groups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, service:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
   for (const r of STATE.enquiry) {
@@ -4780,17 +4875,7 @@ function renderAnalytics(){
   });
   hBarChart('funnelBarChart', funnelItems, { fmt: v => v + '%' });
 
-  // rating distribution (all-time, all reviews)
-  const buckets = {5:0,4:0,3:0,2:0,1:0};
-  STATE.review.forEach(r => {
-    const rating = Math.round(parseRating(r[1]) || 0);
-    if (rating >= 1 && rating <= 5) buckets[rating]++;
-  });
-  const ratingItems = [5,4,3,2,1].map(k => ({ label: k + ' star', value: buckets[k] }));
-  hBarChart('ratingBarChart', ratingItems);
-
   renderPerformanceHeatmap();
-  renderEnquiryQuality();
 }
 
 // Cross-references the RE Portal's "ENQUIRY STATMENT" sheet (which has rich Lead Status / Drop
@@ -4919,6 +5004,7 @@ function explorerData(){
   return map[sheet];
 }
 function renderExplorer(){
+  if (!document.getElementById('tblExplorer')) return; // Data Explorer removed from the Funnel tab
   const { rows, cols } = explorerData();
   const search = str(document.getElementById('explorerSearch').value).toLowerCase();
   const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
@@ -4926,15 +5012,19 @@ function renderExplorer(){
   const colDefs = cols.map((label, i) => ({ key:i, label, fmt: (v) => v instanceof Date ? fmtDate(v) : str(v) }));
   renderRawTable('tblExplorer', colDefs, filtered.slice(0, 500));
 }
-document.getElementById('explorerSheet').addEventListener('change', renderExplorer);
-document.getElementById('explorerSearch').addEventListener('input', renderExplorer);
-document.getElementById('explorerExport').addEventListener('click', () => {
-  const sheet = document.getElementById('explorerSheet').value;
-  const { rows, cols } = explorerData();
-  const search = str(document.getElementById('explorerSearch').value).toLowerCase();
-  const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
-  exportCsv(sheet.replace(/\s+/g,'_') + '.csv', cols, filtered);
-});
+// Data Explorer / RE Portal Snapshot were removed for a cleaner page — guard their listeners so a
+// missing element never throws at load.
+if (document.getElementById('explorerSheet')) {
+  document.getElementById('explorerSheet').addEventListener('change', renderExplorer);
+  document.getElementById('explorerSearch').addEventListener('input', renderExplorer);
+  document.getElementById('explorerExport').addEventListener('click', () => {
+    const sheet = document.getElementById('explorerSheet').value;
+    const { rows, cols } = explorerData();
+    const search = str(document.getElementById('explorerSearch').value).toLowerCase();
+    const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
+    exportCsv(sheet.replace(/\s+/g,'_') + '.csv', cols, filtered);
+  });
+}
 
 /* ---------------- generic table renderers ---------------- */
 function renderStaticTable(tableId, cols, rows){
