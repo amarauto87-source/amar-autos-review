@@ -500,6 +500,9 @@
   .bvs-colour-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 11px 14px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
   .bvs-colour-name { font-family: var(--font-head); font-size: 17px; font-weight: 600; letter-spacing: .4px; }
   .bvs-colour .table-wrap { border: none; border-radius: 0; margin: 0; }
+  .bvs-hold { padding: 10px 14px 12px; border-top: 1px dashed var(--border); background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+  .bvs-hold-title { font-size: 11.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 7px; }
+  .bvs-hold-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; font-size: 12px; color: var(--text-secondary); padding: 3px 0; opacity: .8; }
 
   /* ══ Showroom-screen components ═══════════════════════════════════════════
      Brought over from the showroom display design: a pace-aware gauge, a
@@ -1433,7 +1436,7 @@
 </main>
 
 <footer>
-  Data pulled live from your Google Sheet on every refresh (auto-refreshes every 5 minutes) · Built for Amar Autos<br/>
+  Data pulled live from your Google Sheet on every refresh (auto-refreshes every 15 minutes) · Built for Amar Autos<br/>
   Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
 </footer>
 
@@ -1456,7 +1459,7 @@
 
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
-const AUTO_REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes so the dashboard stays current without manual clicks
+const AUTO_REFRESH_MS = 15 * 60 * 1000; // auto-refresh every 15 minutes, silently in the background
 
 /* ---------------- OneSignal push notifications (subscribe side only) ----------------
    This page can subscribe each employee's own browser and tag it with their name — that part
@@ -1791,7 +1794,15 @@ function enterDashboard(){
   applyRoleRestrictions();
   linkOneSignalIdentity();
   loadAll();
-  setInterval(loadAll, AUTO_REFRESH_MS); // keeps the dashboard current on its own — no manual refresh needed
+  // Background auto-refresh: silent (no overlay, no scroll jump) and every 15 minutes instead of
+  // 5, so it stops interrupting. It also skips refreshing while the tab is hidden and instead
+  // refreshes once when the user comes back, so a backgrounded tab isn't hammering the sheet.
+  setInterval(() => { if (!document.hidden) loadAll(true); }, AUTO_REFRESH_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && STATE.lastLoaded && (Date.now() - STATE.lastLoaded.getTime()) > AUTO_REFRESH_MS) {
+      loadAll(true);
+    }
+  });
 }
 document.getElementById('reFactContinue').addEventListener('click', enterDashboard);
 
@@ -2134,8 +2145,12 @@ function matchModelCode(master, bookingModel, bookingColour){
 }
 
 /* ---------------- data loading ---------------- */
-async function loadAll(){
-  document.getElementById('loading').style.display = 'flex';
+async function loadAll(silent){
+  // silent = true → background auto-refresh: don't pop the full-screen loading overlay and don't
+  // disturb the user's scroll position; just swap the data in and re-render in place. The manual
+  // "Force Refresh" and the first load call this normally (overlay shown) so the user gets clear
+  // feedback that something is happening.
+  if (!silent) document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
     const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin] = await Promise.all([
@@ -2202,9 +2217,13 @@ async function loadAll(){
     populateFilters();
     STATE.initialized = true;
     STATE.lastLoaded = new Date();
+    // On a silent background refresh, keep the user exactly where they were — save the scroll
+    // position, re-render, then restore it, so a background update never yanks the page around.
+    const savedScroll = silent ? window.scrollY : null;
     renderAll();
     renderDataHealthBanner();
     updateStatusLine();
+    if (silent && savedScroll != null) window.scrollTo(0, savedScroll);
   } catch (err) {
     console.error(err);
     document.getElementById('errorBox').innerHTML =
@@ -2358,7 +2377,7 @@ function updateStatusLine(){
     ? (STATE.dayFilterTo ? `Day filter: ${fmtShort(dayRange.from)} – ${fmtShort(dayRange.to)}` : `Day filter: ${fmtShort(dayRange.from)}`)
     : (STATE.filterMonth === 'ALL' ? 'All Months' : 'Month filter active');
   document.getElementById('statusLine').textContent =
-    `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 5 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
+    `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 15 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
 }
 function dateInFilter(d){
   const dayRange = dayFilterRange();
@@ -4193,18 +4212,29 @@ function renderBvsModel(globalOpenBookings){
   const selectedModel = sel.value || models[0];
   if (!selectedModel) { result.innerHTML = '<div class="empty-note">Koi model nahi mila (na booking, na stock).</div>'; return; }
 
-  // Group this model's open bookings by colour, each queue FIFO by booking date.
+  // Group this model's open bookings by colour. Each colour has an ACTIVE queue (FIFO by booking
+  // date, used for allotment) and a separate HOLD list. A booking whose TDD says "HOLD" means the
+  // customer doesn't want the bike yet, so it must NOT occupy a place in the allocation order —
+  // when stock arrives it should skip HOLD customers and go to the next ready customer. HOLD
+  // bookings are still shown, but in their own parked list, not counted in the allotment.
   const fam = modelFamilyKey(selectedModel);
-  const byColour = {};
+  const byColour = {};   // colour -> active FIFO queue
+  const holdColour = {}; // colour -> parked HOLD bookings
   globalOpenBookings.forEach((r, i) => {
     if (modelFamilyKey(str(r[3])) !== fam) return;
     const colour = str(r[4]) || '(no colour)';
     const bd = parseTddDate(r[2], null);
-    (byColour[colour] || (byColour[colour] = [])).push({
+    const tddText = str(r[8]) || str(r[10]);
+    const entry = {
       slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), colour,
-      exec: str(r[7]), bookingDate: bd, tdd: str(r[8]) || str(r[10]),
+      exec: str(r[7]), bookingDate: bd, tdd: tddText,
       _order: bd ? bd.getTime() : i,
-    });
+    };
+    if (up(tddText) === 'HOLD') {
+      (holdColour[colour] || (holdColour[colour] = [])).push(entry);
+    } else {
+      (byColour[colour] || (byColour[colour] = [])).push(entry);
+    }
   });
   Object.values(byColour).forEach(list => list.sort((a,b) => a._order - b._order)); // FIFO
 
@@ -4214,14 +4244,14 @@ function renderBvsModel(globalOpenBookings){
   // open-stock item of this family, check whether its name already matches one of the booking
   // colours (every colour word present); only if NO booking colour matches do we surface it as a
   // free-stock-only colour, using a cleaned-up label (stock name minus the model family words).
-  const colours = new Set(Object.keys(byColour));
+  const colours = new Set([...Object.keys(byColour), ...Object.keys(holdColour)]);
   const famWords = new Set(up(selectedModel).split(/\s+/).filter(w => w.length > 2));
   STATE.stock.forEach(r => {
     if (up(r[17]) !== 'OPEN' || up(r[7]) !== 'KN') return;
     const name = up(r[11] || r[9]);
     if (!name || modelFamilyKey(name) !== fam) return;
-    // does this stock item already match one of the booking colours?
-    const matchesExisting = [...Object.keys(byColour)].some(bc => colourMatches(name, bc));
+    // does this stock item already match one of the booking colours (active or HOLD)?
+    const matchesExisting = [...colours].some(bc => colourMatches(name, bc));
     if (matchesExisting) return;
     // strip model/family words to get just the colour part, and Title Case it so a stock-only
     // colour reads "Halcyon Green" rather than the sheet's raw "HALCYON GREEN".
@@ -4254,7 +4284,14 @@ function renderBvsModel(globalOpenBookings){
           <td>${esc(q.tdd)}</td>
           <td>${idx < free ? '<span class="pill good">Ready — allot</span>' : '<span class="pill warn">Wait for stock</span>'}</td>
         </tr>`).join('')
-      : `<tr><td colspan="7" class="empty-note">Is colour pe koi booking nahi — poora stock free hai.</td></tr>`;
+      : `<tr><td colspan="7" class="empty-note">Is colour pe koi active booking nahi.</td></tr>`;
+
+    // Parked HOLD bookings for this colour — shown separately, greyed, NOT part of the allotment.
+    const holds = holdColour[colour] || [];
+    const holdHtml = holds.length ? `<div class="bvs-hold">
+        <div class="bvs-hold-title">⏸️ HOLD par (${holds.length}) — customer abhi ready nahi, allocation me nahi</div>
+        ${holds.map(h => `<div class="bvs-hold-row"><span>${esc(h.customer)}</span><span>${esc(h.exec)}</span><span>${h.bookingDate ? esc(fmtDate(h.bookingDate)) : ''}</span></div>`).join('')}
+      </div>` : '';
 
     return `<div class="bvs-colour">
       <div class="bvs-colour-head">
@@ -4265,6 +4302,7 @@ function renderBvsModel(globalOpenBookings){
         <thead><tr><th class="num">#</th><th>Customer</th><th>Mobile</th><th>Sales Person</th><th>Booking Date</th><th>TDD</th><th>Allotment (FIFO)</th></tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table></div>
+      ${holdHtml}
     </div>`;
   });
 
