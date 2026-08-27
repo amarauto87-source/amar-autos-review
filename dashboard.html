@@ -410,6 +410,20 @@
   @media (max-width: 520px)  { .panel-grid { grid-template-columns: 1fr; } }
   .panel-row2 { display: grid; grid-template-columns: 2.1fr 1fr 1.15fr; gap: 11px; margin-top: 11px; }
   @media (max-width: 1300px) { .panel-row2 { grid-template-columns: 1fr; } }
+  .panel-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+  @media (max-width: 820px) { .panel-row-2col { grid-template-columns: 1fr; } }
+  /* Punch-pending summary list on the Dashboard */
+  .punch-summary { cursor: pointer; }
+  .punch-count { font-family: var(--font-head); font-weight: 700; font-size: 34px; line-height: 1; }
+  .punch-count.zero { color: var(--good); }
+  .punch-count.some { color: var(--critical); }
+  .punch-sub { font-size: 11px; color: var(--text-secondary); margin: 4px 0 10px; }
+  .punch-list { display: flex; flex-direction: column; gap: 6px; max-height: 168px; overflow-y: auto; }
+  .punch-item { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; padding: 5px 8px; background: var(--surface-2); border-radius: 7px; border: 1px solid var(--border); }
+  .punch-item .p-name { color: var(--text-primary); font-weight: 600; }
+  .punch-item .p-cust { color: var(--text-secondary); flex: 1; }
+  .punch-more { font-size: 11px; color: var(--text-muted); text-align: center; padding-top: 4px; }
+  .punch-all-good { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--good); padding: 8px 0; }
   .big-fig { font-family: var(--font-head); font-weight: 700; font-size: 40px; line-height: 1; text-align: center; letter-spacing: .5px; }
   .big-sub { font-size: 10.5px; color: var(--text-secondary); text-align: center; margin-top: 5px; }
   .mini-split { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; font-size: 11px; margin-top: 10px; }
@@ -1057,6 +1071,20 @@
       <div class="panel">
         <div class="panel-bar">Booking &amp; Delivery Pipeline</div>
         <div class="panel-body"><div id="dashPipeline"></div></div>
+      </div>
+    </div>
+
+    <!-- Compact "punch pending" summary — same data as the two Overview tables, shown here as a
+         quick count + the Sales Person / Customer names so the shortfall is visible at a glance.
+         Clicking either card jumps to the Overview tab for the full table. -->
+    <div class="panel-row-2col" style="margin-top:11px;">
+      <div class="panel">
+        <div class="panel-bar">🚨 Enquiry Not Punched</div>
+        <div class="panel-body"><div id="dashEnqNotPunched"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">⚠️ Booking Not Punched</div>
+        <div class="panel-body"><div id="dashBkgNotPunched"></div></div>
       </div>
     </div>
   </section>
@@ -3521,6 +3549,39 @@ function renderWalkinChecks(){
     { key:'model', label:'Model' },
     { key:'status', label:'Status', raw:true, fmt: () => '<span class="pill bad">Booking Not Punched</span>' },
   ], notInSystem);
+
+  // ── Dashboard compact summary (same rows, shown as a count + Sales Person / Customer names) ──
+  renderPunchSummary('dashEnqNotPunched', walkinRows, 'enquiry',
+    'Walk-in aaya par enquiry nahi bani');
+  renderPunchSummary('dashBkgNotPunched', notInSystem, 'booking',
+    'Booking hui par MSD me punch nahi');
+}
+// Builds the small Dashboard card: a big count, then up to 6 "Sales Person — Customer" lines, and
+// a tap-to-open-full-table affordance. When nothing is pending it shows an all-clear message
+// instead of an empty "data not found" table.
+function renderPunchSummary(elId, rows, kind, subtitle){
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const n = rows.length;
+  if (n === 0) {
+    el.className = '';
+    el.innerHTML = `<div class="punch-all-good">✅ Sab punched — koi pending nahi</div>
+      <div class="punch-sub">${esc(subtitle)}</div>`;
+    return;
+  }
+  const shown = rows.slice(0, 6);
+  const items = shown.map(r => `<div class="punch-item">
+      <span class="p-name">${esc(r.salesperson)}</span>
+      <span class="p-cust">${esc(r.customer || '(no name)')}</span>
+    </div>`).join('');
+  const more = n > shown.length ? `<div class="punch-more">+${n - shown.length} aur — Overview me poori list</div>` : '';
+  el.className = 'punch-summary';
+  el.setAttribute('role', 'button');
+  el.setAttribute('title', 'Overview tab me poori list dekho');
+  el.innerHTML = `<div class="punch-count some">${fmtInt(n)}</div>
+    <div class="punch-sub">${esc(subtitle)} — Sales Person &amp; Customer:</div>
+    <div class="punch-list">${items}</div>${more}`;
+  el.onclick = () => switchToTab('overview', kind === 'enquiry' ? 'tblWalkinMissing' : 'tblBookingNotInSystem');
 }
 // Executive x Model grid — "kaunsa sales person kaunsa model kitna bech raha hai" in one view.
 // Built from the same already-filtered billed-delivery rows renderDelivery() uses, so it always
