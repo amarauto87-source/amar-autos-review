@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Royal Enfield Riders Community | Registration</title>
 <meta name="description" content="Join the Amar Autos Royal Enfield Riders Community — register for rides, browse the gallery, and connect with fellow riders in East Delhi.">
-
 <!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='47' fill='%231b1714' stroke='%23d3a24f' stroke-width='5'/%3E%3Ctext x='50' y='63' font-family='Georgia,serif' font-size='36' font-weight='700' fill='%23eec27a' text-anchor='middle'%3ERE%3C/text%3E%3C/svg%3E">
-
 <!-- Open Graph / social share preview -->
 <meta property="og:title" content="Royal Enfield Riders Community | Amar Autos">
 <meta property="og:description" content="Join the Amar Autos Royal Enfield Riders Community — register for rides, browse the gallery, and connect with fellow riders in East Delhi.">
@@ -54,10 +52,8 @@
   a{color:inherit; text-decoration:none;}
   img{max-width:100%; display:block;}
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
-
   .icon{width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; vertical-align:-0.15em; flex:none;}
   .icon.filled{fill:currentColor; stroke:none;}
-
   header.site{
     position:sticky; top:0; z-index:50;
     background:rgba(11,10,9,0.94);
@@ -84,7 +80,6 @@
   }
   .btn-register:hover{background:var(--gold); color:#161310;}
   .nav-toggle{display:none; background:none; border:none; color:var(--gold-light); font-size:22px; cursor:pointer; padding:4px;}
-
   .hero{
     position:relative;
     padding:clamp(120px,20vw,190px) 0 clamp(40px,6vw,64px);
@@ -114,7 +109,6 @@
     color:var(--gold-light); font-size:clamp(16px,2vw,20px); background:rgba(21,18,16,0.75); backdrop-filter:blur(2px);
   }
   .feature-strip .label{font-family:var(--font-head); font-size:clamp(9px,1vw,10.5px); letter-spacing:.8px; color:var(--text-muted); line-height:1.3;}
-
   .form-section{padding:clamp(32px,6vw,56px) 0 40px;}
   .form-card{
     background:var(--panel);
@@ -127,7 +121,6 @@
   .form-title-row .line.right{background:linear-gradient(90deg, var(--gold-dim), transparent);}
   .form-title-row h2{font-size:clamp(19px,2.8vw,29px); color:var(--gold-light); letter-spacing:2px; white-space:nowrap; font-weight:600;}
   .emblem-mini{width:30px; height:30px; border:1px solid var(--gold-dim); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--gold-light); font-size:13px; flex:none;}
-
   form#riderForm{display:grid; grid-template-columns:repeat(3, 1fr); gap:22px 24px;}
   .field{display:flex; flex-direction:column; gap:8px;}
   .field.full{grid-column:1 / -1;}
@@ -159,16 +152,20 @@
   .input-wrap input[type="date"]{color-scheme:dark;}
   .field.disabled .input-wrap{opacity:.45; pointer-events:none;}
   .field-error{font-size:11.5px; color:var(--danger); display:none;}
-  .field.invalid .input-wrap{border-color:var(--danger);}
+  .field.invalid .input-wrap{border-color:var(--danger); background:rgba(226,87,76,0.08); box-shadow:0 0 0 3px rgba(226,87,76,0.16);}
   .field.invalid .field-error{display:block;}
-
+  .field.invalid label{color:var(--danger);}
   .agree-row{
-    grid-column:1 / -1; display:flex; align-items:flex-start; gap:10px;
+    grid-column:1 / -1; display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap;
     margin-top:6px; font-size:13.5px; color:var(--text-muted);
+    border:1px solid transparent; border-radius:6px; padding:6px; transition:border-color .2s, background .2s;
   }
   .agree-row input{margin-top:3px; width:16px; height:16px; accent-color:var(--gold);}
   .agree-row a{color:var(--gold-light); text-decoration:underline;}
-
+  .agree-row.invalid{border-color:var(--danger); background:rgba(226,87,76,0.08);}
+  .agree-row .field-error{font-size:11.5px; color:var(--danger); display:none; flex-basis:100%; margin-left:26px;}
+  .agree-row.invalid .field-error{display:block;}
+  .form-status.duplicate{color:var(--gold-light);}
   .submit-row{grid-column:1 / -1; display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:8px;}
   button.submit-btn{
     background:linear-gradient(180deg, var(--gold-light), var(--gold));
@@ -181,7 +178,6 @@
   .form-status{font-size:13.5px; text-align:center; min-height:18px;}
   .form-status.success{color:var(--success);}
   .form-status.error{color:var(--danger);}
-
   .thank-you{
     display:none; flex-direction:column; align-items:center; text-align:center;
     padding:48px 20px 32px; gap:14px;
@@ -194,7 +190,6 @@
   .thank-you h3{color:var(--gold-light); font-size:24px; letter-spacing:1px;}
   .thank-you p{color:var(--text-muted); font-size:14.5px; max-width:420px; line-height:1.6;}
   .thank-you .btn-register{margin-top:10px; display:inline-block;}
-
   footer.site{padding:40px 0 26px;}
   footer.site .wrap{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px;}
   .footer-left{display:flex; flex-direction:column; gap:14px;}
@@ -213,7 +208,6 @@
     font-family:var(--font-head); font-size:11px; letter-spacing:1px; color:var(--gold-light);
   }
   .footer-right .stars{color:var(--gold-light); margin-top:4px; font-size:11px; letter-spacing:3px;}
-
   @media (max-width:860px){
     nav.main-nav{position:fixed; top:60px; left:0; right:0; background:var(--panel); flex-direction:column; padding:20px; gap:18px; border-bottom:1px solid var(--border); display:none;}
     nav.main-nav.open{display:flex;}
@@ -228,17 +222,14 @@
     .footer-left{align-items:center;}
     .form-title-row .line{display:none;}
   }
-
   .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
   .reveal.reveal-visible{opacity:1; transform:translateY(0);}
-
   .gallery-section{padding:clamp(28px,5vw,48px) 0 8px;}
   .section-heading{display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:26px; flex-wrap:wrap;}
   .section-heading .line{height:1px; flex:1; max-width:140px; min-width:20px; background:linear-gradient(90deg, transparent, var(--gold-dim));}
   .section-heading .line.right{background:linear-gradient(90deg, var(--gold-dim), transparent);}
   .section-heading h2{font-size:clamp(19px,2.8vw,29px); color:var(--gold-light); letter-spacing:2px; white-space:nowrap; font-weight:600; font-family:var(--font-head); text-transform:uppercase;}
   @media (max-width:620px){.section-heading .line{display:none;}}
-
   .gallery-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;}
   .gallery-item{
     position:relative; border-radius:8px; overflow:hidden; aspect-ratio:4/3;
@@ -253,7 +244,6 @@
   }
   @media (max-width:860px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
   @media (max-width:480px){.gallery-grid{grid-template-columns:1fr 1fr; gap:10px;}}
-
   .maps-section{padding:clamp(28px,5vw,48px) 0 8px;}
   .maps-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
   .map-card{
@@ -269,7 +259,6 @@
   }
   .map-card-body a.directions:hover{background:var(--gold); color:#161310;}
   @media (max-width:760px){.maps-grid{grid-template-columns:1fr;}}
-
   /* ===================== Certificate & Dashboard pages ===================== */
   #page-dashboard{ padding-top:20px; }
   #page-dashboard .page-inner{ max-width:1180px; margin:0 auto; padding:0 24px 60px; }
@@ -278,7 +267,6 @@
     font-size:clamp(20px,3vw,28px); color:var(--gold-light); margin-bottom:4px; text-align:center;
   }
   #page-dashboard .subtitle{ color:var(--text-muted); font-size:13px; margin-bottom:28px; text-align:center; }
-
   /* ---- Certificate tool ---- */
   .cert-wrap{ max-width:1000px; margin:0 auto; }
   .form-panel{
@@ -300,7 +288,6 @@
   }
   .btn-primary{background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#181410;}
   .btn-secondary{background:transparent; color:var(--gold-light);}
-
   #certificateWrap{ display:flex; justify-content:center; }
   #certificate{
     width:1000px; max-width:100%; aspect-ratio: 1000 / 700;
@@ -339,7 +326,6 @@
     display:flex; align-items:center; justify-content:center; color:var(--gold-light);
     font-family:'Cinzel',serif; font-size:10px; letter-spacing:.5px; text-align:center; line-height:1.3;
   }
-
   /* ---- Dashboard ---- */
   .gate{
     max-width:380px; margin:80px auto; background:var(--panel); border:1px solid var(--border);
@@ -381,10 +367,8 @@
   }
   .refresh-btn:hover{background:var(--gold); color:#161310;}
   .last-updated{font-size:11.5px; color:var(--text-muted);}
-
   /* nav active state + page visibility */
   nav.main-nav a.active{color:var(--gold-light);}
-
   .admin-tabs{display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap;}
   .admin-tab-btn{
     background:transparent; border:1px solid var(--border); color:var(--text-muted);
@@ -399,7 +383,6 @@
 </style>
 </head>
 <body>
-
 <svg style="display:none" aria-hidden="true">
   <symbol id="i-bars" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
   <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0"/><rect x="3" y="16" width="18" height="4" rx="2"/><path d="M9 16v-1a3 3 0 0 1 6 0v1"/></symbol>
@@ -426,7 +409,6 @@
   <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
   <symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none"/></symbol>
 </svg>
-
 <header class="site">
   <div class="wrap">
     <div class="brand">ROYAL <span>ENFIELD</span></div>
@@ -444,7 +426,6 @@
     </div>
   </div>
 </header>
-
 <div id="page-home" class="site-page active">
 <section class="hero" id="top">
   <div class="hero-bg"></div>
@@ -454,7 +435,6 @@
       <h1 class="headline"><span class="i18n" data-en="Ride Together" data-hi="साथ राइड करें">Ride Together</span><span class="accent"><span class="i18n" data-en="Stay Together" data-hi="साथ रहें">Stay Together</span></span></h1>
       <p class="tagline"><span class="star">&#9733;</span> <span class="i18n" data-en="One Ride" data-hi="एक राइड">One Ride</span> &nbsp;<span class="star">&#9733;</span> <span class="i18n" data-en="One Family" data-hi="एक परिवार">One Family</span> &nbsp;<span class="star">&#9733;</span> Royal Enfield</p>
       <p class="lead"><span class="i18n" data-en="Join our rider community by filling the registration form." data-hi="फॉर्म भरकर हमारे राइडर समुदाय से जुड़ें।">Join our rider community by filling the registration form.</span></p>
-
       <div class="feature-strip">
         <div class="item">
           <div class="icon-badge"><svg class="icon"><use href="#i-helmet"></use></svg></div>
@@ -476,8 +456,6 @@
     </div>
   </div>
 </section>
-
-
 <section class="gallery-section reveal" id="gallery">
   <div class="wrap">
     <div class="section-heading">
@@ -495,7 +473,6 @@
     </div>
   </div>
 </section>
-
 <section class="form-section reveal">
   <div class="wrap">
     <div class="form-card">
@@ -504,9 +481,7 @@
         <h2><span class="i18n" data-en="Rider Registration Form" data-hi="राइडर पंजीकरण फॉर्म">Rider Registration Form</span></h2>
         <div class="line right"></div>
       </div>
-
       <form id="riderForm" novalidate>
-
         <div class="field">
           <label for="riderName"><span class="i18n" data-en="1. Rider Name" data-hi="1. राइडर का नाम">1. Rider Name</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-user"></use></svg></span>
@@ -514,7 +489,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter your name." data-hi="कृपया अपना नाम लिखें।">Please enter your name.</span></span>
         </div>
-
         <div class="field">
           <label for="mobile"><span class="i18n" data-en="2. Mobile Number" data-hi="2. मोबाइल नंबर">2. Mobile Number</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-phone"></use></svg></span>
@@ -522,7 +496,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Enter a valid 10-digit mobile number." data-hi="सही 10 अंकों का मोबाइल नंबर लिखें।">Enter a valid 10-digit mobile number.</span></span>
         </div>
-
         <div class="field">
           <label for="emergency"><span class="i18n" data-en="3. Emergency Contact Number" data-hi="3. आपातकालीन संपर्क नंबर">3. Emergency Contact Number</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-phone-alert"></use></svg></span>
@@ -533,7 +506,6 @@
             <span class="i18n" id="emergencySameNumberMsg" data-en="Emergency contact must be different from your mobile number." data-hi="आपातकालीन नंबर आपके मोबाइल नंबर से अलग होना चाहिए।" style="display:none;">Emergency contact must be different from your mobile number.</span>
           </span>
         </div>
-
         <div class="field">
           <label for="bikeModel"><span class="i18n" data-en="4. Bike Model" data-hi="4. बाइक मॉडल">4. Bike Model</span> <span class="req">*</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-motorcycle"></use></svg></span>
@@ -561,7 +533,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please select your bike model." data-hi="कृपया अपनी बाइक का मॉडल चुनें।">Please select your bike model.</span></span>
         </div>
-
         <div class="field">
           <label for="bikeReg"><span class="i18n" data-en="5. Bike Registration Number" data-hi="5. बाइक पंजीकरण नंबर">5. Bike Registration Number</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-id-card"></use></svg></span>
@@ -569,7 +540,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter registration number." data-hi="कृपया पंजीकरण नंबर लिखें।">Please enter registration number.</span></span>
         </div>
-
         <div class="field">
           <label for="experience"><span class="i18n" data-en="6. Riding Experience" data-hi="6. राइडिंग अनुभव">6. Riding Experience</span> <span class="req">*</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-gauge"></use></svg></span>
@@ -584,7 +554,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please select your experience." data-hi="कृपया अपना अनुभव चुनें।">Please select your experience.</span></span>
         </div>
-
         <div class="field">
           <label for="groupMember"><span class="i18n" data-en="7. Member of Any Riding Group?" data-hi="7. किसी राइडिंग ग्रुप के सदस्य हैं?">7. Member of Any Riding Group?</span> <span class="req">*</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-users"></use></svg></span>
@@ -597,14 +566,12 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please select an option." data-hi="कृपया एक विकल्प चुनें।">Please select an option.</span></span>
         </div>
-
         <div class="field disabled" id="groupNameField">
           <label for="groupName"><span class="i18n" data-en="8. If Yes, Enter Riding Group Name" data-hi="8. अगर हाँ, तो ग्रुप का नाम लिखें">8. If Yes, Enter Riding Group Name</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-flag"></use></svg></span>
             <input type="text" id="groupName" name="Riding Group Name" placeholder="Enter riding group name" data-hi-placeholder="राइडिंग ग्रुप का नाम लिखें" disabled>
           </div>
         </div>
-
         <div class="field">
           <label for="city"><span class="i18n" data-en="9. City / Location" data-hi="9. शहर / स्थान">9. City / Location</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-map-pin"></use></svg></span>
@@ -612,7 +579,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter your city." data-hi="कृपया अपना शहर लिखें।">Please enter your city.</span></span>
         </div>
-
         <div class="field">
           <label for="dob"><span class="i18n" data-en="10. Date of Birth" data-hi="10. जन्म तिथि">10. Date of Birth</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-calendar"></use></svg></span>
@@ -620,7 +586,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter your date of birth." data-hi="कृपया अपनी जन्म तिथि लिखें।">Please enter your date of birth.</span></span>
         </div>
-
         <div class="field">
           <label for="email"><span class="i18n" data-en="11. Email Address" data-hi="11. ईमेल पता">11. Email Address</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-mail"></use></svg></span>
@@ -628,14 +593,12 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter a valid email." data-hi="कृपया सही ईमेल पता लिखें।">Please enter a valid email.</span></span>
         </div>
-
         <div class="field">
           <label for="instagram"><span class="i18n" data-en="11a. Instagram ID" data-hi="11a. इंस्टाग्राम आईडी">11a. Instagram ID</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-instagram"></use></svg></span>
             <input type="text" id="instagram" name="Instagram ID" placeholder="@yourusername" data-hi-placeholder="@yourusername">
           </div>
         </div>
-
         <div class="field full">
           <label for="address"><span class="i18n" data-en="12. Address" data-hi="12. पता">12. Address</span> <span class="req">*</span></label>
           <div class="input-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-home"></use></svg></span>
@@ -643,7 +606,6 @@
           </div>
           <span class="field-error"><span class="i18n" data-en="Please enter your address." data-hi="कृपया अपना पता लिखें।">Please enter your address.</span></span>
         </div>
-
         <div class="field">
           <label for="helmet"><span class="i18n" data-en="13. Helmet Available?" data-hi="13. हेलमेट उपलब्ध है?">13. Helmet Available?</span> <span class="req">*</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-helmet"></use></svg></span>
@@ -656,7 +618,6 @@
           </div>
           <span class="field-error">Please select an option.</span>
         </div>
-
         <div class="field">
           <label for="gear"><span class="i18n" data-en="14. Riding Gear Available?" data-hi="14. राइडिंग गियर उपलब्ध है?">14. Riding Gear Available?</span> <span class="req">*</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-shirt"></use></svg></span>
@@ -669,38 +630,31 @@
           </div>
           <span class="field-error">Please select an option.</span>
         </div>
-
         <div class="field">
           <label for="heardFrom"><span class="i18n" data-en="15. How Did You Hear About Us?" data-hi="15. आपने हमारे बारे में कैसे सुना?">15. How Did You Hear About Us?</span></label>
           <div class="input-wrap select-wrap"><span class="icon-slot"><svg class="icon"><use href="#i-megaphone"></use></svg></span>
             <select id="heardFrom" name="How Did You Hear About Us">
               <option value="" disabled selected><span class="i18n" data-en="Select an option" data-hi="एक विकल्प चुनें">Select an option</span></option>
+              <option value="Rider Reference"><span class="i18n" data-en="Rider Reference" data-hi="राइडर रेफरेंस">Rider Reference</span></option>
               <option value="Social Media"><span class="i18n" data-en="Social Media" data-hi="सोशल मीडिया">Social Media</span></option>
-              <option value="Friend / Family"><span class="i18n" data-en="Friend / Family" data-hi="दोस्त / परिवार">Friend / Family</span></option>
-              <option value="Riding Event"><span class="i18n" data-en="Riding Event" data-hi="राइडिंग इवेंट">Riding Event</span></option>
-              <option value="Royal Enfield Dealer"><span class="i18n" data-en="Royal Enfield Dealer" data-hi="रॉयल एनफील्ड डीलर">Royal Enfield Dealer</span></option>
-              <option value="Amar Auto - Kanti Nagar">Amar Auto - Kanti Nagar</option>
-              <option value="Amar Auto - Vikas Marg">Amar Auto - Vikas Marg</option>
-              <option value="Other">Other</option>
+              <option value="Amar Autos - Kanti Nagar">Amar Autos (Kanti Nagar)</option>
+              <option value="Amar Autos - Vikas Marg">Amar Autos (Vikas Marg)</option>
             </select>
             <svg class="icon caret"><use href="#i-chevron-down"></use></svg>
           </div>
         </div>
-
         <div class="agree-row">
           <input type="checkbox" id="agree" required>
           <label for="agree"><span class="i18n" data-en="I agree to the" data-hi="मैं">I agree to the</span> <a href="#top"><span class="i18n" data-en="Terms &amp; Conditions" data-hi="नियम व शर्तों">Terms &amp; Conditions</span></a> <span class="i18n" data-en="and" data-hi="और">and</span> <a href="#top"><span class="i18n" data-en="Privacy Policy" data-hi="गोपनीयता नीति">Privacy Policy</span></a><span class="i18n" data-en="." data-hi="से सहमत हूँ।">.</span></label>
+          <span class="field-error"><span class="i18n" data-en="Please agree to the Terms &amp; Conditions and Privacy Policy to continue." data-hi="जारी रखने के लिए कृपया नियम व शर्तों और गोपनीयता नीति से सहमत हों।">Please agree to the Terms &amp; Conditions and Privacy Policy to continue.</span></span>
         </div>
-
         <div class="submit-row">
           <button type="submit" class="submit-btn" id="submitBtn">
             <span id="submitLabel"><span class="i18n" data-en="Submit Registration" data-hi="पंजीकरण जमा करें">Submit Registration</span></span>
           </button>
           <div class="form-status" id="formStatus"></div>
         </div>
-
       </form>
-
       <div class="thank-you" id="thankYou">
         <div class="thank-you-icon"><svg class="icon"><use href="#i-check-circle"></use></svg></div>
         <h3><span class="i18n" data-en="Thank You!" data-hi="धन्यवाद!">Thank You!</span></h3>
@@ -713,8 +667,6 @@
     </div>
   </div>
 </section>
-
-
 <section class="maps-section reveal" id="visit">
   <div class="wrap">
     <div class="section-heading">
@@ -740,7 +692,6 @@
     </div>
   </div>
 </section>
-
 <footer class="site">
   <div class="wrap">
     <div class="footer-left">
@@ -765,36 +716,29 @@
 </footer>
 </div>
 <!-- /page-home -->
-
 <div id="page-dashboard" class="site-page">
   <div class="page-inner">
     <h1>Amar Autos Admin</h1>
     <p class="subtitle">Login required &middot; Analytics &amp; Certificate tools</p>
-
     <div class="gate" id="gate">
       <h2>Enter Access Code</h2>
       <input type="password" id="passcodeInput" placeholder="&bull;&bull;&bull;&bull;" maxlength="20" autocomplete="off">
       <button id="unlockBtn" type="button">Login</button>
       <div class="err" id="gateErr"></div>
     </div>
-
     <div class="dashboard-panel" id="dashboardPanel">
-
       <div class="admin-tabs">
         <button type="button" class="admin-tab-btn active" id="tabBtnAnalytics" onclick="showAdminTab('analytics')">Analytics Dashboard</button>
         <button type="button" class="admin-tab-btn" id="tabBtnCertificate" onclick="showAdminTab('certificate')">Ride Certificate</button>
       </div>
-
       <!-- ===== Analytics tab ===== -->
       <div id="adminTabAnalytics" class="admin-tab active">
         <div class="refresh-row">
           <button class="refresh-btn" id="refreshBtn" type="button">&#8635; Refresh Data</button>
           <span class="last-updated" id="lastUpdated"></span>
         </div>
-
         <div id="loadingMsg" class="status-msg">Loading registration data&hellip;</div>
         <div id="errorMsg" class="status-msg err" style="display:none;"></div>
-
         <div id="dashContent" style="display:none;">
           <div class="stat-row">
             <div class="stat-card"><div class="num" id="totalCount">0</div><div class="lbl">Total Riders</div></div>
@@ -802,7 +746,6 @@
             <div class="stat-card"><div class="num" id="groupCount">0</div><div class="lbl">Already in a Group</div></div>
             <div class="stat-card"><div class="num" id="topModel">&mdash;</div><div class="lbl">Most Popular Model</div></div>
           </div>
-
           <div class="charts-grid">
             <div class="chart-card">
               <h3>Bike Model Breakdown</h3>
@@ -813,12 +756,10 @@
               <canvas id="experienceChart"></canvas>
             </div>
           </div>
-
           <div class="chart-card" style="margin-bottom:24px;">
             <h3>City-wise Registrations</h3>
             <canvas id="cityChart"></canvas>
           </div>
-
           <div class="table-card">
             <h3>Recent Registrations</h3>
             <table>
@@ -830,7 +771,6 @@
           </div>
         </div>
       </div>
-
       <!-- ===== Certificate tab ===== -->
       <div id="adminTabCertificate" class="admin-tab">
         <div class="cert-wrap">
@@ -860,32 +800,26 @@
               <button class="btn btn-secondary" id="downloadPngBtn" type="button">Download as Image</button>
             </div>
           </div>
-
           <div id="certificateWrap">
             <div id="certificate">
               <div class="corner tl"></div>
               <div class="corner tr"></div>
               <div class="corner bl"></div>
               <div class="corner br"></div>
-
               <div class="cert-header">
                 <div class="cert-brand">Royal Enfield <span>Amar Autos</span></div>
                 <div class="cert-estd">ESTD 1982</div>
               </div>
-
               <div class="cert-title">Certificate of Completion</div>
               <div class="cert-subtitle">Rider Community Ride</div>
-
               <div class="cert-presented">This certificate is proudly presented to</div>
               <div class="cert-name" id="certName">Rahul Sharma</div>
-
               <div class="cert-body-text">
                 For successfully completing the <b id="certRideName">Independence Day Ride</b>
                 on a <b id="certBikeModel">Himalayan 450</b>, riding with the Amar Autos community
                 on <b id="certDate">&mdash;</b><span id="certRouteWrap"><br>Route: <b id="certRoute"></b></span>.
                 Ride safe, ride pure.
               </div>
-
               <div class="cert-footer">
                 <div class="cert-sign">
                   <div class="line">Amar Autos</div>
@@ -901,27 +835,21 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 <!-- /page-dashboard -->
-
-
 <script>
   // ---------- SPA-style page switching (Home / Admin) ----------
   function showPage(target){
     document.getElementById('page-home').classList.toggle('active', target === 'home');
     document.getElementById('page-dashboard').classList.toggle('active', target === 'dashboard');
-
     document.querySelectorAll('nav.main-nav a').forEach(function(a){ a.classList.remove('active'); });
     var activeLink = document.querySelector('nav.main-nav a.nav-' + target);
     if (activeLink) activeLink.classList.add('active');
-
     document.getElementById('mainNav').classList.remove('open');
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
-
   // ---------- Admin panel tab switching (Analytics / Certificate) ----------
   function showAdminTab(tab){
     document.getElementById('adminTabAnalytics').classList.toggle('active', tab === 'analytics');
@@ -929,7 +857,6 @@
     document.getElementById('tabBtnAnalytics').classList.toggle('active', tab === 'analytics');
     document.getElementById('tabBtnCertificate').classList.toggle('active', tab === 'certificate');
   }
-
   // Mobile navigation toggle
   // Scroll-reveal animation
   (function(){
@@ -948,16 +875,13 @@
       revealEls.forEach(function(el){ el.classList.add('reveal-visible'); });
     }
   })();
-
   document.getElementById('navToggle').addEventListener('click', function(){
     document.getElementById('mainNav').classList.toggle('open');
   });
   document.getElementById('year').textContent = new Date().getFullYear();
-
   // ---------- Hindi / English language toggle ----------
   var currentLang = 'en';
   var langToggleBtn = document.getElementById('langToggle');
-
   function applyLanguage(lang){
     currentLang = lang;
     document.querySelectorAll('.i18n').forEach(function(el){
@@ -978,21 +902,17 @@
     document.documentElement.setAttribute('lang', lang);
     langToggleBtn.textContent = (lang === 'hi') ? 'हिं / EN' : 'EN / हिं';
   }
-
   langToggleBtn.addEventListener('click', function(){
     applyLanguage(currentLang === 'en' ? 'hi' : 'en');
   });
-
   // Set DOB maximum date (Must be at least 18 years old)
   const today = new Date();
   const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
   document.getElementById('dob').setAttribute('max', maxDate);
-
   // Conditional field: Riding group name
   var groupMember = document.getElementById('groupMember');
   var groupNameField = document.getElementById('groupNameField');
   var groupNameInput = document.getElementById('groupName');
-
   function toggleGroupName(){
     if (groupMember.value === 'Yes') {
       groupNameField.classList.remove('disabled');
@@ -1005,7 +925,6 @@
     }
   }
   groupMember.addEventListener('change', toggleGroupName);
-
   // Bike Model: show free-text field when "Other" is selected
   var bikeModelSelect = document.getElementById('bikeModel');
   var bikeModelOther = document.getElementById('bikeModelOther');
@@ -1020,24 +939,24 @@
       bikeModelOther.value = '';
     }
   });
-
   // Force Bike Registration Number to uppercase (both display and actual value)
   document.getElementById('bikeReg').addEventListener('input', function(){
     var pos = this.selectionStart;
     this.value = this.value.toUpperCase();
     this.setSelectionRange(pos, pos);
   });
-
   // Updated Active Google Apps Script Web App URL
   var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_I8pCyDutFotd_hv6e6ob3bFCoTl398h5l3hBYQgg2phNywBg5JgltVmiBhh8hSzG/exec";
-
   var form = document.getElementById('riderForm');
   var submitBtn = document.getElementById('submitBtn');
   var submitLabel = document.getElementById('submitLabel');
   var formStatus = document.getElementById('formStatus');
   var thankYou = document.getElementById('thankYou');
   var submitAnotherBtn = document.getElementById('submitAnotherBtn');
-
+  var mobileInput = document.getElementById('mobile');
+  var emergencyInput = document.getElementById('emergency');
+  var emergencyPatternMsg = document.getElementById('emergencyPatternMsg');
+  var emergencySameNumberMsg = document.getElementById('emergencySameNumberMsg');
   submitAnotherBtn.addEventListener('click', function(){
     thankYou.style.display = 'none';
     form.style.display = '';
@@ -1045,15 +964,46 @@
     formStatus.textContent = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-
   function setFieldError(fieldEl, isInvalid){
     if (fieldEl) fieldEl.classList.toggle('invalid', isInvalid);
   }
-
+  // A field/box only ever gets highlighted by validateForm() (on submit) or
+  // explicitly by the duplicate-registration check below. Here we only ever
+  // CLEAR that highlight, the moment the rider fixes the value — so a box
+  // that was flagged red doesn't stay red after they've corrected it.
+  function isInputValid(input){
+    if (input.type === 'checkbox') return input.checked;
+    var val = input.value.trim();
+    if (val === '') return false;
+    if (input.pattern) return new RegExp('^' + input.pattern + '$').test(val);
+    return true;
+  }
+  form.querySelectorAll('[required]').forEach(function(input){
+    var evt = (input.tagName === 'SELECT' || input.type === 'checkbox') ? 'change' : 'input';
+    input.addEventListener(evt, function(){
+      var fieldEl = input.closest('.field') || input.closest('.agree-row');
+      if (fieldEl && isInputValid(input)) setFieldError(fieldEl, false);
+      if ((input === mobileInput || input === emergencyInput) &&
+          mobileInput.value.trim() !== '' && emergencyInput.value.trim() !== '' &&
+          /^[0-9]{10}$/.test(emergencyInput.value.trim())) {
+        var stillSame = mobileInput.value.trim() === emergencyInput.value.trim();
+        if (!stillSame) {
+          setFieldError(emergencyInput.closest('.field'), false);
+          emergencyPatternMsg.style.display = '';
+          emergencySameNumberMsg.style.display = 'none';
+        }
+      }
+    });
+  });
+  document.getElementById('email').addEventListener('input', function(){
+    var val = this.value.trim();
+    var ok = val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    if (ok) setFieldError(this.closest('.field'), false);
+  });
   function validateForm(){
     var valid = true;
     var requiredFields = form.querySelectorAll('[required]');
-    
+
     requiredFields.forEach(function(input){
       var fieldEl = input.closest('.field') || input.closest('.agree-row');
       var ok = true;
@@ -1066,22 +1016,16 @@
           ok = re.test(input.value.trim());
         }
       }
-      if (fieldEl && fieldEl.classList.contains('field')) setFieldError(fieldEl, !ok);
+      if (fieldEl && (fieldEl.classList.contains('field') || fieldEl.classList.contains('agree-row'))) setFieldError(fieldEl, !ok);
       if (!ok) valid = false;
     });
-
     var emailInput = document.getElementById('email');
     if (emailInput.value.trim() !== '') {
       var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
       setFieldError(emailInput.closest('.field'), !emailOk);
       if (!emailOk) valid = false;
     }
-
     // Emergency contact must not be the same as the rider's own mobile number
-    var mobileInput = document.getElementById('mobile');
-    var emergencyInput = document.getElementById('emergency');
-    var emergencyPatternMsg = document.getElementById('emergencyPatternMsg');
-    var emergencySameNumberMsg = document.getElementById('emergencySameNumberMsg');
     if (mobileInput.value.trim() !== '' && emergencyInput.value.trim() !== '') {
       var sameNumber = mobileInput.value.trim() === emergencyInput.value.trim();
       setFieldError(emergencyInput.closest('.field'), sameNumber);
@@ -1089,21 +1033,17 @@
       emergencySameNumberMsg.style.display = sameNumber ? '' : 'none';
       if (sameNumber) valid = false;
     }
-
     return valid;
   }
-
   form.addEventListener('submit', function(e){
     e.preventDefault();
     formStatus.className = 'form-status';
     formStatus.textContent = '';
-
     if (!validateForm()) {
       formStatus.classList.add('error');
       formStatus.textContent = (currentLang === 'hi') ? 'कृपया सभी आवश्यक फ़ील्ड सही से भरें।' : 'Please fill all required fields correctly.';
       return;
     }
-
     var data = {};
     new FormData(form).forEach(function(value, key){ data[key] = value; });
     if (data['Bike Model'] === 'Other' && bikeModelOther.value.trim()) {
@@ -1111,13 +1051,10 @@
     }
     data['Agreed to Terms'] = document.getElementById('agree').checked ? 'Yes' : 'No';
     data['Submission Time'] = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
     submitBtn.disabled = true;
     submitLabel.textContent = (currentLang === 'hi') ? 'जमा हो रहा है...' : 'Submitting...';
-
     // ⚠️ Verify this is Amar Autos' correct WhatsApp Business number before going live.
     var DEALER_WHATSAPP_NUMBER = "918448988948";
-
     fetch(SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1125,9 +1062,24 @@
     })
     .then(function(res){
       if (!res.ok) throw new Error('Server responded with status ' + res.status);
-      return res;
+      return res.text();
     })
-    .then(function(){
+    .then(function(text){
+      // The Apps Script backend can flag an already-registered mobile number by
+      // returning JSON like {"status":"duplicate"}. If it just returns plain
+      // text (older/unmodified backend), this parse fails harmlessly and we
+      // fall through to the normal success flow below, exactly as before.
+      var result = {};
+      try { result = JSON.parse(text); } catch (e) { result = {}; }
+      if (result && (result.status === 'duplicate' || result.duplicate === true)) {
+        formStatus.className = 'form-status duplicate';
+        formStatus.textContent = (currentLang === 'hi')
+          ? 'आप पहले से ही इस मोबाइल नंबर से पंजीकृत हैं। अगर यह गलती लगे तो Amar Autos से संपर्क करें।'
+          : "You're already registered with this mobile number. If this seems wrong, please contact Amar Autos.";
+        setFieldError(mobileInput.closest('.field'), true);
+        mobileInput.closest('.field').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       form.reset();
       toggleGroupName();
       bikeModelOtherWrap.style.display = 'none';
@@ -1137,7 +1089,6 @@
       form.style.display = 'none';
       thankYou.style.display = 'flex';
       thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
       // ---------- 1-tap WhatsApp confirmation ----------
       // Opens the rider's own WhatsApp with a pre-filled message to Amar Autos.
       // This needs one tap from the rider — true automatic sending needs
@@ -1161,23 +1112,18 @@
     });
   });
 </script>
-
-
 <script>
   // ====== DASHBOARD (privacy-safe: talks to an Apps Script proxy, never the raw Sheet) ======
   // Paste your deployed proxy's /exec URL here after setting it up (see dashboard-proxy-script.gs).
   var DASHBOARD_PROXY_URL = "https://script.google.com/macros/s/AKfycbxgd3u-3_KTGg2TGOBXii5bz19dv-KBDtAcJtUgcLiDV1yPlzXabXQnDQSqVYs3mWHl/exec";
-
   // Simple passcode — must match ACCESS_CODE inside the Apps Script proxy too.
   // This is NOT strong security (anyone who reads the page source can find it) —
   // it just keeps casual visitors from opening the dashboard.
   var ACCESS_CODE = "Guerrilla@450";
-
   document.getElementById('unlockBtn').addEventListener('click', tryUnlock);
   document.getElementById('passcodeInput').addEventListener('keydown', function(e){
     if (e.key === 'Enter') tryUnlock();
   });
-
   function tryUnlock(){
     var val = document.getElementById('passcodeInput').value;
     if (val === ACCESS_CODE) {
@@ -1188,31 +1134,24 @@
       document.getElementById('gateErr').textContent = 'Incorrect code, try again.';
     }
   }
-
   document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
-
   var modelChartInstance = null;
   var experienceChartInstance = null;
   var cityChartInstance = null;
-
   function loadDashboardData(){
     var loadingMsg = document.getElementById('loadingMsg');
     var errorMsg = document.getElementById('errorMsg');
     var dashContent = document.getElementById('dashContent');
-
     loadingMsg.style.display = 'block';
     errorMsg.style.display = 'none';
     dashContent.style.display = 'none';
-
     if (!DASHBOARD_PROXY_URL || DASHBOARD_PROXY_URL.indexOf('PASTE_YOUR') === 0) {
       loadingMsg.style.display = 'none';
       errorMsg.style.display = 'block';
       errorMsg.textContent = 'Dashboard proxy URL not set yet — see dashboard-proxy-script.gs setup steps.';
       return;
     }
-
     var url = DASHBOARD_PROXY_URL + '?code=' + encodeURIComponent(ACCESS_CODE) + '&_ts=' + Date.now();
-
     fetch(url, { cache: 'no-store' })
       .then(function(res){
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1231,21 +1170,15 @@
         errorMsg.textContent = 'Could not load data. (' + err.message + ')';
       });
   }
-
   function renderDashboard(data){
     document.getElementById('totalCount').textContent = data.totalCount;
     document.getElementById('todayCount').textContent = data.todayCount;
     document.getElementById('groupCount').textContent = data.groupCount;
-
     var sortedModels = Object.entries(data.modelTally || {}).sort(function(a,b){ return b[1]-a[1]; });
     document.getElementById('topModel').textContent = sortedModels.length ? sortedModels[0][0] : '—';
-
     var expTally = data.experienceTally || {};
-
     var sortedCities = Object.entries(data.cityTally || {}).sort(function(a,b){ return b[1]-a[1]; }).slice(0, 8);
-
     var goldPalette = ['#d3a24f','#eec27a','#a17f42','#8b6a35','#c9a544','#e0b76a','#b58a3f','#f0d9a8'];
-
     if (modelChartInstance) modelChartInstance.destroy();
     modelChartInstance = new Chart(document.getElementById('modelChart'), {
       type: 'doughnut',
@@ -1255,7 +1188,6 @@
       },
       options: { plugins: { legend: { position: 'right', labels: { color: '#c2b7a6', boxWidth: 12, font: { size: 11 } } } } }
     });
-
     if (experienceChartInstance) experienceChartInstance.destroy();
     experienceChartInstance = new Chart(document.getElementById('experienceChart'), {
       type: 'bar',
@@ -1271,7 +1203,6 @@
         }
       }
     });
-
     if (cityChartInstance) cityChartInstance.destroy();
     cityChartInstance = new Chart(document.getElementById('cityChart'), {
       type: 'bar',
@@ -1288,7 +1219,6 @@
         }
       }
     });
-
     var tbody = document.getElementById('recentTableBody');
     tbody.innerHTML = '';
     (data.recent || []).forEach(function(r){
@@ -1302,7 +1232,6 @@
     });
   }
 </script>
-
 <script>
   // ====== CERTIFICATE GENERATOR ======
   var certInputRiderName = document.getElementById('certInputRiderName');
@@ -1310,21 +1239,18 @@
   var certInputRideName = document.getElementById('certInputRideName');
   var certInputRideDate = document.getElementById('certInputRideDate');
   var certInputRideRoute = document.getElementById('certInputRideRoute');
-
   var certNameEl = document.getElementById('certName');
   var certRideNameEl = document.getElementById('certRideName');
   var certBikeModelEl = document.getElementById('certBikeModel');
   var certDateEl = document.getElementById('certDate');
   var certRouteEl = document.getElementById('certRoute');
   var certRouteWrapEl = document.getElementById('certRouteWrap');
-
   function formatCertDate(dstr){
     if (!dstr) return '—';
     var d = new Date(dstr + 'T00:00:00');
     if (isNaN(d)) return '—';
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   }
-
   function updateCertificatePreview(){
     certNameEl.textContent = certInputRiderName.value || 'Rider Name';
     certRideNameEl.textContent = certInputRideName.value || 'the ride';
@@ -1337,14 +1263,11 @@
       certRouteWrapEl.style.display = 'none';
     }
   }
-
   [certInputRiderName, certInputBikeModel, certInputRideName, certInputRideDate, certInputRideRoute].forEach(function(el){
     el.addEventListener('input', updateCertificatePreview);
   });
-
   certInputRideDate.value = new Date().toISOString().split('T')[0];
   updateCertificatePreview();
-
   document.getElementById('downloadPngBtn').addEventListener('click', function(){
     html2canvas(document.getElementById('certificate'), { scale: 2, backgroundColor: null }).then(function(canvas){
       var link = document.createElement('a');
@@ -1353,7 +1276,6 @@
       link.click();
     });
   });
-
   document.getElementById('downloadPdfBtn').addEventListener('click', function(){
     html2canvas(document.getElementById('certificate'), { scale: 2, backgroundColor: null }).then(function(canvas){
       var imgData = canvas.toDataURL('image/png');
