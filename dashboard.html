@@ -143,6 +143,15 @@
 
   /* Outline motorcycle sitting behind the masthead — kept very low contrast so
      it works as texture and never competes with the numbers. */
+  /* Clips ONLY the bike-mark artwork to the header's box. This used to be `overflow: hidden`
+     directly on header.top, but that also clipped anything else inside the header that needs to
+     escape its bounds — most importantly the "More" dropdown, which got cut off / hidden behind
+     the tab bar below it because the header (its positioned ancestor) clipped its own overflow.
+     Moving the clip onto a dedicated, non-interactive wrapper around just the SVG fixes that
+     without letting the decorative artwork bleed past the header edge. */
+  .bike-mark-clip {
+    position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+  }
   .bike-mark {
     position: absolute; right: -26px; top: 50%; transform: translateY(-50%);
     width: 440px; max-width: 46vw; height: auto; pointer-events: none;
@@ -151,9 +160,9 @@
   .bike-mark .ln { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
   .bike-mark .thin { stroke-width: 1.6; }
   .bike-mark .hair { stroke-width: 1; }
-  header.top { position: sticky; overflow: hidden; }
-  header.top > *:not(.bike-mark) { position: relative; z-index: 1; }
-  @media (max-width: 900px) { .bike-mark { display: none; } }
+  header.top { position: sticky; }
+  header.top > *:not(.bike-mark-clip) { position: relative; z-index: 1; }
+  @media (max-width: 900px) { .bike-mark-clip { display: none; } }
 
   /* ── Controls ──────────────────────────────────────────────────────────── */
   .controls { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
@@ -477,6 +486,22 @@
   }
   .dash-shortcuts button:hover { background: color-mix(in srgb, var(--gold) 14%, transparent); border-color: var(--gold); transform: translateY(-1px); }
   @media (max-width: 640px) { .dash-shortcuts button { padding: 7px 12px; font-size: 12px; } }
+
+  /* ── "My Day" hero — greeting + daily tip, the very first thing a sales login sees ────────── */
+  .myday-hero {
+    background:
+      radial-gradient(ellipse 500px 200px at 8% -20%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 68%),
+      var(--surface-1);
+    border: 1px solid var(--gold-dim); border-top: 2px solid var(--gold);
+    border-radius: 14px; padding: 20px 22px;
+  }
+  .myday-hero .greet { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: .3px; }
+  .myday-hero .date { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+  .myday-hero .tip {
+    margin-top: 15px; font-size: 13.5px; line-height: 1.55; color: var(--text-primary);
+    background: var(--surface-2); border-radius: 10px; padding: 12px 14px; border-left: 3px solid var(--gold);
+  }
+  .myday-hero .tip b { color: var(--gold); font-family: var(--font-head); }
   /* Model Specs — expandable cards (deep details + Hinglish selling points) */
   .spec-card { border: 1px solid var(--border); border-left: 3px solid var(--gold-dim); border-radius: 11px; background: var(--surface-1); margin-bottom: 10px; overflow: hidden; }
   .spec-card[open] { border-left-color: var(--gold); }
@@ -921,7 +946,7 @@
 </div>
 
 <header class="top">
-  <svg class="bike-mark" viewBox="0 0 460 215" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"> <g class="ln">  <!-- tyres -->  <circle cx="112" cy="155" r="48"/>  <circle cx="348" cy="155" r="48"/>  <circle cx="112" cy="155" r="31" class="thin"/>  <circle cx="348" cy="155" r="31" class="thin"/>  <circle cx="112" cy="155" r="9" class="thin"/>  <circle cx="348" cy="155" r="6" class="thin"/>  <g class="hair"><line x1="121.0" y1="155.0" x2="142.0" y2="155.0"/><line x1="120.3" y1="158.4" x2="139.7" y2="166.5"/><line x1="118.4" y1="161.4" x2="133.2" y2="176.2"/><line x1="115.4" y1="163.3" x2="123.5" y2="182.7"/><line x1="112.0" y1="164.0" x2="112.0" y2="185.0"/><line x1="108.6" y1="163.3" x2="100.5" y2="182.7"/><line x1="105.6" y1="161.4" x2="90.8" y2="176.2"/><line x1="103.7" y1="158.4" x2="84.3" y2="166.5"/><line x1="103.0" y1="155.0" x2="82.0" y2="155.0"/><line x1="103.7" y1="151.6" x2="84.3" y2="143.5"/><line x1="105.6" y1="148.6" x2="90.8" y2="133.8"/><line x1="108.6" y1="146.7" x2="100.5" y2="127.3"/><line x1="112.0" y1="146.0" x2="112.0" y2="125.0"/><line x1="115.4" y1="146.7" x2="123.5" y2="127.3"/><line x1="118.4" y1="148.6" x2="133.2" y2="133.8"/><line x1="120.3" y1="151.6" x2="139.7" y2="143.5"/></g>  <g class="hair"><line x1="354.0" y1="155.0" x2="378.0" y2="155.0"/><line x1="353.5" y1="157.3" x2="375.7" y2="166.5"/><line x1="352.2" y1="159.2" x2="369.2" y2="176.2"/><line x1="350.3" y1="160.5" x2="359.5" y2="182.7"/><line x1="348.0" y1="161.0" x2="348.0" y2="185.0"/><line x1="345.7" y1="160.5" x2="336.5" y2="182.7"/><line x1="343.8" y1="159.2" x2="326.8" y2="176.2"/><line x1="342.5" y1="157.3" x2="320.3" y2="166.5"/><line x1="342.0" y1="155.0" x2="318.0" y2="155.0"/><line x1="342.5" y1="152.7" x2="320.3" y2="143.5"/><line x1="343.8" y1="150.8" x2="326.8" y2="133.8"/><line x1="345.7" y1="149.5" x2="336.5" y2="127.3"/><line x1="348.0" y1="149.0" x2="348.0" y2="125.0"/><line x1="350.3" y1="149.5" x2="359.5" y2="127.3"/><line x1="352.2" y1="150.8" x2="369.2" y2="133.8"/><line x1="353.5" y1="152.7" x2="375.7" y2="143.5"/></g>  <!-- mudguards hug the tyre (r=52 vs tyre 48) so they read as fenders, not floating arcs -->  <path d="M 303.2 128.4 A 52 52 0 0 1 392.8 128.4" class="thin"/>  <path d="M 66.8 123 A 52 52 0 0 1 160.5 139" class="thin"/>  <!-- forks, bars, lamp -->  <path d="M 348 155 L 318 84"/>  <path d="M 356 152 L 326 81"/>  <path d="M 322 79 L 298 69"/>  <path d="M 322 79 L 344 73"/>  <circle cx="330" cy="104" r="13"/>  <!-- teardrop tank, stopping clear of the lamp -->  <path d="M 236 103 C 243 87 264 81 285 83 C 297 84 303 89 303 97 L 303 106       C 289 116 257 117 242 111 Z"/>  <!-- sprung seat -->  <path d="M 237 103 L 190 105 C 178 106 172 111 172 115 L 229 113 C 235 112 237 108 237 103 Z"/>  <!-- frame: steering head down to engine, top tube back to seat post -->  <path d="M 299 103 L 268 148"/>  <path d="M 242 106 L 202 116"/>  <path d="M 202 116 L 190 152"/>  <path d="M 200 154 L 112 155"/>  <!-- engine case + finned barrel, tucked under the tank -->  <path d="M 222 124 L 266 126 L 270 154 L 216 154 Z"/>  <path d="M 234 124 L 238 104 L 258 106 L 258 126"/>  <path d="M 236 118 L 258 119" class="hair"/>  <path d="M 236 113 L 258 114" class="hair"/>  <path d="M 237 108 L 258 109" class="hair"/>  <!-- exhaust sweeping back under the seat -->  <path d="M 268 154 C 240 170 172 172 124 161"/> </g></svg>
+  <div class="bike-mark-clip"><svg class="bike-mark" viewBox="0 0 460 215" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"> <g class="ln">  <!-- tyres -->  <circle cx="112" cy="155" r="48"/>  <circle cx="348" cy="155" r="48"/>  <circle cx="112" cy="155" r="31" class="thin"/>  <circle cx="348" cy="155" r="31" class="thin"/>  <circle cx="112" cy="155" r="9" class="thin"/>  <circle cx="348" cy="155" r="6" class="thin"/>  <g class="hair"><line x1="121.0" y1="155.0" x2="142.0" y2="155.0"/><line x1="120.3" y1="158.4" x2="139.7" y2="166.5"/><line x1="118.4" y1="161.4" x2="133.2" y2="176.2"/><line x1="115.4" y1="163.3" x2="123.5" y2="182.7"/><line x1="112.0" y1="164.0" x2="112.0" y2="185.0"/><line x1="108.6" y1="163.3" x2="100.5" y2="182.7"/><line x1="105.6" y1="161.4" x2="90.8" y2="176.2"/><line x1="103.7" y1="158.4" x2="84.3" y2="166.5"/><line x1="103.0" y1="155.0" x2="82.0" y2="155.0"/><line x1="103.7" y1="151.6" x2="84.3" y2="143.5"/><line x1="105.6" y1="148.6" x2="90.8" y2="133.8"/><line x1="108.6" y1="146.7" x2="100.5" y2="127.3"/><line x1="112.0" y1="146.0" x2="112.0" y2="125.0"/><line x1="115.4" y1="146.7" x2="123.5" y2="127.3"/><line x1="118.4" y1="148.6" x2="133.2" y2="133.8"/><line x1="120.3" y1="151.6" x2="139.7" y2="143.5"/></g>  <g class="hair"><line x1="354.0" y1="155.0" x2="378.0" y2="155.0"/><line x1="353.5" y1="157.3" x2="375.7" y2="166.5"/><line x1="352.2" y1="159.2" x2="369.2" y2="176.2"/><line x1="350.3" y1="160.5" x2="359.5" y2="182.7"/><line x1="348.0" y1="161.0" x2="348.0" y2="185.0"/><line x1="345.7" y1="160.5" x2="336.5" y2="182.7"/><line x1="343.8" y1="159.2" x2="326.8" y2="176.2"/><line x1="342.5" y1="157.3" x2="320.3" y2="166.5"/><line x1="342.0" y1="155.0" x2="318.0" y2="155.0"/><line x1="342.5" y1="152.7" x2="320.3" y2="143.5"/><line x1="343.8" y1="150.8" x2="326.8" y2="133.8"/><line x1="345.7" y1="149.5" x2="336.5" y2="127.3"/><line x1="348.0" y1="149.0" x2="348.0" y2="125.0"/><line x1="350.3" y1="149.5" x2="359.5" y2="127.3"/><line x1="352.2" y1="150.8" x2="369.2" y2="133.8"/><line x1="353.5" y1="152.7" x2="375.7" y2="143.5"/></g>  <!-- mudguards hug the tyre (r=52 vs tyre 48) so they read as fenders, not floating arcs -->  <path d="M 303.2 128.4 A 52 52 0 0 1 392.8 128.4" class="thin"/>  <path d="M 66.8 123 A 52 52 0 0 1 160.5 139" class="thin"/>  <!-- forks, bars, lamp -->  <path d="M 348 155 L 318 84"/>  <path d="M 356 152 L 326 81"/>  <path d="M 322 79 L 298 69"/>  <path d="M 322 79 L 344 73"/>  <circle cx="330" cy="104" r="13"/>  <!-- teardrop tank, stopping clear of the lamp -->  <path d="M 236 103 C 243 87 264 81 285 83 C 297 84 303 89 303 97 L 303 106       C 289 116 257 117 242 111 Z"/>  <!-- sprung seat -->  <path d="M 237 103 L 190 105 C 178 106 172 111 172 115 L 229 113 C 235 112 237 108 237 103 Z"/>  <!-- frame: steering head down to engine, top tube back to seat post -->  <path d="M 299 103 L 268 148"/>  <path d="M 242 106 L 202 116"/>  <path d="M 202 116 L 190 152"/>  <path d="M 200 154 L 112 155"/>  <!-- engine case + finned barrel, tucked under the tank -->  <path d="M 222 124 L 266 126 L 270 154 L 216 154 Z"/>  <path d="M 234 124 L 238 104 L 258 106 L 258 126"/>  <path d="M 236 118 L 258 119" class="hair"/>  <path d="M 236 113 L 258 114" class="hair"/>  <path d="M 237 108 L 258 109" class="hair"/>  <!-- exhaust sweeping back under the seat -->  <path d="M 268 154 C 240 170 172 172 124 161"/> </g></svg></div>
   <div class="top-row">
     <div class="brand">
       <div class="logo">🏍️</div>
@@ -970,6 +995,7 @@
 </header>
 
 <nav class="tabs" id="tabs">
+  <button data-tab="myday">🌟 My Day</button>
   <button data-tab="dashboard" class="active">📊 Dashboard</button>
   <button data-tab="overview">Overview</button>
   <button data-tab="analytics">🎯 Funnel</button>
@@ -980,10 +1006,49 @@
   <button data-tab="riders">Riders</button>
   <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
+  <button data-tab="moredata" style="display:none;">🗂️ More Data</button>
 </nav>
 
 <main>
   <div id="errorBox"></div>
+
+  <!-- "My Day" — a single simple screen for one sales executive: today's tip, their action list,
+       their target progress, and their standing vs the team. This is what a Sales/CRT login lands
+       on by default (see applyRoleRestrictions()); Admin can also open it and use the top exec
+       filter to preview any one person's day. Deliberately far shorter than the Dashboard tab
+       below, which stays available for anyone who wants the full wall-display view. -->
+  <section class="tabpanel" id="tab-myday">
+    <div class="myday-hero" id="mydayHero"></div>
+
+    <div class="dash-shortcuts" id="mydayShortcuts" style="margin-top:18px;">
+      <button type="button" data-jump="pending">🔎 Book vs Stock</button>
+      <button type="button" data-jump="booking">📋 Booking</button>
+      <button type="button" data-jump="delivery">🚚 Delivery</button>
+      <button type="button" data-jump="specs">📖 Model Specs</button>
+    </div>
+
+    <h2 class="section-title">✅ Aaj Karne Wale Kaam</h2>
+    <div class="chat-panel" id="mydayPriorities"></div>
+
+    <div class="panel-row-2col" style="margin-top:20px;">
+      <div class="panel">
+        <div class="panel-bar">🎯 My Target — This Month</div>
+        <div class="panel-body">
+          <div class="gauge" id="mydayGauge" style="margin:0 auto"></div>
+          <div class="mini-split" id="mydayTargetSplit"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">🏆 My Standing</div>
+        <div class="panel-body" id="mydayRank"></div>
+      </div>
+    </div>
+
+    <!-- Sabka retail vs apna retail — ek hi jagah, taaki competition bana rahe, bina poora dense
+         Dashboard tab khole. No customer data here at all (names + retail/target numbers only). -->
+    <h2 class="section-title" style="margin-top:26px;">🏁 Team Retail — This Month</h2>
+    <div class="table-wrap"><table class="data" id="mydayLeaderboard"></table></div>
+  </section>
 
   <section class="tabpanel active" id="tab-dashboard">
     <h2 class="section-title" id="dashTitle">🏍️ Overall Store KPI</h2>
@@ -1090,6 +1155,37 @@
       <div class="panel">
         <div class="panel-bar">⚠️ Booking Not Punched</div>
         <div class="panel-body"><div id="dashBkgNotPunched"></div></div>
+      </div>
+    </div>
+
+    <!-- Executive performance tracking: (1) how many un-punched enquiries sit against each
+         executive, at a glance, without opening every name's individual list above; (2) total
+         bookings done by each executive this filter, as a bar chart, right on the wall-display
+         tab. Both are click-through: a row / bar jumps straight to that executive's detail on the
+         relevant tab, with the top exec filter already set to them. -->
+    <div class="panel-row-2col" style="margin-top:11px;">
+      <div class="panel">
+        <div class="panel-bar">📋 Missing Enquiries — by Executive</div>
+        <div class="panel-body" style="padding:0">
+          <!-- Shown only when at least one executive is over the alert threshold. The button opens
+               WhatsApp (same pattern as the header's Notify Team action) with a ready-made message
+               naming who's over, so Deepak can ping the group in one tap instead of typing it out. -->
+          <div id="missingEnqAlertBanner" class="data-health-banner empty" style="margin:10px 12px 0;display:none;"></div>
+          <div class="table-wrap" style="border:none;border-radius:0;max-height:280px">
+            <table class="data" id="dashMissingEnqByExec"></table>
+          </div>
+          <p class="empty-note" style="text-align:left;padding:6px 12px 10px;">Kisi bhi executive ke naam par click karke uski poori missing-enquiry list dekho.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-bar">📊 Bookings — by Executive <span style="font-weight:400;font-size:11px;color:var(--text-secondary)">· count · enquiry→booking conv %</span></div>
+        <div class="panel-body">
+          <div class="chart-wrap"><div id="dashBookingsByExecChart"></div></div>
+          <p class="empty-note" style="text-align:left;padding:6px 0 0;">Bar par click karke us executive ki booking list dekho.</p>
+          <h3 style="margin:18px 0 6px;font-size:12.5px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.8px;">Last 6 Months — Bookings Trend</h3>
+          <div class="legend-row" id="dashBookingsByExecTrendLegend"></div>
+          <div class="chart-wrap"><div id="dashBookingsByExecTrend"></div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1440,6 +1536,24 @@
       ⚠️ Note: this QR opens the same link you yourself use to access the Master Dashboard (the name+password login screen). A customer scanning it will see that same login screen, not a review form. If this is meant for customers, it would be better pointed at "customer-experience.html" (built for exactly this) or your real Google Maps review link — just let me know and I'll switch it right away.
     </div>
   </section>
+
+  <!-- Sales-only: one launcher tab instead of a separate button for every remaining data view.
+       Picking an option just switches to that tab (switchToTab) — the tab itself is unchanged and
+       still fully works, it's simply not cluttering the main tab bar any more. -->
+  <section class="tabpanel" id="tab-moredata">
+    <h2 class="section-title">🗂️ More Data</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 14px;">Baaki ka data yahan se select karo — jo chahiye seedha wahi khul jaayega.</p>
+    <div class="myday-hero" style="padding:16px 18px;">
+      <select id="moreDataSelect" style="width:100%;max-width:440px;font-size:14.5px;padding:11px 13px;">
+        <option value="">— Data chuno —</option>
+        <option value="overview">📊 Overview — sales console, funnel steps, reviews</option>
+        <option value="delivery">🚚 Delivery — billed/delivered bikes</option>
+        <option value="booking">📋 Booking — full booking list</option>
+        <option value="stock">🏭 Stock — current showroom stock</option>
+        <option value="specs">📖 Model Specs — bike details &amp; selling points</option>
+      </select>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -1535,10 +1649,16 @@ const CREDENTIALS = [
   { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
 ];
 let CURRENT_USER = null;
-// Tabs a non-Admin login should NOT see — company-wide data not specific to one person.
-// Stock ab sabko dikhta hai (Deepak's request) — ye shared showroom inventory hai, kisi ek
-// sales person ki private data nahi, isliye sales person ke liye restrict karne ki zaroorat nahi.
-const RESTRICTED_TABS = ['analytics', 'riders'];
+// Tabs a non-Admin login should NOT see at all — 'riders' stays CRT+Admin only (Harsh's job, not
+// a sales person's). Funnel used to be here too but Deepak now wants a Sales login to see it
+// directly (competition/context), so it's open to everyone.
+const RESTRICTED_TABS = ['riders'];
+// Sales-only decluttering (Deepak: "itna report bahut jyada ho jaata hai, kam karo"): these tabs
+// still exist and work exactly as before, they're just not separate buttons in a Sales login's
+// tab bar any more — reachable instead from the single "More Data" tab's dropdown, so the same
+// data is available without repeating itself across a long row of tabs. Admin and CRT logins are
+// unaffected — this list only applies when CURRENT_USER.role === 'Sales'.
+const SALES_MOVE_TO_MORE_DATA = ['dashboard', 'overview', 'delivery', 'booking', 'stock', 'specs'];
 
 // ===== Royal Enfield "Spotlight" — a random Hinglish fact shown at each login =====
 // Pure offline/rule-based (no API, no network call) — same philosophy as the rest of this
@@ -1905,22 +2025,29 @@ function applyRoleRestrictions(){
   // hide tabs that show company-wide / other-people's data from non-admin logins.
   // Riders (registration + feedback, merged into one tab) is the one exception: Deepak wants CRT
   // logins (Harsh handles riders) to see it too, alongside Admin — everyone else (Sales) still doesn't.
+  const isSales = CURRENT_USER.role === 'Sales';
+  function tabHidden(tab){
+    const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
+    if (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) return true;
+    if (isSales && SALES_MOVE_TO_MORE_DATA.includes(tab)) return true; // moved into "More Data" instead
+    return false;
+  }
   document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
-    const tab = btn.dataset.tab;
-    const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
-    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) ? 'none' : '';
+    if (btn.dataset.tab === 'moredata') { btn.style.display = isSales ? '' : 'none'; return; }
+    btn.style.display = tabHidden(btn.dataset.tab) ? 'none' : '';
   });
-  // Same rule for the Dashboard quick-jump shortcut buttons — hide any that jump to a tab this
-  // user can't open, so a sales login doesn't get a "Booking Funnel" button that leads nowhere.
-  document.querySelectorAll('#dashShortcuts button[data-jump]').forEach(btn => {
-    const tab = btn.dataset.jump;
-    const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
-    btn.style.display = (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) ? 'none' : '';
+  // Same rule for the Dashboard / My Day quick-jump shortcut buttons — hide any that jump to a
+  // tab this user can't open directly any more, so a sales login doesn't get a "Delivery" button
+  // that leads to a tab with no visible nav entry to get back from (they still have "More Data").
+  document.querySelectorAll('#dashShortcuts button[data-jump], #mydayShortcuts button[data-jump]').forEach(btn => {
+    btn.style.display = tabHidden(btn.dataset.jump) ? 'none' : '';
   });
   if (!isAdmin) {
-    // land on the Dashboard tab (the default landing view), not whatever tab happened to be active
-    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'dashboard'));
-    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-dashboard'));
+    // Land on the new "My Day" tab — one screen with just this person's own action list, target
+    // and standing — instead of the dense, company-wide Dashboard tab. Deepak/Admin still lands
+    // on Dashboard as before; Admin can open My Day too and use the exec filter to preview anyone.
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'myday'));
+    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-myday'));
     // lock the executive filter to their own name so every KPI/table only shows their own numbers
     const execSel = document.getElementById('execFilter');
     execSel.disabled = true;
@@ -2436,6 +2563,7 @@ function ownerInFilter(owner){
 
 /* ---------------- render orchestrator ---------------- */
 function renderAll(){
+  renderMyDay();
   renderDashboard();
   renderTodayPriorities();
   renderStorePerformance();
@@ -2559,6 +2687,96 @@ function renderDashboard(){
   renderDashLeaderboard();
   renderDashSpotlight();
   renderDashPipeline();
+  renderDashBookingsByExec();
+}
+// Bar chart: total bookings (this filter's month/day range) done by each sales executive, so
+// booking volume per person is visible directly on the wall-display Dashboard tab without
+// switching to Overview or Booking. Counts every booking row regardless of status (booked,
+// billed, or cancelled) — same convention "Booked this filter" above already uses — so this
+// total always agrees with that figure when summed across executives.
+function renderDashBookingsByExec(){
+  const container = document.getElementById('dashBookingsByExecChart');
+  if (!container) return;
+  const items = visibleExecList()
+    .map((name, i) => {
+      const bookings = STATE.booking.filter(r => dateInFilter(r[2]) && execMatches(r[7], name)).length;
+      // Enquiry → booking conversion %, same filter window, so the chart shows not just who's
+      // booking the most but who's converting best out of what they were given.
+      const enquiries = enquiryCountForExec(name);
+      const conv = enquiries ? Math.round((bookings / enquiries) * 100) : null;
+      return {
+        label: name,
+        value: bookings,
+        color: CAT_SLOTS[i % CAT_SLOTS.length],
+        note: conv === null ? null : conv + '% conv',
+      };
+    })
+    .filter(it => it.value > 0)
+    .sort((a, b) => b.value - a.value);
+  hBarChart('dashBookingsByExecChart', items, {
+    fmt: fmtInt,
+    onClick: (item) => drillIntoExec(item.label, 'booking'),
+  });
+  renderDashBookingsByExecTrend();
+}
+// Enquiries logged against one executive within the currently selected month/day filter — used
+// only to compute the conversion % note on the bar above. Mirrors the column layout used
+// everywhere else in this file (COL.ENQUIRY: Owner=13, Created On=14).
+function enquiryCountForExec(name){
+  let n = 0;
+  for (const r of STATE.enquiry) {
+    if (!dateInFilter(r[14])) continue;
+    if (!execMatches(r[13], name)) continue;
+    n++;
+  }
+  return n;
+}
+// Last 6 calendar months of booking counts, one line per executive, independent of the top
+// month/day filter (a trend needs its own fixed window to mean anything). STATE.booking holds
+// the full history — unlike the walk-in/enquiry "not punched" sheets, which only ever hold the
+// current month's data — so this comparison across months is reliable.
+function computeBookingsTrendByExec(){
+  const monthsSorted = [...STATE.months].sort((a, b) => a.key.localeCompare(b.key)).slice(-6);
+  const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const labels = monthsSorted.map(m => monthNames[m.month] + " '" + String(m.year).slice(2));
+  const series = visibleExecList().map((name, i) => {
+    const values = monthsSorted.map(m => {
+      let count = 0;
+      for (const r of STATE.booking) {
+        const d = r[2];
+        if (!(d instanceof Date) || isNaN(d)) continue;
+        if ((d.getMonth() + 1) !== m.month || d.getFullYear() !== m.year) continue;
+        if (execMatches(r[7], name)) count++;
+      }
+      return count;
+    });
+    return { name, color: CAT_SLOTS[i % CAT_SLOTS.length], values };
+  }).filter(s => s.values.some(v => v > 0));
+  return { labels, series };
+}
+function renderDashBookingsByExecTrend(){
+  const container = document.getElementById('dashBookingsByExecTrend');
+  if (!container) return;
+  const { labels, series } = computeBookingsTrendByExec();
+  if (!labels.length || !series.length) { container.innerHTML = '<div class="empty-note">Not enough months of data yet</div>'; return; }
+  lineChart('dashBookingsByExecTrend', series, labels, { legendId: 'dashBookingsByExecTrendLegend' });
+}
+// Shared drill-down: sets the top exec filter to one executive (matching it against the actual
+// <option> value, since spelling can differ slightly between sheets) and jumps to the tab/section
+// with that person's detail, so a click on a summary chart or table always lands on their full
+// list instead of the team-wide view.
+function drillIntoExec(execName, tabName, scrollToId){
+  const sel = document.getElementById('execFilter');
+  if (sel && execName) {
+    const opt = Array.from(sel.options).find(o => o.value === execName || up(o.value) === up(execName));
+    if (opt) {
+      sel.value = opt.value;
+      STATE.filterExec = opt.value;
+      renderAll();
+      renderDataHealthBanner();
+    }
+  }
+  switchToTab(tabName, scrollToId);
 }
 function renderDashFunnel(retail){
   const el = document.getElementById('dFunnel'); if (!el) return;
@@ -2636,10 +2854,17 @@ function renderDashFunnel_OLD_UNUSED(retail){
   const H = (y - gap) + padBottom;
   el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sales funnel">${bands}</svg>`;
 }
-function renderDashLeaderboard(){
+// elId lets this same leaderboard render into more than one place — the Dashboard tab's
+// dashLeaderboard, and now a compact copy on My Day (mydayLeaderboard) so a Sales login still has
+// the "everyone's retail side by side" competition view Deepak wants, without needing the full
+// Dashboard tab. No customer data of any kind here — names + team-wide retail/target numbers only.
+function renderDashLeaderboard(elId){
+  elId = elId || 'dashLeaderboard';
+  const target = document.getElementById(elId);
+  if (!target) return;
   const rows = STATE.execList.map(name => {
-    const agg = computeDeliveryAgg(name), target = targetFor(name);
-    return { name, ...agg, target, achv: target?agg.retail/target:0, gap: Math.max(0,target-agg.retail) };
+    const agg = computeDeliveryAgg(name), tgt = targetFor(name);
+    return { name, ...agg, target: tgt, achv: tgt?agg.retail/tgt:0, gap: Math.max(0,tgt-agg.retail) };
   }).sort((a,b)=>b.retail-a.retail);
   rows.forEach((r,i)=>r.rank=i+1);
   const ini = n => str(n).split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -2656,7 +2881,7 @@ function renderDashLeaderboard(){
     <td class="num">${fmtInt(tRetail)}</td><td class="num">${fmtInt(tTarget)}</td>
     <td class="num">${fmtPct(tTarget?tRetail/tTarget:0)}</td><td class="num">${fmtInt(sum('ew'))}</td>
     <td class="num">${fmtInt(sum('rsa'))}</td><td class="num">${fmtMoney(sum('gma'))}</td></tr></tfoot>`:'';
-  document.getElementById('dashLeaderboard').innerHTML =
+  target.innerHTML =
     `<thead><tr>${head.map((h,i)=>`<th class="${i>=2?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody>${foot}`;
 }
 function renderDashSpotlight(){
@@ -3315,9 +3540,8 @@ async function submitStatusChangeReport(slipNo, execName, action, note){
 
 /* ---------------- My Daily Target (personal pace tracker) ---------------- */
 // Always the REAL current calendar month, pace-adjusted to today's date — deliberately mirrors
-// computeFunnelTargets()'s logic (store-wide, Analytics tab) but scoped to one executive, since
-// Sales/CRT logins never see the Analytics tab (it's in RESTRICTED_TABS) and previously had no
-// way to see how their own month is pacing day-by-day.
+// computeFunnelTargets()'s logic (store-wide, Analytics tab) but scoped to one executive, so a
+// Sales/CRT login can see how their own month is pacing day-by-day without leaving My Day.
 function computePersonalTarget(execName){
   if (!execName) return null;
   const now = new Date();
@@ -3377,6 +3601,102 @@ function renderPersonalTarget(){
     kpiCard('Needed Per Day', p.remaining ? p.requiredPerDay.toFixed(1) : '0',
       p.daysLeft > 0 ? `for the next ${fmtInt(p.daysLeft)} days` : 'month over'),
   ].join('');
+}
+
+/* ══ "My Day" tab — one simple screen for one sales executive ═══════════════════════════════
+   Deliberately short: a greeting + daily tip, today's action list (reuses the same
+   computeTodayPriorities() the Overview chat panel uses), target progress (reuses
+   computePersonalTarget() + the same dashGauge() the Dashboard tab draws), and a gamified
+   "standing vs the team" card. A Sales/CRT login lands here by default; Admin can open it too
+   and use the top exec filter to preview any one person's day — same execName resolution
+   renderPersonalTarget() already uses, so both panels always agree on who's being shown. */
+function renderMyDay(){
+  const heroEl = document.getElementById('mydayHero');
+  if (!heroEl) return; // tab not present in this build
+
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const execName = (CURRENT_USER && CURRENT_USER.role !== 'Admin')
+    ? CURRENT_USER.execKey
+    : (STATE.filterExec && STATE.filterExec !== 'ALL' ? STATE.filterExec : null);
+  const greetName = execName || (isAdmin ? 'Deepak' : CURRENT_USER.name);
+  const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  heroEl.innerHTML = `
+    <div class="greet">👋 Namaste, ${esc(greetName)}!</div>
+    <div class="date">${esc(today)}</div>
+    <div class="tip"><b>💡 Aaj ka tip:</b> ${esc(getDailyGrowthTip())}</div>`;
+
+  // Action list — identical logic/data to the Overview "Today's Priorities" panel, just shown
+  // here first so a sales login doesn't have to find another tab to see it.
+  const prioEl = document.getElementById('mydayPriorities');
+  if (prioEl) {
+    const items = computeTodayPriorities();
+    prioEl.innerHTML = `<div class="chat-greeting">Priority order me, sabse zaroori pehle:</div>` +
+      items.map(it => `<div class="chat-item ${it.cls}"><span class="chat-icon">${it.icon}</span><span>${esc(it.text)}</span></div>`).join('');
+  }
+
+  // Target gauge — same computePersonalTarget()/dashGauge() the Dashboard tab uses, so the
+  // numbers here never disagree with anywhere else in the app.
+  const gaugeWrap = document.getElementById('mydayGauge');
+  const splitEl = document.getElementById('mydayTargetSplit');
+  if (gaugeWrap && splitEl) {
+    if (!execName) {
+      gaugeWrap.innerHTML = '';
+      splitEl.innerHTML = '<div class="empty-note" style="grid-column:1/-1">Top ke filter se ek executive chuno unka target dekhne ke liye.</div>';
+    } else {
+      const p = computePersonalTarget(execName);
+      const pace = p.daysInMonth ? p.dayOfMonth / p.daysInMonth : 1;
+      dashGauge('mydayGauge', p.monthTarget ? p.achievedPct : 0, pace);
+      splitEl.innerHTML = `
+        <span class="k">Target</span><span class="v">${fmtInt(p.monthTarget)}</span>
+        <span class="k">Done</span><span class="v">${fmtInt(p.retailSoFar)}</span>
+        <span class="k">Remaining</span><span class="v">${fmtInt(p.remaining)}</span>
+        <span class="k">Needed/Day</span><span class="v">${p.remaining ? p.requiredPerDay.toFixed(1) : '0'}</span>`;
+    }
+  }
+
+  renderMyDayRank(execName);
+  renderDashLeaderboard('mydayLeaderboard');
+}
+// Rank + this-month category badges for one executive, against the WHOLE team (STATE.execList),
+// not just what a Sales/CRT login is otherwise allowed to see — a standing only means something
+// measured against everyone else, same reasoning computeCategoryBadges() already uses.
+function computeMyRank(execName){
+  const stats = STATE.execList.map(name => ({ name, retail: computeDeliveryAgg(name).retail }))
+    .sort((a, b) => b.retail - a.retail);
+  const idx = stats.findIndex(s => up(s.name) === up(execName));
+  const total = stats.length;
+  const avg = total ? stats.reduce((s, r) => s + r.retail, 0) / total : 0;
+  return { rank: idx >= 0 ? idx + 1 : null, total, avg, mine: idx >= 0 ? stats[idx].retail : 0 };
+}
+function renderMyDayRank(execName){
+  const el = document.getElementById('mydayRank');
+  if (!el) return;
+  if (!execName) { el.innerHTML = '<div class="empty-note">Top ke filter se ek executive chuno unki standing dekhne ke liye.</div>'; return; }
+
+  const r = computeMyRank(execName);
+  if (!r.rank) { el.innerHTML = '<div class="empty-note">Is naam ka koi target/rank data nahi mila.</div>'; return; }
+  const medal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : '👤';
+  const vsAvg = r.mine - r.avg;
+
+  const badges = computeCategoryBadges();
+  const won = [];
+  if (badges) {
+    if (badges.retail && badges.retail.winners.some(w => up(w) === up(execName))) won.push('🏍️ Top Retail');
+    if (badges.reviews && badges.reviews.winners.some(w => up(w) === up(execName))) won.push('⭐ Top Reviews');
+    if (badges.gmaPerBike && badges.gmaPerBike.winners.some(w => up(w) === up(execName))) won.push('💰 Best GMA/Bike');
+    if (badges.ewPct && badges.ewPct.winners.some(w => up(w) === up(execName))) won.push('🛡️ Best EW Attach');
+  }
+
+  el.innerHTML = `
+    <div class="big-fig">${medal} #${fmtInt(r.rank)} <span style="font-size:14px;color:var(--text-secondary);font-weight:500">of ${fmtInt(r.total)}</span></div>
+    <div class="big-sub">${fmtInt(r.mine)} bikes this month${r.avg ? ` · team avg ${r.avg.toFixed(1)}` : ''}</div>
+    ${r.avg ? `<div class="pace-note" style="justify-content:center;color:${vsAvg >= 0 ? 'var(--good)' : 'var(--critical)'}">
+        <span class="pace-dot" style="background:${vsAvg >= 0 ? 'var(--good)' : 'var(--critical)'}"></span>
+        ${vsAvg >= 0 ? '▲ ' + vsAvg.toFixed(1) + ' bikes team average se zyada' : '▼ ' + Math.abs(vsAvg).toFixed(1) + ' bikes team average se kam'}
+      </div>` : ''}
+    ${won.length ? `<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">${won.map(w => `<span class="pill good" style="padding:5px 10px;">${esc(w)}</span>`).join('')}</div>` : ''}
+  `;
 }
 
 /* ---------------- This Month's Champions (category-wise recognition badges) ---------------- */
@@ -3518,8 +3838,10 @@ function renderReviews(){
 
 /* ---------------- Overview-only data-hygiene audits ----------------
    Two tables, both scoped ONLY to the Overview tab and both respecting STATE.filterExec (Admin
-   sees everyone; a sales login sees only their own rows). Neither of these datasets or this logic
-   is used anywhere else in the dashboard.
+   sees everyone; a sales login sees only their own rows). The two counting helpers just below
+   (computeMissingEnquiryCount / computeMissingBookingPunchCount) reuse this same "NOT FOUND"
+   formula-column logic for the My Day action list, so a Sales login still sees their own
+   un-punched count front and centre even with the Overview tab moved into "More Data".
    1. Walk-ins not punched in enquiry — customers in ACTUL WALKIN whose mobile isn't in enquiry.
    2. Actual bookings not in system — bookings in ACTUL BOOKING whose customer mobile isn't in
       BOOKING MSD (the RE portal).
@@ -3528,6 +3850,23 @@ function renderReviews(){
 function phoneKey(v){
   const digits = str(v).replace(/\D/g, '');
   return digits.length >= 10 ? digits.slice(-10) : digits;
+}
+const notFoundLookup = (v) => /NOT\s*FOUND|NO\s*DATA/i.test(str(v));
+// One executive's un-punched walk-in-enquiry count, same month-scoping and "NOT FOUND" formula
+// column (ACTUL WALKIN col J / index 9) renderWalkinChecks() uses for the full table.
+function computeMissingEnquiryCount(execName){
+  return STATE.walkin.filter(r => dateInFilter(r[0]) && execMatches(r[1], execName) && notFoundLookup(r[9])).length;
+}
+// Same idea for bookings not yet punched into the RE Portal/MSD (ACTUL BOOKING col M / index 12),
+// excluding already-cancelled bookings — mirrors the "Feature 2" block in renderWalkinChecks().
+function computeMissingBookingPunchCount(execName){
+  return STATE.booking.filter(r => {
+    if (!dateInFilter(r[2])) return false;
+    const s = up(r[9]);
+    if (s === 'CANCEL' || s === 'CANCELLED') return false;
+    if (!execMatches(r[7], execName)) return false;
+    return notFoundLookup(r[12]);
+  }).length;
 }
 function renderWalkinChecks(){
   // Both trackers now read a formula result the user maintains in the sheet itself, instead of the
@@ -3581,6 +3920,72 @@ function renderWalkinChecks(){
     'Walk-in aaya par enquiry nahi bani');
   renderPunchSummary('dashBkgNotPunched', notInSystem, 'booking',
     'Booking hui par MSD me punch nahi');
+
+  // ── Dashboard: same walk-in rows, grouped by executive so the count of missing/un-punched
+  //    enquiries per sales person is visible at a glance (rather than scrolling the name list
+  //    above one entry at a time). Every executive Admin can see is listed, even at zero, so an
+  //    empty count is a visible "all clear" rather than a silent absence from the table.
+  renderMissingEnqByExec(walkinRows);
+}
+// Missing enquiries at/above this count for one executive trigger the WhatsApp-alert banner.
+const MISSING_ENQ_ALERT_THRESHOLD = 5;
+function renderMissingEnqByExec(walkinRows){
+  const table = document.getElementById('dashMissingEnqByExec');
+  if (!table) return;
+  const counts = {};
+  walkinRows.forEach(r => { const name = r.salesperson || '(unassigned)'; counts[name] = (counts[name] || 0) + 1; });
+  // Zero-fill every executive currently in view so "0 missing" shows as a clean row instead of
+  // that person just not appearing in the table at all.
+  visibleExecList().forEach(name => { if (!(name in counts)) counts[name] = 0; });
+  const rows = Object.entries(counts)
+    .map(([name, missing]) => ({ name, missing }))
+    .sort((a, b) => b.missing - a.missing || a.name.localeCompare(b.name));
+  renderStaticTable('dashMissingEnqByExec', [
+    { key:'name', label:'Sales Executive', raw:true, fmt: v =>
+        `<button type="button" class="link-btn" data-exec-drill="${esc(v)}" style="color:var(--text-primary);font-weight:600;text-decoration:none;" title="Click to see ${esc(v)}'s full missing-enquiry list">${esc(v)}</button>` },
+    { key:'missing', label:'Missing Enquiries', num:true, raw:true, fmt: v => v > 0
+        ? `<span class="table-flag">🚨 ${fmtInt(v)}</span>`
+        : `<span style="color:var(--good)">✅ 0</span>` },
+  ], rows);
+  table.querySelectorAll('[data-exec-drill]').forEach(btn => {
+    btn.addEventListener('click', () => drillIntoExec(btn.dataset.execDrill, 'overview', 'tblWalkinMissing'));
+  });
+  renderMissingEnqAlertBanner(rows);
+}
+// Banner + WhatsApp button shown only when at least one executive's missing-enquiry count has
+// crossed MISSING_ENQ_ALERT_THRESHOLD. Reuses the same "open wa.me with a ready-made message"
+// pattern as the header's Notify Team button — this page has no backend to push a real
+// notification from, so a one-tap WhatsApp draft is the practical stand-in.
+function renderMissingEnqAlertBanner(rows){
+  const banner = document.getElementById('missingEnqAlertBanner');
+  if (!banner) return;
+  const over = rows.filter(r => r.missing >= MISSING_ENQ_ALERT_THRESHOLD);
+  if (!over.length) { banner.style.display = 'none'; banner.innerHTML = ''; return; }
+  banner.style.display = 'block';
+  banner.innerHTML = `🚨 ${over.length} executive${over.length > 1 ? 's' : ''} ${MISSING_ENQ_ALERT_THRESHOLD}+ missing enquiries ke saath —
+    ${over.map(r => `${esc(r.name)} (${fmtInt(r.missing)})`).join(', ')}.
+    <button type="button" id="missingEnqAlertBtn" style="margin-left:8px;">📢 Notify via WhatsApp</button>`;
+  document.getElementById('missingEnqAlertBtn').addEventListener('click', () => openMissingEnqAlertModal(over));
+}
+function defaultMissingEnqAlertMessage(overRows){
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const lines = overRows.map(r => `• ${r.name} — ${fmtInt(r.missing)} enquiry pending`).join('\n');
+  return `🚨 *Missing Enquiry Alert*\n${today}\n\nIn logon ki walk-in enquiry abhi tak punch nahi hui hai:\n${lines}\n\nPlease aaj hi punch karo — followup isi se hota hai.`;
+}
+function openMissingEnqAlertModal(overRows){
+  document.getElementById('modalTitle').textContent = '📢 Missing Enquiry Alert';
+  document.getElementById('modalBody').innerHTML = `
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Edit the message if you want, then send — this opens WhatsApp with it ready to go.</p>
+    <textarea id="missingEnqAlertMsgBox" rows="7" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);">${esc(defaultMissingEnqAlertMessage(overRows))}</textarea>
+    <div style="margin-top:12px; text-align:right;">
+      <button type="button" id="missingEnqAlertSendBtn" class="primary">✅ Send via WhatsApp</button>
+    </div>`;
+  document.getElementById('missingEnqAlertSendBtn').addEventListener('click', () => {
+    const msg = document.getElementById('missingEnqAlertMsgBox').value;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    closeDetailModal();
+  });
+  document.getElementById('detailModal').classList.add('open');
 }
 // Builds the small Dashboard card: a big count, then up to 6 "Sales Person — Customer" lines, and
 // a tap-to-open-full-table affordance. When nothing is pending it shows an all-clear message
@@ -3924,6 +4329,17 @@ function computeTodayPriorities(){
     }
   } else {
     const name = CURRENT_USER.execKey;
+    // Their own un-punched enquiries/bookings — this used to only surface on the Overview tab's
+    // two detail tables, which a Sales login no longer sees directly (moved into "More Data" to
+    // cut tab clutter). Surfacing the count here keeps it from silently disappearing.
+    const missingEnq = computeMissingEnquiryCount(name);
+    if (missingEnq) {
+      items.push({ icon: '📝', text: `${missingEnq} walk-in customer${missingEnq===1?'':'s'} ki enquiry abhi tak punch nahi hui — aaj hi punch karo, followup isi se hota hai.`, cls: 'urgent' });
+    }
+    const missingBkg = computeMissingBookingPunchCount(name);
+    if (missingBkg) {
+      items.push({ icon: '⚠️', text: `${missingBkg} booking${missingBkg===1?'':'s'} abhi tak RE Portal (MSD) me punch nahi hui — jaldi punch kar do.`, cls: 'urgent' });
+    }
     const overdue = overdueRowsFor(name);
     if (overdue.length) {
       items.push({ icon: '⏰', text: `Follow up on ${overdue.length} overdue ${overdue.length===1?'delivery':'deliveries'} — ${overdue.length===1?'a customer is':'customers are'} waiting.`, cls: 'urgent' });
@@ -4603,6 +5019,7 @@ function hBarChart(containerId, items, opts){
   const container = document.getElementById(containerId);
   if (!items.length) { container.innerHTML = '<div class="empty-note">No data for this filter</div>'; return; }
   const fmt = (opts && opts.fmt) || fmtInt;
+  const onClick = opts && opts.onClick; // optional (item, index) => void — e.g. drill into that item's detail
   const maxV = Math.max(1, ...items.map(it => it.value));
   const rowH = 26, gap = 8;
   const W = 640, padL = 4, padR = 60;
@@ -4614,24 +5031,32 @@ function hBarChart(containerId, items, opts){
     const y = i * (rowH + gap);
     const w = Math.max(2, (it.value / maxV) * barMaxW);
     const color = it.color || SEQ_BLUE[Math.min(SEQ_BLUE.length-1, Math.round((1 - it.value/maxV) * (SEQ_BLUE.length-2)))];
+    // Optional small secondary note (e.g. a conversion %) printed right after the value, in
+    // muted text, so the bar can carry two numbers without cluttering the primary label.
+    const noteSvg = it.note ? `<tspan fill="var(--text-secondary)" font-weight="400"> · ${esc(it.note)}</tspan>` : '';
     rows += `
+      <g class="bar-row" data-i="${i}"${onClick ? ' style="cursor:pointer"' : ''}>
       <text class="legend-label" x="${padL}" y="${y+rowH/2-6}" font-size="11">${esc(it.label)}</text>
       <rect class="bar" data-i="${i}" x="${padL}" y="${y+rowH/2+0}" width="${w}" height="9" rx="4" fill="${color}"/>
-      <text class="axis-label" x="${padL + w + 8}" y="${y+rowH/2+8}" font-size="11" fill="var(--text-primary)">${esc(fmt(it.value))}</text>`;
+      <text class="axis-label" x="${padL + w + 8}" y="${y+rowH/2+8}" font-size="11" fill="var(--text-primary)">${esc(fmt(it.value))}${noteSvg}</text>
+      </g>`;
   });
   container.innerHTML = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${rows}</svg>`;
   const tip = ensureTooltip(container);
   const svg = container.querySelector('svg');
-  svg.querySelectorAll('rect.bar').forEach(r => {
-    r.addEventListener('mouseenter', () => {
-      const i = +r.dataset.i;
+  svg.querySelectorAll('.bar-row').forEach(g => {
+    const i = +g.dataset.i;
+    const r = g.querySelector('rect.bar');
+    g.addEventListener('mouseenter', () => {
       const rect = container.getBoundingClientRect();
       const scale = rect.width / W;
       const x = (parseFloat(r.getAttribute('x')) + parseFloat(r.getAttribute('width'))) * scale;
       const y = parseFloat(r.getAttribute('y')) * scale;
-      showTip(container, tip, x, y, `<strong>${esc(items[+r.dataset.i].label)}</strong><br>${esc(fmt(items[i].value))}`);
+      const noteLine = items[i].note ? `<br>${esc(items[i].note)}` : '';
+      showTip(container, tip, x, y, `<strong>${esc(items[i].label)}</strong><br>${esc(fmt(items[i].value))}${noteLine}${onClick ? '<br><em>Click for detail</em>' : ''}`);
     });
-    r.addEventListener('mouseleave', () => hideTip(tip));
+    g.addEventListener('mouseleave', () => hideTip(tip));
+    if (onClick) g.addEventListener('click', () => onClick(items[i], i));
   });
 }
 
@@ -5198,15 +5623,28 @@ document.getElementById('tabs').addEventListener('click', (e) => {
   if (!btn) return;
   switchToTab(btn.dataset.tab);
 });
-// Dashboard quick-jump shortcuts (Kaam 4)
-const dashShortcuts = document.getElementById('dashShortcuts');
-if (dashShortcuts) {
-  dashShortcuts.addEventListener('click', (e) => {
+// Dashboard + My Day quick-jump shortcuts (Kaam 4) — same delegated behaviour on both rows.
+['dashShortcuts', 'mydayShortcuts'].forEach(id => {
+  const row = document.getElementById(id);
+  if (!row) return;
+  row.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-jump]');
     if (!btn) return;
     // respect tab restrictions — if a restricted tab's button somehow shows, switchToTab still
     // works, but restricted tabs are hidden for non-admins anyway so their buttons won't fire.
     switchToTab(btn.dataset.jump, btn.dataset.scroll || null);
+  });
+});
+// "More Data" launcher — a Sales login's single entry point to the tabs that got folded out of
+// the main tab bar. Picking an option jumps straight there; the select resets to the placeholder
+// afterwards so it's obviously reusable rather than looking "stuck" on the last choice.
+const moreDataSelect = document.getElementById('moreDataSelect');
+if (moreDataSelect) {
+  moreDataSelect.addEventListener('change', (e) => {
+    const tab = e.target.value;
+    if (!tab) return;
+    switchToTab(tab);
+    e.target.value = '';
   });
 }
 
