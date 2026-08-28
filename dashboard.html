@@ -112,6 +112,19 @@
   }
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 13px; }
+  /* Festival theme banner + selector */
+  .festival-banner {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--on-gold); background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    padding: 3px 11px; border-radius: 999px; box-shadow: 0 3px 10px -4px var(--gold-dim);
+    animation: festPulse 2.6s ease-in-out infinite;
+  }
+  .festival-banner .fest-emoji { font-size: 13px; }
+  @keyframes festPulse { 0%,100% { opacity: 1; } 50% { opacity: .82; } }
+  .festival-select-wrap { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; }
+  .festival-select-wrap label { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .festival-select-wrap select { width: 100%; font-size: 12.5px; }
   .brand .logo {
     font-size: 20px; width: 42px; height: 42px; display: grid; place-items: center;
     border-radius: 50%; flex-shrink: 0;
@@ -971,6 +984,7 @@
         <h1>AMAR AUTOS · ROYAL ENFIELD · EAST DELHI</h1>
         <div class="sub">Command Console — Live Sales Intelligence</div>
         <div class="tagline">Pure Motorcycling Since 1901</div>
+        <div class="festival-banner" id="festivalBanner" style="display:none;"></div>
       </div>
     </div>
     <button id="menuToggle" class="menu-toggle" aria-label="Open menu" title="Menu">☰</button>
@@ -1001,6 +1015,25 @@
           <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
           <div class="more-menu-sep"></div>
           <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
+          <div class="festival-select-wrap" title="Festival theme lagta hai apne aap 1 hafte pehle, festival khatam hone par hat jaata hai">
+            <label for="festivalSelect">🎊 Festival Theme</label>
+            <select id="festivalSelect">
+              <option value="auto">Auto (date ke hisaab se)</option>
+              <option value="off">Off (koi theme nahi)</option>
+              <option value="diwali">🪔 Diwali</option>
+              <option value="holi">🎨 Holi</option>
+              <option value="dussehra">🏹 Dussehra</option>
+              <option value="navratri">🕉️ Navratri</option>
+              <option value="ganesh">🐘 Ganesh Chaturthi</option>
+              <option value="janmashtami">🦚 Janmashtami</option>
+              <option value="rakhi">🧵 Raksha Bandhan</option>
+              <option value="independence">🇮🇳 Independence Day</option>
+              <option value="republic">🇮🇳 Republic Day</option>
+              <option value="gandhi">🕊️ Gandhi Jayanti</option>
+              <option value="christmas">🎄 Christmas</option>
+              <option value="newyear">🎉 New Year</option>
+            </select>
+          </div>
           <button id="logoutBtn" title="Log out and return to the login screen">⎋ Logout</button>
         </div>
       </div>
@@ -1632,13 +1665,120 @@ function linkOneSignalIdentity(){
 }
 
 /* ---------------- theme ---------------- */
+/* ═══════════════ Festival themes ═══════════════
+   Each festival gets a warm accent overlay that automatically switches on ~1 week before the
+   festival and switches off the day after it ends. It's a light touch: only the gold accent
+   colours are re-tinted (via CSS custom properties on <html>), so the whole dark/light design
+   stays intact — nothing else about the layout or data changes.
+   Dates are listed per year (festival dates move each year on the Gregorian calendar). Add the
+   next year's dates here once a year and the automation keeps working. Fixed-date national days
+   repeat every year via the "everyYear" flag.
+   The user can also force a specific festival theme, or turn the automation off, from Settings —
+   that choice is remembered in localStorage. */
+const FESTIVALS = [
+  // name, emoji, accent (main), accentLight, greet (banner message), dates, leadDays, durationDays
+  { key:'diwali',   name:'Diwali',            emoji:'🪔', accent:'#E8A317', accentLight:'#FFCE54', greet:'Happy Diwali',            dates:{2026:'11-08', 2027:'10-29'}, lead:7, days:5 },
+  { key:'holi',     name:'Holi',              emoji:'🎨', accent:'#E0367F', accentLight:'#F76FB0', greet:'Happy Holi',             dates:{2026:'03-04', 2027:'03-13'}, lead:5, days:2 },
+  { key:'dussehra', name:'Dussehra',          emoji:'🏹', accent:'#C0392B', accentLight:'#E8705F', greet:'Happy Dussehra',         dates:{2026:'10-20', 2027:'10-09'}, lead:5, days:1 },
+  { key:'navratri', name:'Navratri',          emoji:'🕉️', accent:'#D6336C', accentLight:'#F06595', greet:'Happy Navratri',         dates:{2026:'10-11', 2027:'09-30'}, lead:3, days:9 },
+  { key:'ganesh',   name:'Ganesh Chaturthi',  emoji:'🐘', accent:'#E67E22', accentLight:'#F5A65B', greet:'Happy Ganesh Chaturthi', dates:{2026:'09-14', 2027:'09-04'}, lead:5, days:5 },
+  { key:'janmashtami', name:'Janmashtami',    emoji:'🦚', accent:'#2E86C1', accentLight:'#5DADE2', greet:'Happy Janmashtami',      dates:{2026:'09-04', 2027:'08-25'}, lead:3, days:1 },
+  { key:'rakhi',    name:'Raksha Bandhan',    emoji:'🧵', accent:'#CB4335', accentLight:'#EC7063', greet:'Happy Raksha Bandhan',   dates:{2026:'08-28', 2027:'08-17'}, lead:3, days:1 },
+  { key:'independence', name:'Independence Day', emoji:'🇮🇳', accent:'#138808', accentLight:'#5CB85C', greet:'Happy Independence Day', dates:{everyYear:'08-15'}, lead:5, days:1 },
+  { key:'republic', name:'Republic Day',      emoji:'🇮🇳', accent:'#FF9933', accentLight:'#FFB366', greet:'Happy Republic Day',     dates:{everyYear:'01-26'}, lead:5, days:1 },
+  { key:'gandhi',   name:'Gandhi Jayanti',    emoji:'🕊️', accent:'#4A7C59', accentLight:'#7FB08C', greet:'Gandhi Jayanti',         dates:{everyYear:'10-02'}, lead:2, days:1 },
+  { key:'christmas', name:'Christmas',         emoji:'🎄', accent:'#C0392B', accentLight:'#5CB85C', greet:'Merry Christmas',        dates:{everyYear:'12-25'}, lead:7, days:1 },
+  { key:'newyear',  name:'New Year',          emoji:'🎉', accent:'#8E44AD', accentLight:'#BB8FCE', greet:'Happy New Year',         dates:{everyYear:'12-31'}, lead:3, days:2 },
+];
+
+// Return the festival whose active window (lead days before → last day of festival) contains `d`.
+// If more than one overlaps, the one starting soonest-to-now wins.
+function festivalActiveOn(d){
+  const y = d.getFullYear();
+  let best = null, bestStart = null;
+  for (const f of FESTIVALS) {
+    // resolve this festival's date for the relevant year (or fixed every-year date)
+    const candidates = [];
+    if (f.dates.everyYear) { candidates.push(`${y}-${f.dates.everyYear}`); candidates.push(`${y-1}-${f.dates.everyYear}`); candidates.push(`${y+1}-${f.dates.everyYear}`); }
+    else { for (const yr of [y-1, y, y+1]) if (f.dates[yr]) candidates.push(`${yr}-${f.dates[yr]}`); }
+    for (const iso of candidates) {
+      const fest = new Date(iso + 'T00:00:00');
+      if (isNaN(fest)) continue;
+      const start = new Date(fest); start.setDate(start.getDate() - f.lead);
+      const end = new Date(fest); end.setDate(end.getDate() + (f.days - 1)); end.setHours(23,59,59,999);
+      if (d >= start && d <= end) {
+        if (!best || start > bestStart) { best = f; bestStart = start; } // most recently-started window wins
+      }
+    }
+  }
+  return best;
+}
+
+function applyFestivalTheme(f){
+  const root = document.documentElement;
+  if (!f) {
+    root.style.removeProperty('--gold');
+    root.style.removeProperty('--gold-light');
+    root.style.removeProperty('--gold-dim');
+    root.removeAttribute('data-festival');
+    return;
+  }
+  root.style.setProperty('--gold', f.accent);
+  root.style.setProperty('--gold-light', f.accentLight);
+  root.style.setProperty('--gold-dim', hexToRgba(f.accent, 0.35));
+  root.setAttribute('data-festival', f.key);
+}
+function hexToRgba(hex, a){
+  const m = hex.replace('#','');
+  const r = parseInt(m.slice(0,2),16), g = parseInt(m.slice(2,4),16), b = parseInt(m.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// Decide which festival theme to show: manual override wins; "off" disables; "auto" (default) uses
+// the calendar. Returns the festival object or null.
+// Safe localStorage helpers — some embedded/preview contexts block storage; never let that throw.
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+
+function resolveFestivalTheme(){
+  const pref = lsGet('festivalTheme') || 'auto';
+  if (pref === 'off') return null;
+  if (pref !== 'auto') { const f = FESTIVALS.find(x => x.key === pref); if (f) return f; }
+  return festivalActiveOn(new Date());
+}
+function refreshFestivalTheme(){ applyFestivalTheme(resolveFestivalTheme()); updateFestivalBanner(); }
+
+// A small banner in the masthead so it's obvious a festival theme is live (and which one).
+function updateFestivalBanner(){
+  const el = document.getElementById('festivalBanner');
+  if (!el) return;
+  const f = resolveFestivalTheme();
+  if (!f) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = '';
+  el.innerHTML = `<span class="fest-emoji">${f.emoji}</span> ${esc(f.greet || f.name)}`;
+}
+
 (function initTheme(){
   // Defaults to dark — the dashboard's visual identity is a dark, RE-branded console.
   document.documentElement.setAttribute('data-theme', 'dark');
-  document.getElementById('themeToggle').addEventListener('click', () => {
+  const tt = document.getElementById('themeToggle');
+  if (tt) tt.addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme');
     document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
   });
+  // Festival theme: apply now, then re-check every hour so it turns on/off on its own even if the
+  // dashboard is left open across the day a festival window opens or closes.
+  refreshFestivalTheme();
+  setInterval(refreshFestivalTheme, 60 * 60 * 1000);
+  // Festival theme selector (Settings): remember the choice and apply immediately.
+  const fsel = document.getElementById('festivalSelect');
+  if (fsel) {
+    fsel.value = lsGet('festivalTheme') || 'auto';
+    fsel.addEventListener('change', () => {
+      lsSet('festivalTheme', fsel.value);
+      refreshFestivalTheme();
+    });
+  }
 })();
 
 /* ---------------- login / roles ----------------
