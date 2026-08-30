@@ -923,6 +923,82 @@
       padding: 6px; background: var(--surface-1); border-top: 1px solid var(--border);
     }
   }
+
+  /* ═══════════ Race Control + Twin Dials dashboard ═══════════ */
+  .rc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .rc-head .rc-left { display:flex; align-items:center; gap:14px; }
+  .rc-flag { width:46px; height:31px; border-radius:3px; border:1px solid #333;
+    background:repeating-conic-gradient(#fff 0% 25%, #0a0908 0% 50%) 0/15.5px 15.5px; flex-shrink:0; }
+  .rc-head h2 { font-family:var(--font-head); font-size:26px; letter-spacing:1px; margin:0; font-weight:700; }
+  .rc-head h2 span { color:var(--brand-red, #e0362f); }
+  .rc-lap { font-family:var(--font-head); text-align:right; line-height:1.1; }
+  .rc-lap .n { font-size:11px; letter-spacing:3px; color:var(--text-muted); }
+  .rc-lap .v { font-size:23px; font-weight:700; color:var(--gold-light); }
+  .rc-shift { display:flex; gap:5px; margin-bottom:16px; padding:9px 13px; border-radius:10px;
+    background:linear-gradient(180deg, var(--surface-1), var(--page)); border:1px solid var(--border); }
+  .rc-shift i { flex:1; height:19px; border-radius:3px; background:var(--surface-3); transition:.3s; }
+  .rc-shift i.g { background:#4CAF7D; box-shadow:0 0 9px #4CAF7D; }
+  .rc-shift i.y { background:#e0a93b; box-shadow:0 0 9px #e0a93b; }
+  .rc-shift i.r { background:#e0362f; box-shadow:0 0 11px #e0362f; }
+  .rc-dials { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:820px){ .rc-dials { grid-template-columns:1fr; } }
+  .rc-dialbox { background:var(--surface-1); border:1px solid var(--border); border-radius:16px;
+    padding:20px; display:flex; align-items:center; gap:20px; }
+  @media (max-width:480px){ .rc-dialbox { flex-direction:column; gap:14px; } }
+  .rc-dial { width:190px; height:190px; border-radius:50%; position:relative; flex-shrink:0; padding:8px;
+    background:conic-gradient(from 180deg,#4a4038,#8a7a60,#3a322a,#a89670,#4a4038); }
+  .rc-dial-face { width:100%; height:100%; border-radius:50%; position:relative; overflow:hidden;
+    background:radial-gradient(circle at 42% 36%, #1c1811 0%, #080706 78%); box-shadow:inset 0 0 30px rgba(0,0,0,.9); }
+  :root[data-theme="light"] .rc-dial-face { background:radial-gradient(circle at 42% 36%, #2a2620 0%, #14110c 78%); }
+  .rc-dial-c { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .rc-dial-lbl { font-family:var(--font-head); font-size:10px; letter-spacing:3px; color:#8a7a52; text-transform:uppercase; }
+  .rc-dial-big { font-family:var(--font-head); font-weight:700; font-size:48px; line-height:.9; color:#f5ecda; text-shadow:0 0 18px rgba(224,169,59,.5); }
+  .rc-dial-big small { font-size:19px; color:#a89670; }
+  .rc-dial-unit { font-family:var(--font-head); font-size:11px; letter-spacing:1px; color:var(--gold-light); margin-top:5px; }
+  .rc-tick { position:absolute; left:50%; top:11px; width:2px; height:9px; background:#4a4030; transform-origin:50% 84px; }
+  .rc-tick.maj { height:15px; width:3px; background:#7a6a48; }
+  .rc-tick.on { background:#e0a93b; box-shadow:0 0 6px #e0a93b; }
+  .rc-tick.red { background:#e0362f; box-shadow:0 0 8px #e0362f; }
+  .rc-dial-side { flex:1; min-width:0; }
+  .rc-dial-side .sl { font-family:var(--font-head); font-size:11px; letter-spacing:2px; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px; }
+  .rc-dial-side .sr { display:flex; justify-content:space-between; gap:14px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .rc-dial-side .sr:last-child { border:none; }
+  .rc-dial-side .sr b { font-family:var(--font-head); font-size:18px; }
+  .rc-tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; margin-bottom:16px; }
+  @media (max-width:820px){ .rc-tiles { grid-template-columns:1fr 1fr; } }
+  .rc-tile { background:var(--surface-1); border:1px solid var(--border); border-left:4px solid #e0362f; border-radius:12px; padding:15px 18px; }
+  .rc-tile.g { border-left-color:#4CAF7D; } .rc-tile.a { border-left-color:#e0a93b; } .rc-tile.b { border-left-color:#5b9bd5; }
+  .rc-tile .tl { font-family:var(--font-head); font-size:11px; letter-spacing:2px; color:var(--text-secondary); text-transform:uppercase; }
+  .rc-tile .tv { font-family:var(--font-head); font-weight:700; font-size:32px; color:var(--text-primary); margin-top:3px; line-height:1; }
+  .rc-podium .rc-pos { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .rc-podium .rc-pos:last-child { border:none; }
+  .rc-medal { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-head); font-size:15px; font-weight:700; flex-shrink:0; color:#0a0908; }
+  .rc-pos.p1 .rc-medal { background:linear-gradient(135deg,#e0a93b,#8a6a20); }
+  .rc-pos.p2 .rc-medal { background:linear-gradient(135deg,#b8b8c0,#6a6a72); }
+  .rc-pos.p3 .rc-medal { background:linear-gradient(135deg,#c07a4a,#7a4a2a); }
+  .rc-pos.pn .rc-medal { background:var(--surface-3); color:var(--text-secondary); }
+  .rc-pos .rc-nm { flex:1; font-size:16px; font-weight:600; letter-spacing:.3px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rc-pos .rc-bar { width:100px; height:8px; background:var(--surface-3); border-radius:4px; overflow:hidden; flex-shrink:0; }
+  .rc-pos .rc-bar span { display:block; height:100%; background:linear-gradient(90deg,#e0362f,#e0a93b); }
+  .rc-pos .rc-sc { font-family:var(--font-head); font-size:19px; font-weight:700; width:36px; text-align:right; }
+  /* Reports summary strip */
+  .rc-section-h { font-family:var(--font-head); font-size:13px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--text-secondary); margin:22px 0 12px; font-weight:600; }
+  .rc-reports { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; }
+  @media (max-width:900px){ .rc-reports { grid-template-columns:1fr 1fr; } }
+  @media (max-width:560px){ .rc-reports { grid-template-columns:1fr; } }
+  .rc-report { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; padding:16px 18px;
+    cursor:pointer; transition:.15s; text-align:left; display:flex; flex-direction:column; gap:8px; position:relative; }
+  .rc-report:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 8px 22px -12px var(--gold-dim); }
+  .rc-report .rr-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .rc-report .rr-title { font-family:var(--font-head); font-size:14px; letter-spacing:.5px; font-weight:600; text-transform:uppercase; color:var(--text-primary); }
+  .rc-report .rr-arrow { color:var(--gold-light); font-size:16px; flex-shrink:0; }
+  .rc-report .rr-big { font-family:var(--font-head); font-size:30px; font-weight:700; line-height:1; }
+  .rc-report .rr-sub { font-size:12px; color:var(--text-secondary); line-height:1.4; }
+  .rc-report .rr-sub b { color:var(--text-primary); }
+  .rc-report.alert { border-left:4px solid var(--critical); }
+  .rc-report.ok { border-left:4px solid var(--good); }
 </style>
 </head>
 <body>
@@ -1101,9 +1177,18 @@
   </section>
 
   <section class="tabpanel active" id="tab-dashboard">
-    <h2 class="section-title" id="dashTitle">🏍️ Overall Store KPI</h2>
-    <!-- Kaam 4: quick jump buttons. Each one switches to the relevant tab (and, where useful,
-         scrolls to a specific section on it) so the wall-display Dashboard doubles as a launcher. -->
+    <!-- Race Control header: checkered flag + title + LAP (day of month) counter -->
+    <div class="rc-head">
+      <div class="rc-left">
+        <div class="rc-flag"></div>
+        <h2 id="dashTitle">AMAR <span>AUTOS</span> · RACE CONTROL</h2>
+      </div>
+      <div class="rc-lap"><div class="n">LAP</div><div class="v" id="rcLap">—</div></div>
+    </div>
+    <!-- Shift-light bar: fills green→amber→red with retail achievement, like an RPM shift light -->
+    <div class="rc-shift" id="rcShift"></div>
+
+    <!-- Quick jump buttons (unchanged) -->
     <div class="dash-shortcuts" id="dashShortcuts">
       <button type="button" data-jump="booking" data-scroll="atRiskTitle">🚨 At-Risk (stock nahi)</button>
       <button type="button" data-jump="booking">📋 Booking</button>
@@ -1113,131 +1198,73 @@
       <button type="button" data-jump="analytics" data-scroll="funnelTargetTitle">🎯 Booking Funnel</button>
       <button type="button" data-jump="specs">📖 Model Specs</button>
     </div>
-    <div class="panel-grid">
-      <div class="panel">
-        <div class="panel-bar" id="barRetail">Bike Retail</div>
-        <div class="panel-body">
-          <div class="gauge" id="dashGauge" style="margin:0 auto"></div>
-          <div class="mini-split">
-            <span class="k">Target</span><span class="v" id="dTarget">—</span>
-            <span class="k">Retail</span><span class="v" id="dRetail">—</span>
-            <span class="k">Gap</span><span class="v" id="dGap">—</span>
-          </div>
+
+    <!-- Twin analog dials: Retail Achieved + Bookings, each with side stats -->
+    <div class="rc-dials">
+      <div class="rc-dialbox">
+        <div class="rc-dial"><div class="rc-dial-face" id="rcDial1">
+          <div class="rc-dial-c"><div class="rc-dial-lbl" id="rcDial1Lbl">Retail Achieved</div><div class="rc-dial-big" id="rcDial1Big">—</div><div class="rc-dial-unit" id="rcDial1Unit">—</div></div>
+        </div></div>
+        <div class="rc-dial-side">
+          <div class="sl" id="barRetail">Bike Retail</div>
+          <div class="sr"><span>Target</span><b id="dTarget">—</b></div>
+          <div class="sr"><span>Retail</span><b id="dRetail" class="good">—</b></div>
+          <div class="sr"><span>Gap</span><b id="dGap">—</b></div>
+          <div class="sr"><span>Pace</span><b id="dPaceStat">—</b></div>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-bar">Retail Achievement %</div>
-        <div class="panel-body">
-          <div class="big-fig" id="dAchvBig">—</div>
-          <div class="big-sub" id="dAchvSub">—</div>
-          <div class="meter" style="margin-top:12px"><div id="dAchvMeter"></div></div>
-          <div class="pace-note" id="dPaceNote" style="justify-content:center"></div>
+      <div class="rc-dialbox">
+        <div class="rc-dial"><div class="rc-dial-face" id="rcDial2">
+          <div class="rc-dial-c"><div class="rc-dial-lbl">Bookings</div><div class="rc-dial-big" id="rcDial2Big">—</div><div class="rc-dial-unit" id="rcDial2Unit">in hand</div></div>
+        </div></div>
+        <div class="rc-dial-side">
+          <div class="sl">Booking Pipeline</div>
+          <div class="sr"><span>In Hand</span><b id="dBkgBig">—</b></div>
+          <div class="sr"><span>Ready to allot</span><b id="dBkgReady" class="good">—</b></div>
+          <div class="sr"><span>Overdue</span><b id="dBkgOverdue">—</b></div>
+          <div class="sr"><span>Cancelled</span><b id="dBkgCancelled">—</b></div>
         </div>
       </div>
+    </div>
+
+    <!-- Racing tiles: VAS, rating, enquiries, not-punched. Hidden values kept for compatibility. -->
+    <div class="rc-tiles">
+      <div class="rc-tile a"><div class="tl">EW · RSA · Gear</div><div class="tv" id="rcVas">—</div></div>
+      <div class="rc-tile g"><div class="tl">Customer Rating</div><div class="tv" id="dCsatBig">—</div></div>
+      <div class="rc-tile b"><div class="tl">GMA / bike</div><div class="tv" id="rcGma">—</div></div>
+      <div class="rc-tile"><div class="tl">Not Punched</div><div class="tv" id="rcNotPunched">—</div></div>
+    </div>
+
+    <!-- Podium leaderboard + Sales Funnel side by side -->
+    <div class="panel-row-2col">
       <div class="panel">
-        <div class="panel-bar">EW · RSA · Gear · GMA</div>
-        <div class="panel-body">
-          <div class="big-fig" id="dGmaRev">—</div>
-          <div class="big-sub">GMA revenue · <span id="dGmaPerBike">—</span> / bike</div>
-          <div class="mini-split">
-            <span class="k">EW attached</span><span class="v" id="dEw">—</span>
-            <span class="k">RSA attached</span><span class="v" id="dRsa">—</span>
-            <span class="k">Gear attached</span><span class="v" id="dGear">—</span>
-          </div>
-        </div>
+        <div class="panel-bar">🏁 Podium — Top Sales Consultants</div>
+        <div class="panel-body"><div class="rc-podium" id="dashPodium"></div></div>
       </div>
       <div class="panel">
-        <div class="panel-bar">Sales Funnel</div>
+        <div class="panel-bar">▶ Sales Funnel — Channel</div>
         <div class="panel-body"><div id="dFunnel"></div></div>
       </div>
-      <div class="panel">
-        <div class="panel-bar">Bookings In Hand</div>
-        <div class="panel-body">
-          <div class="big-fig" id="dBkgBig">—</div>
-          <div class="big-sub">open bookings, all months</div>
-          <div class="mini-split">
-            <span class="k">Booked this filter</span><span class="v" id="dBkgFiltered">—</span>
-            <span class="k">Cancelled</span><span class="v" id="dBkgCancelled">—</span>
-            <span class="k">Overdue</span><span class="v" id="dBkgOverdue">—</span>
-          </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-bar">Customer Satisfaction</div>
-        <div class="panel-body">
-          <div class="big-fig" id="dCsatBig">—</div>
-          <div class="big-sub"><span id="dCsatCount">—</span> Google reviews</div>
-          <div style="text-align:center;margin-top:8px;letter-spacing:3px;color:var(--gold);font-size:15px" id="dCsatStars"></div>
-          <div class="mini-split">
-            <span class="k">Riders added</span><span class="v" id="dCsatRiders">—</span>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div class="panel-row2">
-      <div class="panel">
-        <div class="panel-bar">Executive Leaderboard</div>
-        <div class="panel-body" style="padding:0">
-          <div class="table-wrap" style="border:none;border-radius:0;max-height:none">
-            <table class="data" id="dashLeaderboard"></table>
-          </div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-bar">Top Performer of the Month</div>
-        <div class="panel-body"><div id="dashSpotlight"></div></div>
-      </div>
-      <div class="panel">
-        <div class="panel-bar">Booking &amp; Delivery Pipeline</div>
-        <div class="panel-body"><div id="dashPipeline"></div></div>
-      </div>
+    <!-- Compatibility holders for functions that still write to these ids (kept hidden). -->
+    <div style="display:none">
+      <span id="dAchvBig"></span><span id="dAchvSub"></span><div id="dAchvMeter"></div><div id="dPaceNote"></div>
+      <span id="dGmaRev"></span><span id="dGmaPerBike"></span><span id="dEw"></span><span id="dRsa"></span><span id="dGear"></span>
+      <span id="dBkgFiltered"></span><span id="dCsatCount"></span><span id="dCsatStars"></span><span id="dCsatRiders"></span>
+      <div id="dashGauge"></div>
+      <table id="dashLeaderboard"></table>
+      <div id="dashEnqNotPunched"></div><div id="dashBkgNotPunched"></div>
+      <div id="dashSpotlight"></div>
+      <table id="dashMissingEnqByExec"></table><div id="missingEnqAlertBanner"></div>
+      <div id="dashBookingsByExecChart"></div><div id="dashBookingsByExecTrend"></div><div id="dashBookingsByExecTrendLegend"></div>
     </div>
 
-    <!-- Compact "punch pending" summary — same data as the two Overview tables, shown here as a
-         quick count + the Sales Person / Customer names so the shortfall is visible at a glance.
-         Clicking either card jumps to the Overview tab for the full table. -->
-    <div class="panel-row-2col" style="margin-top:11px;">
-      <div class="panel">
-        <div class="panel-bar">🚨 Enquiry Not Punched</div>
-        <div class="panel-body"><div id="dashEnqNotPunched"></div></div>
-      </div>
-      <div class="panel">
-        <div class="panel-bar">⚠️ Booking Not Punched</div>
-        <div class="panel-body"><div id="dashBkgNotPunched"></div></div>
-      </div>
-    </div>
-
-    <!-- Executive performance tracking: (1) how many un-punched enquiries sit against each
-         executive, at a glance, without opening every name's individual list above; (2) total
-         bookings done by each executive this filter, as a bar chart, right on the wall-display
-         tab. Both are click-through: a row / bar jumps straight to that executive's detail on the
-         relevant tab, with the top exec filter already set to them. -->
-    <div class="panel-row-2col" style="margin-top:11px;">
-      <div class="panel">
-        <div class="panel-bar">📋 Missing Enquiries — by Executive</div>
-        <div class="panel-body" style="padding:0">
-          <!-- Shown only when at least one executive is over the alert threshold. The button opens
-               WhatsApp (same pattern as the header's Notify Team action) with a ready-made message
-               naming who's over, so Deepak can ping the group in one tap instead of typing it out. -->
-          <div id="missingEnqAlertBanner" class="data-health-banner empty" style="margin:10px 12px 0;display:none;"></div>
-          <div class="table-wrap" style="border:none;border-radius:0;max-height:280px">
-            <table class="data" id="dashMissingEnqByExec"></table>
-          </div>
-          <p class="empty-note" style="text-align:left;padding:6px 12px 10px;">Kisi bhi executive ke naam par click karke uski poori missing-enquiry list dekho.</p>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-bar">📊 Bookings — by Executive <span style="font-weight:400;font-size:11px;color:var(--text-secondary)">· count · enquiry→booking conv %</span></div>
-        <div class="panel-body">
-          <div class="chart-wrap"><div id="dashBookingsByExecChart"></div></div>
-          <p class="empty-note" style="text-align:left;padding:6px 0 0;">Bar par click karke us executive ki booking list dekho.</p>
-          <h3 style="margin:18px 0 6px;font-size:12.5px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.8px;">Last 6 Months — Bookings Trend</h3>
-          <div class="legend-row" id="dashBookingsByExecTrendLegend"></div>
-          <div class="chart-wrap"><div id="dashBookingsByExecTrend"></div></div>
-        </div>
-      </div>
-    </div>
+    <!-- ══ Reports summary strip: each card is a short preview; clicking opens the FULL report on
+         its own tab. This removes the duplicate full tables that used to sit on both Dashboard and
+         Overview — every report now lives in ONE place, and the Dashboard just links into it. ══ -->
+    <h3 class="rc-section-h">📑 Reports — click to open full</h3>
+    <div class="rc-reports" id="rcReports"></div>
   </section>
 
   <section class="tabpanel" id="tab-overview">
@@ -1326,24 +1353,24 @@
       </div>
     </div>
 
-    <h2 class="section-title">🏆 This Month's Champions</h2>
+    <h2 class="section-title" id="ovChampions">🏆 This Month's Champions</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Split across categories so it's not always the same one or two names on top.</p>
     <div class="kpi-grid" id="kpiChampions"></div>
 
-    <h2 class="section-title">👤 Executive Leaderboard</h2>
+    <h2 class="section-title" id="ovLeaderboard">👤 Executive Leaderboard</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
 
-    <h2 class="section-title">⭐ Google Reviews Summary</h2>
+    <h2 class="section-title" id="ovReviews">⭐ Google Reviews Summary</h2>
     <div class="kpi-grid" id="kpiReviews"></div>
     <div class="table-wrap" style="margin-top:10px;"><table class="data" id="tblReviewsEmp"></table></div>
 
     <!-- Two data-hygiene trackers (Overview only). Both respect STATE.filterExec, so Admin sees
          everyone and a sales login sees only their own rows. Customer mobile is masked. -->
-    <h2 class="section-title">🚨 Enquiry Not Punched — Walk-in aaya, enquiry nahi bani</h2>
+    <h2 class="section-title" id="ovEnqNotPunched">🚨 Enquiry Not Punched — Walk-in aaya, enquiry nahi bani</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo customer showroom aaye (Actual Walk-in register me) par unka mobile enquiry me nahi mila — inki enquiry banani zaroori hai, kyunki followup MSD ke through hi hota hai.</p>
     <div class="table-wrap"><table class="data" id="tblWalkinMissing"></table></div>
 
-    <h2 class="section-title">⚠️ Booking Not Punched — Booking hui, system me nahi</h2>
+    <h2 class="section-title" id="ovBkgNotPunched">⚠️ Booking Not Punched — Booking hui, system me nahi</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo booking humare paas hai (Actual Booking sheet) par customer ka mobile RE Portal (BOOKING MSD) me nahi mila — ye bookings system me punch karni zaroori hain.</p>
     <div class="table-wrap"><table class="data" id="tblBookingNotInSystem"></table></div>
   </section>
@@ -2819,14 +2846,31 @@ function renderRouteMap(elId, doneCount, targetCount){
     <path d="M -2 -3 L -6 -8" fill="none" stroke="var(--text-primary)" stroke-width="2.2" stroke-linecap="round"/>
     <circle cx="9" cy="-3" r="1.6" fill="var(--gold-light)"/>`;
 }
+// Draw the tick ring for a Race-Control dial: 50 ticks around a 270° arc, lit up to `frac`,
+// turning red past 85%. Clears any previous ticks first so re-renders don't stack.
+function rcDialTicks(faceId, frac){
+  const face = document.getElementById(faceId); if (!face) return;
+  face.querySelectorAll('.rc-tick').forEach(t => t.remove());
+  frac = Math.max(0, Math.min(1, frac));
+  for (let i = 0; i <= 50; i++){
+    const a = i/50;
+    const t = document.createElement('div');
+    let c = 'rc-tick';
+    if (i % 5 === 0) c += ' maj';
+    if (a <= frac) c += (a > 0.85 ? ' red' : ' on');
+    t.className = c;
+    t.style.transform = `translateX(-50%) rotate(${-135 + a*270}deg)`;
+    face.appendChild(t);
+  }
+}
 function renderDashboard(){
   if (!document.getElementById('tab-dashboard')) return;
   const agg = computeDeliveryAgg(null);
   const target = targetFor(null);
   const achv = target ? agg.retail/target : 0;
   const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
-  document.getElementById('dashTitle').textContent =
-    isSingleExec ? `👤 ${STATE.filterExec} — Store KPI` : '🏍️ Overall Store KPI';
+  document.getElementById('dashTitle').innerHTML =
+    isSingleExec ? `${esc(STATE.filterExec)} · <span>RACE CONTROL</span>` : 'AMAR <span>AUTOS</span> · RACE CONTROL';
 
   const now = new Date();
   const f = monthYearOfFilter();
@@ -2834,71 +2878,162 @@ function renderDashboard(){
   const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   const pace = isCurrentMonth ? now.getDate()/daysInMonth : 1;
 
-  // Panel 1 — gauge
-  dashGauge('dashGauge', achv, pace);
+  // LAP counter (day of month, only meaningful for the current month)
+  const rcLap = document.getElementById('rcLap');
+  if (rcLap) rcLap.textContent = isCurrentMonth ? `${now.getDate()} / ${daysInMonth}` : 'FULL';
+
+  // Shift-light bar: 12 lights, filled by achievement %, green→amber→red
+  const rcShift = document.getElementById('rcShift');
+  if (rcShift){
+    const N = 12, lit = Math.round(Math.min(1, achv) * N);
+    let html = '';
+    for (let i=0;i<N;i++){
+      let cls = '';
+      if (i < lit){ cls = i < 5 ? 'g' : (i < 9 ? 'y' : 'r'); }
+      html += `<i class="${cls}"></i>`;
+    }
+    rcShift.innerHTML = html;
+  }
+
+  // ── Dial 1: Retail Achieved ──
+  rcDialTicks('rcDial1', achv);
+  const d1b = document.getElementById('rcDial1Big'); if (d1b) d1b.innerHTML = `${Math.round(achv*100)}<small>%</small>`;
+  const d1u = document.getElementById('rcDial1Unit'); if (d1u) d1u.textContent = `${fmtInt(agg.retail)} / ${fmtInt(target)}`;
   document.getElementById('barRetail').textContent = isCurrentMonth ? `Bike Retail · Day ${now.getDate()}/${daysInMonth}` : 'Bike Retail';
   document.getElementById('dTarget').textContent = fmtInt(target);
   document.getElementById('dRetail').textContent = fmtInt(agg.retail);
   const gap = Math.max(0, target - agg.retail);
   const dGap = document.getElementById('dGap'); dGap.textContent = fmtInt(gap);
-  dGap.style.color = gap ? 'var(--text-primary)' : 'var(--good)';
+  dGap.className = gap ? '' : 'good';
 
-  // Panel 2 — achievement %
-  const achvCol = achv>=1?'var(--good)':achv>=pace?'var(--gold)':achv>=pace*0.85?'var(--warning)':'var(--critical)';
-  const dAchvBig = document.getElementById('dAchvBig');
-  dAchvBig.textContent = fmtPct(achv); dAchvBig.style.color = achvCol;
-  document.getElementById('dAchvSub').textContent = `${fmtInt(agg.retail)} of ${fmtInt(target)} target`;
-  document.getElementById('dAchvMeter').style.width = Math.min(100, achv*100)+'%';
-  const dPace = document.getElementById('dPaceNote');
-  if (isCurrentMonth && target) {
+  // Pace stat (in the dial's side list)
+  const dPaceStat = document.getElementById('dPaceStat');
+  if (isCurrentMonth && target){
     const expected = Math.round(target*pace), delta = agg.retail - expected;
-    const pc = delta>=0?'var(--good)':delta>=-Math.max(2,target*0.05)?'var(--warning)':'var(--critical)';
-    dPace.style.color = pc;
-    dPace.innerHTML = `<span class="pace-dot" style="background:${pc}"></span>${delta>=0?fmtInt(delta)+' ahead of pace':fmtInt(-delta)+' behind pace'}`;
-  } else if (target) {
-    const pc = achv>=1?'var(--good)':'var(--warning)';
-    dPace.style.color = pc;
-    dPace.innerHTML = `<span class="pace-dot" style="background:${pc}"></span>${fmtInt(gap)} still to go`;
-  } else dPace.innerHTML = '';
+    dPaceStat.textContent = delta>=0 ? `+${fmtInt(delta)}` : `−${fmtInt(-delta)}`;
+    dPaceStat.className = delta>=0 ? 'good' : (delta>=-Math.max(2,target*0.05) ? 'warn' : 'crit');
+  } else {
+    dPaceStat.textContent = target ? `${fmtInt(gap)} left` : '—';
+    dPaceStat.className = achv>=1 ? 'good' : 'warn';
+  }
 
-  // Panel 3 — VAS + GMA
-  const ewPct = agg.retail?agg.ew/agg.retail:0, rsaPct = agg.retail?agg.rsa/agg.retail:0, gearPct = agg.retail?agg.gear/agg.retail:0;
-  document.getElementById('dGmaRev').textContent = fmtMoney(agg.gma);
-  const perBike = agg.retail?agg.gma/agg.retail:0;
-  const dPer = document.getElementById('dGmaPerBike'); dPer.textContent = fmtMoney(perBike);
-  dPer.style.color = (agg.retail && perBike < PERF_THRESHOLDS.gmaPerBike) ? 'var(--critical)' : '';
-  const setU = (id, units, p, th) => { const el=document.getElementById(id); el.textContent = `${fmtInt(units)} · ${fmtPct(p)}`; el.style.color = (th!=null && agg.retail && p<th)?'var(--critical)':''; };
-  setU('dEw', agg.ew, ewPct, PERF_THRESHOLDS.ewPct);
-  setU('dRsa', agg.rsa, rsaPct, PERF_THRESHOLDS.rsaPct);
-  setU('dGear', agg.gear, gearPct, null);
-
-  // Panel 4 — funnel (tapered SVG)
-  renderDashFunnel(agg.retail);
-
-  // Panel 5 — bookings in hand
+  // ── Dial 2: Bookings in hand (dial shows in-hand vs a soft cap for the ring fill) ──
   const openBookings = STATE.booking.filter(r => { const s=up(r[9]); return s!=='BILLED'&&s!=='CANCEL'&&s!=='CANCELLED'&&execInFilter(r[7]); }).length;
   let cancelled=0, filteredBk=0;
   STATE.booking.forEach(r => { if(!dateInFilter(r[2])||!execInFilter(r[7]))return; filteredBk++; const s=up(r[9]); if(s==='CANCEL'||s==='CANCELLED')cancelled++; });
+  const bkgCap = Math.max(openBookings, target || 50); // ring fills relative to target-ish scale
+  rcDialTicks('rcDial2', bkgCap ? openBookings/bkgCap : 0);
+  const d2b = document.getElementById('rcDial2Big'); if (d2b) d2b.textContent = fmtInt(openBookings);
   document.getElementById('dBkgBig').textContent = fmtInt(openBookings);
-  document.getElementById('dBkgFiltered').textContent = fmtInt(filteredBk);
   document.getElementById('dBkgCancelled').textContent = fmtInt(cancelled);
+  document.getElementById('dBkgFiltered').textContent = fmtInt(filteredBk);
   const overdue = allPendingRowsFor(null).filter(r => { const tdd = parseTddDate(r[8],r[2])||parseTddDate(r[10],r[2]); return tdd && tdd < todayMidnight(); }).length;
-  const dOv = document.getElementById('dBkgOverdue'); dOv.textContent = fmtInt(overdue); dOv.style.color = overdue?'var(--critical)':'';
+  const dOv = document.getElementById('dBkgOverdue'); dOv.textContent = fmtInt(overdue); dOv.className = overdue?'crit':'';
 
-  // Panel 6 — CSAT
+  // Ready to allot (exact model+colour in KN stock) — reuse pipeline logic
+  const openPend = allPendingRowsFor(null);
+  let readyCount = 0;
+  openPend.forEach(r => { if (stockMatchFor(r[3], r[4]).exact > 0) readyCount++; });
+  const dReady = document.getElementById('dBkgReady'); if (dReady){ dReady.textContent = fmtInt(readyCount); dReady.className = 'good'; }
+
+  // ── Tiles: VAS combined, rating, GMA/bike, not-punched ──
+  const ewPct = agg.retail?agg.ew/agg.retail:0, rsaPct = agg.retail?agg.rsa/agg.retail:0, gearPct = agg.retail?agg.gear/agg.retail:0;
+  const vasAvg = (ewPct + rsaPct + gearPct) / 3;
+  const rcVas = document.getElementById('rcVas'); if (rcVas) rcVas.textContent = fmtPct(vasAvg);
+  // hidden compat holders
+  const perBike = agg.retail?agg.gma/agg.retail:0;
+  const rcGma = document.getElementById('rcGma'); if (rcGma) rcGma.textContent = fmtMoney(perBike);
+  const setU = (id, units, p) => { const el=document.getElementById(id); if(el) el.textContent = `${fmtInt(units)} · ${fmtPct(p)}`; };
+  setU('dEw', agg.ew, ewPct); setU('dRsa', agg.rsa, rsaPct); setU('dGear', agg.gear, gearPct);
+  const gEl = document.getElementById('dGmaRev'); if (gEl) gEl.textContent = fmtMoney(agg.gma);
+  const gpb = document.getElementById('dGmaPerBike'); if (gpb) gpb.textContent = fmtMoney(perBike);
+
+  // Not-punched tile: count from the same formula-column logic the Overview trackers use
+  const notFound = (v) => /NOT\s*FOUND|NO\s*DATA/i.test(str(v));
+  let enqNp = 0, bkgNp = 0;
+  STATE.walkin.forEach(r => { if (dateInFilter(r[0]) && execInFilter(r[1]) && notFound(r[9])) enqNp++; });
+  STATE.booking.forEach(r => { const s=up(r[9]); if (s==='CANCEL'||s==='CANCELLED') return; if (dateInFilter(r[2]) && execInFilter(r[7]) && notFound(r[12])) bkgNp++; });
+  const rcNp = document.getElementById('rcNotPunched');
+  if (rcNp){ rcNp.textContent = fmtInt(enqNp + bkgNp); rcNp.parentElement.className = (enqNp+bkgNp) ? 'rc-tile' : 'rc-tile g'; }
+
+  // ── CSAT (rating tile) ──
   let sumR=0, nR=0;
   STATE.review.forEach(r => { if(!dateInFilter(r[0]))return; if(!ownerInFilter(r[3]))return; const rt=num(r[1]); if(rt>0){sumR+=rt;nR++;} });
   const avg = nR?sumR/nR:0;
-  document.getElementById('dCsatBig').textContent = nR?avg.toFixed(1)+' / 5':'—';
-  document.getElementById('dCsatCount').textContent = fmtInt(nR);
-  const full = Math.round(avg);
-  document.getElementById('dCsatStars').textContent = nR?'★'.repeat(full)+'☆'.repeat(5-full):'';
-  document.getElementById('dCsatRiders').textContent = fmtInt(STATE.riderReg.length);
+  const csB = document.getElementById('dCsatBig'); if (csB) csB.textContent = nR?avg.toFixed(1)+'★':'—';
+  const csC = document.getElementById('dCsatCount'); if (csC) csC.textContent = fmtInt(nR);
+  const csR = document.getElementById('dCsatRiders'); if (csR) csR.textContent = fmtInt(STATE.riderReg.length);
 
+  // ── Funnel + Podium (both stay on the Dashboard hero) ──
+  renderDashFunnel(agg.retail);
+  renderDashPodium();
+  // ── Everything else is now a clickable summary card that opens the FULL report on its own tab ──
+  renderRcReports({ enqNp, bkgNp, overdue, readyCount, openBookings });
+  // keep the underlying full tables/charts populated (they live on Overview / hidden holders)
   renderDashLeaderboard();
   renderDashSpotlight();
-  renderDashPipeline();
   renderDashBookingsByExec();
+}
+// Build the compact "Reports" strip on the Dashboard. Each card shows a one-line summary and, on
+// click, jumps to the tab where that report lives in full — so no report is duplicated in full on
+// two tabs. Cards are data-driven so the preview number always matches the full report.
+function renderRcReports(ctx){
+  const el = document.getElementById('rcReports'); if (!el) return;
+  const isAdmin = (typeof CURRENT_ROLE === 'undefined') || CURRENT_ROLE === 'Admin' || true; // all roles see their own scope
+  // Leaderboard preview: top name + team size
+  const lb = STATE.execList.map(name => ({ name, retail: computeDeliveryAgg(name).retail }))
+    .sort((a,b)=>b.retail-a.retail);
+  const topName = lb.length && lb[0].retail ? `${lb[0].name} · ${fmtInt(lb[0].retail)}` : '—';
+
+  // Pipeline preview
+  const open = allPendingRowsFor(null);
+  const today = todayMidnight();
+  const eom = new Date(today.getFullYear(), today.getMonth()+1, 0, 23,59,59);
+  let ready=0, awaiting=0, carry=0;
+  open.forEach(r => { const tdd=parseTddDate(r[8],r[2])||parseTddDate(r[10],r[2]); if(tdd&&tdd>eom){carry++;return;} if(stockMatchFor(r[3],r[4]).exact>0)ready++; else awaiting++; });
+
+  // Reviews preview
+  let sumR=0,nR=0; STATE.review.forEach(r=>{ if(!dateInFilter(r[0])||!ownerInFilter(r[3]))return; const rt=num(r[1]); if(rt>0){sumR+=rt;nR++;} });
+  const avgR = nR?(sumR/nR).toFixed(1):'—';
+
+  const cards = [
+    { title:'Enquiry Not Punched', cls: ctx.enqNp?'alert':'ok', big: fmtInt(ctx.enqNp),
+      sub: ctx.enqNp? `<b>${ctx.enqNp}</b> walk-in ki enquiry pending` : 'Sab punched ✅', tab:'overview', scroll:'ovEnqNotPunched' },
+    { title:'Booking Not Punched', cls: ctx.bkgNp?'alert':'ok', big: fmtInt(ctx.bkgNp),
+      sub: ctx.bkgNp? `<b>${ctx.bkgNp}</b> booking system me daalni hai` : 'Sab punched ✅', tab:'overview', scroll:'ovBkgNotPunched' },
+    { title:'Executive Leaderboard', cls:'', big:'', sub:`Top: <b>${esc(topName)}</b> · ${lb.length} consultants`, tab:'overview', scroll:'ovLeaderboard' },
+    { title:'Champions', cls:'', big:'', sub:'Category-wise best performers', tab:'overview', scroll:'ovChampions' },
+    { title:'Booking & Delivery Pipeline', cls: (ready?'ok':''), big:'', sub:`<b>${fmtInt(ready)}</b> ready · ${fmtInt(awaiting)} awaiting · ${fmtInt(carry)} carry-over`, tab:'booking', scroll:'atRiskTitle' },
+    { title:'Google Reviews', cls:'', big: nR?avgR+'★':'—', sub:`${fmtInt(nR)} reviews is filter me`, tab:'overview', scroll:'ovReviews' },
+    { title:'Bookings — by Executive', cls:'', big:'', sub:'Har executive ki booking count + trend', tab:'booking', scroll:null },
+    { title:'Sales Funnel — full', cls:'', big:'', sub:'Channel-wise target vs booked', tab:'analytics', scroll:'funnelTargetTitle' },
+    { title:'Model Specs', cls:'', big:'', sub:'Har model ke selling points', tab:'specs', scroll:null },
+  ];
+  el.innerHTML = cards.map(c => `<button type="button" class="rc-report ${c.cls}" data-tab="${c.tab}" ${c.scroll?`data-scroll="${c.scroll}"`:''}>
+    <div class="rr-top"><span class="rr-title">${esc(c.title)}</span><span class="rr-arrow">↗</span></div>
+    ${c.big?`<div class="rr-big ${c.cls==='alert'?'crit':c.cls==='ok'?'good':''}">${c.big}</div>`:''}
+    <div class="rr-sub">${c.sub}</div>
+  </button>`).join('');
+  el.querySelectorAll('.rc-report').forEach(btn => {
+    btn.addEventListener('click', () => switchToTab(btn.dataset.tab, btn.dataset.scroll || null));
+  });
+}
+// Podium: top-3 sales consultants by retail, as gold/silver/bronze medals with bars. Uses the same
+// per-exec aggregation the full leaderboard uses, so the two always agree.
+function renderDashPodium(){
+  const el = document.getElementById('dashPodium'); if (!el) return;
+  const rows = STATE.execList.map(name => { const a = computeDeliveryAgg(name); return { name, retail: a.retail }; })
+    .sort((x,y) => y.retail - x.retail).slice(0, 5);
+  if (!rows.length || !rows[0].retail){ el.innerHTML = '<div class="empty-note" style="padding:16px">No deliveries yet for this filter</div>'; return; }
+  const top = rows[0].retail || 1;
+  el.innerHTML = rows.map((r,i) => {
+    const cls = i===0?'p1':i===1?'p2':i===2?'p3':'pn';
+    const medal = i<3 ? 'P'+(i+1) : (i+1);
+    return `<div class="rc-pos ${cls}"><div class="rc-medal">${medal}</div>
+      <span class="rc-nm">${esc(r.name)}</span>
+      <div class="rc-bar"><span style="width:${Math.round((r.retail/top)*100)}%"></span></div>
+      <span class="rc-sc">${fmtInt(r.retail)}</span></div>`;
+  }).join('');
 }
 // Bar chart: total bookings (this filter's month/day range) done by each sales executive, so
 // booking volume per person is visible directly on the wall-display Dashboard tab without
