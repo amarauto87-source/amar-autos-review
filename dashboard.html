@@ -931,6 +931,14 @@
     background:repeating-conic-gradient(#fff 0% 25%, #0a0908 0% 50%) 0/15.5px 15.5px; flex-shrink:0; }
   .rc-head h2 { font-family:var(--font-head); font-size:26px; letter-spacing:1px; margin:0; font-weight:700; }
   .rc-head h2 span { color:var(--brand-red, #e0362f); }
+  .rc-heritage { font-size:10px; letter-spacing:2.5px; color:var(--text-muted); text-transform:uppercase; margin-top:3px; }
+  /* subtle Royal Enfield bike silhouette watermark, only behind the dashboard tab */
+  #tab-dashboard { position:relative; }
+  #tab-dashboard::before {
+    content:""; position:absolute; right:-40px; top:70px; width:480px; height:280px; opacity:.035; pointer-events:none; z-index:0;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cg fill='none' stroke='%23c5a059' stroke-width='2'%3E%3Ccircle cx='45' cy='72' r='20'/%3E%3Ccircle cx='150' cy='72' r='20'/%3E%3Cpath d='M45 72 L80 72 L95 45 L130 45 M95 45 L110 72 L150 72 M80 72 L110 72 M118 45 L135 45 L140 55'/%3E%3C/g%3E%3C/svg%3E") no-repeat; background-size:contain;
+  }
+  #tab-dashboard > * { position:relative; z-index:1; }
   .rc-lap { font-family:var(--font-head); text-align:right; line-height:1.1; }
   .rc-lap .n { font-size:11px; letter-spacing:3px; color:var(--text-muted); }
   .rc-lap .v { font-size:23px; font-weight:700; color:var(--gold-light); }
@@ -1181,7 +1189,10 @@
     <div class="rc-head">
       <div class="rc-left">
         <div class="rc-flag"></div>
-        <h2 id="dashTitle">AMAR <span>AUTOS</span> · RACE CONTROL</h2>
+        <div>
+          <h2 id="dashTitle">AMAR <span>AUTOS</span> · RACE CONTROL</h2>
+          <div class="rc-heritage">Royal Enfield · East Delhi · Since 1901</div>
+        </div>
       </div>
       <div class="rc-lap"><div class="n">LAP</div><div class="v" id="rcLap">—</div></div>
     </div>
@@ -1190,7 +1201,7 @@
 
     <!-- Quick jump buttons (unchanged) -->
     <div class="dash-shortcuts" id="dashShortcuts">
-      <button type="button" data-jump="booking" data-scroll="atRiskTitle">🚨 At-Risk (stock nahi)</button>
+      <button type="button" data-jump="booking" data-scroll="atRiskTitle">🚨 At-Risk (no stock)</button>
       <button type="button" data-jump="booking">📋 Booking</button>
       <button type="button" data-jump="pending">🔎 Book vs Stock</button>
       <button type="button" data-jump="delivery">🚚 Delivery</button>
@@ -1263,7 +1274,7 @@
     <!-- ══ Reports summary strip: each card is a short preview; clicking opens the FULL report on
          its own tab. This removes the duplicate full tables that used to sit on both Dashboard and
          Overview — every report now lives in ONE place, and the Dashboard just links into it. ══ -->
-    <h3 class="rc-section-h">📑 Reports — click to open full</h3>
+    <h3 class="rc-section-h" id="rcReportsH">📑 Reports — click to open full</h3>
     <div class="rc-reports" id="rcReports"></div>
   </section>
 
@@ -2964,6 +2975,8 @@ function renderDashboard(){
   const csC = document.getElementById('dCsatCount'); if (csC) csC.textContent = fmtInt(nR);
   const csR = document.getElementById('dCsatRiders'); if (csR) csR.textContent = fmtInt(STATE.riderReg.length);
 
+  // Dashboard shortcut buttons: Hinglish for Sales, English for Admin
+  renderDashShortcutLabels();
   // ── Funnel + Podium (both stay on the Dashboard hero) ──
   renderDashFunnel(agg.retail);
   renderDashPodium();
@@ -2977,9 +2990,63 @@ function renderDashboard(){
 // Build the compact "Reports" strip on the Dashboard. Each card shows a one-line summary and, on
 // click, jumps to the tab where that report lives in full — so no report is duplicated in full on
 // two tabs. Cards are data-driven so the preview number always matches the full report.
+// Dashboard shortcut buttons — labels follow the role (Sales = Hinglish, Admin/CRT = English).
+function renderDashShortcutLabels(){
+  const wrap = document.getElementById('dashShortcuts'); if (!wrap) return;
+  const hin = !!(CURRENT_USER && CURRENT_USER.role === 'Sales');
+  const labels = hin ? {
+    booking_atrisk:'🚨 At-Risk (stock nahi)', booking:'📋 Booking', pending:'🔎 Book vs Stock',
+    delivery:'🚚 Delivery', stock:'🏭 Stock', analytics:'🎯 Booking Funnel', specs:'📖 Model Specs',
+  } : {
+    booking_atrisk:'🚨 At-Risk (no stock)', booking:'📋 Booking', pending:'🔎 Book vs Stock',
+    delivery:'🚚 Delivery', stock:'🏭 Stock', analytics:'🎯 Booking Funnel', specs:'📖 Model Specs',
+  };
+  wrap.querySelectorAll('button').forEach(btn => {
+    const tab = btn.dataset.jump, scroll = btn.dataset.scroll;
+    let key = tab;
+    if (tab === 'booking' && scroll === 'atRiskTitle') key = 'booking_atrisk';
+    if (labels[key]) btn.textContent = labels[key];
+  });
+}
 function renderRcReports(ctx){
   const el = document.getElementById('rcReports'); if (!el) return;
-  const isAdmin = (typeof CURRENT_ROLE === 'undefined') || CURRENT_ROLE === 'Admin' || true; // all roles see their own scope
+  // Dashboard language follows the role: Admin (and CRT) see English, a Sales login sees Hinglish.
+  // Only the Dashboard tab does this — the rest of the app is unchanged.
+  const hin = !!(CURRENT_USER && CURRENT_USER.role === 'Sales');
+  const T = hin ? {
+    sectionH: '📑 Reports — dekhne ke liye click karo',
+    enqPend: n => `<b>${n}</b> walk-in ki enquiry pending`,
+    bkgPend: n => `<b>${n}</b> booking system me daalni hai`,
+    allPunched: 'Sab ho gaya ✅',
+    top: 'Top', consultants: 'sales log',
+    champ: 'Category-wise sabse best performers',
+    pipe: (r,a,c) => `<b>${r}</b> ready · ${a} stock ka wait · ${c} agle mahine`,
+    reviews: n => `${n} reviews is filter me`,
+    byExec: 'Har executive ki booking count + trend',
+    funnel: 'Channel-wise target vs booked',
+    specs: 'Har model ke selling points',
+    tEnq:'Enquiry Not Punched', tBkg:'Booking Not Punched', tLb:'Executive Leaderboard',
+    tCh:'Champions', tPipe:'Booking & Delivery Pipeline', tRev:'Google Reviews',
+    tExec:'Bookings — Executive-wise', tFun:'Sales Funnel — poora', tSpec:'Model Specs',
+  } : {
+    sectionH: '📑 Reports — click to open full',
+    enqPend: n => `<b>${n}</b> walk-in enquiry pending`,
+    bkgPend: n => `<b>${n}</b> booking to enter in system`,
+    allPunched: 'All punched ✅',
+    top: 'Top', consultants: 'consultants',
+    champ: 'Category-wise best performers',
+    pipe: (r,a,c) => `<b>${r}</b> ready · ${a} awaiting · ${c} carry-over`,
+    reviews: n => `${n} reviews in this filter`,
+    byExec: 'Each executive\u2019s booking count + trend',
+    funnel: 'Channel-wise target vs booked',
+    specs: 'Selling points for each model',
+    tEnq:'Enquiry Not Punched', tBkg:'Booking Not Punched', tLb:'Executive Leaderboard',
+    tCh:'Champions', tPipe:'Booking & Delivery Pipeline', tRev:'Google Reviews',
+    tExec:'Bookings — by Executive', tFun:'Sales Funnel — full', tSpec:'Model Specs',
+  };
+  // section heading
+  const secH = document.getElementById('rcReportsH'); if (secH) secH.textContent = T.sectionH;
+
   // Leaderboard preview: top name + team size
   const lb = STATE.execList.map(name => ({ name, retail: computeDeliveryAgg(name).retail }))
     .sort((a,b)=>b.retail-a.retail);
@@ -2997,17 +3064,17 @@ function renderRcReports(ctx){
   const avgR = nR?(sumR/nR).toFixed(1):'—';
 
   const cards = [
-    { title:'Enquiry Not Punched', cls: ctx.enqNp?'alert':'ok', big: fmtInt(ctx.enqNp),
-      sub: ctx.enqNp? `<b>${ctx.enqNp}</b> walk-in ki enquiry pending` : 'Sab punched ✅', tab:'overview', scroll:'ovEnqNotPunched' },
-    { title:'Booking Not Punched', cls: ctx.bkgNp?'alert':'ok', big: fmtInt(ctx.bkgNp),
-      sub: ctx.bkgNp? `<b>${ctx.bkgNp}</b> booking system me daalni hai` : 'Sab punched ✅', tab:'overview', scroll:'ovBkgNotPunched' },
-    { title:'Executive Leaderboard', cls:'', big:'', sub:`Top: <b>${esc(topName)}</b> · ${lb.length} consultants`, tab:'overview', scroll:'ovLeaderboard' },
-    { title:'Champions', cls:'', big:'', sub:'Category-wise best performers', tab:'overview', scroll:'ovChampions' },
-    { title:'Booking & Delivery Pipeline', cls: (ready?'ok':''), big:'', sub:`<b>${fmtInt(ready)}</b> ready · ${fmtInt(awaiting)} awaiting · ${fmtInt(carry)} carry-over`, tab:'booking', scroll:'atRiskTitle' },
-    { title:'Google Reviews', cls:'', big: nR?avgR+'★':'—', sub:`${fmtInt(nR)} reviews is filter me`, tab:'overview', scroll:'ovReviews' },
-    { title:'Bookings — by Executive', cls:'', big:'', sub:'Har executive ki booking count + trend', tab:'booking', scroll:null },
-    { title:'Sales Funnel — full', cls:'', big:'', sub:'Channel-wise target vs booked', tab:'analytics', scroll:'funnelTargetTitle' },
-    { title:'Model Specs', cls:'', big:'', sub:'Har model ke selling points', tab:'specs', scroll:null },
+    { title:T.tEnq, cls: ctx.enqNp?'alert':'ok', big: fmtInt(ctx.enqNp),
+      sub: ctx.enqNp? T.enqPend(ctx.enqNp) : T.allPunched, tab:'overview', scroll:'ovEnqNotPunched' },
+    { title:T.tBkg, cls: ctx.bkgNp?'alert':'ok', big: fmtInt(ctx.bkgNp),
+      sub: ctx.bkgNp? T.bkgPend(ctx.bkgNp) : T.allPunched, tab:'overview', scroll:'ovBkgNotPunched' },
+    { title:T.tLb, cls:'', big:'', sub:`${T.top}: <b>${esc(topName)}</b> · ${lb.length} ${T.consultants}`, tab:'overview', scroll:'ovLeaderboard' },
+    { title:T.tCh, cls:'', big:'', sub:T.champ, tab:'overview', scroll:'ovChampions' },
+    { title:T.tPipe, cls: (ready?'ok':''), big:'', sub:T.pipe(fmtInt(ready),fmtInt(awaiting),fmtInt(carry)), tab:'booking', scroll:'atRiskTitle' },
+    { title:T.tRev, cls:'', big: nR?avgR+'★':'—', sub:T.reviews(fmtInt(nR)), tab:'overview', scroll:'ovReviews' },
+    { title:T.tExec, cls:'', big:'', sub:T.byExec, tab:'booking', scroll:null },
+    { title:T.tFun, cls:'', big:'', sub:T.funnel, tab:'analytics', scroll:'funnelTargetTitle' },
+    { title:T.tSpec, cls:'', big:'', sub:T.specs, tab:'specs', scroll:null },
   ];
   el.innerHTML = cards.map(c => `<button type="button" class="rc-report ${c.cls}" data-tab="${c.tab}" ${c.scroll?`data-scroll="${c.scroll}"`:''}>
     <div class="rr-top"><span class="rr-title">${esc(c.title)}</span><span class="rr-arrow">↗</span></div>
@@ -4343,7 +4410,7 @@ function renderPunchSummary(elId, rows, kind, subtitle){
   const n = rows.length;
   if (n === 0) {
     el.className = '';
-    el.innerHTML = `<div class="punch-all-good">✅ Sab punched — koi pending nahi</div>
+    el.innerHTML = `<div class="punch-all-good">✅ All punched — nothing pending</div>
       <div class="punch-sub">${esc(subtitle)}</div>`;
     return;
   }
