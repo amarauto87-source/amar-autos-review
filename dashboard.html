@@ -933,12 +933,22 @@
   .rc-head h2 span { color:var(--brand-red, #e0362f); }
   .rc-heritage { font-size:10px; letter-spacing:2.5px; color:var(--text-muted); text-transform:uppercase; margin-top:3px; }
   /* subtle Royal Enfield bike silhouette watermark, only behind the dashboard tab */
-  #tab-dashboard { position:relative; }
+  #tab-dashboard { position:relative; overflow:hidden; }
   #tab-dashboard::before {
-    content:""; position:absolute; right:-40px; top:70px; width:480px; height:280px; opacity:.035; pointer-events:none; z-index:0;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cg fill='none' stroke='%23c5a059' stroke-width='2'%3E%3Ccircle cx='45' cy='72' r='20'/%3E%3Ccircle cx='150' cy='72' r='20'/%3E%3Cpath d='M45 72 L80 72 L95 45 L130 45 M95 45 L110 72 L150 72 M80 72 L110 72 M118 45 L135 45 L140 55'/%3E%3C/g%3E%3C/svg%3E") no-repeat; background-size:contain;
+    content:""; position:absolute; right:0; top:70px; width:420px; max-width:45%; height:250px; opacity:.035; pointer-events:none; z-index:0;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cg fill='none' stroke='%23c5a059' stroke-width='2'%3E%3Ccircle cx='45' cy='72' r='20'/%3E%3Ccircle cx='150' cy='72' r='20'/%3E%3Cpath d='M45 72 L80 72 L95 45 L130 45 M95 45 L110 72 L150 72 M80 72 L110 72 M118 45 L135 45 L140 55'/%3E%3C/g%3E%3C/svg%3E") no-repeat right top; background-size:contain;
   }
   #tab-dashboard > * { position:relative; z-index:1; }
+  /* Booking vs Stock summary report */
+  .bvs-sum-nums { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  @media (max-width:700px){ .bvs-sum-nums { grid-template-columns:repeat(2,1fr); } }
+  .bvs-sum-nums .n { background:var(--surface-1); padding:15px; text-align:center; }
+  .bvs-sum-nums .n .l { font-family:var(--font-head); font-size:10px; letter-spacing:1.5px; color:var(--text-secondary); text-transform:uppercase; }
+  .bvs-sum-nums .n .v { font-family:var(--font-head); font-size:30px; font-weight:700; margin-top:4px; line-height:1; }
+  .bvs-pill { display:inline-block; font-family:var(--font-head); font-weight:700; font-size:13px; padding:3px 11px; border-radius:20px; }
+  .bvs-pill.short { background:rgba(232,122,106,.16); color:var(--critical); }
+  .bvs-pill.extra { background:rgba(95,211,154,.16); color:var(--good); }
+  .bvs-pill.ok { background:rgba(154,143,122,.14); color:var(--text-secondary); }
   .rc-lap { font-family:var(--font-head); text-align:right; line-height:1.1; }
   .rc-lap .n { font-size:11px; letter-spacing:3px; color:var(--text-muted); }
   .rc-lap .v { font-size:23px; font-weight:700; color:var(--gold-light); }
@@ -1507,6 +1517,23 @@
     </div>
     <div class="table-wrap"><table class="data" id="tblPendingVsStockColour"></table></div>
     <div id="modelFinderUnmatched"></div>
+
+    <!-- ══ New report: Booking vs Stock — model+colour-wise totals, with short/extra. Shows the
+         count summary, a full table, and a CSV export. Stock is KN-store only (same scope as the
+         FIFO view above). Short = Booking − (Stock + Transit); Extra = the reverse. ══ -->
+    <h2 class="section-title" id="bvsSummaryTitle" style="margin-top:30px;">🏭 Booking vs Stock — Model-wise Summary</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
+      Har model + colour ka: total booking, KN stock me kitna, transit me kitna, aur short (bike kam) ya extra (bike zyada). Short = Booking − (Stock + Transit). Neeche table dekho, ya Export CSV se Excel me nikalo.
+    </div>
+    <div id="bvsSummaryNums" class="bvs-sum-nums"></div>
+    <div class="toolbar" style="margin:12px 0 10px;">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;">
+        <input type="checkbox" id="bvsSummaryShortOnly" style="width:16px;height:16px;cursor:pointer;">
+        Sirf short wale dikhao (jinke booking zyada, stock kam)
+      </label>
+      <button id="bvsSummaryExport" title="Download this table as a CSV file for Excel">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblBvsSummary"></table></div>
   </section>
 
   <section class="tabpanel" id="tab-stock">
@@ -4987,6 +5014,7 @@ function renderPending(){
   // (renderBvsModel), which is easier to read: pick a model, see every colour's free stock and the
   // FIFO booking queue on it. globalOpenBookings feeds that renderer.
   renderBvsModel(globalOpenBookings);
+  renderBvsSummary(globalOpenBookings);
 
   const search = str(document.getElementById('searchPending').value).toLowerCase();
   const filtered = rows.filter(r => !search || r.some(c => str(c).toLowerCase().includes(search)));
@@ -5017,6 +5045,113 @@ document.getElementById('exportPending').addEventListener('click', () => {
    colour's queue. Store-wide (every executive's bookings, ignores the exec filter, so the whole
    team sees one shared queue); customer mobile is masked. */
 let BVS_ALL_BOOKINGS = [];
+// Booking vs Stock — model + colour-wise totals with short/extra.
+// For each model-family + colour we count: total open bookings (store-wide), KN stock that is OPEN
+// (in stock) and KN stock that is IN-TRANSIT. Short = booking − (stock+transit) when positive
+// (bikes short of demand); Extra = (stock+transit) − booking when positive (more than booked).
+// Colour matching uses the same colourMatches() the FIFO view uses, so "Battalion Black" and
+// "Military Black" stay separate. Feeds a summary strip, a table, a shortfall-only filter and CSV.
+let BVS_SUMMARY_ROWS = []; // cached for the CSV export
+function renderBvsSummary(globalOpenBookings){
+  const tbl = document.getElementById('tblBvsSummary'); if (!tbl) return;
+
+  // 1) Bucket every open booking by model-family + colour.
+  const buckets = new Map(); // key "fam||colourLabel" -> { model, colour, booking, stock, transit }
+  const keyOf = (fam, colour) => `${fam}||${up(colour)}`;
+  globalOpenBookings.forEach(r => {
+    const fam = modelFamilyKey(str(r[3]));
+    if (!fam) return;
+    const colour = str(r[4]) || '(no colour)';
+    const k = keyOf(fam, colour);
+    if (!buckets.has(k)) buckets.set(k, { fam, model: familyLabelFor(fam, str(r[3])), colour, booking:0, stock:0, transit:0 });
+    buckets.get(k).booking++;
+  });
+
+  // 2) Add KN stock (OPEN → stock, IN-TRANSIT → transit) into the matching colour bucket. If a
+  //    stock colour has no booking bucket yet, create one (so extra stock still shows up).
+  STATE.stock.forEach(r => {
+    if (up(r[7]) !== 'KN') return;
+    const status = up(r[17]);
+    if (status !== 'OPEN' && status !== 'IN-TRANSIT') return;
+    const name = str(r[11] || r[9]); if (!name) return;
+    const fam = modelFamilyKey(name); if (!fam) return;
+    // find a bucket of the same family whose colour matches this stock item
+    let bucket = null;
+    for (const b of buckets.values()) { if (b.fam === fam && colourMatches(name, b.colour)) { bucket = b; break; } }
+    if (!bucket) {
+      // stock colour with no booking — bucket it under a cleaned colour label
+      const colourLabel = titleCaseColour(stripFamilyWords(name, fam));
+      const k = keyOf(fam, colourLabel);
+      if (!buckets.has(k)) buckets.set(k, { fam, model: familyLabelFor(fam, name), colour: colourLabel, booking:0, stock:0, transit:0 });
+      bucket = buckets.get(k);
+    }
+    if (status === 'OPEN') bucket.stock++; else bucket.transit++;
+  });
+
+  // 3) Compute short/extra and sort: shortfalls first (biggest short on top), then the rest.
+  const rows = [...buckets.values()].map(b => {
+    const avail = b.stock + b.transit;
+    const diff = avail - b.booking;           // +ve = extra, -ve = short
+    return { ...b, avail, diff, short: diff < 0 ? -diff : 0, extra: diff > 0 ? diff : 0 };
+  }).sort((a,b) => (a.diff - b.diff) || b.booking - a.booking);
+  BVS_SUMMARY_ROWS = rows;
+
+  // 4) Summary strip totals
+  const tot = rows.reduce((a,r) => ({ booking:a.booking+r.booking, stock:a.stock+r.stock, transit:a.transit+r.transit, short:a.short+r.short, extra:a.extra+r.extra }), {booking:0,stock:0,transit:0,short:0,extra:0});
+  const numsEl = document.getElementById('bvsSummaryNums');
+  if (numsEl) numsEl.innerHTML = `
+    <div class="n"><div class="l">Total Booking</div><div class="v">${fmtInt(tot.booking)}</div></div>
+    <div class="n"><div class="l">In Stock</div><div class="v good">${fmtInt(tot.stock)}</div></div>
+    <div class="n"><div class="l">In Transit</div><div class="v" style="color:#5b9bd5">${fmtInt(tot.transit)}</div></div>
+    <div class="n"><div class="l">Short</div><div class="v crit">${fmtInt(tot.short)}</div></div>
+    <div class="n"><div class="l">Extra</div><div class="v good">${fmtInt(tot.extra)}</div></div>`;
+
+  // 5) Table (respects the shortfall-only checkbox), built directly so we can add a TOTAL footer.
+  const shortOnly = document.getElementById('bvsSummaryShortOnly');
+  const showShortOnly = shortOnly && shortOnly.checked;
+  const shown = showShortOnly ? rows.filter(r => r.short > 0) : rows;
+  const diffPill = (r) => r.short ? `<span class="bvs-pill short">−${r.short} short</span>`
+                        : r.extra ? `<span class="bvs-pill extra">+${r.extra} extra</span>`
+                        : `<span class="bvs-pill ok">balanced</span>`;
+  if (!shown.length) {
+    tbl.innerHTML = `<tr><td class="empty-note">No data for this filter</td></tr>`;
+    return;
+  }
+  const head = `<thead><tr>
+    <th>Model</th><th>Colour</th>
+    <th class="num">Booking</th><th class="num">Stock</th><th class="num">Transit</th><th class="num">Short / Extra</th>
+  </tr></thead>`;
+  const body = `<tbody>${shown.map(r => `<tr>
+    <td><b>${esc(r.model)}</b></td>
+    <td style="color:var(--text-secondary)">${esc(r.colour)}</td>
+    <td class="num">${fmtInt(r.booking)}</td>
+    <td class="num">${fmtInt(r.stock)}</td>
+    <td class="num">${fmtInt(r.transit)}</td>
+    <td class="num">${diffPill(r)}</td>
+  </tr>`).join('')}</tbody>`;
+  const netPill = tot.short > tot.extra ? `<span class="bvs-pill short">−${tot.short - tot.extra} net</span>`
+                : tot.extra > tot.short ? `<span class="bvs-pill extra">+${tot.extra - tot.short} net</span>`
+                : `<span class="bvs-pill ok">balanced</span>`;
+  const foot = `<tfoot><tr style="border-top:2px solid var(--gold);background:var(--surface-2);font-weight:700;">
+    <td colspan="2"><b>TOTAL</b></td>
+    <td class="num"><b>${fmtInt(tot.booking)}</b></td>
+    <td class="num"><b>${fmtInt(tot.stock)}</b></td>
+    <td class="num"><b>${fmtInt(tot.transit)}</b></td>
+    <td class="num">${netPill}</td>
+  </tr></tfoot>`;
+  tbl.innerHTML = head + body + foot;
+}
+// Best display label for a model family (prefer a short booking-style name).
+function familyLabelFor(fam, sample){
+  const cleaned = str(sample).split(/\s+/).slice(0,2).join(' ');
+  return cleaned || fam;
+}
+function stripFamilyWords(name, fam){
+  const famWords = new Set(up(fam).split(/\s+/));
+  return str(name).split(/\s+/).filter(w => !famWords.has(up(w)) && !/^\d+$/.test(w)).join(' ').trim() || str(name);
+}
+function titleCaseColour(s){ return str(s).replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()); }
+
 function renderBvsModel(globalOpenBookings){
   BVS_ALL_BOOKINGS = globalOpenBookings;
   const sel = document.getElementById('bvsModelSelect');
@@ -5226,6 +5361,18 @@ function renderStock(){
 }
 document.getElementById('searchStock').addEventListener('input', () => renderStock());
 document.getElementById('exportStock').addEventListener('click', () => exportCsv('stock.csv', COL.STOCK, STATE.stock));
+
+// Booking vs Stock summary: re-render on the shortfall-only toggle, and export the current rows.
+(function wireBvsSummary(){
+  const chk = document.getElementById('bvsSummaryShortOnly');
+  if (chk) chk.addEventListener('change', () => { const b = STATE.booking.filter(r => { const s=up(r[9]); return s!=='BILLED'&&s!=='CANCEL'; }); renderBvsSummary(b); });
+  const btn = document.getElementById('bvsSummaryExport');
+  if (btn) btn.addEventListener('click', () => {
+    const headers = ['Model','Colour','Booking','Stock','Transit','Short','Extra','Net'];
+    const rows = (BVS_SUMMARY_ROWS || []).map(r => [r.model, r.colour, r.booking, r.stock, r.transit, r.short||0, r.extra||0, (r.stock+r.transit-r.booking)]);
+    exportCsv('booking_vs_stock_summary.csv', headers, rows);
+  });
+})();
 
 /* ---------------- Riders & Reviews tab ---------------- */
 function renderRiders(){
