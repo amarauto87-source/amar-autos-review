@@ -949,6 +949,59 @@
   .bvs-pill.short { background:rgba(232,122,106,.16); color:var(--critical); }
   .bvs-pill.extra { background:rgba(95,211,154,.16); color:var(--good); }
   .bvs-pill.ok { background:rgba(154,143,122,.14); color:var(--text-secondary); }
+  /* ═══════════ Walk-in Check ═══════════ */
+  .wc-wrap { max-width:760px; margin:0 auto; }
+  .wc-head { text-align:center; margin-bottom:20px; }
+  .wc-head h1 { font-family:var(--font-head); font-size:26px; font-weight:700; letter-spacing:1px; }
+  .wc-head .s { font-size:12px; letter-spacing:1px; color:var(--text-secondary); margin-top:5px; }
+  .wc-search { display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
+  .wc-search input { flex:1; min-width:0; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:16px 18px; font-size:19px; color:var(--text-primary); font-family:var(--font-head); letter-spacing:1px; }
+  .wc-search input:focus { outline:none; border-color:var(--gold); }
+  .wc-search button { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); border:none; border-radius:12px; padding:0 28px; font-weight:700; font-size:15px; cursor:pointer; font-family:var(--font-head); letter-spacing:1px; }
+  .wc-search button:active { transform:translateY(1px); }
+  .wc-new { background:linear-gradient(160deg,rgba(95,211,154,.12),var(--surface-1)); border:1px solid rgba(95,211,154,.4); border-radius:16px; padding:26px; text-align:center; }
+  .wc-new .ic { font-size:38px; } .wc-new .t { font-family:var(--font-head); font-size:25px; font-weight:700; color:var(--good); margin:8px 0; letter-spacing:1px; }
+  .wc-new .assign { font-size:15px; color:var(--text-secondary); } .wc-new .assign b { color:var(--gold-light); font-family:var(--font-head); font-size:22px; letter-spacing:1px; }
+  .wc-old { background:linear-gradient(160deg,rgba(224,169,59,.1),var(--surface-1)); border:1px solid rgba(224,169,59,.4); border-radius:16px; overflow:hidden; }
+  .wc-old .top { padding:20px 22px; border-bottom:1px solid var(--border); }
+  .wc-old .top .warn { font-family:var(--font-head); font-size:20px; font-weight:700; color:var(--warning); letter-spacing:1px; }
+  .wc-old .top .nm { font-size:18px; font-weight:600; margin-top:4px; }
+  .wc-old .top .meta { font-size:13px; color:var(--text-secondary); margin-top:6px; }
+  .wc-dec { background:rgba(224,54,47,.1); border:1px solid rgba(224,54,47,.4); border-radius:10px; padding:14px 16px; margin:16px 22px; }
+  .wc-dec .d { font-family:var(--font-head); font-size:16px; font-weight:700; letter-spacing:.5px; }
+  .wc-dec .d b { color:var(--gold-light); font-size:19px; }
+  .wc-dec.free { background:rgba(95,211,154,.1); border-color:rgba(95,211,154,.4); }
+  .wc-hist { padding:6px 22px 16px; }
+  .wc-hist .h { font-family:var(--font-head); font-size:12px; letter-spacing:2px; color:var(--text-secondary); text-transform:uppercase; margin:10px 0; }
+  .wc-visit { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .wc-visit:last-child { border:none; }
+  .wc-visit .bdg { width:46px; height:46px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-weight:700; font-size:11px; }
+  .wc-visit .bdg.open { background:rgba(95,211,154,.16); color:var(--good); }
+  .wc-visit .bdg.drop { background:rgba(232,122,106,.16); color:var(--critical); }
+  .wc-visit .bdg.book { background:rgba(91,155,213,.16); color:#5b9bd5; }
+  .wc-visit .b { flex:1; min-width:0; }
+  .wc-visit .b .l1 { font-size:15px; font-weight:600; } .wc-visit .b .l1 .sp { color:var(--gold-light); }
+  .wc-visit .b .l2 { font-size:12.5px; color:var(--text-secondary); margin-top:3px; }
+  .wc-visit .b .rmk { font-size:13px; color:var(--text-primary); margin-top:6px; background:var(--surface-2); border-radius:7px; padding:7px 10px; border-left:2px solid var(--gold); }
+  .wc-pill { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; font-family:var(--font-head); letter-spacing:.5px; }
+  .wc-pill.open { background:rgba(95,211,154,.16); color:var(--good); } .wc-pill.drop { background:rgba(232,122,106,.16); color:var(--critical); } .wc-pill.book { background:rgba(91,155,213,.16); color:#5b9bd5; }
+  /* assign / financer row */
+  .wc-assign-box { padding:16px 22px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .wc-assign-box select, .wc-assign-box input { max-width:100%; }
+  .wc-old, .wc-new, .wc-wrap { max-width:100%; overflow-wrap:anywhere; }
+  .wc-assign-box label { font-size:12px; color:var(--text-secondary); font-family:var(--font-head); letter-spacing:1px; text-transform:uppercase; }
+  .wc-assign-box select, .wc-assign-box input { background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:9px 12px; font-size:14px; color:var(--text-primary); }
+  .wc-save { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); border:none; border-radius:9px; padding:10px 20px; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--font-head); letter-spacing:1px; }
+  .wc-save:disabled { opacity:.5; cursor:default; }
+  .wc-saved-msg { font-size:13px; color:var(--good); font-weight:600; }
+  /* walk-in log cards */
+  .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .wcl-item .tag { font-family:var(--font-head); font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:.5px; flex-shrink:0; }
+  .wcl-item .tag.fresh { background:rgba(95,211,154,.16); color:var(--good); }
+  .wcl-item .tag.follow { background:rgba(224,169,59,.16); color:var(--warning); }
+  .wcl-item .info { flex:1; min-width:0; } .wcl-item .info .n { font-weight:600; font-size:15px; }
+  .wcl-item .info .d { font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .wcl-item .fin input { background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; color:var(--text-primary); width:130px; }
   .rc-lap { font-family:var(--font-head); text-align:right; line-height:1.1; }
   .rc-lap .n { font-size:11px; letter-spacing:3px; color:var(--text-muted); }
   .rc-lap .v { font-size:23px; font-weight:700; color:var(--gold-light); }
@@ -1150,6 +1203,8 @@
   <button data-tab="riders">Riders</button>
   <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
+  <button data-tab="walkin" style="display:none;">🔁 Walk-in Check</button>
+  <button data-tab="walkinlog" style="display:none;">📋 Aaj ke Walk-in</button>
   <button data-tab="moredata" style="display:none;">🗂️ More Data</button>
 </nav>
 
@@ -1669,6 +1724,29 @@
       </select>
     </div>
   </section>
+
+  <!-- ══ Walk-in Check (Ajeet's login) — enter a mobile, see if the customer came before and to
+       which sales person, or that they're new + whose turn it is. Saves the entry so sales/admin
+       can see the day's walk-ins. ══ -->
+  <section class="tabpanel" id="tab-walkin">
+    <div class="wc-wrap">
+      <div class="wc-head"><h1>🔁 Walk-in Check</h1><div class="s">Amar Autos · Customer pehle aaya ya naya — number daalo</div></div>
+      <div class="wc-search">
+        <input id="wcMobile" type="tel" inputmode="numeric" placeholder="Customer ka mobile number" autocomplete="off">
+        <button id="wcCheckBtn">Check</button>
+      </div>
+      <div id="wcResult"></div>
+    </div>
+  </section>
+
+  <!-- ══ Aaj ke Walk-in — the day's saved entries. Ajeet sees all (and can add financer); a sales
+       login sees only their own assigned customers (with FRESH / FOLLOW-UP tag) for night-time
+       enquiry entry; Admin sees everyone. ══ -->
+  <section class="tabpanel" id="tab-walkinlog">
+    <h2 class="section-title" id="walkinLogTitle">📋 Aaj ke Walk-in</h2>
+    <p class="empty-note" id="walkinLogNote" style="text-align:left;padding:0 0 12px;"></p>
+    <div id="walkinLogResult"></div>
+  </section>
 </main>
 
 <footer>
@@ -1869,6 +1947,7 @@ const CREDENTIALS = [
   { name: 'SHAISTA', password: 'Shaista@123',  role: 'Sales', execKey: 'SHAISTA' },
   { name: 'HARSH',   password: 'Sharma@111',   role: 'CRT',   execKey: 'HARSH' },
   { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
+  { name: 'AJEET',   password: 'Jha@123',      role: 'Walkin', execKey: null },
 ];
 let CURRENT_USER = null;
 // Tabs a non-Admin login should NOT see at all — 'riders' stays CRT+Admin only (Harsh's job, not
@@ -2240,6 +2319,31 @@ function visibleExecList(){
 function applyRoleRestrictions(){
   if (!CURRENT_USER) return;
   const isAdmin = CURRENT_USER.role === 'Admin';
+  const isWalkin = CURRENT_USER.role === 'Walkin';
+
+  // ── Ajeet (Walkin role): lock the whole app down to ONE screen — the Walk-in Check tool.
+  //    No dashboard, no sales data, nothing else. Just enter a number and see the result.
+  if (isWalkin) {
+    document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
+      btn.style.display = (btn.dataset.tab === 'walkin' || btn.dataset.tab === 'walkinlog') ? '' : 'none';
+    });
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'walkin'));
+    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-walkin'));
+    // rename the log tab for Ajeet, and give it a label
+    const wlBtn = document.querySelector('#tabs button[data-tab="walkinlog"]');
+    if (wlBtn) wlBtn.textContent = '📋 Aaj ke Walk-in';
+    // hide the whole filter/control bar — Ajeet doesn't need month/exec filters
+    const ctrls = document.querySelector('.controls'); if (ctrls) ctrls.style.display = 'none';
+    const notifyBtn = document.getElementById('notifyTeamBtn'); if (notifyBtn) notifyBtn.style.display = 'none';
+    // clean, distraction-free screen for the walk-in desk: hide the KPI status line, the
+    // month/exec "data not found" banner, and the festival banner.
+    const sl = document.getElementById('statusLine'); if (sl) sl.style.display = 'none';
+    const eb = document.getElementById('errorBox'); if (eb) eb.style.display = 'none';
+    const fb = document.getElementById('festivalBanner'); if (fb) fb.style.display = 'none';
+    const dh = document.getElementById('dataHealthBanner'); if (dh) dh.style.display = 'none';
+    return;
+  }
+
   // Notify Team (WhatsApp broadcast) is an admin-only action — a sales/CRT login shouldn't be
   // pinging the whole team.
   const notifyBtn = document.getElementById('notifyTeamBtn');
@@ -2252,10 +2356,13 @@ function applyRoleRestrictions(){
     const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
     if (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) return true;
     if (isSales && SALES_MOVE_TO_MORE_DATA.includes(tab)) return true; // moved into "More Data" instead
+    if (tab === 'walkin') return true; // the check tool is only for the Walkin (Ajeet) login
+    if (tab === 'walkinlog') return false; // "Aaj ke Walk-in" — sales see their own, admin sees all
     return false;
   }
   document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
     if (btn.dataset.tab === 'moredata') { btn.style.display = isSales ? '' : 'none'; return; }
+    if (btn.dataset.tab === 'walkinlog') { btn.style.display = ''; return; } // visible to everyone (not Walkin, handled above)
     btn.style.display = tabHidden(btn.dataset.tab) ? 'none' : '';
   });
   // Same rule for the Dashboard / My Day quick-jump shortcut buttons — hide any that jump to a
@@ -2509,7 +2616,7 @@ async function loadAll(silent){
   if (!silent) document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -2522,6 +2629,9 @@ async function loadAll(silent){
       fetchSheetRaw('ENQUIRY STATMENT'),
       fetchSheetRaw('BOOKING MSD'),
       fetchSheetRaw('ACTUL WALKIN'),
+      fetchSheetRaw('ENQUIRY STATMENT VIEW').catch(() => [[]]),  // repeat-customer history source
+      fetchSheetRaw('TURN').catch(() => [[]]),                    // daily turn roster
+      fetchSheetRaw('WALKIN ENTRY').catch(() => [[]]),            // Ajeet's saved entries
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -2567,6 +2677,12 @@ async function loadAll(silent){
     // walk-in-vs-enquiry match is done on the mobile number. Used ONLY by the two new Overview
     // tables (renderWalkinChecks) — nowhere else in the dashboard.
     STATE.walkin = walkin.slice(1).filter(r => str(r[2]) || str(r[3]));
+    // Walk-in Check tool data (Ajeet's login). ENQUIRY STATMENT VIEW = RE portal view with the
+    // Owner (sales person) column, used to detect repeat customers. TURN = daily roster. WALKIN
+    // ENTRY = entries Ajeet saves through the tool (read back so sales/admin can see them).
+    STATE.enqView = (enqView || []).slice(1).filter(r => str(r[27])); // mobile in col AB (r[27])
+    STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
+    STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
 
     STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
     buildMonthList();
@@ -2805,6 +2921,7 @@ function renderAll(){
   renderRiders();
   renderModelSpecs();
   renderAnalytics();
+  renderWalkinLog();
 }
 
 /* ══ Dashboard tab — showroom wall-display, driven by the same live data ═══════
@@ -5045,7 +5162,226 @@ document.getElementById('exportPending').addEventListener('click', () => {
    colour's queue. Store-wide (every executive's bookings, ignores the exec filter, so the whole
    team sees one shared queue); customer mobile is masked. */
 let BVS_ALL_BOOKINGS = [];
-// Booking vs Stock — model + colour-wise totals with short/extra.
+// ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
+// PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
+// works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
+const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbyw8fiVROX97Ogn6buu_J3G7yptMSPDbDrl3HRd7LftYWKX-6gWTVymvpt_8J0UrQQ_/exec';
+
+// ENQUIRY STATMENT VIEW columns (0-indexed) — from the sheet header Deepak shared.
+const EV = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
+  dropReason:40, created:44, model:31, testRide:10, type:15, remark:47 };
+
+// Which day's turn list to use.
+const DAY_NAMES = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+// The roster sheet spells a couple of days the local way; accept those too.
+const DAY_ALIASES = { 'TEUSDAY':'TUESDAY', 'WEDNESSDAY':'WEDNESDAY', 'THIRSDAY':'THURSDAY' };
+function turnListForToday(){
+  const today = DAY_NAMES[new Date().getDay()];
+  const rows = (STATE.turn || []).filter(r => {
+    let d = up(str(r[0])); d = DAY_ALIASES[d] || d;
+    return d === today;
+  }).sort((a,b) => num(str(a[1])) - num(str(b[1]))); // col B = order
+  return rows.map(r => str(r[2])); // sales person names in turn order
+}
+
+// How many walk-ins already assigned to each sales person TODAY (from saved entries), so the
+// "next turn" pointer advances as customers get handed out through the day.
+// How many FRESH walk-ins already assigned to each sales person TODAY. Only fresh (new) customers
+// count toward the turn rotation — a FOLLOW-UP customer was already that person's from before, so
+// handing them back does NOT use up their turn (they still get the next fresh customer in line).
+function assignedCountToday(){
+  const counts = {};
+  const todayStr = fmtYmd(new Date());
+  (STATE.walkinEntry || []).forEach(r => {
+    if (str(r[1]) !== todayStr) return;          // col B = date
+    if (up(str(r[5])).includes('FOLLOW')) return; // col F = type; skip follow-ups
+    const who = up(str(r[4]));                     // col E = assigned to
+    if (who) counts[who] = (counts[who] || 0) + 1;
+  });
+  return counts;
+}
+function fmtYmd(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+
+// Whose turn is it now? Walk the roster in order, giving to whoever has the fewest assigned so far
+// (round-robin that survives page reloads because it reads saved entries).
+function nextTurnPerson(){
+  const list = turnListForToday();
+  if (!list.length) return null;
+  const counts = assignedCountToday();
+  let best = list[0], bestCount = Infinity, bestIdx = 0;
+  list.forEach((name, i) => {
+    const c = counts[up(name)] || 0;
+    if (c < bestCount) { bestCount = c; best = name; bestIdx = i; }
+  });
+  return best;
+}
+
+// Find every past enquiry for a mobile number in ENQUIRY STATMENT VIEW.
+function historyForMobile(mobile){
+  const key = phoneKey(mobile);
+  if (!key) return [];
+  return (STATE.enqView || []).filter(r => phoneKey(r[EV.mobile]) === key).map(r => {
+    const status = up(str(r[EV.status]) || str(r[EV.stage]));
+    const isDrop = /DROP|LOST|CANCEL|DISQUALIF/.test(status);
+    const isBooked = /BOOK|RETAIL|INVOICE|WON/.test(status);
+    const isOpen = !isDrop && !isBooked;
+    return {
+      owner: str(r[EV.owner]) || '—',
+      name: str(r[EV.name]) || `${str(r[EV.first])} ${str(r[EV.last])}`.trim(),
+      created: parseTddDate(r[EV.created], null),
+      status, isDrop, isOpen, isBooked,
+      dropReason: str(r[EV.dropReason]),
+      model: str(r[EV.model]),
+      testRide: str(r[EV.testRide]),
+      type: str(r[EV.type]),
+      remark: str(r[EV.remark]),
+    };
+  }).sort((a,b) => (b.created?.getTime()||0) - (a.created?.getTime()||0)); // newest first
+}
+
+let WC_CURRENT = null; // holds the last check result for the save step
+function runWalkinCheck(){
+  const inp = document.getElementById('wcMobile');
+  const out = document.getElementById('wcResult');
+  if (!inp || !out) return;
+  const mobile = str(inp.value).replace(/\D/g,'');
+  if (mobile.length < 6) { out.innerHTML = `<div class="empty-note">Poora mobile number daalo</div>`; return; }
+
+  const hist = historyForMobile(mobile);
+  const custName = hist.length ? hist[0].name : '';
+  const anyOpen = hist.find(h => h.isOpen);
+  const turnPerson = nextTurnPerson();
+
+  if (!hist.length) {
+    // NEW customer
+    WC_CURRENT = { mobile, customer:'', type:'FRESH', assignedTo: turnPerson || '' };
+    out.innerHTML = `<div class="wc-new">
+      <div class="ic">✅</div><div class="t">NAYA CUSTOMER</div>
+      <div class="assign">${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Turn sheet set nahi hai'}</div>
+    </div>${assignBox({ mobile, customer:'', suggested: turnPerson, type:'FRESH', isNew:true })}`;
+  } else {
+    // REPEAT customer — decide owner
+    const decideOwner = anyOpen ? anyOpen.owner : null; // OPEN enquiry wins
+    const allDrop = hist.every(h => h.isDrop);
+    const type = anyOpen ? 'FOLLOW-UP' : 'FRESH'; // if open, it's a follow-up to that owner
+    const assignTo = anyOpen ? anyOpen.owner : (turnPerson || '');
+    WC_CURRENT = { mobile, customer:custName, type, assignedTo: assignTo };
+
+    const decision = anyOpen
+      ? `<div class="wc-dec"><div class="d">👉 <b>${esc(anyOpen.owner)}</b> ko bulao — inki enquiry abhi OPEN hai (inhi ka customer)</div></div>`
+      : `<div class="wc-dec free"><div class="d">👉 ${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Turn wale ko dijiye'} — purani enquiry ${allDrop?'DROP ho chuki hai':'band hai'} (customer free)</div></div>`;
+
+    const visits = hist.map(h => {
+      const cls = h.isDrop ? 'drop' : h.isBooked ? 'book' : 'open';
+      const lbl = h.isDrop ? 'DROP' : h.isBooked ? 'BOOKED' : 'OPEN';
+      const bits = [h.model, h.testRide?`Test ride: ${h.testRide}`:'', h.type, h.isDrop&&h.dropReason?`Drop: ${h.dropReason}`:''].filter(Boolean).join(' · ');
+      return `<div class="wc-visit"><div class="bdg ${cls}">${lbl}</div><div class="b">
+        <div class="l1"><span class="sp">${esc(h.owner)}</span> · ${h.created?esc(fmtDate(h.created)):'—'} <span class="wc-pill ${cls}">${lbl}</span></div>
+        <div class="l2">${esc(bits)||'—'}</div>
+        ${h.remark?`<div class="rmk">💬 ${esc(h.remark)}</div>`:''}
+      </div></div>`;
+    }).join('');
+
+    const firstDate = hist[hist.length-1].created;
+    out.innerHTML = `<div class="wc-old">
+      <div class="top">
+        <div class="warn" ${anyOpen?'':'style="color:var(--good)"'}>${anyOpen?'⚠️ YE CUSTOMER PEHLE AAYA HAI':'ℹ️ PEHLE AAYA THA — PAR AB FREE HAI'}</div>
+        <div class="nm">${esc(custName||'—')}</div>
+        <div class="meta">${hist.length} baar aaya${firstDate?` · pehli baar ${esc(fmtDate(firstDate))}`:''}</div>
+      </div>
+      ${decision}
+      <div class="wc-hist"><div class="h">Poori History</div>${visits}</div>
+      ${assignBox({ mobile, customer:custName, suggested: assignTo, type, isNew:false })}
+    </div>`;
+  }
+  wireAssignBox();
+}
+
+// The assign + financer + save row shown under every result.
+function assignBox(o){
+  const list = turnListForToday();
+  const opts = list.map(n => `<option value="${esc(n)}" ${up(n)===up(o.suggested||'')?'selected':''}>${esc(n)}</option>`).join('');
+  return `<div class="wc-assign-box">
+    <label>Assign to</label>
+    <select id="wcAssignSel">${opts || '<option>—</option>'}</select>
+    <label>Financer</label>
+    <input id="wcFinancer" type="text" placeholder="(optional)" style="width:150px">
+    <button class="wc-save" id="wcSaveBtn">💾 Save Entry</button>
+    <span class="wc-saved-msg" id="wcSavedMsg"></span>
+  </div>`;
+}
+function wireAssignBox(){
+  const btn = document.getElementById('wcSaveBtn');
+  if (btn) btn.addEventListener('click', saveWalkinEntry);
+}
+
+async function saveWalkinEntry(){
+  const msg = document.getElementById('wcSavedMsg');
+  const btn = document.getElementById('wcSaveBtn');
+  if (!WC_CURRENT) return;
+  const assignedTo = str(document.getElementById('wcAssignSel')?.value) || WC_CURRENT.assignedTo;
+  const financer = str(document.getElementById('wcFinancer')?.value);
+  const custInput = str(document.getElementById('wcCustName')?.value);
+  const payload = {
+    action:'add', mobile: WC_CURRENT.mobile, customer: custInput || WC_CURRENT.customer || '',
+    assignedTo, type: WC_CURRENT.type, financer, enteredBy: (CURRENT_USER && CURRENT_USER.name) || 'AJEET',
+  };
+  if (!WALKIN_SAVE_URL) { if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Save URL set nahi hai (setup guide dekho)';} return; }
+  if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
+  try {
+    // Apps Script web apps don't return CORS headers, so we POST in no-cors mode with a text/plain
+    // body (avoids the CORS preflight that would otherwise block the request). We can't read the
+    // response in no-cors mode, but the row does get written; we optimistically show success and
+    // mirror the entry locally so "Aaj ke Walk-in" updates immediately.
+    await fetch(WALKIN_SAVE_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+    if (msg){msg.style.color='var(--good)';msg.textContent='✅ Save ho gaya';}
+    // reflect locally so "Aaj ke Walk-in" updates without a full reload
+    STATE.walkinEntry = STATE.walkinEntry || [];
+    STATE.walkinEntry.push(['', fmtYmd(new Date()), payload.mobile, payload.customer, payload.assignedTo, payload.type, payload.financer, payload.enteredBy]);
+    // clear the input so Ajeet can check the next customer straight away
+    const mobInp = document.getElementById('wcMobile'); if (mobInp) mobInp.value = '';
+  } catch(e) {
+    if (msg){msg.style.color='var(--critical)';msg.textContent='❌ Save fail — dobara try karo';}
+  } finally { if (btn) btn.disabled = false; }
+}
+
+// "Aaj ke Walk-in" — role-aware: Ajeet/Admin see all of today's entries (with financer edit),
+// a sales login sees only their own, tagged FRESH / FOLLOW-UP.
+function renderWalkinLog(){
+  const out = document.getElementById('walkinLogResult'); if (!out) return;
+  const title = document.getElementById('walkinLogTitle');
+  const note = document.getElementById('walkinLogNote');
+  const role = CURRENT_USER ? CURRENT_USER.role : '';
+  const me = CURRENT_USER ? up(CURRENT_USER.name) : '';
+  const todayStr = fmtYmd(new Date());
+  let rows = (STATE.walkinEntry || []).filter(r => str(r[1]) === todayStr);
+  const isSales = role === 'Sales' || role === 'CRT';
+  if (isSales) rows = rows.filter(r => up(str(r[4])) === me);
+
+  if (note) note.textContent = isSales
+    ? 'Aaj aapko jo customer assign hue — FRESH = naya, FOLLOW-UP = pehle aaya tha. Raat me inki enquiry bana lena.'
+    : 'Aaj ke saare walk-in. Financer baad me add kar sakte ho.';
+
+  if (!rows.length) { out.innerHTML = `<div class="empty-note">Aaj abhi tak koi walk-in entry nahi.</div>`; return; }
+
+  out.innerHTML = rows.map(r => {
+    const mobile=str(r[2]), cust=str(r[3]), who=str(r[4]), type=up(str(r[5])), fin=str(r[6]);
+    const isFollow = type.includes('FOLLOW');
+    const canEditFin = role === 'Walkin' || role === 'Admin';
+    return `<div class="wcl-item">
+      <span class="tag ${isFollow?'follow':'fresh'}">${isFollow?'FOLLOW-UP':'FRESH'}</span>
+      <div class="info"><div class="n">${esc(cust||'(no name)')} · ${esc(maskMobile(mobile, who))}</div>
+        <div class="d">Assigned: ${esc(who||'—')}${fin?` · Financer: ${esc(fin)}`:''}</div></div>
+      ${canEditFin?`<div class="fin"><input type="text" placeholder="Financer" value="${esc(fin)}" data-mobile="${esc(mobile)}"></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+
 // For each model-family + colour we count: total open bookings (store-wide), KN stock that is OPEN
 // (in stock) and KN stock that is IN-TRANSIT. Short = booking − (stock+transit) when positive
 // (bikes short of demand); Extra = (stock+transit) − booking when positive (more than booked).
@@ -5361,6 +5697,13 @@ function renderStock(){
 }
 document.getElementById('searchStock').addEventListener('input', () => renderStock());
 document.getElementById('exportStock').addEventListener('click', () => exportCsv('stock.csv', COL.STOCK, STATE.stock));
+
+// Walk-in Check button + Enter key
+(function wireWalkin(){
+  const btn = document.getElementById('wcCheckBtn'), inp = document.getElementById('wcMobile');
+  if (btn) btn.addEventListener('click', runWalkinCheck);
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') runWalkinCheck(); });
+})();
 
 // Booking vs Stock summary: re-render on the shortfall-only toggle, and export the current rows.
 (function wireBvsSummary(){
