@@ -995,13 +995,14 @@
   .wc-save:disabled { opacity:.5; cursor:default; }
   .wc-saved-msg { font-size:13px; color:var(--good); font-weight:600; }
   /* walk-in log cards */
-  .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
+  #tab-walkinlog { overflow-wrap:anywhere; }
   .wcl-item .tag { font-family:var(--font-head); font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:.5px; flex-shrink:0; }
   .wcl-item .tag.fresh { background:rgba(95,211,154,.16); color:var(--good); }
   .wcl-item .tag.follow { background:rgba(224,169,59,.16); color:var(--warning); }
-  .wcl-item .info { flex:1; min-width:0; } .wcl-item .info .n { font-weight:600; font-size:15px; }
-  .wcl-item .info .d { font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
-  .wcl-item .fin input { background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; color:var(--text-primary); width:130px; }
+  .wcl-item .info { flex:1; min-width:120px; } .wcl-item .info .n { font-weight:600; font-size:15px; overflow-wrap:anywhere; }
+  .wcl-item .info .d { font-size:12.5px; color:var(--text-secondary); margin-top:2px; overflow-wrap:anywhere; }
+  .wcl-item .fin input { background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; color:var(--text-primary); width:130px; max-width:100%; }
   .rc-lap { font-family:var(--font-head); text-align:right; line-height:1.1; }
   .rc-lap .n { font-size:11px; letter-spacing:3px; color:var(--text-muted); }
   .rc-lap .v { font-size:23px; font-weight:700; color:var(--gold-light); }
@@ -2631,7 +2632,7 @@ async function loadAll(silent){
       fetchSheetRaw('ACTUL WALKIN'),
       fetchSheetRaw('ENQUIRY STATMENT VIEW').catch(() => [[]]),  // repeat-customer history source
       fetchSheetRaw('TURN').catch(() => [[]]),                    // daily turn roster
-      fetchSheetRaw('WALKIN ENTRY').catch(() => [[]]),            // Ajeet's saved entries
+      fetchSheetRaw('REGISTER').catch(() => [[]]),                // Ajeet's saved entries
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -5165,7 +5166,7 @@ let BVS_ALL_BOOKINGS = [];
 // ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
 // PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
-const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbyw8fiVROX97Ogn6buu_J3G7yptMSPDbDrl3HRd7LftYWKX-6gWTVymvpt_8J0UrQQ_/exec';
+const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbyEUDvYBvWnIkFEt3zT6LNPpXKxPl4vYwpP9uTsSrfGSPEqfLMnVhV8Ng2ji1nl0CTS/exec';
 
 // ENQUIRY STATMENT VIEW columns (0-indexed) — from the sheet header Deepak shared.
 const EV = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
@@ -5257,7 +5258,7 @@ function runWalkinCheck(){
     WC_CURRENT = { mobile, customer:'', type:'FRESH', assignedTo: turnPerson || '' };
     out.innerHTML = `<div class="wc-new">
       <div class="ic">✅</div><div class="t">NAYA CUSTOMER</div>
-      <div class="assign">${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Turn sheet set nahi hai'}</div>
+      <div class="assign">${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Neeche se sales person chuno'}</div>
     </div>${assignBox({ mobile, customer:'', suggested: turnPerson, type:'FRESH', isNew:true })}`;
   } else {
     // REPEAT customer — decide owner
@@ -5299,7 +5300,10 @@ function runWalkinCheck(){
 
 // The assign + financer + save row shown under every result.
 function assignBox(o){
-  const list = turnListForToday();
+  let list = turnListForToday();
+  // If the TURN sheet isn't set up (or has no rows for today), fall back to every sales person so
+  // Ajeet can still pick someone manually — the turn suggestion just won't be automatic.
+  if (!list.length) list = salesPeopleList();
   const opts = list.map(n => `<option value="${esc(n)}" ${up(n)===up(o.suggested||'')?'selected':''}>${esc(n)}</option>`).join('');
   return `<div class="wc-assign-box">
     <label>Assign to</label>
@@ -5310,12 +5314,18 @@ function assignBox(o){
     <span class="wc-saved-msg" id="wcSavedMsg"></span>
   </div>`;
 }
+// Every sales person we know about (from the roster if present, else from the login list).
+function salesPeopleList(){
+  const fromExec = (STATE.execList || []).slice();
+  if (fromExec.length) return fromExec;
+  return CREDENTIALS.filter(u => u.role === 'Sales').map(u => u.name);
+}
 function wireAssignBox(){
   const btn = document.getElementById('wcSaveBtn');
   if (btn) btn.addEventListener('click', saveWalkinEntry);
 }
 
-async function saveWalkinEntry(){
+function saveWalkinEntry(){
   const msg = document.getElementById('wcSavedMsg');
   const btn = document.getElementById('wcSaveBtn');
   if (!WC_CURRENT) return;
@@ -5328,25 +5338,41 @@ async function saveWalkinEntry(){
   };
   if (!WALKIN_SAVE_URL) { if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Save URL set nahi hai (setup guide dekho)';} return; }
   if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
-  try {
-    // Apps Script web apps don't return CORS headers, so we POST in no-cors mode with a text/plain
-    // body (avoids the CORS preflight that would otherwise block the request). We can't read the
-    // response in no-cors mode, but the row does get written; we optimistically show success and
-    // mirror the entry locally so "Aaj ke Walk-in" updates immediately.
-    await fetch(WALKIN_SAVE_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-    });
-    if (msg){msg.style.color='var(--good)';msg.textContent='✅ Save ho gaya';}
-    // reflect locally so "Aaj ke Walk-in" updates without a full reload
-    STATE.walkinEntry = STATE.walkinEntry || [];
-    STATE.walkinEntry.push(['', fmtYmd(new Date()), payload.mobile, payload.customer, payload.assignedTo, payload.type, payload.financer, payload.enteredBy]);
-    // clear the input so Ajeet can check the next customer straight away
-    const mobInp = document.getElementById('wcMobile'); if (mobInp) mobInp.value = '';
-  } catch(e) {
-    if (msg){msg.style.color='var(--critical)';msg.textContent='❌ Save fail — dobara try karo';}
-  } finally { if (btn) btn.disabled = false; }
+  // Save via JSONP (a <script> tag) — the same cross-origin trick the dashboard already uses to
+  // read Google Sheets. This actually gets a response back from Apps Script (unlike a no-cors
+  // POST, which silently drops), so we can show a real success/fail message.
+  saveViaJsonp(payload, (res) => {
+    if (btn) btn.disabled = false;
+    if (res && res.ok) {
+      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Save ho gaya';}
+      STATE.walkinEntry = STATE.walkinEntry || [];
+      STATE.walkinEntry.push(['', fmtYmd(new Date()), payload.mobile, payload.customer, payload.assignedTo, payload.type, payload.financer, payload.enteredBy]);
+      const mobInp = document.getElementById('wcMobile'); if (mobInp) mobInp.value = '';
+      const out = document.getElementById('wcResult'); if (out) setTimeout(() => { out.innerHTML = ''; }, 1200);
+    } else {
+      const err = res && res.error ? res.error : 'Apps Script se jawab nahi mila';
+      if (msg){msg.style.color='var(--critical)';msg.textContent='❌ Save fail: ' + err;}
+    }
+  });
+}
+// JSONP saver: builds a GET URL with the entry as query params + a callback name, injects a
+// <script> tag, and resolves when Apps Script calls back. Times out after 12s.
+function saveViaJsonp(payload, cb){
+  const cbName = 'wcSaveCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+  let done = false;
+  const cleanup = () => { try { delete window[cbName]; } catch(e){} const s=document.getElementById(cbName); if(s) s.remove(); };
+  const timer = setTimeout(() => { if(!done){ done=true; cleanup(); cb({ ok:false, error:'timeout — URL/deploy check karo' }); } }, 12000);
+  window[cbName] = (res) => { if(done) return; done=true; clearTimeout(timer); cleanup(); cb(res); };
+  const params = new URLSearchParams({
+    action: payload.action, mobile: payload.mobile, customer: payload.customer,
+    assignedTo: payload.assignedTo, type: payload.type, financer: payload.financer,
+    enteredBy: payload.enteredBy, callback: cbName,
+  });
+  const s = document.createElement('script');
+  s.id = cbName;
+  s.src = WALKIN_SAVE_URL + '?' + params.toString();
+  s.onerror = () => { if(!done){ done=true; clearTimeout(timer); cleanup(); cb({ ok:false, error:'script load fail — URL galat ya deploy access "Anyone" nahi' }); } };
+  document.body.appendChild(s);
 }
 
 // "Aaj ke Walk-in" — role-aware: Ajeet/Admin see all of today's entries (with financer edit),
