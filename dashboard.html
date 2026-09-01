@@ -986,8 +986,11 @@
   .wc-pill { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; font-family:var(--font-head); letter-spacing:.5px; }
   .wc-pill.open { background:rgba(95,211,154,.16); color:var(--good); } .wc-pill.drop { background:rgba(232,122,106,.16); color:var(--critical); } .wc-pill.book { background:rgba(91,155,213,.16); color:#5b9bd5; }
   /* assign / financer row */
-  .wc-assign-box { padding:16px 22px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  .wc-assign-box select, .wc-assign-box input { max-width:100%; }
+  .wc-assign-box { padding:16px 22px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+  .wc-field { display:flex; flex-direction:column; gap:5px; }
+  .wc-field label { font-size:11px; color:var(--text-secondary); font-family:var(--font-head); letter-spacing:1px; text-transform:uppercase; }
+  .wc-assign-box select, .wc-assign-box input { max-width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:10px 12px; font-size:14px; color:var(--text-primary); }
+  .wc-field input, .wc-field select { min-width:150px; }
   .wc-old, .wc-new, .wc-wrap { max-width:100%; overflow-wrap:anywhere; }
   .wc-assign-box label { font-size:12px; color:var(--text-secondary); font-family:var(--font-head); letter-spacing:1px; text-transform:uppercase; }
   .wc-assign-box select, .wc-assign-box input { background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:9px 12px; font-size:14px; color:var(--text-primary); }
@@ -1750,7 +1753,7 @@
   </section>
 </main>
 
-<footer>
+<footer id="mainFooter">
   Data pulled live from your Google Sheet on every refresh (auto-refreshes every 15 minutes) · Built for Amar Autos<br/>
   Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
 </footer>
@@ -2342,6 +2345,7 @@ function applyRoleRestrictions(){
     const eb = document.getElementById('errorBox'); if (eb) eb.style.display = 'none';
     const fb = document.getElementById('festivalBanner'); if (fb) fb.style.display = 'none';
     const dh = document.getElementById('dataHealthBanner'); if (dh) dh.style.display = 'none';
+    const ft = document.getElementById('mainFooter'); if (ft) ft.style.display = 'none';
     return;
   }
 
@@ -5166,7 +5170,7 @@ let BVS_ALL_BOOKINGS = [];
 // ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
 // PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
-const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbwStoUqWpbelSwyn_mx-CKaZjgM2S-knikj_GcXpVyx1Oqq1sK7pdSRYuUJ44_eS6TX/exec';
+const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbzZAVtT46YoLIPvUK21fYKdidFS6hnExWQ5z1dMd409UUNaWya41fMb1LH6ZjF7QCmV/exec';
 
 // ENQUIRY STATMENT VIEW columns (0-indexed) — from the sheet header Deepak shared.
 const EV = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
@@ -5305,14 +5309,28 @@ function assignBox(o){
   // Ajeet can still pick someone manually — the turn suggestion just won't be automatic.
   if (!list.length) list = salesPeopleList();
   const opts = list.map(n => `<option value="${esc(n)}" ${up(n)===up(o.suggested||'')?'selected':''}>${esc(n)}</option>`).join('');
+  // Model dropdown — clean family names the showroom sells.
+  const modelOpts = walkinModelList().map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   return `<div class="wc-assign-box">
-    <label>Assign to</label>
-    <select id="wcAssignSel">${opts || '<option>—</option>'}</select>
-    <label>Financer</label>
-    <input id="wcFinancer" type="text" placeholder="(optional)" style="width:150px">
+    <div class="wc-field"><label>Customer Name</label>
+      <input id="wcCustName" type="text" placeholder="Customer ka naam" value="${esc(o.customer||'')}"></div>
+    <div class="wc-field"><label>Model</label>
+      <select id="wcModel"><option value="">— select —</option>${modelOpts}</select></div>
+    <div class="wc-field"><label>Assign to</label>
+      <select id="wcAssignSel">${opts || '<option>—</option>'}</select></div>
+    <div class="wc-field"><label>Financer</label>
+      <input id="wcFinancer" type="text" placeholder="(optional)"></div>
     <button class="wc-save" id="wcSaveBtn">💾 Save Entry</button>
     <span class="wc-saved-msg" id="wcSavedMsg"></span>
   </div>`;
+}
+// Models list for the walk-in dropdown — from MODEL_SPECS if present, else a sensible RE default.
+function walkinModelList(){
+  if (typeof MODEL_SPECS !== 'undefined' && Array.isArray(MODEL_SPECS) && MODEL_SPECS.length) {
+    return [...new Set(MODEL_SPECS.map(m => m.name || m.model).filter(Boolean))];
+  }
+  return ['Bullet 350','Classic 350','Hunter 350','Meteor 350','Super Meteor 650',
+    'Interceptor 650','Continental GT 650','Himalayan','Scram 411','Shotgun 650','Bear 650'];
 }
 // Every sales person we know about (from the roster if present, else from the login list).
 function salesPeopleList(){
@@ -5332,23 +5350,25 @@ function saveWalkinEntry(){
   const assignedTo = str(document.getElementById('wcAssignSel')?.value) || WC_CURRENT.assignedTo;
   const financer = str(document.getElementById('wcFinancer')?.value);
   const custInput = str(document.getElementById('wcCustName')?.value);
+  const model = str(document.getElementById('wcModel')?.value);
   const payload = {
     action:'add', mobile: WC_CURRENT.mobile, customer: custInput || WC_CURRENT.customer || '',
-    assignedTo, type: WC_CURRENT.type, financer, enteredBy: (CURRENT_USER && CURRENT_USER.name) || 'AJEET',
+    assignedTo, type: WC_CURRENT.type, financer, model,
+    enteredBy: (CURRENT_USER && CURRENT_USER.name) || 'AJEET',
   };
   if (!WALKIN_SAVE_URL) { if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Save URL set nahi hai (setup guide dekho)';} return; }
   if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
-  // Save via JSONP (a <script> tag) — the same cross-origin trick the dashboard already uses to
-  // read Google Sheets. This actually gets a response back from Apps Script (unlike a no-cors
-  // POST, which silently drops), so we can show a real success/fail message.
   saveViaJsonp(payload, (res) => {
     if (btn) btn.disabled = false;
     if (res && res.ok) {
       if (msg){msg.style.color='var(--good)';msg.textContent='✅ Save ho gaya';}
+      // mirror the entry locally so "Aaj ke Walk-in" shows it immediately (col order matches REGISTER
+      // + model in col I=index 8)
       STATE.walkinEntry = STATE.walkinEntry || [];
-      STATE.walkinEntry.push(['', fmtYmd(new Date()), payload.mobile, payload.customer, payload.assignedTo, payload.type, payload.financer, payload.enteredBy]);
+      STATE.walkinEntry.push(['', fmtYmd(new Date()), payload.mobile, payload.customer, payload.assignedTo, payload.type, payload.financer, payload.enteredBy, payload.model]);
+      renderWalkinLog(); // refresh the "Aaj ke Walk-in" list right away
       const mobInp = document.getElementById('wcMobile'); if (mobInp) mobInp.value = '';
-      const out = document.getElementById('wcResult'); if (out) setTimeout(() => { out.innerHTML = ''; }, 1200);
+      const out = document.getElementById('wcResult'); if (out) setTimeout(() => { out.innerHTML = ''; }, 1400);
     } else {
       const err = res && res.error ? res.error : 'Apps Script se jawab nahi mila';
       if (msg){msg.style.color='var(--critical)';msg.textContent='❌ Save fail: ' + err;}
@@ -5366,7 +5386,7 @@ function saveViaJsonp(payload, cb){
   const params = new URLSearchParams({
     action: payload.action, mobile: payload.mobile, customer: payload.customer,
     assignedTo: payload.assignedTo, type: payload.type, financer: payload.financer,
-    enteredBy: payload.enteredBy, callback: cbName,
+    model: payload.model || '', enteredBy: payload.enteredBy, callback: cbName,
   });
   const s = document.createElement('script');
   s.id = cbName;
@@ -5395,13 +5415,13 @@ function renderWalkinLog(){
   if (!rows.length) { out.innerHTML = `<div class="empty-note">Aaj abhi tak koi walk-in entry nahi.</div>`; return; }
 
   out.innerHTML = rows.map(r => {
-    const mobile=str(r[2]), cust=str(r[3]), who=str(r[4]), type=up(str(r[5])), fin=str(r[6]);
+    const mobile=str(r[2]), cust=str(r[3]), who=str(r[4]), type=up(str(r[5])), fin=str(r[6]), model=str(r[8]);
     const isFollow = type.includes('FOLLOW');
     const canEditFin = role === 'Walkin' || role === 'Admin';
     return `<div class="wcl-item">
       <span class="tag ${isFollow?'follow':'fresh'}">${isFollow?'FOLLOW-UP':'FRESH'}</span>
       <div class="info"><div class="n">${esc(cust||'(no name)')} · ${esc(maskMobile(mobile, who))}</div>
-        <div class="d">Assigned: ${esc(who||'—')}${fin?` · Financer: ${esc(fin)}`:''}</div></div>
+        <div class="d">Assigned: ${esc(who||'—')}${model?` · ${esc(model)}`:''}${fin?` · Financer: ${esc(fin)}`:''}</div></div>
       ${canEditFin?`<div class="fin"><input type="text" placeholder="Financer" value="${esc(fin)}" data-mobile="${esc(mobile)}"></div>`:''}
     </div>`;
   }).join('');
