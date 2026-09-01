@@ -1000,6 +1000,54 @@
   /* walk-in log cards */
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
+  /* ═══════════ Sales Person Analysis report ═══════════ */
+  .spa-card { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; }
+  .spa-head { display:flex; align-items:center; justify-content:space-between; padding:15px 20px; background:var(--surface-2); cursor:pointer; gap:12px; }
+  .spa-head:hover { background:color-mix(in srgb, var(--gold) 8%, var(--surface-2)); }
+  .spa-head .nm { font-family:var(--font-head); font-size:18px; font-weight:700; letter-spacing:.5px; }
+  .spa-head .right { display:flex; gap:16px; align-items:center; }
+  .spa-head .conv { font-family:var(--font-head); font-size:24px; font-weight:700; line-height:1; text-align:right; }
+  .spa-head .conv.good { color:var(--good); } .spa-head .conv.warn { color:var(--warning); } .spa-head .conv.bad { color:var(--critical); }
+  .spa-head .conv small { font-size:9px; color:var(--text-secondary); display:block; letter-spacing:1px; margin-top:2px; }
+  .spa-head .arrow { color:var(--text-muted); transition:transform .2s; }
+  .spa-card.open .spa-head .arrow { transform:rotate(180deg); }
+  .spa-body { padding:18px 20px; display:none; }
+  .spa-card.open .spa-body { display:block; }
+  .spa-metrics { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px; }
+  @media (max-width:700px){ .spa-metrics { grid-template-columns:repeat(3,1fr); } }
+  .spa-metric { background:var(--surface-2); border-radius:10px; padding:12px 10px; text-align:center; }
+  .spa-metric .v { font-family:var(--font-head); font-size:24px; font-weight:700; line-height:1; }
+  .spa-metric .l { font-size:9.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.8px; margin-top:4px; }
+  .spa-insights { display:flex; flex-direction:column; gap:8px; }
+  .spa-ins { display:flex; gap:10px; align-items:flex-start; font-size:13.5px; padding:10px 12px; border-radius:9px; line-height:1.45; }
+  .spa-ins.good { background:rgba(95,211,154,.1); border-left:3px solid var(--good); }
+  .spa-ins.bad { background:rgba(232,122,106,.1); border-left:3px solid var(--critical); }
+  .spa-ins.warn { background:rgba(224,169,59,.1); border-left:3px solid var(--warning); }
+  .spa-ins.fix { background:rgba(91,155,213,.1); border-left:3px solid #5b9bd5; }
+  .spa-ins .ic { flex-shrink:0; font-size:15px; }
+  .spa-ins b { color:var(--gold-light); }
+  .spa-drops { margin-top:14px; font-size:12.5px; color:var(--text-secondary); }
+  .spa-drops .dr { display:inline-block; background:var(--surface-2); border-radius:6px; padding:3px 9px; margin:3px 4px 0 0; }
+  .spa-hint { font-size:12px; color:var(--text-secondary); margin-bottom:14px; }
+  /* ═══════════ Monthly Target setter (admin) ═══════════ */
+  .tgt-panel { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:22px; overflow:hidden; }
+  .tgt-head { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); font-family:var(--font-head); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:14px; cursor:pointer; }
+  .tgt-head .tgt-sub { font-weight:500; font-size:11px; opacity:.75; text-transform:none; letter-spacing:0; }
+  .tgt-head .tgt-arrow { transition:transform .2s; }
+  .tgt-panel.open .tgt-head .tgt-arrow { transform:rotate(180deg); }
+  .tgt-body { display:none; padding:18px 20px; }
+  .tgt-panel.open .tgt-body { display:block; }
+  .tgt-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px; }
+  @media (max-width:820px){ .tgt-row { grid-template-columns:repeat(2,1fr); } }
+  .tgt-field { display:flex; flex-direction:column; gap:5px; }
+  .tgt-field label { font-size:11px; color:var(--text-secondary); font-family:var(--font-head); letter-spacing:.5px; text-transform:uppercase; }
+  .tgt-field label span { color:var(--text-muted); font-weight:400; }
+  .tgt-field input { background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:10px 12px; font-size:15px; color:var(--text-primary); font-family:var(--font-head); }
+  .tgt-field input:focus { outline:none; border-color:var(--gold); }
+  .tgt-actions { display:flex; align-items:center; gap:14px; }
+  .tgt-save { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); border:none; border-radius:9px; padding:11px 24px; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--font-head); letter-spacing:1px; }
+  .tgt-save:disabled { opacity:.5; }
+  .tgt-msg { font-size:13px; font-weight:600; }
   .wcl-item .tag { font-family:var(--font-head); font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:.5px; flex-shrink:0; }
   .wcl-item .tag.fresh { background:rgba(95,211,154,.16); color:var(--good); }
   .wcl-item .tag.follow { background:rgba(224,169,59,.16); color:var(--warning); }
@@ -1348,6 +1396,33 @@
   </section>
 
   <section class="tabpanel" id="tab-overview">
+    <!-- Admin-only: set this month's targets. Saves to the MONTHLY TARGETS sheet via Apps Script.
+         Hidden for non-admin logins (see applyRoleRestrictions). -->
+    <div id="targetSetterWrap" style="display:none;">
+      <div class="tgt-panel">
+        <div class="tgt-head" id="tgtHead">
+          <span>🎯 Set Monthly Targets <span class="tgt-sub">(sirf Admin · sabko dikhega)</span></span>
+          <span class="tgt-arrow">▼</span>
+        </div>
+        <div class="tgt-body" id="tgtBody">
+          <div class="tgt-row">
+            <div class="tgt-field"><label>Month</label><input type="month" id="tgtMonth"></div>
+            <div class="tgt-field"><label>Retail Target <span>(no)</span></label><input type="number" id="tgtRetail" placeholder="180"></div>
+            <div class="tgt-field"><label>Booking Target <span>(no)</span></label><input type="number" id="tgtBooking" placeholder="213"></div>
+            <div class="tgt-field"><label>EW <span>(%)</span></label><input type="number" id="tgtEw" placeholder="65"></div>
+            <div class="tgt-field"><label>RSA <span>(%)</span></label><input type="number" id="tgtRsa" placeholder="60"></div>
+            <div class="tgt-field"><label>GMA <span>(₹/bike)</span></label><input type="number" id="tgtGma" placeholder="5000"></div>
+            <div class="tgt-field"><label>Gear <span>(/exec)</span></label><input type="number" id="tgtGear" placeholder="10"></div>
+            <div class="tgt-field"><label>Rider Join <span>(no)</span></label><input type="number" id="tgtRider" placeholder="50"></div>
+          </div>
+          <div class="tgt-actions">
+            <button class="tgt-save" id="tgtSaveBtn">💾 Save Targets</button>
+            <span class="tgt-msg" id="tgtMsg"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h2 class="section-title">🤖 Today's Priorities</h2>
     <div class="chat-panel" id="todayPriorities"></div>
 
@@ -1453,6 +1528,13 @@
     <h2 class="section-title" id="ovBkgNotPunched">⚠️ Booking Not Punched — Booking hui, system me nahi</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo booking humare paas hai (Actual Booking sheet) par customer ka mobile RE Portal (BOOKING MSD) me nahi mila — ye bookings system me punch karni zaroori hain.</p>
     <div class="table-wrap"><table class="data" id="tblBookingNotInSystem"></table></div>
+
+    <!-- ══ Sales Person Analysis — reads ENQUIRY STATMENT VIEW and, per sales person, works out
+         what's going well, what's weak, the loopholes, and concrete fixes. Follows the top month
+         filter. Cards are collapsed; click a name to expand. ══ -->
+    <h2 class="section-title" id="ovSpAnalysis">🔍 Sales Person Analysis — Kya chal raha hai, kya theek karna hai</h2>
+    <p class="spa-hint">Har sales person ka performance ENQUIRY STATMENT VIEW ke data se — conversion, test ride, follow-up, drop reasons, aur sudhaar ke suggestions. Naam par click karke details kholo.</p>
+    <div id="spAnalysisResult"></div>
   </section>
 
   <section class="tabpanel" id="tab-analytics">
@@ -2325,6 +2407,10 @@ function applyRoleRestrictions(){
   const isAdmin = CURRENT_USER.role === 'Admin';
   const isWalkin = CURRENT_USER.role === 'Walkin';
 
+  // Admin-only monthly target setter (top of Overview).
+  const tgtWrap = document.getElementById('targetSetterWrap');
+  if (tgtWrap) { tgtWrap.style.display = isAdmin ? '' : 'none'; if (isAdmin) initTargetSetter(); }
+
   // ── Ajeet (Walkin role): lock the whole app down to ONE screen — the Walk-in Check tool.
   //    No dashboard, no sales data, nothing else. Just enter a number and see the result.
   if (isWalkin) {
@@ -2621,7 +2707,7 @@ async function loadAll(silent){
   if (!silent) document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry, monthlyTargets] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -2637,6 +2723,7 @@ async function loadAll(silent){
       fetchSheetRaw('ENQUIRY STATMENT VIEW').catch(() => [[]]),  // repeat-customer history source
       fetchSheetRaw('TURN').catch(() => [[]]),                    // daily turn roster
       fetchSheetRaw('REGISTER').catch(() => [[]]),                // Ajeet's saved entries
+      fetchSheetRaw('MONTHLY TARGETS').catch(() => [[]]),         // admin-set monthly targets
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -2688,6 +2775,17 @@ async function loadAll(silent){
     STATE.enqView = (enqView || []).slice(1).filter(r => str(r[27])); // mobile in col AB (r[27])
     STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
     STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
+    // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
+    // Admin-set monthly targets: from the MONTHLY TARGETS sheet if it exists, plus anything saved
+    // in this browser (localStorage) — browser values win, since that's where the admin sets them.
+    STATE.monthlyTargets = (monthlyTargets || []).slice(1).filter(r => str(r[0]));
+    try {
+      const saved = JSON.parse(lsGet('monthlyTargets') || '{}');
+      Object.values(saved).forEach(row => {
+        const i = STATE.monthlyTargets.findIndex(r => str(r[0]) === str(row[0]));
+        if (i >= 0) STATE.monthlyTargets[i] = row; else STATE.monthlyTargets.push(row);
+      });
+    } catch(e) {}
 
     STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
     buildMonthList();
@@ -2927,6 +3025,7 @@ function renderAll(){
   renderModelSpecs();
   renderAnalytics();
   renderWalkinLog();
+  if (CURRENT_USER && CURRENT_USER.role === 'Admin') prefillTargets();
 }
 
 /* ══ Dashboard tab — showroom wall-display, driven by the same live data ═══════
@@ -3543,7 +3642,27 @@ function computeDeliveryAgg(execFilterName){
   }
   return { retail, ew, rsa, gma, gear };
 }
+// Read an admin-set value from the MONTHLY TARGETS sheet for the selected month (or current month
+// when the filter is ALL). col: 1=Retail 2=Booking 3=EW% 4=RSA% 5=GMA/bike 6=Gear/exec 7=Rider.
+// Returns null if nothing is set, so callers can fall back to the old source.
+function monthlyTargetVal(col){
+  const f = monthYearOfFilter();
+  const now = new Date();
+  const y = f ? f.year : now.getFullYear();
+  const m = f ? f.month : now.getMonth()+1;
+  const key = `${y}-${String(m).padStart(2,'0')}`;
+  const row = (STATE.monthlyTargets || []).find(r => str(r[0]) === key);
+  if (!row) return null;
+  const v = num(row[col]);
+  return (row[col] === '' || row[col] == null || isNaN(v)) ? null : v;
+}
 function targetFor(execName){
+  // Whole-store retail target: prefer the admin-set MONTHLY TARGETS value when present (only for
+  // the store-wide view, not a single exec — per-exec split still comes from the Targets sheet).
+  if (!execName) {
+    const mt = monthlyTargetVal(1);
+    if (mt != null) return mt;
+  }
   const f = monthYearOfFilter();
   const monthColIdx = f ? f.month : null; // 1=Jan..12=Dec
   const rows = execName ? STATE.targets.filter(r => up(r[0]) === execName) : STATE.targets;
@@ -4484,6 +4603,8 @@ function renderWalkinChecks(){
   renderPunchSummary('dashBkgNotPunched', notInSystem, 'booking',
     'Booking hui par MSD me punch nahi');
 
+  renderSalesPersonAnalysis();
+
   // ── Dashboard: same walk-in rows, grouped by executive so the count of missing/un-punched
   //    enquiries per sales person is visible at a glance (rather than scrolling the name list
   //    above one entry at a time). Every executive Admin can see is listed, even at zero, so an
@@ -4577,6 +4698,201 @@ function renderPunchSummary(elId, rows, kind, subtitle){
     <div class="punch-list">${items}</div>${more}`;
   el.onclick = () => switchToTab('overview', kind === 'enquiry' ? 'tblWalkinMissing' : 'tblBookingNotInSystem');
 }
+// ═══════════════ Monthly Target setter (admin) ═══════════════
+let TGT_WIRED = false;
+function initTargetSetter(){
+  const head = document.getElementById('tgtHead');
+  const panel = head ? head.closest('.tgt-panel') : null;
+  // default month = current month
+  const mInp = document.getElementById('tgtMonth');
+  if (mInp && !mInp.value) {
+    const now = new Date();
+    mInp.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+  prefillTargets();
+  if (TGT_WIRED) return; // wire events only once
+  TGT_WIRED = true;
+  if (head && panel) head.addEventListener('click', () => panel.classList.toggle('open'));
+  if (mInp) mInp.addEventListener('change', prefillTargets);
+  const saveBtn = document.getElementById('tgtSaveBtn');
+  if (saveBtn) saveBtn.addEventListener('click', saveTargets);
+}
+// Pre-fill the form with whatever is already saved for the chosen month (so admin edits, not blanks).
+function prefillTargets(){
+  const mEl = document.getElementById('tgtMonth'); if (!mEl) return;
+  const month = str(mEl.value);
+  if (!month) return;
+  const row = (STATE.monthlyTargets || []).find(r => str(r[0]) === month);
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v!=null && v!=='') ? v : ''; };
+  set('tgtRetail', row?num(row[1]):''); set('tgtBooking', row?num(row[2]):'');
+  set('tgtEw', row?num(row[3]):''); set('tgtRsa', row?num(row[4]):'');
+  set('tgtGma', row?num(row[5]):''); set('tgtGear', row?num(row[6]):'');
+  set('tgtRider', row?num(row[7]):'');
+}
+function saveTargets(){
+  const msg = document.getElementById('tgtMsg');
+  const btn = document.getElementById('tgtSaveBtn');
+  const month = str(document.getElementById('tgtMonth')?.value);
+  if (!month) { if(msg){msg.style.color='var(--warning)';msg.textContent='Month select karo';} return; }
+  const vals = [month,
+    num(document.getElementById('tgtRetail')?.value),
+    num(document.getElementById('tgtBooking')?.value),
+    num(document.getElementById('tgtEw')?.value),
+    num(document.getElementById('tgtRsa')?.value),
+    num(document.getElementById('tgtGma')?.value),
+    num(document.getElementById('tgtGear')?.value),
+    num(document.getElementById('tgtRider')?.value),
+  ];
+  // Update local state + browser backup immediately (so it shows on this screen right away).
+  STATE.monthlyTargets = STATE.monthlyTargets || [];
+  const existing = STATE.monthlyTargets.find(r => str(r[0]) === month);
+  if (existing) { for (let i=0;i<8;i++) existing[i]=vals[i]; } else STATE.monthlyTargets.push(vals);
+  const store = {};
+  STATE.monthlyTargets.forEach(r => { store[str(r[0])] = r; });
+  lsSet('monthlyTargets', JSON.stringify(store));
+
+  // Save to the MONTHLY TARGETS sheet via Apps Script — THIS is what makes it visible to everyone
+  // (sales logins, other devices), because they all read the same sheet.
+  const payload = { action:'settarget', month,
+    retail: vals[1], booking: vals[2], ew: vals[3], rsa: vals[4], gma: vals[5], gear: vals[6], rider: vals[7] };
+  if (!WALKIN_SAVE_URL) {
+    if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Sirf is browser me saved — sabko dikhane ke liye Apps Script URL chahiye';}
+    renderAll(); return;
+  }
+  if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
+  saveTargetsJsonp(payload, (res) => {
+    if (btn) btn.disabled = false;
+    if (res && res.ok) {
+      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Targets save ho gaye — sabko dikhega';}
+    } else {
+      const err = res && res.error ? res.error : 'Apps Script se jawab nahi aaya';
+      if (msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Sheet me save fail ('+err+') — filhaal is browser me saved hai';}
+    }
+    renderAll(); // refresh dashboard with the new target
+  });
+}
+function saveTargetsJsonp(payload, cb){
+  const cbName = 'tgtCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+  let done = false;
+  const cleanup = () => { try { delete window[cbName]; } catch(e){} const s=document.getElementById(cbName); if(s) s.remove(); };
+  const timer = setTimeout(() => { if(!done){ done=true; cleanup(); cb({ ok:false, error:'timeout' }); } }, 12000);
+  window[cbName] = (res) => { if(done) return; done=true; clearTimeout(timer); cleanup(); cb(res); };
+  const params = new URLSearchParams({ ...payload, callback: cbName });
+  const s = document.createElement('script');
+  s.id = cbName; s.src = WALKIN_SAVE_URL + '?' + params.toString();
+  s.onerror = () => { if(!done){ done=true; clearTimeout(timer); cleanup(); cb({ ok:false, error:'script load fail' }); } };
+  document.body.appendChild(s);
+}
+
+// ═══════════════ Sales Person Analysis ═══════════════
+// Reads ENQUIRY STATMENT VIEW (STATE.enqView) for the selected month and, per Owner (sales
+// person), computes conversion, test-ride rate, follow-up gaps, drop patterns, response habits and
+// model spread — then turns those into plain-Hinglish insights: what's good, what's weak, the
+// loophole, and a concrete fix. Purely data-driven so it stays honest as the sheet changes.
+function renderSalesPersonAnalysis(){
+  const out = document.getElementById('spAnalysisResult'); if (!out) return;
+  const EV = { mobile:27, owner:13, status:12, stage:42, dropReason:40, created:44, model:31, testRide:10, type:15, remark:47 };
+
+  // Bucket this month's enquiries by owner.
+  const byOwner = new Map();
+  (STATE.enqView || []).forEach(r => {
+    if (!dateInFilter(r[EV.created])) return;         // follow the top month filter
+    const owner = str(r[EV.owner]); if (!owner) return;
+    if (!execInFilter(owner)) return;                  // respect exec filter (admin = all)
+    if (!byOwner.has(owner)) byOwner.set(owner, []);
+    byOwner.get(owner).push(r);
+  });
+
+  if (!byOwner.size) { out.innerHTML = `<div class="empty-note">Is month ka ENQUIRY STATMENT VIEW data nahi mila. (Month filter check karo, ya sheet me data hai?)</div>`; return; }
+
+  const classify = (r) => {
+    const s = up(str(r[EV.status]) + ' ' + str(r[EV.stage]));
+    if (/BOOK|RETAIL|INVOICE|WON|DELIVER/.test(s)) return 'booked';
+    if (/DROP|LOST|CANCEL|DISQUALIF|CLOSED/.test(s)) return 'drop';
+    return 'open';
+  };
+  const yes = (v) => /^(Y|YES|TRUE|1|DONE|TAKEN)/i.test(str(v).trim());
+
+  // Build a stats object per owner.
+  const stats = [...byOwner.entries()].map(([owner, rows]) => {
+    let booked=0, drop=0, open=0, testRides=0, noRemark=0;
+    const dropReasons = {}; const models = {};
+    rows.forEach(r => {
+      const c = classify(r);
+      if (c === 'booked') booked++; else if (c === 'drop') drop++; else open++;
+      if (yes(r[EV.testRide])) testRides++;
+      if (!str(r[EV.remark]).trim()) noRemark++;
+      if (c === 'drop') { const dr = str(r[EV.dropReason]).trim() || 'Reason nahi likha'; dropReasons[dr] = (dropReasons[dr]||0)+1; }
+      const m = str(r[EV.model]).trim(); if (m) models[m] = (models[m]||0)+1;
+    });
+    const total = rows.length;
+    const conv = total ? booked/total : 0;
+    const trRate = total ? testRides/total : 0;
+    const noRemarkRate = total ? noRemark/total : 0;
+    return { owner, total, booked, drop, open, testRides, noRemark, conv, trRate, noRemarkRate, dropReasons, models };
+  }).sort((a,b) => b.conv - a.conv || b.booked - a.booked);
+
+  // Team averages for relative comparison.
+  const teamConv = stats.reduce((a,s)=>a+s.conv,0) / stats.length;
+  const teamTr = stats.reduce((a,s)=>a+s.trRate,0) / stats.length;
+
+  out.innerHTML = stats.map((s, idx) => {
+    const convCls = s.conv >= 0.25 ? 'good' : s.conv >= 0.12 ? 'warn' : 'bad';
+    const medal = idx===0 ? '🥇 ' : idx===1 ? '🥈 ' : idx===2 ? '🥉 ' : '';
+    const topDrops = Object.entries(s.dropReasons).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const topModel = Object.entries(s.models).sort((a,b)=>b[1]-a[1])[0];
+
+    const ins = [];
+    // GOOD signals
+    if (s.conv >= 0.25) ins.push(['good','✅',`<b>Conversion strong:</b> ${fmtPct(s.conv)} — team average (${fmtPct(teamConv)}) se ${s.conv>=teamConv?'upar':'theek'}. Achha kaam.`]);
+    if (s.trRate >= 0.6) ins.push(['good','🏍️',`<b>Test ride strong:</b> ${fmtPct(s.trRate)} enquiries ko test ride diya — jo bike chalata hai wo zyada khareedta hai.`]);
+    if (s.noRemarkRate <= 0.15 && s.total >= 5) ins.push(['good','💬',`<b>Follow-up notes achhe:</b> Zyaadatar enquiries me remark likha hai — follow-up track ho raha hai.`]);
+    // BAD / loophole signals
+    if (s.conv < 0.12 && s.total >= 5) ins.push(['bad','🚨',`<b>Low conversion:</b> Sirf ${fmtPct(s.conv)} — ${s.total} me se sirf ${s.booked} booked. Yaha turant dhyan chahiye.`]);
+    if (s.trRate < 0.35 && s.total >= 5) ins.push(['bad','🏍️',`<b>Test ride kam:</b> Sirf ${fmtPct(s.trRate)} ko test ride diya (team avg ${fmtPct(teamTr)}). Har walk-in ko test ride offer karo.`]);
+    if (s.noRemarkRate > 0.3 && s.total >= 5) ins.push(['bad','⚠️',`<b>Follow-up gap (loophole):</b> ${s.noRemark} enquiries me remark khali — follow-up call nahi hua. Ye customer haath se nikal sakte hain.`]);
+    if (s.open > s.booked + s.drop && s.total >= 5) ins.push(['warn','⏳',`<b>Bahut open pade hain:</b> ${s.open} enquiries abhi tak open — na booked na drop. Inpe follow-up karke close karo.`]);
+    // DROP pattern
+    if (topDrops.length) {
+      const [reason, cnt] = topDrops[0];
+      const pctOfDrops = s.drop ? Math.round(cnt/s.drop*100) : 0;
+      if (pctOfDrops >= 30) ins.push(['warn','📉',`<b>Drop pattern:</b> ${pctOfDrops}% drops "${esc(reason)}" ki wajah se. ${/budget|finance|price|emi/i.test(reason)?'Finance/EMI/exchange pehle offer karo.':/stock|available|model/i.test(reason)?'Stock/alternate model ready rakho.':'Is wajah pe kaam karo.'}`]);
+    }
+    // model focus
+    if (topModel) ins.push(['fix','🎯',`<b>Sabse zyada enquiry:</b> ${esc(topModel[0])} (${topModel[1]}). Is model ki expertise aur stock strong rakho.`]);
+    // universal fix line
+    const fixes = [];
+    if (s.noRemarkRate > 0.3) fixes.push('har open enquiry pe 48 ghante me follow-up + remark likho');
+    if (s.trRate < 0.35) fixes.push('har customer ko test ride offer karo');
+    if (s.conv < teamConv) fixes.push(`top performer (${stats[0].owner}) ke saath pair karke sikho`);
+    if (fixes.length) ins.push(['fix','🔧',`<b>Sudhaar:</b> ${fixes.join('; ')}.`]);
+    if (!ins.length) ins.push(['good','✅',`<b>Balanced:</b> Koi bada issue nahi — aise hi consistent raho.`]);
+
+    return `<div class="spa-card" data-idx="${idx}">
+      <div class="spa-head">
+        <span class="nm">${medal}${esc(s.owner)}</span>
+        <div class="right"><div class="conv ${convCls}">${fmtPct(s.conv)}<small>CONVERSION</small></div><span class="arrow">▼</span></div>
+      </div>
+      <div class="spa-body">
+        <div class="spa-metrics">
+          <div class="spa-metric"><div class="v">${s.total}</div><div class="l">Enquiries</div></div>
+          <div class="spa-metric"><div class="v good">${s.booked}</div><div class="l">Booked</div></div>
+          <div class="spa-metric"><div class="v" style="color:var(--warning)">${s.open}</div><div class="l">Open</div></div>
+          <div class="spa-metric"><div class="v crit">${s.drop}</div><div class="l">Dropped</div></div>
+          <div class="spa-metric"><div class="v">${s.testRides}</div><div class="l">Test Rides</div></div>
+        </div>
+        <div class="spa-insights">${ins.map(([cls,ic,txt])=>`<div class="spa-ins ${cls}"><span class="ic">${ic}</span><div>${txt}</div></div>`).join('')}</div>
+        ${topDrops.length?`<div class="spa-drops">Drop reasons: ${topDrops.map(([r,c])=>`<span class="dr">${esc(r)} ×${c}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Expand/collapse on header click.
+  out.querySelectorAll('.spa-head').forEach(h => {
+    h.addEventListener('click', () => h.closest('.spa-card').classList.toggle('open'));
+  });
+}
+
 // Executive x Model grid — "kaunsa sales person kaunsa model kitna bech raha hai" in one view.
 // Built from the same already-filtered billed-delivery rows renderDelivery() uses, so it always
 // agrees with the numbers directly above it. Models are columns, ordered by total units sold.
@@ -5170,7 +5486,7 @@ let BVS_ALL_BOOKINGS = [];
 // ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
 // PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
-const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbzZAVtT46YoLIPvUK21fYKdidFS6hnExWQ5z1dMd409UUNaWya41fMb1LH6ZjF7QCmV/exec';
+const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbxCTXgqYDgiC8mmamXqhZkb--7fkMMrfYHPaS8MBE6wjbxiZ464xANE3kL_JlWBAV4/exec';
 
 // ENQUIRY STATMENT VIEW columns (0-indexed) — from the sheet header Deepak shared.
 const EV = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
@@ -5418,9 +5734,13 @@ function renderWalkinLog(){
     const mobile=str(r[2]), cust=str(r[3]), who=str(r[4]), type=up(str(r[5])), fin=str(r[6]), model=str(r[8]);
     const isFollow = type.includes('FOLLOW');
     const canEditFin = role === 'Walkin' || role === 'Admin';
+    // Ajeet (Walkin) and Admin manage the desk, so they see the FULL number/name/model — no mask.
+    // A sales login sees their own customers, so full too (it's their own). Only cross-person masking
+    // would apply, but this list is already scoped per role, so show everything unblurred.
+    const mobShown = mobile;
     return `<div class="wcl-item">
       <span class="tag ${isFollow?'follow':'fresh'}">${isFollow?'FOLLOW-UP':'FRESH'}</span>
-      <div class="info"><div class="n">${esc(cust||'(no name)')} · ${esc(maskMobile(mobile, who))}</div>
+      <div class="info"><div class="n">${esc(cust||'(no name)')} · ${esc(mobShown)}</div>
         <div class="d">Assigned: ${esc(who||'—')}${model?` · ${esc(model)}`:''}${fin?` · Financer: ${esc(fin)}`:''}</div></div>
       ${canEditFin?`<div class="fin"><input type="text" placeholder="Financer" value="${esc(fin)}" data-mobile="${esc(mobile)}"></div>`:''}
     </div>`;
@@ -6079,8 +6399,14 @@ function computeMonthlyTrend(){
 }
 
 // ===== Monthly Booking Target & Funnel (Deepak's channel-wise targets) =====
-// Update MONTHLY_BOOKING_TARGET here each month when the new month's target is set.
+// Fallback booking target if the admin hasn't set one in MONTHLY TARGETS for the month.
 const MONTHLY_BOOKING_TARGET = 213;
+// The booking target actually used: admin-set value for the selected month if present, else the
+// fallback constant above. Lets Deepak change the target from the dashboard, not the code.
+function bookingTargetNow(){
+  const mt = monthlyTargetVal(2);
+  return (mt != null && mt > 0) ? mt : MONTHLY_BOOKING_TARGET;
+}
 
 // Channel split of the monthly booking target, and (for Walk-in only, per Deepak) how many
 // enquiries are needed to reach that many bookings. Everything is proportional to whatever
@@ -6137,7 +6463,7 @@ function computeFunnelTargets(){
   });
 
   const rows = FUNNEL_CHANNELS.map(c => {
-    const targetFull = Math.round(MONTHLY_BOOKING_TARGET * c.pct);
+    const targetFull = Math.round(bookingTargetNow() * c.pct);
     const targetTillToday = Math.round(targetFull * frac);
     const enqTargetFull = c.enqMultiplier ? targetFull * c.enqMultiplier : null;
     const enqTargetTillToday = enqTargetFull !== null ? Math.round(enqTargetFull * frac) : null;
@@ -6148,7 +6474,7 @@ function computeFunnelTargets(){
     };
   });
   const totalActualBooked = rows.reduce((s,r) => s + r.actualBooked, 0);
-  const totalTargetTillToday = Math.round(MONTHLY_BOOKING_TARGET * frac);
+  const totalTargetTillToday = Math.round(bookingTargetNow() * frac);
   return { rows, totalActualBooked, totalTargetTillToday, daysInMonth, dayOfMonth };
 }
 
@@ -6157,7 +6483,7 @@ function renderFunnelTargets(){
   const gap = f.totalActualBooked - f.totalTargetTillToday;
   const meterPct = f.totalTargetTillToday ? (f.totalActualBooked / f.totalTargetTillToday) * 100 : 0;
   document.getElementById('kpiFunnelTargets').innerHTML = [
-    kpiCard('Monthly Booking Target', fmtInt(MONTHLY_BOOKING_TARGET), `Day ${f.dayOfMonth} of ${f.daysInMonth}`),
+    kpiCard('Monthly Booking Target', fmtInt(bookingTargetNow()), `Day ${f.dayOfMonth} of ${f.daysInMonth}`),
     kpiCard('Expected By Today', fmtInt(f.totalTargetTillToday), 'at expected pace'),
     kpiCard('Booked So Far', fmtInt(f.totalActualBooked), 'this month, all channels', meterPct,
       gap < 0 ? `${fmtInt(Math.abs(gap))} behind pace` : undefined),
