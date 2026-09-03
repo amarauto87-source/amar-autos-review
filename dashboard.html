@@ -1481,6 +1481,7 @@
 
     <!-- Target vs Actual — shows this month's admin-set targets against the live actuals. -->
     <h2 class="section-title" id="tvaTitle">🎯 Target vs Actual — This Month</h2>
+    <div id="tvaDebug"></div>
     <div id="targetVsActual"></div>
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
@@ -4941,6 +4942,19 @@ function renderTargetVsActual(){
   const title = document.getElementById('tvaTitle');
   // Only meaningful when a target row exists for the selected/current month.
   const hasAny = [1,2,3,4,5,6,7].some(c => monthlyTargetVal(c) != null);
+  // TEMP DEBUG: show what actually loaded, so we can see the real data shape on screen.
+  try {
+    const dbg = document.getElementById('tvaDebug');
+    if (dbg) {
+      const f = monthYearOfFilter(); const now2 = new Date();
+      const wantKey = `${f?f.year:now2.getFullYear()}-${String(f?f.month:now2.getMonth()+1).padStart(2,'0')}`;
+      const rowsDump = (STATE.monthlyTargets||[]).map(r => `[${r.slice(0,8).map(x=>JSON.stringify(x)).join(', ')}]  → month "${normMonthKey(r[0])}"`).join('<br>');
+      dbg.innerHTML = `<div style="font-family:monospace;font-size:11px;color:var(--text-secondary);background:var(--surface-2);padding:10px;border-radius:8px;margin-bottom:10px;overflow-x:auto;">
+        <b>DEBUG</b> — dhoondh raha hoon month: <b>${wantKey}</b><br>
+        Rows loaded (${(STATE.monthlyTargets||[]).length}):<br>${rowsDump || '(khaali — sheet load nahi hui)'}<br>
+        retail(col1)=${monthlyTargetVal(1)} booking(col2)=${monthlyTargetVal(2)}</div>`;
+    }
+  } catch(e){}
   if (!hasAny) {
     // Show a clear on-screen reason so the admin knows WHY targets aren't appearing — no console needed.
     const f = monthYearOfFilter();
