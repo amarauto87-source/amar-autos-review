@@ -3724,13 +3724,45 @@ function computeDeliveryAgg(execFilterName){
 // Read an admin-set value from the MONTHLY TARGETS sheet for the selected month (or current month
 // when the filter is ALL). col: 1=Retail 2=Booking 3=EW% 4=RSA% 5=GMA/bike 6=Gear/exec 7=Rider.
 // Returns null if nothing is set, so callers can fall back to the old source.
+// Normalize any month value the sheet might hold into "YYYY-MM". Handles: 2026-09, 2026/09,
+// Sep/26, Sep-26, September 2026, 09/2026, a real Date object, etc. Returns '' if it can't tell.
+const _MONTH_NAMES = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12,
+  january:1,february:2,march:3,april:4,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+function normMonthKey(v){
+  if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}`;
+  let s = str(v).trim();
+  if (!s) return '';
+  // already YYYY-MM or YYYY/MM
+  let m = s.match(/^(\d{4})[-/](\d{1,2})$/);
+  if (m) return `${m[1]}-${String(+m[2]).padStart(2,'0')}`;
+  // MM-YYYY or MM/YYYY
+  m = s.match(/^(\d{1,2})[-/](\d{4})$/);
+  if (m) return `${m[2]}-${String(+m[1]).padStart(2,'0')}`;
+  // Month-name based: "Sep/26", "Sep-26", "Sep 2026", "September 26", "September 2026"
+  m = s.match(/^([A-Za-z]{3,9})[\s/-]*(\d{2,4})$/);
+  if (m) {
+    const mo = _MONTH_NAMES[m[1].toLowerCase()];
+    if (mo) { let yr = +m[2]; if (yr < 100) yr += 2000; return `${yr}-${String(mo).padStart(2,'0')}`; }
+  }
+  // "26/Sep" or "26-Sep"
+  m = s.match(/^(\d{2,4})[\s/-]*([A-Za-z]{3,9})$/);
+  if (m) {
+    const mo = _MONTH_NAMES[m[2].toLowerCase()];
+    if (mo) { let yr = +m[1]; if (yr < 100) yr += 2000; return `${yr}-${String(mo).padStart(2,'0')}`; }
+  }
+  // last resort: let Date try
+  const d = new Date(s);
+  if (!isNaN(d)) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  return '';
+}
 function monthlyTargetVal(col){
   const f = monthYearOfFilter();
   const now = new Date();
   const y = f ? f.year : now.getFullYear();
   const m = f ? f.month : now.getMonth()+1;
   const key = `${y}-${String(m).padStart(2,'0')}`;
-  const row = (STATE.monthlyTargets || []).find(r => str(r[0]) === key);
+  // Match on the normalized month key, so the sheet can store it in any common format.
+  const row = (STATE.monthlyTargets || []).find(r => normMonthKey(r[0]) === key);
   if (!row) return null;
   const v = num(row[col]);
   return (row[col] === '' || row[col] == null || isNaN(v)) ? null : v;
@@ -4814,7 +4846,7 @@ function prefillTargets(){
   const mEl = document.getElementById('tgtMonth'); if (!mEl) return;
   const month = str(mEl.value);
   if (!month) return;
-  const row = (STATE.monthlyTargets || []).find(r => str(r[0]) === month);
+  const row = (STATE.monthlyTargets || []).find(r => normMonthKey(r[0]) === normMonthKey(month));
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v!=null && v!=='') ? v : ''; };
   set('tgtRetail', row?num(row[1]):''); set('tgtBooking', row?num(row[2]):'');
   set('tgtEw', row?num(row[3]):''); set('tgtRsa', row?num(row[4]):'');
@@ -4837,7 +4869,7 @@ function saveTargets(){
   ];
   // Update local state + browser backup immediately (so it shows on this screen right away).
   STATE.monthlyTargets = STATE.monthlyTargets || [];
-  const existing = STATE.monthlyTargets.find(r => str(r[0]) === month);
+  const existing = STATE.monthlyTargets.find(r => normMonthKey(r[0]) === normMonthKey(month));
   if (existing) { for (let i=0;i<8;i++) existing[i]=vals[i]; } else STATE.monthlyTargets.push(vals);
   const store = {};
   STATE.monthlyTargets.forEach(r => { store[str(r[0])] = r; });
