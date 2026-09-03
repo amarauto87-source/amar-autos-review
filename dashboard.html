@@ -1469,6 +1469,7 @@
           </div>
           <div class="tgt-actions">
             <button class="tgt-save" id="tgtSaveBtn">💾 Save Targets</button>
+            <button class="tgt-save" id="tgtClearBtn" style="background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border)" title="Purana browser cache saaf karo (sheet ka data rahega)">🗑️ Clear browser cache</button>
             <span class="tgt-msg" id="tgtMsg"></span>
           </div>
         </div>
@@ -2836,10 +2837,12 @@ async function loadAll(silent){
     // in this browser (localStorage) — browser values win, since that's where the admin sets them.
     STATE.monthlyTargets = (monthlyTargets || []).slice(1).filter(r => str(r[0]));
     try {
+      // Browser backup is ONLY a fallback for months the sheet doesn't have. The sheet is the
+      // source of truth, so a stale browser copy must never hide the real sheet numbers.
       const saved = JSON.parse(lsGet('monthlyTargets') || '{}');
       Object.values(saved).forEach(row => {
-        const i = STATE.monthlyTargets.findIndex(r => str(r[0]) === str(row[0]));
-        if (i >= 0) STATE.monthlyTargets[i] = row; else STATE.monthlyTargets.push(row);
+        const exists = STATE.monthlyTargets.some(r => normMonthKey(r[0]) === normMonthKey(row[0]));
+        if (!exists) STATE.monthlyTargets.push(row); // only add months the sheet is missing
       });
     } catch(e) {}
 
@@ -3767,6 +3770,19 @@ function monthlyTargetVal(col){
   const v = num(row[col]);
   return (row[col] === '' || row[col] == null || isNaN(v)) ? null : v;
 }
+// Handy one-liner for debugging targets from the browser console: window.debugTargets()
+window.debugTargets = function(){
+  const f = monthYearOfFilter();
+  const now = new Date();
+  const y = f ? f.year : now.getFullYear();
+  const m = f ? f.month : now.getMonth()+1;
+  const key = `${y}-${String(m).padStart(2,'0')}`;
+  console.log('Looking for month key:', key);
+  console.log('Rows in MONTHLY TARGETS (+browser):', JSON.stringify(STATE.monthlyTargets));
+  (STATE.monthlyTargets||[]).forEach(r => console.log('  row month:', JSON.stringify(r[0]), '→ normalized:', normMonthKey(r[0]), (normMonthKey(r[0])===key?'✅ MATCH':'❌ no match')));
+  console.log('Retail target found:', monthlyTargetVal(1), '| Booking:', monthlyTargetVal(2));
+  return STATE.monthlyTargets;
+};
 function targetFor(execName){
   // Whole-store retail target: prefer the admin-set MONTHLY TARGETS value when present (only for
   // the store-wide view, not a single exec — per-exec split still comes from the Targets sheet).
@@ -4840,6 +4856,16 @@ function initTargetSetter(){
   if (mInp) mInp.addEventListener('change', prefillTargets);
   const saveBtn = document.getElementById('tgtSaveBtn');
   if (saveBtn) saveBtn.addEventListener('click', saveTargets);
+  const clearBtn = document.getElementById('tgtClearBtn');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    // Wipe the browser-saved targets so ONLY the sheet's values are used, then re-read.
+    try { localStorage.removeItem('monthlyTargets'); } catch(e){}
+    STATE.monthlyTargets = (STATE.monthlyTargets || []).filter(r => normMonthKey(r[0])); // keep sheet-loaded rows
+    // reload from sheet cleanly
+    loadAll(true);
+    const msg = document.getElementById('tgtMsg');
+    if (msg){ msg.style.color='var(--good)'; msg.textContent='✅ Browser cache saaf — ab sirf sheet ke targets'; }
+  });
 }
 // Pre-fill the form with whatever is already saved for the chosen month (so admin edits, not blanks).
 function prefillTargets(){
@@ -4916,8 +4942,22 @@ function renderTargetVsActual(){
   // Only meaningful when a target row exists for the selected/current month.
   const hasAny = [1,2,3,4,5,6,7].some(c => monthlyTargetVal(c) != null);
   if (!hasAny) {
-    if (title) title.style.display = 'none';
-    out.innerHTML = '';
+    // Show a clear on-screen reason so the admin knows WHY targets aren't appearing — no console needed.
+    const f = monthYearOfFilter();
+    const now = new Date();
+    const wantKey = `${f?f.year:now.getFullYear()}-${String(f?f.month:now.getMonth()+1).padStart(2,'0')}`;
+    const rows = STATE.monthlyTargets || [];
+    let reason;
+    if (!rows.length) {
+      reason = '⚠️ MONTHLY TARGETS sheet dashboard tak nahi pahunch rahi (khali aa rahi hai). Check karo: sheet spreadsheet me hai, aur file "Anyone with the link — Viewer" pe shared hai.';
+    } else {
+      const found = rows.map(r => normMonthKey(r[0])).filter(Boolean);
+      const matchNow = rows.some(r => normMonthKey(r[0]) === wantKey);
+      if (matchNow) reason = '⚠️ Month mil gaya par target values 0/khali hain. Sheet me numbers check karo.';
+      else reason = `⚠️ Is month (${wantKey}) ka target sheet me nahi mila. Sheet me ye months hain: ${found.join(', ') || '(koi valid month nahi)'}. Month filter is month par set karo, ya sheet me is month ki row daalo.`;
+    }
+    if (title) title.style.display = '';
+    out.innerHTML = `<div class="empty-note" style="text-align:left;border-left:3px solid var(--warning);padding:12px 14px;">${esc(reason)}</div>`;
     return;
   }
   if (title) title.style.display = '';
