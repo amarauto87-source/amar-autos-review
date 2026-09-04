@@ -1269,8 +1269,8 @@
           <div class="festival-select-wrap" title="Festival theme lagta hai apne aap 1 hafte pehle, festival khatam hone par hat jaata hai">
             <label for="festivalSelect">🎊 Festival Theme</label>
             <select id="festivalSelect">
-              <option value="auto">Auto (date ke hisaab se)</option>
-              <option value="off">Off (koi theme nahi)</option>
+              <option value="auto">Auto (by date)</option>
+              <option value="off">Off (no theme)</option>
               <option value="diwali">🪔 Diwali</option>
               <option value="holi">🎨 Holi</option>
               <option value="dussehra">🏹 Dussehra</option>
@@ -1308,7 +1308,7 @@
   <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
   <button data-tab="walkin" style="display:none;">🔁 Walk-in Check</button>
-  <button data-tab="walkinlog" style="display:none;">📋 Aaj ke Walk-in</button>
+  <button data-tab="walkinlog" style="display:none;">📋 Today's Walk-ins</button>
   <button data-tab="moredata" style="display:none;">🗂️ More Data</button>
 </nav>
 
@@ -1330,7 +1330,7 @@
       <button type="button" data-jump="specs">📖 Model Specs</button>
     </div>
 
-    <h2 class="section-title">✅ Aaj Karne Wale Kaam</h2>
+    <h2 class="section-title">✅ Today's To-Do</h2>
     <div class="chat-panel" id="mydayPriorities"></div>
 
     <div class="panel-row-2col" style="margin-top:20px;">
@@ -1453,7 +1453,7 @@
     <div id="targetSetterWrap" style="display:none;">
       <div class="tgt-panel">
         <div class="tgt-head" id="tgtHead">
-          <span>🎯 Set Monthly Targets <span class="tgt-sub">(sirf Admin · sabko dikhega)</span></span>
+          <span>🎯 Set Monthly Targets <span class="tgt-sub">(Admin only · visible to all)</span></span>
           <span class="tgt-arrow">▼</span>
         </div>
         <div class="tgt-body" id="tgtBody">
@@ -1469,7 +1469,7 @@
           </div>
           <div class="tgt-actions">
             <button class="tgt-save" id="tgtSaveBtn">💾 Save Targets</button>
-            <button class="tgt-save" id="tgtClearBtn" style="background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border)" title="Purana browser cache saaf karo (sheet ka data rahega)">🗑️ Clear browser cache</button>
+            <button class="tgt-save" id="tgtClearBtn" style="background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border)" title="Clear old browser cache (sheet data stays)">🗑️ Clear browser cache</button>
             <span class="tgt-msg" id="tgtMsg"></span>
           </div>
         </div>
@@ -1481,7 +1481,6 @@
 
     <!-- Target vs Actual — shows this month's admin-set targets against the live actuals. -->
     <h2 class="section-title" id="tvaTitle">🎯 Target vs Actual — This Month</h2>
-    <div id="tvaDebug"></div>
     <div id="targetVsActual"></div>
 
     <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
@@ -1579,19 +1578,19 @@
 
     <!-- Two data-hygiene trackers (Overview only). Both respect STATE.filterExec, so Admin sees
          everyone and a sales login sees only their own rows. Customer mobile is masked. -->
-    <h2 class="section-title" id="ovEnqNotPunched">🚨 Enquiry Not Punched — Walk-in aaya, enquiry nahi bani</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo customer showroom aaye (Actual Walk-in register me) par unka mobile enquiry me nahi mila — inki enquiry banani zaroori hai, kyunki followup MSD ke through hi hota hai.</p>
+    <h2 class="section-title" id="ovEnqNotPunched">🚨 Enquiry Not Punched — Walk-in came, no enquiry created</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Customers who visited the showroom (in the Actual Walk-in register) whose mobile was NOT found in the enquiry sheet — their enquiry must be created, because follow-up happens through MSD.</p>
     <div class="table-wrap"><table class="data" id="tblWalkinMissing"></table></div>
 
-    <h2 class="section-title" id="ovBkgNotPunched">⚠️ Booking Not Punched — Booking hui, system me nahi</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Jo booking humare paas hai (Actual Booking sheet) par customer ka mobile RE Portal (BOOKING MSD) me nahi mila — ye bookings system me punch karni zaroori hain.</p>
+    <h2 class="section-title" id="ovBkgNotPunched">⚠️ Booking Not Punched — Booking done, not in system</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Bookings we have (Actual Booking sheet) whose customer mobile was NOT found in the RE Portal (BOOKING MSD) — these bookings must be punched into the system.</p>
     <div class="table-wrap"><table class="data" id="tblBookingNotInSystem"></table></div>
 
     <!-- ══ Sales Person Analysis — reads ENQUIRY STATMENT VIEW and, per sales person, works out
          what's going well, what's weak, the loopholes, and concrete fixes. Follows the top month
          filter. Cards are collapsed; click a name to expand. ══ -->
     <h2 class="section-title" id="ovSpAnalysis">🔍 Sales Person Analysis — Kya chal raha hai, kya theek karna hai</h2>
-    <p class="spa-hint">Har sales person ka performance ENQUIRY STATMENT VIEW ke data se — conversion, test ride, follow-up, drop reasons, aur sudhaar ke suggestions. Naam par click karke details kholo.</p>
+    <p class="spa-hint">Each sales person's performance from ENQUIRY STATMENT VIEW data — conversion, test ride, follow-up, drop reasons, and improvement suggestions. Click a name to open details.</p>
     <div id="spAnalysisResult"></div>
   </section>
 
@@ -1690,7 +1689,7 @@
   </section>
 
   <section class="tabpanel" id="tab-pending">
-    <h2 class="section-title">🔎 Book vs Stock — Model Select karke dekho</h2>
+    <h2 class="section-title">🔎 Book vs Stock — Select a Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Model chuno — us model ki har colour ka stock (FREE hai ya nahi) aur uspe kiski booking hai, sab dikhega. Bookings <b>FIFO</b> order me hain (jisne pehle booking kiya wo pehle) — jab bike aaye to sabse upar wale customer ko milegi. Sabhi sales person ki booking sabko dikhti hai; customer ka mobile chhupa rehta hai.
     </div>
@@ -1856,10 +1855,10 @@
        still fully works, it's simply not cluttering the main tab bar any more. -->
   <section class="tabpanel" id="tab-moredata">
     <h2 class="section-title">🗂️ More Data</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 14px;">Baaki ka data yahan se select karo — jo chahiye seedha wahi khul jaayega.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 14px;">Select other data here — pick what you need and it opens directly.</p>
     <div class="myday-hero" style="padding:16px 18px;">
       <select id="moreDataSelect" style="width:100%;max-width:440px;font-size:14.5px;padding:11px 13px;">
-        <option value="">— Data chuno —</option>
+        <option value="">— Select data —</option>
         <option value="overview">📊 Overview — sales console, funnel steps, reviews</option>
         <option value="delivery">🚚 Delivery — billed/delivered bikes</option>
         <option value="booking">📋 Booking — full booking list</option>
@@ -1887,7 +1886,7 @@
        login sees only their own assigned customers (with FRESH / FOLLOW-UP tag) for night-time
        enquiry entry; Admin sees everyone. ══ -->
   <section class="tabpanel" id="tab-walkinlog">
-    <h2 class="section-title" id="walkinLogTitle">📋 Aaj ke Walk-in</h2>
+    <h2 class="section-title" id="walkinLogTitle">📋 Today's Walk-ins</h2>
     <p class="empty-note" id="walkinLogNote" style="text-align:left;padding:0 0 12px;"></p>
     <div id="walkinLogResult"></div>
   </section>
@@ -2208,12 +2207,12 @@ const MODEL_SPECS = [
   { name: 'Meteor 350', category: 'Cruiser (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '765 mm', kerbWeight: '191 kg', fuelTank: '15 L', price: '₹1.99L – 2.31L*',
     bestFor: 'Highway cruising + easy low-seat riders',
     features: 'Asli 350 cruiser — teardrop tank, forward-set feet, relaxed geometry. Sabse low seat (765 mm), Tripper navigation. Fireball / Stellar / Supernova variants.',
-    hinglish: 'Ye ASLI cruiser hai (Classic/Bullet nahi). Low seat 765 mm — chhoti height wale aur ladies ko comfortable. Highway pe relaxed long ride ke liye best, feet aage, tank bada (15L). Tripper navigation milta hai. Comfort chahne wale ko yahi bolo.' },
+    hinglish: 'This is a TRUE cruiser (not Classic/Bullet). Low seat 765 mm — comfortable for shorter riders and ladies. Best for relaxed long highway rides, feet forward, big tank (15L). Comes with Tripper navigation. Recommend this to comfort-seekers.' },
 
   { name: 'Scram 440', category: 'Scrambler (450 platform)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa)', power: 'confirm karein (~40 bhp class)', torque: 'confirm karein', gearbox: '6-Speed', seatHeight: 'confirm karein', kerbWeight: 'confirm karein', fuelTank: 'confirm karein', price: 'Newest addition — confirm current ex-showroom & full specs from RE site',
     bestFor: 'Light scrambler / mixed road-trail',
-    features: 'Naya model (Scram range ka bada engine version). Poore specs abhi RE site se confirm karke hi customer ko batayein.',
-    hinglish: 'Ye bahut naya model hai — iske exact numbers (power, weight, price) main abhi 100% confirm nahi keh sakta. Customer ko dene se pehle RE ki official site ya price list se cross-check zaroor kar lo, taaki galat spec na chala jaye.' },
+    features: 'New model (bigger-engine version of the Scram range). Confirm full specs from the RE site before telling the customer.',
+    hinglish: 'This is a very new model — I cannot be 100% sure of its exact numbers (power, weight, price). Cross-check with the official RE site or price list before sharing with the customer, so no wrong spec goes out.' },
 
   { name: 'Guerrilla 450', category: 'Roadster (450)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa 450)', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '780 mm', kerbWeight: '185 kg', fuelTank: '11 L', price: '₹2.39L – 2.85L*',
     bestFor: 'Modern street/roadster — liquid-cooled power',
@@ -2243,12 +2242,12 @@ const MODEL_SPECS = [
   { name: 'Shotgun 650', category: 'Roadster / Bobber (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '795 mm', kerbWeight: '240 kg (approx — confirm)', fuelTank: '13.8 L', price: '₹3.60L – 3.90L* — confirm exact figures',
     bestFor: 'Custom/bobber style, single-seat cruiser look',
     features: 'Bobber-roadster styling, single-seat convertible. Style-heavy custom-culture bike. Kuch figures confirm karein.',
-    hinglish: 'Ye custom/bobber style ka bike hai — single seat, muscular look. Style-conscious customer ke liye. Kuch exact numbers (weight, price) main pura confirm nahi keh sakta — RE list se check kar lena.' },
+    hinglish: 'This is a custom/bobber style bike — single seat, muscular look. For style-conscious customers. Some exact numbers (weight, price) I cannot fully confirm — check the RE list.' },
 
   { name: 'Bullet 650', category: 'Roadster / Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.8 L', price: 'Newest addition — confirm current ex-showroom',
     bestFor: 'Bullet legacy + twin-cylinder power',
     features: 'Bullet naam ab 650 twin me. Classic Bullet styling + parallel-twin refinement. Bahut naya — price confirm karein.',
-    hinglish: 'Ye ekdum naya hai — purane "Bullet" ke look me ab 650 twin engine. Jo customer Bullet ka naam/heritage chahta hai par twin-cylinder power bhi, unke liye. Price abhi confirm karke hi batana, bahut recent launch hai.' },
+    hinglish: 'Brand new — the classic "Bullet" look now with a 650 twin engine. For customers who want the Bullet name/heritage plus twin-cylinder power. Confirm the price before quoting, it is a very recent launch.' },
 
   { name: 'Classic 650', category: 'Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.7 L', price: '₹3.68L (Hotrod) – 3.82L (Chrome)* — confirm',
     bestFor: 'Classic look + 650 twin smoothness',
@@ -2258,7 +2257,7 @@ const MODEL_SPECS = [
   { name: 'Bear 650', category: 'Scrambler (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm (confirm)', gearbox: '6-Speed', seatHeight: '830 mm (approx — confirm)', kerbWeight: '216 kg (approx — confirm)', fuelTank: '13.7 L', price: '₹3.55L – 3.85L* — confirm exact figures',
     bestFor: 'Scrambler style on the 650 twin',
     features: 'Interceptor-based scrambler — taller stance, off-road-inspired. Newer model, kuch figures confirm karein.',
-    hinglish: 'Ye 650 twin par scrambler style hai — thoda ooncha, rugged look, halka off-road flavour. Style aur twin power dono chahne wale ko. Kuch numbers (seat height, weight) exact confirm karke hi batana.' },
+    hinglish: 'A scrambler style on the 650 twin — slightly taller, rugged look, light off-road flavour. For those who want both style and twin power. Confirm some numbers (seat height, weight) before quoting.' },
 ];
 function renderModelSpecs(){
   const search = str(document.getElementById('specsSearch').value).toLowerCase();
@@ -2267,7 +2266,7 @@ function renderModelSpecs(){
     || m.category.toLowerCase().includes(search)
     || (m.bestFor && m.bestFor.toLowerCase().includes(search)));
   const el = document.getElementById('specsCards');
-  if (!rows.length) { el.innerHTML = '<div class="empty-note">Koi model nahi mila — dusra naam try karo.</div>'; return; }
+  if (!rows.length) { el.innerHTML = '<div class="empty-note">No model found — try another name.</div>'; return; }
   // Expandable cards: model name + category always visible; click to open full specs + Hinglish
   // selling points. Deep detail lives inside so the executive can read it out to a customer.
   el.innerHTML = rows.map((m, i) => `
@@ -2479,7 +2478,7 @@ function applyRoleRestrictions(){
     document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-walkin'));
     // rename the log tab for Ajeet, and give it a label
     const wlBtn = document.querySelector('#tabs button[data-tab="walkinlog"]');
-    if (wlBtn) wlBtn.textContent = '📋 Aaj ke Walk-in';
+    if (wlBtn) wlBtn.textContent = '📋 Today\'s Walk-ins';
     // hide the whole filter/control bar — Ajeet doesn't need month/exec filters
     const ctrls = document.querySelector('.controls'); if (ctrls) ctrls.style.display = 'none';
     const notifyBtn = document.getElementById('notifyTeamBtn'); if (notifyBtn) notifyBtn.style.display = 'none';
@@ -2835,8 +2834,11 @@ async function loadAll(silent){
     STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
     // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
     // Admin-set monthly targets: from the MONTHLY TARGETS sheet if it exists, plus anything saved
-    // in this browser (localStorage) — browser values win, since that's where the admin sets them.
+    // in this browser (localStorage). We keep the header row (row 1) too, because employee names
+    // live in the K–R headers and their targets in the data row below.
+    STATE.monthlyTargetsHeader = (monthlyTargets || [])[0] || [];
     STATE.monthlyTargets = (monthlyTargets || []).slice(1).filter(r => str(r[0]));
+    _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
     try {
       // Browser backup is ONLY a fallback for months the sheet doesn't have. The sheet is the
       // source of truth, so a stale browser copy must never hide the real sheet numbers.
@@ -3324,9 +3326,9 @@ function renderDashboard(){
 // Dashboard shortcut buttons — labels follow the role (Sales = Hinglish, Admin/CRT = English).
 function renderDashShortcutLabels(){
   const wrap = document.getElementById('dashShortcuts'); if (!wrap) return;
-  const hin = !!(CURRENT_USER && CURRENT_USER.role === 'Sales');
+  const hin = false; // everyone sees English now
   const labels = hin ? {
-    booking_atrisk:'🚨 At-Risk (stock nahi)', booking:'📋 Booking', pending:'🔎 Book vs Stock',
+    booking_atrisk:'🚨 At-Risk (no stock)', booking:'📋 Booking', pending:'🔎 Book vs Stock',
     delivery:'🚚 Delivery', stock:'🏭 Stock', analytics:'🎯 Booking Funnel', specs:'📖 Model Specs',
   } : {
     booking_atrisk:'🚨 At-Risk (no stock)', booking:'📋 Booking', pending:'🔎 Book vs Stock',
@@ -3343,7 +3345,7 @@ function renderRcReports(ctx){
   const el = document.getElementById('rcReports'); if (!el) return;
   // Dashboard language follows the role: Admin (and CRT) see English, a Sales login sees Hinglish.
   // Only the Dashboard tab does this — the rest of the app is unchanged.
-  const hin = !!(CURRENT_USER && CURRENT_USER.role === 'Sales');
+  const hin = false; // everyone sees English now
   const T = hin ? {
     sectionH: '📑 Reports — dekhne ke liye click karo',
     enqPend: n => `<b>${n}</b> walk-in ki enquiry pending`,
@@ -3784,12 +3786,33 @@ window.debugTargets = function(){
   console.log('Retail target found:', monthlyTargetVal(1), '| Booking:', monthlyTargetVal(2));
   return STATE.monthlyTargets;
 };
+// Per-employee retail target from MONTHLY TARGETS sheet, columns K–R (index 10–17). Row 1 (the
+// header row, already sliced off) had the names, row 2 the numbers — so in STATE.monthlyTargets
+// the first data row holds the numbers, and we map name→column using the sheet's header names.
+// We stored only data rows, so we re-read the header for the K–R name↔column mapping once.
+let _EMP_TARGET_MAP = null; // {UPPERNAME: number}
+function empTargetMap(){
+  if (_EMP_TARGET_MAP) return _EMP_TARGET_MAP;
+  _EMP_TARGET_MAP = {};
+  // STATE.monthlyTargetsHeader holds row 1 (names in K–R); STATE.monthlyTargets[0] holds row 2.
+  const hdr = STATE.monthlyTargetsHeader || [];
+  const dataRow = (STATE.monthlyTargets && STATE.monthlyTargets[0]) || [];
+  for (let c = 10; c <= 17; c++) {              // K..R
+    const nm = up(str(hdr[c]));
+    const val = num(dataRow[c]);
+    if (nm && !isNaN(val) && dataRow[c] !== '' && dataRow[c] != null) _EMP_TARGET_MAP[nm] = val;
+  }
+  return _EMP_TARGET_MAP;
+}
 function targetFor(execName){
-  // Whole-store retail target: prefer the admin-set MONTHLY TARGETS value when present (only for
-  // the store-wide view, not a single exec — per-exec split still comes from the Targets sheet).
+  // Whole-store retail target: prefer the admin-set MONTHLY TARGETS value when present.
   if (!execName) {
     const mt = monthlyTargetVal(1);
     if (mt != null) return mt;
+  } else {
+    // Per-employee: prefer the K–R value from MONTHLY TARGETS if set for this person.
+    const em = empTargetMap()[up(execName)];
+    if (em != null) return em;
   }
   const f = monthYearOfFilter();
   const monthColIdx = f ? f.month : null; // 1=Jan..12=Dec
@@ -3816,7 +3839,7 @@ function kpiCard(label, value, hint, meterPct, flagText, jumpTo){
     <div class="value">${value}</div>
     ${hint ? `<div class="hint">${hint}</div>` : ''}
     ${meterPct !== undefined ? `<div class="meter"><div style="width:${Math.min(100,Math.max(0,meterPct))}%"></div></div>` : ''}
-    ${flagText ? `<div class="kpi-flag">⚠️ ${esc(flagText)}${clickable?' <span style="text-decoration:underline">— dekho</span>':''}</div>` : ''}
+    ${flagText ? `<div class="kpi-flag">⚠️ ${esc(flagText)}${clickable?' <span style="text-decoration:underline">— view</span>':''}</div>` : ''}
   </div>`;
 }
 // Delegate clicks on any clickable KPI card (works no matter how many are rendered).
@@ -4076,7 +4099,7 @@ function renderEmployeeTable(){
         const ini = str(v).split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
         return `<span class="name-cell"><span class="mini-av">${esc(ini)}</span>${esc(v)}</span>`;
       } },
-    { key:'retail', label:'Retail', num:true },
+    { key:'retail', label:'Retail', num:true, raw:true, fmt: (v,row) => row.target ? `${fmtInt(v)} / ${fmtInt(row.target)}` : fmtInt(v) },
     { key:'target', label:'Target', num:true },
     { key:'achv', label:'Achv %', num:true, raw:true, fmt: (v,row) => flagIf(row.target && v < PERF_THRESHOLDS.achv, fmtPct(v)) },
     { key:'ewPct', label:'EW %', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.ewPct, fmtPct(v)) },
@@ -4264,7 +4287,7 @@ function openStatusChangeModal(action, preSelected){
 
   const remarksHtml = `
     <textarea id="statusNoteBox" rows="3" placeholder="Remarks (required) — ${cfg.placeholder}" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);"></textarea>
-    <div id="statusNoteError" style="color:var(--critical); font-size:12px; margin-top:4px; display:none;">Remarks likhna zaroori hai — bina reason ke submit nahi hoga.</div>`;
+    <div id="statusNoteError" style="color:var(--critical); font-size:12px; margin-top:4px; display:none;">A remark is required — it won't submit without a reason.</div>`;
 
   function wireSubmit(getSlipAndExec){
     document.getElementById('statusSubmitBtn').addEventListener('click', async () => {
@@ -4447,14 +4470,14 @@ function renderMyDay(){
   heroEl.innerHTML = `
     <div class="greet">👋 Namaste, ${esc(greetName)}!</div>
     <div class="date">${esc(today)}</div>
-    <div class="tip"><b>💡 Aaj ka tip:</b> ${esc(getDailyGrowthTip())}</div>`;
+    <div class="tip"><b>💡 Today's tip:</b> ${esc(getDailyGrowthTip())}</div>`;
 
   // Action list — identical logic/data to the Overview "Today's Priorities" panel, just shown
   // here first so a sales login doesn't have to find another tab to see it.
   const prioEl = document.getElementById('mydayPriorities');
   if (prioEl) {
     const items = computeTodayPriorities();
-    prioEl.innerHTML = `<div class="chat-greeting">Priority order me, sabse zaroori pehle:</div>` +
+    prioEl.innerHTML = `<div class="chat-greeting">In priority order, most important first:</div>` +
       items.map(it => `<div class="chat-item ${it.cls}"><span class="chat-icon">${it.icon}</span><span>${esc(it.text)}</span></div>`).join('');
   }
 
@@ -4466,7 +4489,7 @@ function renderMyDay(){
   if (gaugeWrap && splitEl) {
     if (!execName) {
       gaugeWrap.innerHTML = '';
-      splitEl.innerHTML = '<div class="empty-note" style="grid-column:1/-1">Top ke filter se ek executive chuno unka target dekhne ke liye.</div>';
+      splitEl.innerHTML = '<div class="empty-note" style="grid-column:1/-1">Pick an executive from the top filter to see their target.</div>';
     } else {
       const p = computePersonalTarget(execName);
       renderRouteMap('mydayGauge', p.retailSoFar, p.monthTarget);
@@ -4495,10 +4518,10 @@ function computeMyRank(execName){
 function renderMyDayRank(execName){
   const el = document.getElementById('mydayRank');
   if (!el) return;
-  if (!execName) { el.innerHTML = '<div class="empty-note">Top ke filter se ek executive chuno unki standing dekhne ke liye.</div>'; return; }
+  if (!execName) { el.innerHTML = '<div class="empty-note">Pick an executive from the top filter to see their standing.</div>'; return; }
 
   const r = computeMyRank(execName);
-  if (!r.rank) { el.innerHTML = '<div class="empty-note">Is naam ka koi target/rank data nahi mila.</div>'; return; }
+  if (!r.rank) { el.innerHTML = '<div class="empty-note">No target/rank data found for this name.</div>'; return; }
   const medal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : '👤';
   const vsAvg = r.mine - r.avg;
 
@@ -4740,9 +4763,9 @@ function renderWalkinChecks(){
 
   // ── Dashboard compact summary (same rows, shown as a count + Sales Person / Customer names) ──
   renderPunchSummary('dashEnqNotPunched', walkinRows, 'enquiry',
-    'Walk-in aaya par enquiry nahi bani');
+    'Walk-in came but no enquiry created');
   renderPunchSummary('dashBkgNotPunched', notInSystem, 'booking',
-    'Booking hui par MSD me punch nahi');
+    'Booking done but not punched in MSD');
 
   renderSalesPersonAnalysis();
 
@@ -4830,10 +4853,10 @@ function renderPunchSummary(elId, rows, kind, subtitle){
       <span class="p-name">${esc(r.salesperson)}</span>
       <span class="p-cust">${esc(r.customer || '(no name)')}</span>
     </div>`).join('');
-  const more = n > shown.length ? `<div class="punch-more">+${n - shown.length} aur — Overview me poori list</div>` : '';
+  const more = n > shown.length ? `<div class="punch-more">+${n - shown.length} more — full list in Overview</div>` : '';
   el.className = 'punch-summary';
   el.setAttribute('role', 'button');
-  el.setAttribute('title', 'Overview tab me poori list dekho');
+  el.setAttribute('title', 'See the full list in the Overview tab');
   el.innerHTML = `<div class="punch-count some">${fmtInt(n)}</div>
     <div class="punch-sub">${esc(subtitle)} — Sales Person &amp; Customer:</div>
     <div class="punch-list">${items}</div>${more}`;
@@ -4865,7 +4888,7 @@ function initTargetSetter(){
     // reload from sheet cleanly
     loadAll(true);
     const msg = document.getElementById('tgtMsg');
-    if (msg){ msg.style.color='var(--good)'; msg.textContent='✅ Browser cache saaf — ab sirf sheet ke targets'; }
+    if (msg){ msg.style.color='var(--good)'; msg.textContent='✅ Browser cache cleared — now using sheet targets only'; }
   });
 }
 // Pre-fill the form with whatever is already saved for the chosen month (so admin edits, not blanks).
@@ -4884,7 +4907,7 @@ function saveTargets(){
   const msg = document.getElementById('tgtMsg');
   const btn = document.getElementById('tgtSaveBtn');
   const month = str(document.getElementById('tgtMonth')?.value);
-  if (!month) { if(msg){msg.style.color='var(--warning)';msg.textContent='Month select karo';} return; }
+  if (!month) { if(msg){msg.style.color='var(--warning)';msg.textContent='Select a month';} return; }
   const vals = [month,
     num(document.getElementById('tgtRetail')?.value),
     num(document.getElementById('tgtBooking')?.value),
@@ -4907,17 +4930,17 @@ function saveTargets(){
   const payload = { action:'settarget', month,
     retail: vals[1], booking: vals[2], ew: vals[3], rsa: vals[4], gma: vals[5], gear: vals[6], rider: vals[7] };
   if (!WALKIN_SAVE_URL) {
-    if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Sirf is browser me saved — sabko dikhane ke liye Apps Script URL chahiye';}
+    if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Saved in this browser only — need Apps Script URL to share with all';}
     renderAll(); return;
   }
   if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
   saveTargetsJsonp(payload, (res) => {
     if (btn) btn.disabled = false;
     if (res && res.ok) {
-      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Targets save ho gaye — sabko dikhega';}
+      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Targets saved — visible to all';}
     } else {
-      const err = res && res.error ? res.error : 'Apps Script se jawab nahi aaya';
-      if (msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Sheet me save fail ('+err+') — filhaal is browser me saved hai';}
+      const err = res && res.error ? res.error : 'No response from Apps Script';
+      if (msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Sheet save failed ('+err+') — saved in this browser for now';}
     }
     renderAll(); // refresh dashboard with the new target
   });
@@ -4942,19 +4965,6 @@ function renderTargetVsActual(){
   const title = document.getElementById('tvaTitle');
   // Only meaningful when a target row exists for the selected/current month.
   const hasAny = [1,2,3,4,5,6,7].some(c => monthlyTargetVal(c) != null);
-  // TEMP DEBUG: show what actually loaded, so we can see the real data shape on screen.
-  try {
-    const dbg = document.getElementById('tvaDebug');
-    if (dbg) {
-      const f = monthYearOfFilter(); const now2 = new Date();
-      const wantKey = `${f?f.year:now2.getFullYear()}-${String(f?f.month:now2.getMonth()+1).padStart(2,'0')}`;
-      const rowsDump = (STATE.monthlyTargets||[]).map(r => `[${r.slice(0,8).map(x=>JSON.stringify(x)).join(', ')}]  → month "${normMonthKey(r[0])}"`).join('<br>');
-      dbg.innerHTML = `<div style="font-family:monospace;font-size:11px;color:var(--text-secondary);background:var(--surface-2);padding:10px;border-radius:8px;margin-bottom:10px;overflow-x:auto;">
-        <b>DEBUG</b> — dhoondh raha hoon month: <b>${wantKey}</b><br>
-        Rows loaded (${(STATE.monthlyTargets||[]).length}):<br>${rowsDump || '(khaali — sheet load nahi hui)'}<br>
-        retail(col1)=${monthlyTargetVal(1)} booking(col2)=${monthlyTargetVal(2)}</div>`;
-    }
-  } catch(e){}
   if (!hasAny) {
     // Show a clear on-screen reason so the admin knows WHY targets aren't appearing — no console needed.
     const f = monthYearOfFilter();
@@ -4963,12 +4973,12 @@ function renderTargetVsActual(){
     const rows = STATE.monthlyTargets || [];
     let reason;
     if (!rows.length) {
-      reason = '⚠️ MONTHLY TARGETS sheet dashboard tak nahi pahunch rahi (khali aa rahi hai). Check karo: sheet spreadsheet me hai, aur file "Anyone with the link — Viewer" pe shared hai.';
+      reason = '⚠️ MONTHLY TARGETS sheet is not loading (coming back empty). Check: the sheet exists in the spreadsheet, and the file is shared as "Anyone with the link — Viewer".';
     } else {
       const found = rows.map(r => normMonthKey(r[0])).filter(Boolean);
       const matchNow = rows.some(r => normMonthKey(r[0]) === wantKey);
-      if (matchNow) reason = '⚠️ Month mil gaya par target values 0/khali hain. Sheet me numbers check karo.';
-      else reason = `⚠️ Is month (${wantKey}) ka target sheet me nahi mila. Sheet me ye months hain: ${found.join(', ') || '(koi valid month nahi)'}. Month filter is month par set karo, ya sheet me is month ki row daalo.`;
+      if (matchNow) reason = '⚠️ Month found but target values are 0/blank. Check the numbers in the sheet.';
+      else reason = `⚠️ No target found for this month (${wantKey}) in the sheet. Sheet has these months: ${found.join(', ') || '(no valid month)'}. Set the month filter to this month, or add a row for this month in the sheet.`;
     }
     if (title) title.style.display = '';
     out.innerHTML = `<div class="empty-note" style="text-align:left;border-left:3px solid var(--warning);padding:12px 14px;">${esc(reason)}</div>`;
@@ -5030,7 +5040,7 @@ function renderSalesPersonAnalysis(){
     byOwner.get(owner).push(r);
   });
 
-  if (!byOwner.size) { out.innerHTML = `<div class="empty-note">Is month ka ENQUIRY STATMENT VIEW data nahi mila. (Month filter check karo, ya sheet me data hai?)</div>`; return; }
+  if (!byOwner.size) { out.innerHTML = `<div class="empty-note">No ENQUIRY STATMENT VIEW data for this month. (Check the month filter, or whether the sheet has data.)</div>`; return; }
 
   const classify = (r) => {
     const s = up(str(r[EV.status]) + ' ' + str(r[EV.stage]));
@@ -5049,7 +5059,7 @@ function renderSalesPersonAnalysis(){
       if (c === 'booked') booked++; else if (c === 'drop') drop++; else open++;
       if (yes(r[EV.testRide])) testRides++;
       if (!str(r[EV.remark]).trim()) noRemark++;
-      if (c === 'drop') { const dr = str(r[EV.dropReason]).trim() || 'Reason nahi likha'; dropReasons[dr] = (dropReasons[dr]||0)+1; }
+      if (c === 'drop') { const dr = str(r[EV.dropReason]).trim() || 'No reason given'; dropReasons[dr] = (dropReasons[dr]||0)+1; }
       const m = str(r[EV.model]).trim(); if (m) models[m] = (models[m]||0)+1;
     });
     const total = rows.length;
@@ -5805,7 +5815,7 @@ function runWalkinCheck(){
     WC_CURRENT = { mobile, customer:'', type:'FRESH', assignedTo: turnPerson || '' };
     out.innerHTML = `<div class="wc-new">
       <div class="ic">✅</div><div class="t">NAYA CUSTOMER</div>
-      <div class="assign">${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Neeche se sales person chuno'}</div>
+      <div class="assign">${turnPerson ? `Give as per turn: <b>${esc(turnPerson)}</b>` : 'Select a sales person below'}</div>
     </div>${assignBox({ mobile, customer:'', suggested: turnPerson, type:'FRESH', isNew:true })}`;
   } else {
     // REPEAT customer — decide owner
@@ -5816,8 +5826,8 @@ function runWalkinCheck(){
     WC_CURRENT = { mobile, customer:custName, type, assignedTo: assignTo };
 
     const decision = anyOpen
-      ? `<div class="wc-dec"><div class="d">👉 <b>${esc(anyOpen.owner)}</b> ko bulao — inki enquiry abhi OPEN hai (inhi ka customer)</div></div>`
-      : `<div class="wc-dec free"><div class="d">👉 ${turnPerson ? `Turn ke hisaab se dijiye: <b>${esc(turnPerson)}</b>` : 'Turn wale ko dijiye'} — purani enquiry ${allDrop?'DROP ho chuki hai':'band hai'} (customer free)</div></div>`;
+      ? `<div class="wc-dec"><div class="d">👉 Call <b>${esc(anyOpen.owner)}</b> — their enquiry is still OPEN (this is their customer)</div></div>`
+      : `<div class="wc-dec free"><div class="d">👉 ${turnPerson ? `Give as per turn: <b>${esc(turnPerson)}</b>` : 'Give to the next in turn'} — old enquiry is ${allDrop?'DROPPED':'closed'} (customer free)</div></div>`;
 
     const visits = hist.map(h => {
       const cls = h.isDrop ? 'drop' : h.isBooked ? 'book' : 'open';
@@ -5833,12 +5843,12 @@ function runWalkinCheck(){
     const firstDate = hist[hist.length-1].created;
     out.innerHTML = `<div class="wc-old">
       <div class="top">
-        <div class="warn" ${anyOpen?'':'style="color:var(--good)"'}>${anyOpen?'⚠️ YE CUSTOMER PEHLE AAYA HAI':'ℹ️ PEHLE AAYA THA — PAR AB FREE HAI'}</div>
+        <div class="warn" ${anyOpen?'':'style="color:var(--good)"'}>${anyOpen?'⚠️ THIS CUSTOMER HAS VISITED BEFORE':'ℹ️ VISITED BEFORE — BUT NOW FREE'}</div>
         <div class="nm">${esc(custName||'—')}</div>
-        <div class="meta">${hist.length} baar aaya${firstDate?` · pehli baar ${esc(fmtDate(firstDate))}`:''}</div>
+        <div class="meta">${hist.length} visit(s)${firstDate?` · first on ${esc(fmtDate(firstDate))}`:''}</div>
       </div>
       ${decision}
-      <div class="wc-hist"><div class="h">Poori History</div>${visits}</div>
+      <div class="wc-hist"><div class="h">Full History</div>${visits}</div>
       ${assignBox({ mobile, customer:custName, suggested: assignTo, type, isNew:false })}
     </div>`;
   }
@@ -5952,10 +5962,10 @@ function renderWalkinLog(){
   if (isSales) rows = rows.filter(r => up(str(r[4])) === me);
 
   if (note) note.textContent = isSales
-    ? 'Aaj aapko jo customer assign hue — FRESH = naya, FOLLOW-UP = pehle aaya tha. Raat me inki enquiry bana lena.'
-    : 'Aaj ke saare walk-in. Financer baad me add kar sakte ho.';
+    ? 'Customers assigned to you today — FRESH = new, FOLLOW-UP = visited before. Create their enquiries tonight.'
+    : 'All of today\'s walk-ins. You can add the financer later.';
 
-  if (!rows.length) { out.innerHTML = `<div class="empty-note">Aaj abhi tak koi walk-in entry nahi.</div>`; return; }
+  if (!rows.length) { out.innerHTML = `<div class="empty-note">No walk-in entries yet today.</div>`; return; }
 
   out.innerHTML = rows.map(r => {
     const mobile=str(r[2]), cust=str(r[3]), who=str(r[4]), type=up(str(r[5])), fin=str(r[6]), model=str(r[8]);
@@ -6111,7 +6121,7 @@ function renderBvsModel(globalOpenBookings){
   sel.innerHTML = models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   if (prev && models.includes(prev)) sel.value = prev;
   const selectedModel = sel.value || models[0];
-  if (!selectedModel) { result.innerHTML = '<div class="empty-note">Koi model nahi mila (na booking, na stock).</div>'; return; }
+  if (!selectedModel) { result.innerHTML = '<div class="empty-note">No model found (no booking, no stock).</div>'; return; }
 
   // Group this model's open bookings by colour. Each colour has an ACTIVE queue (FIFO by booking
   // date, used for allotment) and a separate HOLD list. A booking whose TDD says "HOLD" means the
@@ -6880,7 +6890,7 @@ function renderSmartSuggestions(){
   if (!el) return;
   const items = computeSmartSuggestions();
   el.innerHTML = items.map(it =>
-    `<div class="chat-item ${it.cls || ''}"><span class="chat-icon">${it.icon}</span><span>${it.cls === 'tip' ? '<strong>Aaj ka tip:</strong> ' : ''}${esc(it.text)}</span></div>`
+    `<div class="chat-item ${it.cls || ''}"><span class="chat-icon">${it.icon}</span><span>${it.cls === 'tip' ? '<strong>Today\'s tip:</strong> ' : ''}${esc(it.text)}</span></div>`
   ).join('');
 }
 
