@@ -3790,18 +3790,33 @@ window.debugTargets = function(){
 // header row, already sliced off) had the names, row 2 the numbers — so in STATE.monthlyTargets
 // the first data row holds the numbers, and we map name→column using the sheet's header names.
 // We stored only data rows, so we re-read the header for the K–R name↔column mapping once.
+// Per-employee retail target from MONTHLY TARGETS columns K–R (index 10–17). gviz sometimes drops
+// the header row's names (type-detection quirk when the data row is numeric), so we map by FIXED
+// column position instead of by header text. Order per Deepak's sheet:
+const EMP_TARGET_COLS = { 10:'ASLAM', 11:'RAKESH', 12:'SANDEEP', 13:'POOJA', 14:'SIMMI', 15:'KASHISH', 16:'SHAISTA', 17:'HARSH' };
 let _EMP_TARGET_MAP = null; // {UPPERNAME: number}
 function empTargetMap(){
   if (_EMP_TARGET_MAP) return _EMP_TARGET_MAP;
   _EMP_TARGET_MAP = {};
-  // STATE.monthlyTargetsHeader holds row 1 (names in K–R); STATE.monthlyTargets[0] holds row 2.
   const hdr = STATE.monthlyTargetsHeader || [];
   const dataRow = (STATE.monthlyTargets && STATE.monthlyTargets[0]) || [];
-  for (let c = 10; c <= 17; c++) {              // K..R
-    const nm = up(str(hdr[c]));
+  // Primary: fixed K–R column positions (reliable — gviz often drops the header names).
+  for (const c in EMP_TARGET_COLS) {
+    const nm = up(EMP_TARGET_COLS[c]);
     const val = num(dataRow[c]);
-    if (nm && !isNaN(val) && dataRow[c] !== '' && dataRow[c] != null) _EMP_TARGET_MAP[nm] = val;
+    if (!isNaN(val) && dataRow[c] !== '' && dataRow[c] != null) _EMP_TARGET_MAP[nm] = val;
   }
+  // If the header names DID load and point somewhere different, let them override (handles the
+  // case where someone re-orders the K–R columns and updates the headers).
+  const known = new Set((STATE.execList || []).map(n => up(n)));
+  CREDENTIALS.forEach(u => { if (u.execKey) known.add(up(u.execKey)); if (u.name) known.add(up(u.name)); });
+  hdr.forEach((cell, c) => {
+    const nm = up(str(cell));
+    if (nm && known.has(nm) && c >= 10) {   // only in the employee-target zone
+      const val = num(dataRow[c]);
+      if (!isNaN(val) && dataRow[c] !== '' && dataRow[c] != null) _EMP_TARGET_MAP[nm] = val;
+    }
+  });
   return _EMP_TARGET_MAP;
 }
 function targetFor(execName){
