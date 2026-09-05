@@ -1583,6 +1583,7 @@
 
     <h2 class="section-title" id="ovLeaderboard">👤 Executive Leaderboard</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
+    <div id="empTargetNote" class="empty-note" style="text-align:left;padding:8px 0 0;display:none;"></div>
 
     <h2 class="section-title" id="ovReviews">⭐ Google Reviews Summary</h2>
     <div class="kpi-grid" id="kpiReviews"></div>
@@ -3896,9 +3897,16 @@ function targetFor(execName){
     const mt = monthlyTargetVal(1);
     if (mt != null) return mt;
   } else {
-    // Per-employee: prefer the K–R value from MONTHLY TARGETS if set for this person.
-    const em = empTargetMap()[up(execName)];
-    if (em != null) return em;
+    // Per-employee: prefer the K–R value from MONTHLY TARGETS if set for this person. Try the
+    // name as-is, then the alias-resolved name, then a first-word match (so "POOJA NEGI" finds
+    // "POOJA" and stray spaces/# don't break it).
+    const map = empTargetMap();
+    const tryKeys = [];
+    const raw = up(str(execName)).trim();
+    tryKeys.push(raw, raw.replace(/^#+/, '').trim(), canonName(execName), up(canonName(execName)).split(/\s+/)[0], raw.split(/\s+/)[0]);
+    for (const k of tryKeys) {
+      if (k && map[k] != null) return map[k];
+    }
   }
   const f = monthYearOfFilter();
   const monthColIdx = f ? f.month : null; // 1=Jan..12=Dec
@@ -4224,6 +4232,23 @@ function renderEmployeeTable(){
       return `class="achv-row" style="--achv-fill:${Math.round(pct*100)}%;--achv-col:${achvMeterColour(pct)}"`;
     }
   });
+  // Small note: confirms where per-employee targets came from, or says plainly why they're missing.
+  const noteEl = document.getElementById('empTargetNote');
+  if (noteEl) {
+    const map = empTargetMap();
+    const found = Object.keys(map).length;
+    const withTarget = rows.filter(r => r.target).length;
+    if (withTarget === 0) {
+      const mtRows = (STATE.monthlyTargets || []).length;
+      noteEl.style.display = '';
+      noteEl.innerHTML = mtRows
+        ? `⚠️ Per-employee targets not found in MONTHLY TARGETS columns K–R. Sheet has ${mtRows} row(s); employee names read: ${found ? Object.keys(map).join(', ') : '(none)'}. Check that row 2 has the numbers under K–R.`
+        : `⚠️ MONTHLY TARGETS sheet is not loading, so employee targets are blank. Check the sheet name and that the file is shared as "Anyone with the link — Viewer".`;
+    } else {
+      noteEl.style.display = 'none';
+      noteEl.innerHTML = '';
+    }
+  }
 
   // Team TOTAL row — summed from the rows actually displayed, so it can never drift
   // out of step with the table above it.
