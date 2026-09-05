@@ -3788,7 +3788,15 @@ function computeDeliveryAgg(execFilterName){
 const _MONTH_NAMES = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12,
   january:1,february:2,march:3,april:4,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
 function normMonthKey(v){
-  if (v instanceof Date && !isNaN(v)) return `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}`;
+  if (v instanceof Date && !isNaN(v)) {
+    // A month cell like "Sep/26" is really 1-Sep midnight, which can be stored as 31-Aug 18:30 UTC
+    // (timezone shift). If a date lands on the LAST day of a month in the afternoon/evening, it's
+    // that artifact — treat it as the next month so the target lands on the right month.
+    const d = new Date(v.getTime());
+    const lastDay = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    if (d.getDate() === lastDay && d.getHours() >= 12) d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
   let s = str(v).trim();
   if (!s) return '';
   // already YYYY-MM or YYYY/MM
@@ -3849,10 +3857,20 @@ window.debugTargets = function(){
 const EMP_TARGET_COLS = { 10:'ASLAM', 11:'RAKESH', 12:'SANDEEP', 13:'POOJA', 14:'SIMMI', 15:'KASHISH', 16:'SHAISTA', 17:'HARSH' };
 let _EMP_TARGET_MAP = null; // {UPPERNAME: number}
 function empTargetMap(){
-  if (_EMP_TARGET_MAP) return _EMP_TARGET_MAP;
+  if (_EMP_TARGET_MAP && Object.keys(_EMP_TARGET_MAP).length) return _EMP_TARGET_MAP;
   _EMP_TARGET_MAP = {};
   const hdr = STATE.monthlyTargetsHeader || [];
-  const dataRow = (STATE.monthlyTargets && STATE.monthlyTargets[0]) || [];
+  const rows = STATE.monthlyTargets || [];
+  // Pick the row that actually carries per-employee numbers in the K–R zone. Prefer the row for
+  // the selected month; otherwise take the first row that has any value there. (A row restored
+  // from the browser backup only has columns A–H, so it must not be mistaken for the real one.)
+  const hasEmpVals = (r) => { for (let c = 10; c <= 17; c++) { const v = r && r[c]; if (v !== '' && v != null && !isNaN(num(v))) return true; } return false; };
+  const f = monthYearOfFilter();
+  const now = new Date();
+  const wantKey = `${f?f.year:now.getFullYear()}-${String(f?f.month:now.getMonth()+1).padStart(2,'0')}`;
+  let dataRow = rows.find(r => hasEmpVals(r) && normMonthKey(r[0]) === wantKey)
+             || rows.find(hasEmpVals)
+             || rows[0] || [];
   // Primary: fixed K–R column positions (reliable — gviz often drops the header names).
   for (const c in EMP_TARGET_COLS) {
     const nm = up(EMP_TARGET_COLS[c]);
