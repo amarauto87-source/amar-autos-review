@@ -2817,7 +2817,9 @@ async function loadAll(silent){
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
     STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
-    STATE.enquiry = enquiry.slice(1).filter(r => str(r[0]));
+    // Keep any row that carries identifying data. (Column A is sometimes blank in exports, so
+    // requiring it silently dropped whole sheets and left reports empty.)
+    STATE.enquiry = enquiry.slice(1).filter(r => str(r[0]) || str(r[5]) || str(r[13]) || str(r[14]));
     STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
     STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
     STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
@@ -2872,7 +2874,16 @@ async function loadAll(silent){
     // Walk-in Check tool data (Ajeet's login). ENQUIRY STATMENT VIEW = RE portal view with the
     // Owner (sales person) column, used to detect repeat customers. TURN = daily roster. WALKIN
     // ENTRY = entries Ajeet saves through the tool (read back so sales/admin can see them).
-    STATE.enqView = (enqView || []).slice(1).filter(r => str(r[27])); // mobile in col AB (r[27])
+    // ENQUIRY STATMENT VIEW. gviz may or may not hand back the header row, so decide by content:
+    // a header row is one whose cells are the column titles. We keep it to resolve columns by NAME
+    // (positions shift when Google drops/adds columns), and treat everything else as data.
+    {
+      const evAll = (enqView || []);
+      const looksLikeHeader = (r) => r && (up(str(r[0])) === 'ENQ NUMBER' || r.some(c => /ENQ NUMBER|MOBILE PHONE|PREVIOUS CALL REMARK/i.test(str(c))));
+      STATE.enqViewHeader = evAll.find(looksLikeHeader) || [];
+      STATE.enqView = evAll.filter(r => !looksLikeHeader(r));
+      _EV_COLS = null; // recompute column positions from the header
+    }
     STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
     STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
     // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
@@ -5198,13 +5209,14 @@ function renderTargetVsActual(){
 // loophole, and a concrete fix. Purely data-driven so it stays honest as the sheet changes.
 function renderSalesPersonAnalysis(){
   const out = document.getElementById('spAnalysisResult'); if (!out) return;
-  const EV = { mobile:27, owner:13, status:12, stage:42, dropReason:40, created:44, model:31, testRide:10, type:15, remark:47 };
+  const EV = evCols(); // resolved from the sheet header, not fixed positions
 
   // Bucket this month's enquiries by owner.
   const byOwner = new Map();
   (STATE.enqView || []).forEach(r => {
     if (!dateInFilter(r[EV.created])) return;         // follow the top month filter
-    const owner = str(r[EV.owner]); if (!owner) return;
+    // Resolve to the real person (so "#ASLAM", "SANJEET", "POOJA NEGI" all land on one name).
+    const owner = canonName(r[EV.owner]); if (!owner) return;
     if (!execInFilter(owner)) return;                  // respect exec filter (admin = all)
     if (!byOwner.has(owner)) byOwner.set(owner, []);
     byOwner.get(owner).push(r);
@@ -5251,29 +5263,29 @@ function renderSalesPersonAnalysis(){
 
     const ins = [];
     // GOOD signals
-    if (s.conv >= 0.25) ins.push(['good','✅',`<b>Conversion strong:</b> ${fmtPct(s.conv)} — team average (${fmtPct(teamConv)}) se ${s.conv>=teamConv?'upar':'theek'}. Achha kaam.`]);
-    if (s.trRate >= 0.6) ins.push(['good','🏍️',`<b>Test ride strong:</b> ${fmtPct(s.trRate)} enquiries ko test ride diya — jo bike chalata hai wo zyada khareedta hai.`]);
-    if (s.noRemarkRate <= 0.15 && s.total >= 5) ins.push(['good','💬',`<b>Follow-up notes achhe:</b> Zyaadatar enquiries me remark likha hai — follow-up track ho raha hai.`]);
+    if (s.conv >= 0.25) ins.push(['good','✅',`<b>Conversion strong:</b> ${fmtPct(s.conv)} — ${s.conv>=teamConv?'above':'in line with'} the team average (${fmtPct(teamConv)}). Good work.`]);
+    if (s.trRate >= 0.6) ins.push(['good','🏍️',`<b>Test rides strong:</b> ${fmtPct(s.trRate)} of enquiries got a test ride — riders who try the bike buy far more often.`]);
+    if (s.noRemarkRate <= 0.15 && s.total >= 5) ins.push(['good','💬',`<b>Follow-up notes good:</b> Most enquiries have a remark written — follow-up is being tracked.`]);
     // BAD / loophole signals
-    if (s.conv < 0.12 && s.total >= 5) ins.push(['bad','🚨',`<b>Low conversion:</b> Sirf ${fmtPct(s.conv)} — ${s.total} me se sirf ${s.booked} booked. Yaha turant dhyan chahiye.`]);
-    if (s.trRate < 0.35 && s.total >= 5) ins.push(['bad','🏍️',`<b>Test ride kam:</b> Sirf ${fmtPct(s.trRate)} ko test ride diya (team avg ${fmtPct(teamTr)}). Har walk-in ko test ride offer karo.`]);
-    if (s.noRemarkRate > 0.3 && s.total >= 5) ins.push(['bad','⚠️',`<b>Follow-up gap (loophole):</b> ${s.noRemark} enquiries me remark khali — follow-up call nahi hua. Ye customer haath se nikal sakte hain.`]);
-    if (s.open > s.booked + s.drop && s.total >= 5) ins.push(['warn','⏳',`<b>Bahut open pade hain:</b> ${s.open} enquiries abhi tak open — na booked na drop. Inpe follow-up karke close karo.`]);
+    if (s.conv < 0.12 && s.total >= 5) ins.push(['bad','🚨',`<b>Low conversion:</b> Only ${fmtPct(s.conv)} — just ${s.booked} booked out of ${s.total}. Needs attention now.`]);
+    if (s.trRate < 0.35 && s.total >= 5) ins.push(['bad','🏍️',`<b>Test rides low:</b> Only ${fmtPct(s.trRate)} got a test ride (team avg ${fmtPct(teamTr)}). Offer a test ride to every walk-in.`]);
+    if (s.noRemarkRate > 0.3 && s.total >= 5) ins.push(['bad','⚠️',`<b>Follow-up gap:</b> ${s.noRemark} enquiries have no remark — no follow-up call was logged. These customers can slip away.`]);
+    if (s.open > s.booked + s.drop && s.total >= 5) ins.push(['warn','⏳',`<b>Too many left open:</b> ${s.open} enquiries are still open — neither booked nor dropped. Follow up and close them.`]);
     // DROP pattern
     if (topDrops.length) {
       const [reason, cnt] = topDrops[0];
       const pctOfDrops = s.drop ? Math.round(cnt/s.drop*100) : 0;
-      if (pctOfDrops >= 30) ins.push(['warn','📉',`<b>Drop pattern:</b> ${pctOfDrops}% drops "${esc(reason)}" ki wajah se. ${/budget|finance|price|emi/i.test(reason)?'Finance/EMI/exchange pehle offer karo.':/stock|available|model/i.test(reason)?'Stock/alternate model ready rakho.':'Is wajah pe kaam karo.'}`]);
+      if (pctOfDrops >= 30) ins.push(['warn','📉',`<b>Drop pattern:</b> ${pctOfDrops}% of drops are due to "${esc(reason)}". ${/budget|finance|price|emi/i.test(reason)?'Offer finance / EMI / exchange earlier.':/stock|available|model/i.test(reason)?'Keep stock or an alternate model ready.':'Work on this reason.'}`]);
     }
     // model focus
-    if (topModel) ins.push(['fix','🎯',`<b>Sabse zyada enquiry:</b> ${esc(topModel[0])} (${topModel[1]}). Is model ki expertise aur stock strong rakho.`]);
+    if (topModel) ins.push(['fix','🎯',`<b>Most enquiries:</b> ${esc(topModel[0])} (${topModel[1]}). Keep strong product knowledge and stock for this model.`]);
     // universal fix line
     const fixes = [];
-    if (s.noRemarkRate > 0.3) fixes.push('har open enquiry pe 48 ghante me follow-up + remark likho');
-    if (s.trRate < 0.35) fixes.push('har customer ko test ride offer karo');
-    if (s.conv < teamConv) fixes.push(`top performer (${stats[0].owner}) ke saath pair karke sikho`);
-    if (fixes.length) ins.push(['fix','🔧',`<b>Sudhaar:</b> ${fixes.join('; ')}.`]);
-    if (!ins.length) ins.push(['good','✅',`<b>Balanced:</b> Koi bada issue nahi — aise hi consistent raho.`]);
+    if (s.noRemarkRate > 0.3) fixes.push('follow up on every open enquiry within 48 hours and write a remark');
+    if (s.trRate < 0.35) fixes.push('offer a test ride to every customer');
+    if (s.conv < teamConv) fixes.push(`pair with the top performer (${stats[0].owner}) to learn`);
+    if (fixes.length) ins.push(['fix','🔧',`<b>To improve:</b> ${fixes.join('; ')}.`]);
+    if (!ins.length) ins.push(['good','✅',`<b>Balanced:</b> No major issue — keep it consistent.`]);
 
     return `<div class="spa-card" data-idx="${idx}">
       <div class="spa-head">
@@ -5895,9 +5907,43 @@ let BVS_ALL_BOOKINGS = [];
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
 const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbxCTXgqYDgiC8mmamXqhZkb--7fkMMrfYHPaS8MBE6wjbxiZ464xANE3kL_JlWBAV4/exec';
 
-// ENQUIRY STATMENT VIEW columns (0-indexed) — from the sheet header Deepak shared.
-const EV = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
+// ENQUIRY STATMENT VIEW columns. Google's reader shifts/drops columns, so we resolve each one by
+// its HEADER NAME and only fall back to the original fixed position if the header didn't load.
+// Everything downstream (walk-in check, sales analysis) uses evCols() instead of hard indices.
+const EV_FALLBACK = { mobile:27, owner:13, name:19, first:20, last:22, status:12, stage:42,
   dropReason:40, created:44, model:31, testRide:10, type:15, remark:47 };
+const EV_HEADER_NAMES = {
+  mobile:     ['MOBILE PHONE','MOBILE','MOBILE NO','PHONE'],
+  owner:      ['OWNER','EMPLOYEE (OWNING USER) (USER)','SALES PERSON','SALES CONSULTANT'],
+  name:       [' NAME','NAME','CUSTOMER NAME','FULL NAME'],
+  first:      ['FIRST NAME'],
+  last:       ['LAST NAME'],
+  status:     ['STATUS'],
+  stage:      ['STAGE'],
+  dropReason: ['DROP REASON','LEAD LOST REASON','LOST REASON'],
+  created:    ['CREATED ON','ENQUIRY CREATED DATE','ENQUIRY CONVERSION DATE'],
+  model:      ['MAIN CONSIDERATION MODEL','MODEL NAME','MODEL'],
+  testRide:   ['TEST RIDE TAKEN','TEST RIDE'],
+  type:       ['TYPE OF ENQUIRY','ENQUIRY TYPE'],
+  remark:     ['PREVIOUS CALL REMARK','REMARK','REMARKS','LEAD INSIGHTS'],
+};
+let _EV_COLS = null;
+function evCols(){
+  if (_EV_COLS) return _EV_COLS;
+  const hdr = (STATE.enqViewHeader || []).map(h => up(str(h)).trim());
+  const find = (names) => {
+    for (const n of names) { const i = hdr.indexOf(up(n).trim()); if (i >= 0) return i; }
+    // loose contains-match as a second pass (handles "Owner (User)" style titles)
+    for (const n of names) { const i = hdr.findIndex(h => h && h.includes(up(n).trim())); if (i >= 0) return i; }
+    return -1;
+  };
+  _EV_COLS = {};
+  Object.keys(EV_FALLBACK).forEach(key => {
+    const i = find(EV_HEADER_NAMES[key] || []);
+    _EV_COLS[key] = i >= 0 ? i : EV_FALLBACK[key];
+  });
+  return _EV_COLS;
+}
 
 // Which day's turn list to use.
 const DAY_NAMES = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
@@ -5948,6 +5994,7 @@ function nextTurnPerson(){
 function historyForMobile(mobile){
   const key = phoneKey(mobile);
   if (!key) return [];
+  const EV = evCols();
   return (STATE.enqView || []).filter(r => phoneKey(r[EV.mobile]) === key).map(r => {
     const status = up(str(r[EV.status]) || str(r[EV.stage]));
     const isDrop = /DROP|LOST|CANCEL|DISQUALIF/.test(status);
@@ -6832,11 +6879,13 @@ const FUNNEL_CHANNELS = [
 // Field Generation → Field (kept separate now, per Deepak). Anything that isn't Walk In /
 // Telephonic / Field / Service (e.g. "Company", blank, or a future "Web" value) → Web / Other.
 function classifyChannel(type){
-  const t = up(type);
-  if (t === 'WALK IN') return 'walkin';
-  if (t === 'TELEPHONIC') return 'tele';
-  if (t === 'SERVICE REFERRAL') return 'service';
-  if (t === 'FIELD GENERATION') return 'field';
+  // Sheets write these a few ways ("Walk In", "WALK-IN", "Walkin", "Service Referral", "Field
+  // Generation"), so match on the distinctive word rather than an exact string.
+  const t = up(type).replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (/\bWALK ?IN\b|^WALKIN$/.test(t)) return 'walkin';
+  if (/TELEPHON|\bTELE\b|\bPHONE\b|\bCALL\b/.test(t)) return 'tele';
+  if (/SERVICE/.test(t)) return 'service';
+  if (/FIELD/.test(t)) return 'field';
   return 'web';
 }
 
@@ -6929,8 +6978,9 @@ function renderPerformanceHeatmap(){
   STATE.enquiry.forEach(r => {
     if (!dateInFilter(r[14])) return;
     if (up(r[9]) !== 'BOOKED') return;
-    const owner = up(str(r[13]));
-    const match = execs.find(e => up(e) === owner);
+    // Alias-aware match: the owner may be written as "#ASLAM", "SANJEET", "POOJA NEGI" etc.
+    const owner = str(r[13]);
+    const match = execs.find(e => execMatches(owner, e));
     if (!match) return;
     grid[match][classifyChannel(r[11])]++;
   });
