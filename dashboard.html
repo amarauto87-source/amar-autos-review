@@ -2839,7 +2839,15 @@ async function loadAll(silent){
       return true;
     }).filter(r => up(r[0]) !== 'TOTAL');
     // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
+    // Alias table: from the separate "Name Map" sheet if present, AND from columns T–X of the
+    // one-sheet TARGET layout (T = real name, U..X = the other spellings/IDs). Either works, so
+    // the whole setup can live in a single sheet if that's easier.
     STATE.nameMapRaw = (nameMap || []).filter(r => str(r[0]));
+    (monthlyTargets || []).forEach(r => {
+      const nm = str(r[19]); // column T
+      if (!nm || up(nm) === 'NAME') return;
+      STATE.nameMapRaw.push([nm, str(r[20]), str(r[21]), str(r[22]), str(r[23])]);
+    });
     _ALIAS_TO_CANON = null; // rebuild alias lookup on next use
     STATE.nameMap = nameMap.filter(r => {
       const owner = str(r[1]);
@@ -2868,12 +2876,18 @@ async function loadAll(silent){
     STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
     STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
     // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
-    // Admin-set monthly targets: from the MONTHLY TARGETS sheet if it exists, plus anything saved
-    // in this browser (localStorage). We keep the header row (row 1) too, because employee names
-    // live in the K–R headers and their targets in the data row below.
-    STATE.monthlyTargetsHeader = (monthlyTargets || [])[0] || [];
-    STATE.monthlyTargets = (monthlyTargets || []).slice(1).filter(r => str(r[0]));
-    _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
+    // Admin-set monthly targets. IMPORTANT: gviz sometimes swallows the first row as "headers"
+    // and sometimes returns it as data — so we must NOT blindly skip row 1. Instead we decide by
+    // content: a DATA row is one whose column A resolves to a month (or that carries per-employee
+    // numbers in K–R); anything else is treated as the header row (which holds the K–R names).
+    {
+      const mtAll = (monthlyTargets || []);
+      const hasEmpNums = (r) => { for (let c = 10; c <= 17; c++) { const v = r && r[c]; if (v !== '' && v != null && isFinite(Number(v))) return true; } return false; };
+      const isDataRow = (r) => !!normMonthKey(r && r[0]) || hasEmpNums(r);
+      STATE.monthlyTargets = mtAll.filter(isDataRow);
+      STATE.monthlyTargetsHeader = mtAll.find(r => !isDataRow(r)) || [];
+      _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
+    }
     try {
       // Browser backup is ONLY a fallback for months the sheet doesn't have. The sheet is the
       // source of truth, so a stale browser copy must never hide the real sheet numbers.
