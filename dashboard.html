@@ -2092,6 +2092,9 @@ function updateFestivalBanner(){
    HARSH, SANDEEP, KASHISH) — confirmed against Deepak's final credentials list, all 9 non-admin
    logins now map 1:1 onto the real execList codes.
 */
+// Staff who have left the dealership. They're removed from the executive list, leaderboard and
+// filters so the team view stays current. Add a name here when someone leaves.
+const EX_EMPLOYEES = new Set(['PRAKSHI']);
 const CREDENTIALS = [
   { name: 'Deepak',  password: 'Superman@123', role: 'Admin', execKey: null },
   { name: 'ASLAM',   password: 'Khan@786',     role: 'Sales', execKey: 'ASLAM' },
@@ -2099,7 +2102,6 @@ const CREDENTIALS = [
   { name: 'SANDEEP', password: 'Sanjeet@123',  role: 'Sales', execKey: 'SANDEEP' },
   { name: 'POOJA',   password: 'Negi@111',     role: 'Sales', execKey: 'POOJA' },
   { name: 'SIMMI',   password: 'Khan@786',     role: 'Sales', execKey: 'SIMMI' },
-  { name: 'PRAKSHI', password: 'Prakshi@123',  role: 'Sales', execKey: 'PRAKSHI' },
   { name: 'SHAISTA', password: 'Shaista@123',  role: 'Sales', execKey: 'SHAISTA' },
   { name: 'HARSH',   password: 'Sharma@111',   role: 'CRT',   execKey: 'HARSH' },
   { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
@@ -2769,6 +2771,23 @@ function matchModelCode(master, bookingModel, bookingColour){
 }
 
 /* ---------------- data loading ---------------- */
+// Optional sheets (added later, may not exist in every copy of the workbook). A single failed or
+// timed-out request used to silently blank the data — e.g. targets showing as 0 — so we retry once
+// after a short pause before giving up. Also records the last error so the UI can explain it.
+let LAST_SHEET_ERROR = {};
+async function fetchSheetOptional(name){
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const rows = await fetchSheetRaw(name);
+      delete LAST_SHEET_ERROR[name];
+      return rows;
+    } catch (e) {
+      LAST_SHEET_ERROR[name] = String(e && e.message ? e.message : e);
+      if (attempt === 0) await new Promise(r => setTimeout(r, 700)); // brief pause, then retry once
+    }
+  }
+  return [[]];
+}
 async function loadAll(silent){
   // silent = true → background auto-refresh: don't pop the full-screen loading overlay and don't
   // disturb the user's scroll position; just swap the data in and re-render in place. The manual
@@ -2790,10 +2809,10 @@ async function loadAll(silent){
       fetchSheetRaw('ENQUIRY STATMENT'),
       fetchSheetRaw('BOOKING MSD'),
       fetchSheetRaw('ACTUL WALKIN'),
-      fetchSheetRaw('ENQUIRY STATMENT VIEW').catch(() => [[]]),  // repeat-customer history source
-      fetchSheetRaw('TURN').catch(() => [[]]),                    // daily turn roster
-      fetchSheetRaw('REGISTER').catch(() => [[]]),                // Ajeet's saved entries
-      fetchSheetRaw('MONTHLY TARGETS').catch(() => [[]]),         // admin-set monthly targets
+      fetchSheetOptional('ENQUIRY STATMENT VIEW'),  // repeat-customer history source
+      fetchSheetOptional('TURN'),                    // daily turn roster
+      fetchSheetOptional('REGISTER'),                // Ajeet's saved entries
+      fetchSheetOptional('MONTHLY TARGETS'),         // admin-set monthly targets
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -2865,7 +2884,9 @@ async function loadAll(silent){
       });
     } catch(e) {}
 
-    STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean);
+    // People who have left — kept out of the executive list, leaderboard, filters and targets.
+    // (Their past deliveries still sit in the sheets; this only hides them as active consultants.)
+    STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean).filter(n => !EX_EMPLOYEES.has(n));
     buildMonthList();
     populateFilters();
     STATE.initialized = true;
@@ -4240,10 +4261,11 @@ function renderEmployeeTable(){
     const withTarget = rows.filter(r => r.target).length;
     if (withTarget === 0) {
       const mtRows = (STATE.monthlyTargets || []).length;
+      const err = LAST_SHEET_ERROR['MONTHLY TARGETS'];
       noteEl.style.display = '';
       noteEl.innerHTML = mtRows
         ? `⚠️ Per-employee targets not found in MONTHLY TARGETS columns K–R. Sheet has ${mtRows} row(s); employee names read: ${found ? Object.keys(map).join(', ') : '(none)'}. Check that row 2 has the numbers under K–R.`
-        : `⚠️ MONTHLY TARGETS sheet is not loading, so employee targets are blank. Check the sheet name and that the file is shared as "Anyone with the link — Viewer".`;
+        : `⚠️ MONTHLY TARGETS sheet did not load${err ? ' — ' + esc(err) : ''}. Try "Force Refresh" once; if it keeps failing, check the sheet name and that the file is shared as "Anyone with the link — Viewer".`;
     } else {
       noteEl.style.display = 'none';
       noteEl.innerHTML = '';
