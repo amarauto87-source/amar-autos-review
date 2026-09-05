@@ -398,6 +398,18 @@
   }
   .kpi-card.kpi-below-target .label { color: var(--critical); }
   .kpi-card.kpi-clickable { transition: transform .12s, border-color .12s; }
+  /* Executive Leaderboard: the whole row acts as a progress meter — filled to the achievement %,
+     coloured red (far from target) → amber → green (at/over target). The fill sits behind the
+     cells so the text stays fully readable. */
+  tr.achv-row { position: relative; }
+  tr.achv-row::after {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: var(--achv-fill, 0%);
+    background: color-mix(in srgb, var(--achv-col, transparent) 15%, transparent);
+    border-right: 3px solid color-mix(in srgb, var(--achv-col, transparent) 65%, transparent);
+    pointer-events: none; z-index: 0;
+  }
+  tr.achv-row > td { position: relative; z-index: 1; }
   .kpi-card.kpi-clickable:hover { transform: translateY(-2px); border-color: var(--critical); }
   .kpi-card .kpi-flag {
     display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px;
@@ -2806,6 +2818,9 @@ async function loadAll(silent){
       if (name.startsWith('🎯') || upn.startsWith('ENTER EACH')) return false; // title / instructions row
       return true;
     }).filter(r => up(r[0]) !== 'TOTAL');
+    // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
+    STATE.nameMapRaw = (nameMap || []).filter(r => str(r[0]));
+    _ALIAS_TO_CANON = null; // rebuild alias lookup on next use
     STATE.nameMap = nameMap.filter(r => {
       const owner = str(r[1]);
       if (!owner) return false;
@@ -3041,10 +3056,44 @@ function dateInFilter(d){
 const EXEC_ALIASES = {
   SANDEEP: ['SANJEET', 'SANJEET SINGH', 'SAJEET', 'SAJEET SINGH'],
 };
+// ── Name aliases ───────────────────────────────────────────────────────────────
+// The same person appears under several spellings/IDs across the sheets (e.g. SANDEEP is written
+// "SANJEET" and "#SANJEET"; RAKESH is also "RAKESH MISHRA" / "#RAKESH MISHRA"). The "Name Map"
+// sheet lists them: column A = the real name, columns B..E = the IDs/aliases used in the data.
+// We build alias → real-name lookup once, so every count lands on one person instead of splitting.
+let _ALIAS_TO_CANON = null;
+function aliasMap(){
+  if (_ALIAS_TO_CANON) return _ALIAS_TO_CANON;
+  _ALIAS_TO_CANON = {};
+  (STATE.nameMapRaw || []).forEach(r => {
+    const canon = up(str(r[0]));
+    if (!canon || canon === 'NAME') return;                  // skip header
+    _ALIAS_TO_CANON[canon] = canon;                          // the name maps to itself
+    for (let c = 1; c < r.length; c++) {                     // ID1..ID4 (and any extra columns)
+      const a = up(str(r[c]));
+      if (a) _ALIAS_TO_CANON[a] = canon;
+    }
+  });
+  return _ALIAS_TO_CANON;
+}
+// Resolve any spelling/ID to the person's real name. Falls back to the value itself.
+function canonName(v){
+  const s = up(str(v)).trim();
+  if (!s) return '';
+  const m = aliasMap();
+  if (m[s]) return m[s];
+  // also try without a leading '#' (data often has "#NAME")
+  const noHash = s.replace(/^#+/, '').trim();
+  if (m[noHash]) return m[noHash];
+  return noHash || s;
+}
 function execMatches(fieldValue, execKey){
   const f = up(fieldValue);
   const k = up(execKey);
   if (!f || !k) return false;
+  // Alias-aware: resolve both sides to the real person first, so "#SANJEET" matches "SANDEEP".
+  const cf = canonName(f), ck = canonName(k);
+  if (cf && ck && cf === ck) return true;
   if (f.includes(k) || k.includes(f)) return true;
   const aliases = EXEC_ALIASES[k] || [];
   return aliases.some(a => f.includes(up(a)) || up(a).includes(f));
@@ -3058,6 +3107,10 @@ function billedOk(status){
   return s === 'BILLED' || s === 'P DONE';
 }
 function mapOwnerToExec(owner){
+  // Prefer the alias table (real name for any ID/spelling); fall back to the older
+  // "owner → sales executive" two-column mapping if that's what the sheet holds.
+  const canon = canonName(owner);
+  if (canon && aliasMap()[up(owner)]) return canon;
   const row = STATE.nameMap.find(r => up(r[1]) === up(owner));
   return row ? up(row[2]) : null;
 }
@@ -4087,6 +4140,17 @@ function renderPipeline(){
       </div>`).join('')}`;
 }
 
+// Colour ramp for the achievement meter: 0% = red, ~50% = amber, 100%+ = green. Interpolates so
+// the bar visibly warms up as someone gets closer to target (rather than jumping between colours).
+function achvMeterColour(pct){
+  const p = Math.max(0, Math.min(1, pct));
+  // red (224,91,75) → amber (224,169,59) → green (76,175,125)
+  const lerp = (a,b,t) => Math.round(a + (b-a)*t);
+  let r,g,b;
+  if (p < 0.5) { const t = p/0.5;  r=lerp(224,224,t); g=lerp(91,169,t);  b=lerp(75,59,t); }
+  else         { const t = (p-0.5)/0.5; r=lerp(224,76,t); g=lerp(169,175,t); b=lerp(59,125,t); }
+  return `rgb(${r},${g},${b})`;
+}
 function renderEmployeeTable(){
   const rows = visibleExecList().map(name => {
     const agg = computeDeliveryAgg(name);
@@ -4114,9 +4178,14 @@ function renderEmployeeTable(){
         const ini = str(v).split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
         return `<span class="name-cell"><span class="mini-av">${esc(ini)}</span>${esc(v)}</span>`;
       } },
-    { key:'retail', label:'Retail', num:true, raw:true, fmt: (v,row) => row.target ? `${fmtInt(v)} / ${fmtInt(row.target)}` : fmtInt(v) },
+    { key:'retail', label:'Retail', num:true },
     { key:'target', label:'Target', num:true },
-    { key:'achv', label:'Achv %', num:true, raw:true, fmt: (v,row) => flagIf(row.target && v < PERF_THRESHOLDS.achv, fmtPct(v)) },
+    // Achievement number, coloured red→green. The row itself carries the progress fill.
+    { key:'achv', label:'Achv %', num:true, raw:true, fmt: (v,row) => {
+        if (!row.target) return fmtPct(v);
+        const col = achvMeterColour(Math.max(0, Math.min(1, v)));
+        return `<span style="color:${col};font-weight:700">${fmtPct(v)}</span>`;
+      } },
     { key:'ewPct', label:'EW %', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.ewPct, fmtPct(v)) },
     { key:'rsaPct', label:'RSA %', num:true, raw:true, fmt: (v,row) => flagIf(row.retail && v < PERF_THRESHOLDS.rsaPct, fmtPct(v)) },
     { key:'gearPct', label:'Gear %', num:true, fmt: fmtPct },
@@ -4129,7 +4198,14 @@ function renderEmployeeTable(){
         ? `<button type="button" class="link-btn" data-overdue-exec="${esc(row.name)}" title="Click to see these bookings">⚠️ ${fmtInt(v)}</button>`
         : fmtInt(v) },
   ];
-  renderStaticTable('tblEmployee', cols, rows);
+  renderStaticTable('tblEmployee', cols, rows, {
+    // Paint the whole row as a progress meter: fill width = achievement %, colour = red→green.
+    rowAttrs: (r) => {
+      if (!r.target) return '';
+      const pct = Math.max(0, Math.min(1, r.achv));
+      return `class="achv-row" style="--achv-fill:${Math.round(pct*100)}%;--achv-col:${achvMeterColour(pct)}"`;
+    }
+  });
 
   // Team TOTAL row — summed from the rows actually displayed, so it can never drift
   // out of step with the table above it.
@@ -7086,11 +7162,14 @@ if (document.getElementById('explorerSheet')) {
 }
 
 /* ---------------- generic table renderers ---------------- */
-function renderStaticTable(tableId, cols, rows){
+function renderStaticTable(tableId, cols, rows, opts){
   const table = document.getElementById(tableId);
   if (!rows.length) { table.innerHTML = `<tr><td class="empty-note">No data for this filter</td></tr>`; return; }
+  // opts.rowAttrs(row) can return extra attributes for the <tr> — used to paint the achievement
+  // progress fill across the whole row.
+  const rowAttrs = (opts && typeof opts.rowAttrs === 'function') ? opts.rowAttrs : null;
   const thead = `<thead><tr>${cols.map(c => `<th class="${c.num ? 'num' : ''}">${esc(c.label)}</th>`).join('')}</tr></thead>`;
-  const tbody = `<tbody>${rows.map(r => `<tr>${cols.map(c => {
+  const tbody = `<tbody>${rows.map(r => `<tr${rowAttrs ? ' ' + rowAttrs(r) : ''}>${cols.map(c => {
     let v = r[c.key];
     if (c.fmt) v = c.fmt(v, r); // fmt gets the whole row too, so a column can flag based on another field
     else if (typeof v === 'number') v = fmtInt(v);
