@@ -3181,9 +3181,15 @@ function canonName(v){
   if (!s) return '';
   const m = aliasMap();
   if (m[s]) return m[s];
-  // also try without a leading '#' (data often has "#NAME")
+  // data often has "# RAKESH" (hash + space) — strip it and retry
   const noHash = s.replace(/^#+/, '').trim();
   if (m[noHash]) return m[noHash];
+  // Last resort: surname/extra words. "ASLAM KHAN", "SIMMI KHAN", "RAKESH MISHRA" should all land
+  // on the first name when that first word is a known sales person.
+  const first = noHash.split(/\s+/)[0];
+  if (first && m[first]) return m[first];
+  const known = new Set((STATE.execList || []).map(up));
+  if (first && known.has(first)) return first;
   return noHash || s;
 }
 function execMatches(fieldValue, execKey){
@@ -6090,7 +6096,20 @@ function evCols(){
   // belong to a different (wider) export — which would silently read the wrong columns and make
   // the whole report look empty. So when the header is missing, work the columns out from the
   // DATA itself: dates, phone numbers, known names, stage keywords and the longest free text.
-  if (!haveHeader) Object.assign(_EV_COLS, sniffEvColumns(_EV_COLS));
+  // Fill in anything the header couldn't resolve by reading the DATA. Google often returns a
+  // partial header (e.g. 17 of 20 cells), so a column like "Created On" can go missing even when
+  // a header exists — without this, the whole report silently shows nothing.
+  const unresolved = Object.keys(_EV_COLS).filter(k => _EV_COLS[k] < 0);
+  if (!haveHeader || unresolved.length) {
+    const sniffed = sniffEvColumns(_EV_COLS);
+    Object.keys(sniffed).forEach(k => {
+      // No header at all → trust what the data says over the old fixed positions (they belong to a
+      // different, wider export). Header present → only fill the gaps it couldn't resolve.
+      if (!haveHeader || _EV_COLS[k] == null || _EV_COLS[k] < 0) _EV_COLS[k] = sniffed[k];
+    });
+    if (_EV_COLS.status < 0 && _EV_COLS.stage >= 0) _EV_COLS.status = _EV_COLS.stage;
+    if (_EV_COLS.stage  < 0 && _EV_COLS.status >= 0) _EV_COLS.stage  = _EV_COLS.status;
+  }
   return _EV_COLS;
 }
 // Infer ENQUIRY STATMENT VIEW columns from the values when there's no header row.
@@ -6107,7 +6126,8 @@ function sniffEvColumns(current){
       if (asDate(v)) dates++;
       const s = str(v).trim(); if (!s) return;
       if (/^\+?\d[\d\s-]{8,14}$/.test(s)) phones++;
-      if (execNames.has(up(s)) || execNames.has(up(s).replace(/^#+/,''))) names++;
+      // owner detection goes through canonName so "# RAKESH", "ASLAM KHAN", "RAKESH MISHRA" count
+      { const cn = canonName(s); if (cn && execNames.has(cn)) names++; }
       if (/^(OPEN|BOOKED|DROPPED|DROP|LOST|QUALIFIED|CONTACTED|RETAILED|NEW|CLOSED|INVOICED|DISQUALIFIED|FOLLOW ?UP)$/i.test(s)) stages++;
       if (/^(Y|N|YES|NO|TRUE|FALSE)$/i.test(s)) yesno++;
       if (/\b(350|650|450|411|CLASSIC|BULLET|HUNTER|METEOR|HIMALAYAN|INTERCEPTOR|CONTINENTAL|SCRAM|SHOTGUN|BEAR|GUERRILLA)\b/i.test(s)) models++;
