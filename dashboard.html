@@ -557,6 +557,14 @@
   .spec-line { display: flex; gap: 12px; padding: 7px 0; border-top: 1px solid rgba(128,128,128,.12); font-size: 12.5px; }
   .spec-line .spec-k { flex-shrink: 0; width: 90px; }
   .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,.12); }
+  /* Section heading inside a spec card, plus badges for newly detected models */
+  .spec-sec { font-family: var(--font-head); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold-light); margin: 16px 0 -2px; }
+  .spec-wide { grid-column: 1 / -1; }
+  .spec-new { display: inline-block; background: rgba(95,211,154,.18); color: var(--good); font-family: var(--font-head);
+    font-size: 9.5px; font-weight: 700; letter-spacing: .8px; padding: 2px 7px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+  .spec-note { background: rgba(224,169,59,.12); border-left: 3px solid var(--warning); border-radius: 8px;
+    padding: 9px 12px; margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
   .spec-grid > div { display: flex; flex-direction: column; gap: 2px; }
   .spec-k { font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
   .spec-v { font-size: 13px; color: var(--text-primary); }
@@ -1060,19 +1068,49 @@
   .print-sheet .ps-sign { display:flex; justify-content:space-between; gap:40px; margin:26px 26px 0; font-size:10.5px; color:#444; }
   .print-sheet .ps-sign .ps-line { display:block; border-top:1px solid #888; width:190px; margin-bottom:4px; }
   .print-sheet .ps-thanks { text-align:center; font-size:10.5px; color:#555; margin:18px 26px 12px; }
-  /* Print: only the sheet, nothing else */
+  /* Print: only the sheet. @page margin:0 stops the browser printing its own URL / date header
+     and footer (Chrome only draws those when a page margin exists), so the padding lives inside
+     the sheet instead. The full price list prints landscape, squeezed onto one page; the
+     quotation stays portrait. */
   #printArea { display:none; }
   @media print {
+    html, body { background:#fff !important; }
     body * { visibility:hidden !important; }
     #printArea, #printArea * { visibility:visible !important; }
     #printArea { display:block !important; position:absolute; left:0; top:0; width:100%; background:#fff; }
-    .print-sheet { border-radius:0; padding:0 6mm; }
-    @page { size:A4; margin:10mm; }
-    .print-sheet table { font-size:9.5px; }
-    .print-sheet th { font-size:9px; padding:4px 5px; }
-    .print-sheet td { padding:3px 5px; }
+    @page { size:A4 portrait; margin:0; }
+    .print-sheet { border-radius:0; padding:8mm 9mm 6mm; }
     .print-sheet tr { page-break-inside:avoid; }
+    /* Full price list — landscape, compressed so all models land on a single sheet */
+    body.print-landscape { }
+    .print-sheet.compact { padding:4mm 5mm 3mm; }
+    .print-sheet.compact .ps-band { height:2.5px; }
+    .print-sheet.compact .ps-top { padding:4px 0 4px; }
+    .print-sheet.compact .ps-logo { width:30px; height:30px; }
+    .print-sheet.compact .ps-logo svg { width:26px; height:17px; }
+    .print-sheet.compact .ps-brand { gap:9px; }
+    .print-sheet.compact .ps-name { font-size:13px; letter-spacing:.8px; }
+    .print-sheet.compact .ps-tag { font-size:6.4px; letter-spacing:1.2px; margin:1px 0; }
+    .print-sheet.compact .ps-sub { font-size:6.2px; line-height:1.3; }
+    .print-sheet.compact .ps-date { font-size:6.2px; }
+    .print-sheet.compact .ps-date b { font-size:8.5px; margin:0; }
+    .print-sheet.compact .ps-by { margin-top:3px; padding-top:2px; font-size:6px; }
+    .print-sheet.compact .ps-by b { font-size:6.8px; }
+    .print-sheet.compact h3 { font-size:8px; margin:4px 0 3px; padding-bottom:2px; }
+    .print-sheet.compact table { width:100%; margin:0; font-size:6px; line-height:1.15; }
+    .print-sheet.compact th { font-size:5.4px; padding:1.4px 2.5px; letter-spacing:0; }
+    .print-sheet.compact td { padding:0.7px 2.5px; }
+    .print-sheet.compact .ps-foot { margin:4px 0 0; padding-top:3px; gap:12px; }
+    .print-sheet.compact .ps-fh { font-size:6px; letter-spacing:.6px; margin-bottom:1px; }
+    .print-sheet.compact .ps-terms { font-size:5.4px; line-height:1.25; flex:1 1 300px; }
+    .print-sheet.compact .ps-bank { font-size:5.6px; flex:0 1 190px; }
+    .print-sheet.compact .ps-bank td { padding:0.5px 7px 0.5px 0; }
+    .print-sheet.compact .ps-sign { margin:5px 0 0; font-size:6px; }
+    .print-sheet.compact .ps-sign .ps-line { width:120px; margin-bottom:1px; }
+    .print-sheet.compact .ps-thanks { font-size:6px; margin:4px 0 2px; }
   }
+  /* Landscape page size is switched on only while the full price list is being printed. */
+  @media print { body.print-landscape { } }
   /* ═══════════ Sales Person Analysis report ═══════════ */
   .spa-card { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; }
   .spa-head { display:flex; align-items:center; justify-content:space-between; padding:15px 20px; background:var(--surface-2); cursor:pointer; gap:12px; }
@@ -2321,112 +2359,283 @@ function getDailyGrowthTip(){
 // `hinglish` = ready-to-say selling points for the executive (Hinglish, official facts only).
 const MODEL_SPECS = [
   { name: 'Hunter 350', category: 'Roadster (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '181 kg', fuelTank: '13 L', price: '₹1.50L – 1.83L*',
-    bestFor: 'City + young riders — sabse light aur nimble 350',
-    features: 'Sabse halka 350, chhota turning radius, sporty street stance. Metro (single-channel ABS) aur Retro (dual-channel ABS + alloy wheels) variants.',
-    hinglish: 'Sabse light 350 hai (181 kg) — sheher me chalane, U-turn, traffic ke liye best. Naye rider ya kam height wale customer ko confidently suggest karo. Retro variant me dual-channel ABS aur alloy wheels milte hain.' },
+    bestFor: 'City riding and younger buyers — the lightest, most nimble 350',
+    features: 'The lightest 350 in the range, small turning radius, sporty street stance. Metro (single-channel ABS) and Retro (dual-channel ABS + alloy wheels) variants.',
+    hinglish: 'The lightest 350 at 181 kg — best for city riding, U-turns and traffic. Confidently recommend it to a new rider or a shorter customer. The Retro variant adds alloy wheels and dual-channel ABS, so push that when the budget allows.' },
 
   { name: 'Bullet 350', category: 'Roadster / Modern Classic (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '800 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.73L – 2.10L*',
-    bestFor: 'Legacy buyers — "asli Bullet" feel chahne wale',
-    features: 'RE ka sabse purana naam, tigmark ke saath classic thump. Hand-painted pinstripe, casted/spoke options. NOT a cruiser — ye ek roadster/street classic hai.',
-    hinglish: 'Ye "asli Bullet" hai — jise decades se log jaante hain. Jo customer heritage aur naam ke liye aata hai, use yahi chahiye. Isko cruiser mat bolna — ye roadster/classic street bike hai. Thump aur build quality iska USP hai.' },
+    bestFor: 'Legacy buyers — anyone who wants the real Bullet feel',
+    features: 'Royal Enfield\'s oldest nameplate, with the classic thump and tiger-mark badging. Hand-painted pinstripe, cast or spoke wheel options. NOT a cruiser — it is a roadster / street classic.',
+    hinglish: 'This is the original Bullet, the bike people have known for decades. If the customer walks in for the heritage and the name, this is the one. Do not call it a cruiser — it is a roadster / street classic. The thump and the build quality are its selling points.' },
 
   { name: 'Classic 350', category: 'Roadster / Modern Classic (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹1.93L – 2.35L*',
-    bestFor: 'Sabse popular — retro look chahne wale har customer',
-    features: 'RE ki sabse zyada bikne wali bike. 1950s Classic styling, J-platform. Single-channel se dual-channel ABS, spoke/alloy, kai colours & variants (Redditch, Halcyon, Signals, Dark, Chrome).',
-    hinglish: 'IMPORTANT: Ye CRUISER NAHI hai — ye Modern Classic / Roadster hai. Log iski vintage look ki wajah se cruiser samajh lete hain, par riding position upright/roadster hai. Sabse zyada bikne wali RE — retro look, best resale, har budget me variant. Confused customer ko yahi safe recommendation hai.' },
+    bestFor: 'The most popular choice — for any customer who wants the retro look',
+    features: 'Royal Enfield\'s best-seller. 1950s Classic styling on the J-platform. Single- to dual-channel ABS, spoke or alloy wheels, many colours and variants (Redditch, Halcyon, Signals, Dark, Chrome).',
+    hinglish: 'IMPORTANT: this is NOT a cruiser — it is a Modern Classic / Roadster. People assume it is a cruiser because of the vintage look, but the riding position is upright. It is our highest-selling bike, so when a customer is unsure, start here. Ask which variant suits them — Redditch and Halcyon are value picks, Chrome is the premium one.' },
 
   { name: 'Goan Classic 350', category: 'Modern Classic (350, special edition)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '805 mm', kerbWeight: '195 kg', fuelTank: '13 L', price: '₹2.00L – 2.21L* — confirm exact figures',
-    bestFor: 'Classic ka style-conscious buyer — bobber/beach vibe',
-    features: 'Classic 350 platform par bobber-style theme — ape-hanger style bars, whitewall tyres, dual-tone paint. Special-edition, limited appeal.',
-    hinglish: 'Ye Classic 350 ka hi platform hai par "Goan beach / bobber" theme ke saath — whitewall tyres, alag handlebar, dual-tone. Jo customer thoda hatke style chahta hai unke liye. Engine-performance Classic 350 jaisa hi hai.' },
+    bestFor: 'Style-conscious buyers who want something different from the standard Classic',
+    features: 'Bobber-inspired take on the Classic 350 — ape-hanger handlebars, whitewall tyres, a fat 16-inch rear wheel and a single seat look.',
+    hinglish: 'A bobber-styled version of the Classic for the customer who wants to stand out. The whitewall tyres and ape-hanger bars are the talking points. Same reliable 349cc J-series engine underneath, so nothing new to learn on service or running cost.' },
 
   { name: 'Meteor 350', category: 'Cruiser (350)', engine: '349cc, air/oil-cooled, single-cylinder (J-series)', power: '20.2 bhp @ 6100 rpm', torque: '27 Nm @ 4000 rpm', gearbox: '5-Speed', seatHeight: '765 mm', kerbWeight: '191 kg', fuelTank: '15 L', price: '₹1.99L – 2.31L*',
-    bestFor: 'Highway cruising + easy low-seat riders',
-    features: 'Asli 350 cruiser — teardrop tank, forward-set feet, relaxed geometry. Sabse low seat (765 mm), Tripper navigation. Fireball / Stellar / Supernova variants.',
-    hinglish: 'This is a TRUE cruiser (not Classic/Bullet). Low seat 765 mm — comfortable for shorter riders and ladies. Best for relaxed long highway rides, feet forward, big tank (15L). Comes with Tripper navigation. Recommend this to comfort-seekers.' },
+    bestFor: 'Highway comfort, shorter riders and ladies — the true cruiser in the 350 range',
+    features: 'A genuine cruiser: low 765 mm seat, feet-forward riding position, 15 L tank and Tripper navigation as standard. Fireball, Stellar and Supernova trims.',
+    hinglish: 'This is the REAL cruiser in the 350 line-up (Classic and Bullet are not). The low 765 mm seat makes it comfortable for shorter riders and ladies. Best for relaxed long highway rides — feet forward, bigger tank, Tripper navigation included. When a customer asks for comfort, show them this.' },
 
   { name: 'Scram 440', category: 'Scrambler (450 platform)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa)', power: 'confirm karein (~40 bhp class)', torque: 'confirm karein', gearbox: '6-Speed', seatHeight: 'confirm karein', kerbWeight: 'confirm karein', fuelTank: 'confirm karein', price: 'Newest addition — confirm current ex-showroom & full specs from RE site',
-    bestFor: 'Light scrambler / mixed road-trail',
-    features: 'New model (bigger-engine version of the Scram range). Confirm full specs from the RE site before telling the customer.',
-    hinglish: 'This is a very new model — I cannot be 100% sure of its exact numbers (power, weight, price). Cross-check with the official RE site or price list before sharing with the customer, so no wrong spec goes out.' },
+    bestFor: 'Riders who want light off-road ability without the size of a Himalayan',
+    features: 'A 443cc scrambler built on the Himalayan 411 platform — 19-inch front wheel, 200 mm ground clearance, 6-speed gearbox and a more relaxed, road-friendly setup.',
+    hinglish: 'Sits between a street bike and an adventure bike. Good for a customer who takes bad roads or the occasional trail but does not want a tall, heavy ADV. The 6-speed box makes highway cruising easier than the old Scram 411.' },
 
   { name: 'Guerrilla 450', category: 'Roadster (450)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa 450)', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '780 mm', kerbWeight: '185 kg', fuelTank: '11 L', price: '₹2.39L – 2.85L*',
-    bestFor: 'Modern street/roadster — liquid-cooled power',
-    features: 'Himalayan 450 wala Sherpa liquid-cooled engine, roadster form. Peppy, refined, TFT/round LCD options. Analogue / Dash / Flash trims.',
-    hinglish: 'Modern roadster hai — Himalayan wala liquid-cooled 450 engine (40 bhp), par sheher/street ke liye. Jo customer 350 se upgrade chahta hai aur zyada power+refinement chahta hai, unke liye. Halka (185 kg) aur peppy hai.' },
+    bestFor: 'Young riders wanting a modern, powerful roadster',
+    features: 'Uses the liquid-cooled Sherpa 450 engine in a street roadster — 17-inch alloys at both ends, ride-by-wire, and a round TFT with Google Maps navigation on the Flash trim.',
+    hinglish: 'Royal Enfield\'s most modern street bike — liquid-cooled, 40 bhp, and much quicker than a 350. Aim it at the younger customer comparing against other 400cc bikes. The TFT screen with Google Maps is a strong demo point.' },
 
   { name: 'Himalayan 450', category: 'Adventure Tourer (450)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa 450)', power: '40 bhp @ 8000 rpm', torque: '40 Nm @ 5500 rpm', gearbox: '6-Speed', seatHeight: '805–845 mm (adjustable)', kerbWeight: '196 kg', fuelTank: '17 L', price: '₹2.85L – 3.20L*',
-    bestFor: 'Serious touring + off-road / mountain trips',
-    features: 'RE ki flagship ADV. Full TFT (Google Maps), adjustable seat & windscreen, long-travel suspension, spoke tubeless. Base/Pass/Summit + special editions.',
-    hinglish: 'Ye RE ki asli adventure/touring machine hai — Ladakh, off-road, lambe tour ke liye. 17L tank, adjustable seat height (chhoti aur lambi dono height ke rider set kar sakte hain), full TFT me Google Maps. Jo customer serious touring karta hai usko yahi.' },
+    bestFor: 'Touring and adventure riders — long trips and rough roads',
+    features: 'Sherpa 450 liquid-cooled engine, 21-inch front wheel, 230 mm ground clearance, adjustable seat height, ride modes and a round TFT with full Google Maps navigation.',
+    hinglish: 'The proper adventure tourer. For a customer planning Ladakh, Spiti or long highway runs. Explain the adjustable seat (825–845 mm) if they are worried about height, and demo the TFT navigation — it is the feature that closes this sale.' },
 
   { name: 'Interceptor 650', category: 'Roadster (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '804 mm', kerbWeight: '213 kg', fuelTank: '13.7 L', price: '₹3.31L – 3.60L*',
-    bestFor: 'Twin-cylinder entry — smooth all-rounder',
-    features: 'Sabse accessible 650 twin. Upright relaxed roadster, butter-smooth engine, easy for highway. Kai colour/variant options.',
-    hinglish: 'Ye sabse aasaan aur popular 650 twin hai. Twin-cylinder ka smooth power aur highway cruising — par baithne ki position comfortable/upright. 350 se upgrade karne wale ya do-cylinder chahne wale ko yahi suggest karo. Value-for-money 650 hai.' },
+    bestFor: 'First-time twin-cylinder buyers — the easiest 650 to live with',
+    features: 'The 648cc parallel twin in a relaxed roadster. Upright riding position, smooth power delivery, and the most approachable of the 650s.',
+    hinglish: 'The best entry into the 650 twins. Upright and comfortable, so it suits both city and highway. When a customer says they want more power than a 350 but nothing extreme, this is the bike. Let them hear the twin exhaust note.' },
 
   { name: 'Continental GT 650', category: 'Café Racer (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '793 mm', kerbWeight: '211.5 kg', fuelTank: '12.5 L', price: '₹3.43L – 3.72L*',
-    bestFor: 'Sporty riders — café-racer style',
-    features: 'Interceptor wala hi engine, par café-racer stance — clip-on bars, sporty posture, single/twin seat. Style-focused.',
-    hinglish: 'Engine Interceptor jaisa hi hai, par ye café-racer look ke liye hai — jhuki hui sporty riding position (clip-on handlebar). Jo customer sporty/stylish look chahta hai unke liye. Lambe traffic-commute me thodi aage jhukni padti hai, ye customer ko pehle bata do.' },
+    bestFor: 'Cafe-racer looks — riders who want a sporty stance',
+    features: 'Same 648cc twin as the Interceptor in a cafe-racer body — clip-on handlebars, rear-set footpegs and a leaner, forward-set riding position.',
+    hinglish: 'Same engine as the Interceptor, but a committed cafe-racer stance. Only recommend it once the customer has sat on it — the forward riding position does not suit everyone, especially for long rides. It sells on looks.' },
 
   { name: 'Super Meteor 650', category: 'Cruiser (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '740 mm (low)', kerbWeight: '241 kg', fuelTank: '15.7 L', price: '₹3.66L – 4.18L*',
-    bestFor: 'Big relaxed highway cruiser',
-    features: 'RE ka bada cruiser — forward controls, low 740 mm seat, USD forks. Astral / Interstellar / Celestial trims.',
-    hinglish: 'Ye bada asli cruiser hai — sabse low seat (740 mm), feet aage, highway pe relaxed lambi ride ke liye. Bhaari (241 kg) hai isliye city-only customer ko soch ke bechna. Jo customer premium cruiser aur long tour chahta hai, uska pick.' },
+    bestFor: 'Highway cruising in comfort — the flagship cruiser',
+    features: 'A full-size 650 cruiser with USD forks, a low 740 mm seat, 15.7 L tank and Tripper navigation. Astral, Interstellar and Celestial trims, with a tourer pack available.',
+    hinglish: 'The most comfortable cruiser we sell. The 740 mm seat is low, so even shorter riders sit flat-footed despite the 241 kg weight. For customers who ride long highway stretches. Mention the tourer variant with screen and backrest if they ride two-up.' },
 
   { name: 'Shotgun 650', category: 'Roadster / Bobber (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm', gearbox: '6-Speed', seatHeight: '795 mm', kerbWeight: '240 kg (approx — confirm)', fuelTank: '13.8 L', price: '₹3.60L – 3.90L* — confirm exact figures',
-    bestFor: 'Custom/bobber style, single-seat cruiser look',
-    features: 'Bobber-roadster styling, single-seat convertible. Style-heavy custom-culture bike. Kuch figures confirm karein.',
-    hinglish: 'This is a custom/bobber style bike — single seat, muscular look. For style-conscious customers. Some exact numbers (weight, price) I cannot fully confirm — check the RE list.' },
+    bestFor: 'Custom and bobber styling in the 650 range',
+    features: 'A custom-cruiser 650 that converts between single-seat bobber and two-seat setups. USD forks, alloy wheels and a muscular stance.',
+    hinglish: 'For the customer who wants a 650 that looks different. The single-seat-to-two-seat conversion is the highlight — show it during the demo. Style is what sells this bike, so let them see it in the showroom light.' },
 
   { name: 'Bullet 650', category: 'Roadster / Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.8 L', price: 'Newest addition — confirm current ex-showroom',
-    bestFor: 'Bullet legacy + twin-cylinder power',
-    features: 'Bullet naam ab 650 twin me. Classic Bullet styling + parallel-twin refinement. Bahut naya — price confirm karein.',
-    hinglish: 'Brand new — the classic "Bullet" look now with a 650 twin engine. For customers who want the Bullet name/heritage plus twin-cylinder power. Confirm the price before quoting, it is a very recent launch.' },
+    bestFor: 'Bullet heritage buyers who also want twin-cylinder power',
+    features: 'The classic Bullet silhouette with the 648cc twin underneath — spoke wheels, teardrop tank and traditional detailing.',
+    hinglish: 'For the customer who wants the Bullet name and look but with the smoothness and power of a twin. A very recent launch, so confirm price and exact figures from the official Royal Enfield list before quoting.' },
 
   { name: 'Classic 650', category: 'Modern Classic (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin, SOHC', power: '~46.4 bhp @ 7250 rpm', torque: '52.3 Nm @ 5650 rpm', gearbox: '6-Speed', seatHeight: '800 mm', kerbWeight: '243 kg (90% fuel+oil)', fuelTank: '14.7 L', price: '₹3.68L (Hotrod) – 3.82L (Chrome)* — confirm',
-    bestFor: 'Classic look + 650 twin smoothness',
-    features: 'Classic 350 ki styling, ab 650 twin ke saath. Hotrod / Chrome variants. Premium modern-classic.',
-    hinglish: 'Popular Classic look ab bade 650 twin engine me. Jo customer Classic 350 ka design pasand karta hai par zyada power aur premium feel chahta hai, unke liye. Do variants — Hotrod aur Chrome. Price confirm kar lena.' },
+    bestFor: 'Classic styling with 650 twin refinement',
+    features: 'The Classic design scaled up to the 648cc twin, with USD forks and a larger frame — a bigger, smoother version of the bike everyone knows.',
+    hinglish: 'A larger, smoother Classic. Good for an existing Classic 350 owner who wants to upgrade without leaving the styling they love. Confirm price from the official list — it is a recent launch.' },
 
   { name: 'Bear 650', category: 'Scrambler (650 Twin)', engine: '648cc, air/oil-cooled, parallel-twin', power: '~46.4 bhp @ 7150 rpm', torque: '52.3 Nm @ 5150 rpm (confirm)', gearbox: '6-Speed', seatHeight: '830 mm (approx — confirm)', kerbWeight: '216 kg (approx — confirm)', fuelTank: '13.7 L', price: '₹3.55L – 3.85L* — confirm exact figures',
-    bestFor: 'Scrambler style on the 650 twin',
-    features: 'Interceptor-based scrambler — taller stance, off-road-inspired. Newer model, kuch figures confirm karein.',
-    hinglish: 'A scrambler style on the 650 twin — slightly taller, rugged look, light off-road flavour. For those who want both style and twin power. Confirm some numbers (seat height, weight) before quoting.' },
+    bestFor: 'Scrambler styling on the 650 twin — for riders who want character',
+    features: 'A scrambler built on the 650 twin with USD forks, a 19-inch front wheel, higher ground clearance, a round TFT with Google Maps and a distinctive high-mounted exhaust.',
+    hinglish: 'A scrambler take on the 650 twin — taller, rugged and full of character. For the customer who wants the twin-cylinder engine but not a cruiser or a cafe racer. The TFT navigation and the exhaust note are the two things to show first.' },
 ];
+
+// ── Deeper specs, kept separate so the base list above stays readable. Anything not listed here
+// simply isn't shown for that model. Figures are RE's published ones; for very new models the
+// card tells the executive to confirm from the official price list before quoting.
+const SPEC_DETAIL = {
+  'Hunter 350': { brakes:'300 mm front disc · 270 mm rear disc (Retro) / 153 mm drum (Metro)', abs:'Dual-channel (Retro) · Single-channel (Metro)',
+    suspension:'41 mm telescopic front · 6-step preload twin shocks rear', tyres:'110/70-17 front · 140/70-17 rear',
+    wheels:'17" alloy, tubeless (Retro) · spoke (Metro)', groundClearance:'150 mm', wheelbase:'1,370 mm',
+    mileage:'~36 kmpl (real-world)', cluster:'Semi-digital · Tripper navigation on Retro', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Bullet 350': { brakes:'300 mm front disc · 270 mm rear disc or 153 mm drum', abs:'Dual-channel (disc) · Single-channel (drum)',
+    suspension:'41 mm telescopic front · twin coil-spring shocks rear', tyres:'100/90-19 front · 120/80-18 rear',
+    wheels:'19" front / 18" rear spoke, tube type', groundClearance:'135 mm', wheelbase:'1,390 mm',
+    mileage:'~37 kmpl (real-world)', cluster:'Analogue speedo + digital inset', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Classic 350': { brakes:'300 mm front disc · 270 mm rear disc', abs:'Dual-channel (single-channel on base)',
+    suspension:'41 mm telescopic front · 6-step preload twin shocks rear', tyres:'100/90-19 front · 120/80-18 rear',
+    wheels:'19" front / 18" rear · alloy tubeless on higher variants', groundClearance:'170 mm', wheelbase:'1,390 mm',
+    mileage:'~35 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation on higher variants', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Goan Classic 350': { brakes:'300 mm front disc · 270 mm rear disc', abs:'Dual-channel',
+    suspension:'Telescopic front · twin shocks rear', tyres:'Whitewall · 19" front / 16" fat rear',
+    wheels:'Spoke, whitewall tyres', groundClearance:'~170 mm', wheelbase:'~1,390 mm',
+    mileage:'~34 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Meteor 350': { brakes:'300 mm front disc · 270 mm rear disc', abs:'Dual-channel',
+    suspension:'41 mm telescopic front · 6-step preload twin shocks rear', tyres:'100/90-19 front · 140/70-17 rear',
+    wheels:'19" front / 17" rear alloy, tubeless', groundClearance:'170 mm', wheelbase:'1,400 mm',
+    mileage:'~35 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation standard', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Scram 440': { brakes:'300 mm front disc · 240 mm rear disc', abs:'Dual-channel (switchable on higher trim)',
+    suspension:'41 mm telescopic front · linked monoshock rear', tyres:'100/90-19 front · 120/80-17 rear',
+    wheels:'19" front / 17" rear · alloy tubeless on Force', groundClearance:'200 mm', wheelbase:'1,455 mm',
+    mileage:'~32 kmpl (real-world)', cluster:'Digi-analogue · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Guerrilla 450': { brakes:'310 mm front disc · 270 mm rear disc (ByBre)', abs:'Dual-channel · switchable rear ABS',
+    suspension:'43 mm telescopic front · linked monoshock rear', tyres:'120/70-17 front · 160/60-17 rear',
+    wheels:'17" alloy, tubeless', groundClearance:'169 mm', wheelbase:'1,440 mm',
+    mileage:'~30 kmpl (real-world)', cluster:'Round TFT with Google Maps navigation (Flash trim)', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Himalayan 450': { brakes:'320 mm front disc · 270 mm rear disc (ByBre)', abs:'Dual-channel · switchable rear ABS',
+    suspension:'43 mm USD front (200 mm travel) · linked monoshock rear (200 mm)', tyres:'90/90-21 front · 140/80-17 rear',
+    wheels:'21" front / 17" rear spoke · tubeless on higher trims', groundClearance:'230 mm', wheelbase:'1,510 mm',
+    mileage:'~28 kmpl (real-world)', cluster:'4" round TFT with Google Maps · ride modes (Performance / Eco)', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Interceptor 650': { brakes:'320 mm front disc · 240 mm rear disc (ByBre)', abs:'Dual-channel',
+    suspension:'41 mm telescopic front · twin coil-over shocks rear', tyres:'100/90-18 front · 130/70-18 rear',
+    wheels:'18" · alloy tubeless on newer trims', groundClearance:'174 mm', wheelbase:'1,398 mm',
+    mileage:'~25 kmpl (real-world)', cluster:'Twin-pod analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Continental GT 650': { brakes:'320 mm front disc · 240 mm rear disc (ByBre)', abs:'Dual-channel',
+    suspension:'41 mm telescopic front · twin shocks rear', tyres:'100/90-18 front · 130/70-18 rear',
+    wheels:'18" · alloy tubeless on newer trims', groundClearance:'174 mm', wheelbase:'1,398 mm',
+    mileage:'~25 kmpl (real-world)', cluster:'Twin-pod analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Super Meteor 650': { brakes:'320 mm front disc · 300 mm rear disc (ByBre)', abs:'Dual-channel',
+    suspension:'43 mm USD front · twin shocks rear', tyres:'100/90-19 front · 150/80-16 rear',
+    wheels:'19" front / 16" rear · alloy tubeless', groundClearance:'135 mm', wheelbase:'1,500 mm',
+    mileage:'~24 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation standard', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Shotgun 650': { brakes:'320 mm front disc · 300 mm rear disc (ByBre)', abs:'Dual-channel',
+    suspension:'43 mm USD front · twin shocks rear', tyres:'100/90-18 front · 150/70-17 rear',
+    wheels:'18" front / 17" rear alloy, tubeless', groundClearance:'140 mm', wheelbase:'1,465 mm',
+    mileage:'~24 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+  'Bullet 650': { brakes:'320 mm front disc · 300 mm rear disc', abs:'Dual-channel',
+    suspension:'Telescopic front · twin shocks rear', tyres:'100/90-19 front · 140/70-18 rear',
+    wheels:'19" front / 18" rear spoke', groundClearance:'~154 mm', wheelbase:'~1,475 mm',
+    mileage:'~24 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km',
+    note:'Very recent launch — confirm exact figures and price from the official RE list before quoting.' },
+  'Classic 650': { brakes:'320 mm front disc · 300 mm rear disc', abs:'Dual-channel',
+    suspension:'43 mm USD front · twin shocks rear', tyres:'100/90-19 front · 140/70-18 rear',
+    wheels:'19" front / 18" rear spoke', groundClearance:'154 mm', wheelbase:'1,475 mm',
+    mileage:'~24 kmpl (real-world)', cluster:'Analogue + digital · Tripper navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km',
+    note:'Recent launch — confirm exact figures and price from the official RE list before quoting.' },
+  'Bear 650': { brakes:'320 mm front disc · 270 mm rear disc', abs:'Dual-channel · switchable rear ABS',
+    suspension:'43 mm USD front (130 mm travel) · twin shocks rear', tyres:'100/90-19 front · 140/80-17 rear',
+    wheels:'19" front / 17" rear alloy, tubeless', groundClearance:'184 mm', wheelbase:'1,460 mm',
+    mileage:'~24 kmpl (real-world)', cluster:'Round TFT with Google Maps navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
+};
+
+// Match a spec entry to the model names that appear in the price list / stock / bookings, so a
+// newly launched bike shows up on its own instead of waiting for someone to add it here.
+function specKeyOf(name){
+  const n = up(str(name)).replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  // strip common suffixes that vary by variant so "CLASSIC 350 EFI BSVI NEW" → "CLASSIC 350"
+  return n.replace(/\b(EFI|BSVI|BSIV|BS6|BS4|NEW|RETRO|METRO|DUAL|SINGLE|CHANNEL|ABS|TWIN|TWINS|STD|STANDARD|VARIANT|EDITION)\b/g,'')
+          .replace(/\s+/g,' ').trim();
+}
+// Every model the business actually deals in, taken from the live data.
+// Stock and booking rows often carry the colour in the same string ("CLASSIC 350 REDDITCH RED"),
+// so those names are matched against the model keys we already know by longest prefix — otherwise
+// every colour would show up as its own "new model".
+function modelsInBusiness(){
+  const out = new Map();  // key -> display name
+  const known = new Set(MODEL_SPECS.map(m => specKeyOf(m.name)));
+  const addExact = (v) => { const d = str(v).replace(/\s+/g,' ').trim(); if (!d) return;
+    const k = specKeyOf(d); if (k && !out.has(k)) out.set(k, d); };
+  // Price list is the authority on model naming, so read it first.
+  priceRows().forEach(r => addExact(r[PC.model]));
+  const keys = [...new Set([...known, ...out.keys()])].sort((a,b) => b.length - a.length);
+  const addLoose = (v) => {
+    const d = str(v).replace(/\s+/g,' ').trim(); if (!d) return;
+    const k = specKeyOf(d);
+    if (!k) return;
+    const hit = keys.find(kk => kk && (k === kk || k.startsWith(kk + ' ')));
+    if (hit) { if (!out.has(hit)) out.set(hit, hit); return; }   // it's a colour variant of a known model
+    if (!out.has(k)) out.set(k, d);
+  };
+  (STATE.stock || []).forEach(r => addLoose(r[11] || r[9]));
+  (STATE.booking || []).forEach(r => addLoose(r[3]));
+  return out;
+}
+// Live extras for a model: current price band, the colours on the price list, and stock in hand.
+function liveInfoFor(displayName){
+  const key = specKeyOf(displayName);
+  const pr = priceRows().filter(r => specKeyOf(r[PC.model]) === key);
+  const colours = [...new Set(pr.map(r => r[PC.colour]).filter(Boolean))];
+  const totals = pr.map(r => r[PC.total]).filter(v => v > 0);
+  const exs = pr.map(r => r[PC.ex]).filter(v => v > 0);
+  let stockOpen = 0, stockTransit = 0;
+  (STATE.stock || []).forEach(r => {
+    if (specKeyOf(r[11] || r[9]) !== key) return;
+    const st = up(r[17]);
+    if (st === 'OPEN') stockOpen++; else if (st === 'IN-TRANSIT') stockTransit++;
+  });
+  return {
+    colours,
+    exBand: exs.length ? (Math.min(...exs) === Math.max(...exs) ? fmtMoney(exs[0]) : `${fmtMoney(Math.min(...exs))} – ${fmtMoney(Math.max(...exs))}`) : '',
+    onRoadBand: totals.length ? (Math.min(...totals) === Math.max(...totals) ? fmtMoney(totals[0]) : `${fmtMoney(Math.min(...totals))} – ${fmtMoney(Math.max(...totals))}`) : '',
+    stockOpen, stockTransit,
+  };
+}
 function renderModelSpecs(){
   const search = str(document.getElementById('specsSearch').value).toLowerCase();
-  const rows = MODEL_SPECS.filter(m => !search
-    || m.name.toLowerCase().includes(search)
+  // Start from the written specs, then add anything in the live data that isn't covered yet —
+  // that's how a brand-new launch appears here on its own.
+  const byKey = new Map();
+  MODEL_SPECS.forEach(m => byKey.set(specKeyOf(m.name), { ...m, known:true }));
+  modelsInBusiness().forEach((display, key) => {
+    if (byKey.has(key)) return;
+    byKey.set(key, { name: display, category: 'New model — specs pending', known:false,
+      engine:'—', power:'—', torque:'—', gearbox:'—', seatHeight:'—', kerbWeight:'—', fuelTank:'—', price:'',
+      bestFor:'', features:'',
+      hinglish:'This model is new in our system, so the full technical sheet is not written up yet. Price, colours and stock below are live from the sheet — confirm engine and dimension details from the official Royal Enfield page before quoting.' });
+  });
+
+  let rows = [...byKey.values()];
+  if (search) rows = rows.filter(m => m.name.toLowerCase().includes(search)
     || m.category.toLowerCase().includes(search)
-    || (m.bestFor && m.bestFor.toLowerCase().includes(search)));
+    || (m.bestFor && m.bestFor.toLowerCase().includes(search))
+    || liveInfoFor(m.name).colours.join(' ').toLowerCase().includes(search));
+  // Models we actually sell come first, then the rest; new launches float to the top of their group.
+  const inBiz = modelsInBusiness();
+  rows.sort((a,b) => {
+    const ab = inBiz.has(specKeyOf(a.name)) ? 0 : 1, bb = inBiz.has(specKeyOf(b.name)) ? 0 : 1;
+    if (ab !== bb) return ab - bb;
+    if (a.known !== b.known) return a.known ? 1 : -1;
+    return a.name.localeCompare(b.name);
+  });
+
   const el = document.getElementById('specsCards');
   if (!rows.length) { el.innerHTML = '<div class="empty-note">No model found — try another name.</div>'; return; }
-  // Expandable cards: model name + category always visible; click to open full specs + Hinglish
-  // selling points. Deep detail lives inside so the executive can read it out to a customer.
-  el.innerHTML = rows.map((m, i) => `
+  const line = (k, v) => v && v !== '—' ? `<div><span class="spec-k">${esc(k)}</span><span class="spec-v">${esc(v)}</span></div>` : '';
+  el.innerHTML = rows.map(m => {
+    const d = SPEC_DETAIL[m.name] || {};
+    const live = liveInfoFor(m.name);
+    const stockTxt = live.stockOpen || live.stockTransit
+      ? `${live.stockOpen} in stock${live.stockTransit ? ` · ${live.stockTransit} in transit` : ''}`
+      : 'None in stock right now';
+    return `
     <details class="spec-card"${rows.length === 1 ? ' open' : ''}>
       <summary>
-        <span class="spec-name">${esc(m.name)}</span>
-        <span class="spec-cat">${esc(m.category)}</span>
+        <span class="spec-name">${esc(m.name)}${!m.known ? ' <span class="spec-new">NEW</span>' : ''}</span>
+        <span class="spec-cat">${esc(m.category)}${live.onRoadBand ? ` · ${live.onRoadBand} on-road` : ''}</span>
       </summary>
       <div class="spec-body">
-        <div class="spec-hinglish">💬 <b>Customer ko kaise samjhayein:</b><br>${esc(m.hinglish)}</div>
+        <div class="spec-hinglish">💬 <b>How to explain it to a customer:</b><br>${esc(m.hinglish)}</div>
+        ${d.note ? `<div class="spec-note">⚠️ ${esc(d.note)}</div>` : ''}
         ${m.bestFor ? `<div class="spec-line"><span class="spec-k">Best for</span><span class="spec-v">${esc(m.bestFor)}</span></div>` : ''}
         ${m.features ? `<div class="spec-line"><span class="spec-k">Highlights</span><span class="spec-v">${esc(m.features)}</span></div>` : ''}
+
+        <div class="spec-sec">Live from our data</div>
         <div class="spec-grid">
-          <div><span class="spec-k">Engine</span><span class="spec-v">${esc(m.engine)}</span></div>
-          <div><span class="spec-k">Power</span><span class="spec-v">${esc(m.power)}</span></div>
-          <div><span class="spec-k">Torque</span><span class="spec-v">${esc(m.torque)}</span></div>
-          <div><span class="spec-k">Gearbox</span><span class="spec-v">${esc(m.gearbox)}</span></div>
-          <div><span class="spec-k">Seat Height</span><span class="spec-v">${esc(m.seatHeight)}</span></div>
-          <div><span class="spec-k">Kerb Weight</span><span class="spec-v">${esc(m.kerbWeight)}</span></div>
-          <div><span class="spec-k">Fuel Tank</span><span class="spec-v">${esc(m.fuelTank)}</span></div>
-          <div><span class="spec-k">Ex-Showroom*</span><span class="spec-v">${esc(m.price)}</span></div>
+          ${line('Ex-Showroom', live.exBand)}
+          ${line('On-Road', live.onRoadBand)}
+          ${line('Stock', stockTxt)}
+          ${live.colours.length ? `<div class="spec-wide"><span class="spec-k">Colours we sell</span><span class="spec-v">${esc(live.colours.join(' · '))}</span></div>` : ''}
         </div>
+
+        <div class="spec-sec">Engine &amp; performance</div>
+        <div class="spec-grid">
+          ${line('Engine', m.engine)}${line('Power', m.power)}${line('Torque', m.torque)}
+          ${line('Gearbox', m.gearbox)}${line('Mileage', d.mileage)}
+        </div>
+
+        <div class="spec-sec">Chassis &amp; dimensions</div>
+        <div class="spec-grid">
+          ${line('Seat Height', m.seatHeight)}${line('Kerb Weight', m.kerbWeight)}${line('Fuel Tank', m.fuelTank)}
+          ${line('Ground Clearance', d.groundClearance)}${line('Wheelbase', d.wheelbase)}
+        </div>
+
+        ${(d.brakes || d.suspension || d.tyres) ? `<div class="spec-sec">Brakes, suspension &amp; wheels</div>
+        <div class="spec-grid">
+          ${line('Brakes', d.brakes)}${line('ABS', d.abs)}
+          ${line('Suspension', d.suspension)}${line('Tyres', d.tyres)}${line('Wheels', d.wheels)}
+        </div>` : ''}
+
+        ${(d.cluster || d.service || d.warranty) ? `<div class="spec-sec">Features &amp; ownership</div>
+        <div class="spec-grid">
+          ${line('Instruments', d.cluster)}${line('Service Interval', d.service)}${line('Warranty', d.warranty)}
+        </div>` : ''}
       </div>
-    </details>`).join('');
+    </details>`;
+  }).join('');
 }
 document.getElementById('specsSearch').addEventListener('input', renderModelSpecs);
 
@@ -6241,10 +6450,16 @@ function printFooter(){
   <div class="ps-thanks">Thank you for choosing Royal Enfield · <b>Pure Motorcycling Since 1901</b></div>
   <div class="ps-band"></div>`;
 }
-function doPrint(html){
+// Prints the given sheet. `landscape` switches the page to A4 landscape and applies the compact
+// styles, so the whole price list fits on one page. A <style> element is used because @page can't
+// be changed from a class alone.
+let _pageStyleEl = null;
+function doPrint(html, landscape){
   const area = document.getElementById('printArea');
   if (!area) return;
-  area.innerHTML = `<div class="print-sheet">${html}</div>`;
+  if (!_pageStyleEl) { _pageStyleEl = document.createElement('style'); document.head.appendChild(_pageStyleEl); }
+  _pageStyleEl.textContent = `@page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 0; }`;
+  area.innerHTML = `<div class="print-sheet${landscape ? ' compact' : ''}">${html}</div>`;
   window.print();
 }
 function printFullPriceList(){
@@ -6255,9 +6470,9 @@ function printFullPriceList(){
   const body = rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td>
     ${r.slice(2).map(v=>`<td>${fmtMoney(v)}</td>`).join('')}</tr>`).join('');
   doPrint(`${printHeader('Price list as on ')}
-    <h3>Price List${modelPick?` — ${esc(modelPick)}`:''}</h3>
+    <h3>On-Road Price List${modelPick?` — ${esc(modelPick)}`:''} &nbsp;·&nbsp; ${rows.length} models</h3>
     <table><thead><tr>${PRICE_COLS.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>
-    ${printFooter()}`);
+    ${printFooter()}`, true);   // true = landscape, one page
 }
 // Single-bike quotation: the customer only sees the bike they asked about, with a clean breakup.
 function buildQuotation(){
