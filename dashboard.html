@@ -1014,6 +1014,65 @@
   /* walk-in log cards */
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
+  /* ═══════════ Price List & Quotation ═══════════ */
+  .quote-box { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-top:16px; overflow:hidden; }
+  .qb-head { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); font-family:var(--font-head); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:14px; padding:12px 18px; }
+  .qb-body { padding:16px 18px; }
+  .qb-row { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:14px; align-items:flex-end; }
+  .qb-field { display:flex; flex-direction:column; gap:5px; }
+  .qb-field label { font-size:11px; color:var(--text-secondary); font-family:var(--font-head); letter-spacing:1px; text-transform:uppercase; }
+  .qb-field input, .qb-field select { background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:10px 12px; font-size:14px; color:var(--text-primary); min-width:170px; max-width:100%; }
+  .qb-check { display:inline-flex; align-items:center; gap:7px; font-size:13.5px; color:var(--text-secondary); cursor:pointer; }
+  .qb-check input { width:16px; height:16px; cursor:pointer; }
+  .qb-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .qb-print { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); border:none; border-radius:9px; padding:11px 22px; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--font-head); letter-spacing:1px; }
+  .qb-preview { margin-top:16px; }
+  /* The printable sheet — Amar Autos / Royal Enfield letterhead, shown on screen as a preview. */
+  .print-sheet { background:#fff; color:#111; border-radius:10px; padding:0 0 18px; font-family:Arial,Helvetica,sans-serif; overflow:hidden; }
+  .print-sheet .ps-band { height:6px; background:linear-gradient(90deg,#C8102E 0 34%,#111 34% 66%,#C5A059 66% 100%); }
+  .print-sheet .ps-top { display:flex; justify-content:space-between; align-items:flex-start; gap:18px;
+    padding:16px 26px 12px; border-bottom:1.5px solid #111; }
+  .print-sheet .ps-brand { display:flex; gap:14px; align-items:flex-start; }
+  .print-sheet .ps-logo { border:2px solid #111; border-radius:50%; width:60px; height:60px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .print-sheet .ps-name { font-size:25px; font-weight:800; letter-spacing:1.5px; line-height:1; }
+  .print-sheet .ps-tag { font-size:10.5px; letter-spacing:2.4px; text-transform:uppercase; color:#C8102E; font-weight:700; margin:4px 0 5px; }
+  .print-sheet .ps-sub { font-size:11px; color:#444; line-height:1.55; }
+  .print-sheet .ps-date { font-size:10.5px; text-align:right; white-space:nowrap; color:#555; letter-spacing:.6px; text-transform:uppercase; }
+  .print-sheet .ps-date b { display:block; font-size:15px; color:#111; letter-spacing:0; text-transform:none; margin:2px 0; }
+  .print-sheet .ps-by { display:block; margin-top:8px; padding-top:6px; border-top:1px solid #ddd; font-size:9.5px; }
+  .print-sheet .ps-by b { display:inline; font-size:11px; }
+  .print-sheet h3 { font-size:15px; margin:16px 26px 9px; padding-bottom:5px; border-bottom:1px solid #ddd; }
+  .print-sheet table { width:calc(100% - 52px); margin:0 26px; border-collapse:collapse; font-size:12px; }
+  .print-sheet th { background:#111; color:#fff; text-align:right; padding:7px 8px; border:1px solid #111; font-size:10px; text-transform:uppercase; letter-spacing:.5px; }
+  .print-sheet th:first-child, .print-sheet th:nth-child(2) { text-align:left; }
+  .print-sheet td { padding:6px 8px; border:1px solid #ddd; text-align:right; }
+  .print-sheet td:first-child, .print-sheet td:nth-child(2) { text-align:left; }
+  .print-sheet tbody tr:nth-child(even) td { background:#fafafa; }
+  .print-sheet tr.grand td { font-weight:800; background:#111 !important; color:#fff; font-size:14px; border-color:#111; }
+  .print-sheet .ps-cust { font-size:12.5px; margin:14px 26px 0; color:#333; }
+  .print-sheet .ps-cust b { font-size:15px; color:#111; }
+  .print-sheet .ps-foot { display:flex; gap:26px; margin:18px 26px 0; padding-top:12px; border-top:1px solid #ddd; flex-wrap:wrap; }
+  .print-sheet .ps-fh { font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:#C8102E; margin-bottom:5px; }
+  .print-sheet .ps-terms { flex:1 1 340px; font-size:10px; color:#333; white-space:pre-wrap; line-height:1.6; }
+  .print-sheet .ps-bank { flex:0 1 260px; font-size:10.5px; }
+  .print-sheet .ps-bank table { width:auto; margin:0; }
+  .print-sheet .ps-bank td { border:none; padding:2px 12px 2px 0; text-align:left; background:none !important; }
+  .print-sheet .ps-sign { display:flex; justify-content:space-between; gap:40px; margin:26px 26px 0; font-size:10.5px; color:#444; }
+  .print-sheet .ps-sign .ps-line { display:block; border-top:1px solid #888; width:190px; margin-bottom:4px; }
+  .print-sheet .ps-thanks { text-align:center; font-size:10.5px; color:#555; margin:18px 26px 12px; }
+  /* Print: only the sheet, nothing else */
+  #printArea { display:none; }
+  @media print {
+    body * { visibility:hidden !important; }
+    #printArea, #printArea * { visibility:visible !important; }
+    #printArea { display:block !important; position:absolute; left:0; top:0; width:100%; background:#fff; }
+    .print-sheet { border-radius:0; padding:0 6mm; }
+    @page { size:A4; margin:10mm; }
+    .print-sheet table { font-size:9.5px; }
+    .print-sheet th { font-size:9px; padding:4px 5px; }
+    .print-sheet td { padding:3px 5px; }
+    .print-sheet tr { page-break-inside:avoid; }
+  }
   /* ═══════════ Sales Person Analysis report ═══════════ */
   .spa-card { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; }
   .spa-head { display:flex; align-items:center; justify-content:space-between; padding:15px 20px; background:var(--surface-2); cursor:pointer; gap:12px; }
@@ -1336,6 +1395,7 @@
   <button data-tab="riders">Riders</button>
   <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
+  <button data-tab="pricelist" style="display:none;">💰 Price List</button>
   <button data-tab="walkin" style="display:none;">🔁 Walk-in Check</button>
   <button data-tab="walkinlog" style="display:none;">📋 Today's Walk-ins</button>
   <button data-tab="moredata" style="display:none;">🗂️ More Data</button>
@@ -1898,6 +1958,48 @@
     </div>
   </section>
 
+  <!-- ══ Price List — live from the "PRICE" tab of the same Google Sheet, with a built-in copy as
+       backup if that tab isn't reachable. Two print modes: the full list, and a one-page quotation
+       for a single bike. Both carry today's date. ══ -->
+  <section class="tabpanel" id="tab-pricelist">
+    <h2 class="section-title">💰 Price List</h2>
+    <p class="empty-note" id="priceSource" style="text-align:left;padding:0 0 12px;"></p>
+
+    <div class="toolbar" style="margin-bottom:12px;">
+      <input type="search" id="priceSearch" placeholder="🔍 Search model or colour…" style="min-width:230px;">
+      <select id="priceModelSel"><option value="">— All models —</option></select>
+      <button id="printPriceBtn">🖨️ Print full price list</button>
+      <button id="quoteBtn">📄 Make customer quotation</button>
+    </div>
+
+    <div class="table-wrap"><table class="data" id="tblPrice"></table></div>
+
+    <!-- Quotation builder: pick a bike, add the customer's name, print a clean one-pager -->
+    <div id="quoteBox" class="quote-box" style="display:none;">
+      <div class="qb-head">📄 Customer Quotation</div>
+      <div class="qb-body">
+        <div class="qb-row">
+          <div class="qb-field"><label>Customer Name</label><input type="text" id="qCust" placeholder="Customer ka naam"></div>
+          <div class="qb-field"><label>Mobile</label><input type="tel" id="qMobile" placeholder="optional"></div>
+          <div class="qb-field"><label>Bike</label><select id="qBike"></select></div>
+
+        </div>
+        <div class="qb-row">
+          <label class="qb-check"><input type="checkbox" id="qEw" checked> Extended Warranty</label>
+          <label class="qb-check"><input type="checkbox" id="qGuard" checked> Engine Guard</label>
+          <label class="qb-check"><input type="checkbox" id="qRsa" checked> RSA</label>
+          <label class="qb-check"><input type="checkbox" id="qAmc" checked> AMC</label>
+          <label class="qb-check"><input type="checkbox" id="qHelmet" checked> Helmet</label>
+        </div>
+        <div class="qb-actions">
+          <button class="qb-print" id="qPrintBtn">🖨️ Print quotation</button>
+          <button id="qCloseBtn">Close</button>
+        </div>
+        <div id="qPreview" class="qb-preview"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ══ Walk-in Check (Ajeet's login) — enter a mobile, see if the customer came before and to
        which sales person, or that they're new + whose turn it is. Saves the entry so sales/admin
        can see the day's walk-ins. ══ -->
@@ -1921,6 +2023,8 @@
     <div id="walkinLogResult"></div>
   </section>
 </main>
+
+<div id="printArea"></div>
 
 <footer id="mainFooter">
   Data pulled live from your Google Sheet on every refresh (auto-refreshes every 15 minutes) · Built for Amar Autos<br/>
@@ -2537,6 +2641,7 @@ function applyRoleRestrictions(){
     if (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) return true;
     if (isSales && SALES_MOVE_TO_MORE_DATA.includes(tab)) return true; // moved into "More Data" instead
     if (tab === 'walkin') return true; // the check tool is only for the Walkin (Ajeet) login
+    if (tab === 'pricelist') return false; // price list: Admin + Sales (Ajeet is handled above)
     if (tab === 'walkinlog') return false; // "Aaj ke Walk-in" — sales see their own, admin sees all
     return false;
   }
@@ -2813,7 +2918,7 @@ async function loadAll(silent){
   if (!silent) document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry, monthlyTargets] = await Promise.all([
+    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry, monthlyTargets, priceSheet] = await Promise.all([
       fetchSheetRaw('ACTUL BOOKING'),
       fetchSheetRaw('DELIVERY SHEET'),
       fetchSheetRaw('enquiry'),
@@ -2830,6 +2935,7 @@ async function loadAll(silent){
       fetchSheetOptional('TURN'),                    // daily turn roster
       fetchSheetOptional('REGISTER'),                // Ajeet's saved entries
       fetchSheetOptional('MONTHLY TARGETS'),         // admin-set monthly targets
+      fetchSheetOptional('PRICE'),                   // on-road price list
     ]);
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
@@ -2858,6 +2964,9 @@ async function loadAll(silent){
       return true;
     }).filter(r => up(r[0]) !== 'TOTAL');
     // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
+    // Price list rows (header row skipped by content, like the other sheets).
+    STATE.price = (priceSheet || []).filter(r => str(r[0]).trim() && !/^MODEL$/i.test(str(r[0]).trim()));
+
     // Alias table: from the separate "Name Map" sheet if present, AND from the one-sheet TARGET
     // layout. In the single sheet the block starts at whichever column is headed "NAME" (normally
     // T), with the ID columns to its right — so the block can be moved without breaking anything.
@@ -3248,6 +3357,7 @@ function renderAll(){
   renderModelSpecs();
   renderAnalytics();
   renderWalkinLog();
+  renderPriceList();
   renderTargetVsActual();
   if (CURRENT_USER && CURRENT_USER.role === 'Admin') prefillTargets();
 }
@@ -6032,6 +6142,175 @@ document.getElementById('exportPending').addEventListener('click', () => {
    colour's queue. Store-wide (every executive's bookings, ignores the exec filter, so the whole
    team sees one shared queue); customer mobile is masked. */
 let BVS_ALL_BOOKINGS = [];
+
+// ═══════════════ Price List ═══════════════
+// Columns: 0 Model, 1 Colour, 2 Ex-showroom, 3 Road tax, 4 Normal insurance, 5 Price with insurance,
+// 6 Nil-dep + RT, 7 Zero-dep insurance, 8 On-road (nil dep), 9 EW, 10 Engine guard, 11 RSA,
+// 12 AMC, 13 Helmet, 14 Total.
+const PRICE_FALLBACK = [["NEW BULLET 350","Military Black",165656,14652,12537,192845,2799,3900,1199,1499,2500,204742],["NEW BULLET 350","Standard Maroon / Black",191739,16739,13022,221500,2799,3900,1199,1499,2500,233397],["NEW BULLET 350","BATTALION BLACK",166511,14721,12554,193786,2799,3900,1199,1499,2500,205683],["NEW BULLET 350","Black Gold",209572,18166,13354,241092,2799,3900,1199,1499,2500,252989],["CLASSIC 350 EFI BSVI NEW","REDDITCH RED SC",188434,16475,12961,217870,2799,3900,1199,1499,2500,229767],["CLASSIC 350 EFI BSVI NEW","MADRAS RED",194668,16973,13077,224718,2799,3900,1199,1499,2500,236615],["CLASSIC 350 EFI BSVI NEW","MEDALLION BRONZE",199040,17323,13158,229521,2799,3900,1199,1499,2500,241418],["CLASSIC 350 EFI BSVI NEW","COMMANDO SAND/gorakh green",210684,18255,13373,242312,2799,3900,1199,1499,2500,254209],["CLASSIC 350 EFI BSVI NEW","GUN GREY / STEALTH BLACK",219423,18954,13536,251913,2799,3900,1199,1499,2500,263810],["CLASSIC 350 EFI BSVI NEW","EMERALD GREEN",224275,19342,13627,257244,2799,3900,1199,1499,2500,269141],["GOAN CLASSIC 350 SINGLE TONE","SHACK BLACK / PURPLE HAZE",225311,19425,13646,258382,2799,3900,1199,1499,2500,270279],["GOAN CLASSIC 350 DUAL TONE","RAVE RED /TRIP TEAL GREEN",228187,19655,13699,261541,2799,3900,1199,1499,2500,273438],["HUNTER 350 RETRO","FACTORY BLACK",137640,12411,12017,162068,2799,3250,1199,1499,2500,173315],["HUNTER 350 RETRO","TARMAC BLACK",151025,13482,12265,176772,2799,3250,1199,1499,2500,188019],["HUNTER 350 METRO","DAPPER GREY / RIO WHITE / GRAPHITE GREY",166372,14710,12552,193634,2799,3250,1199,1499,2500,204881],["HUNTER 350 METRO","REBEL BLUE /LONDON RED / TOKYO BLACK / MOONSHOT WHITE / MUMBAI YELLOW",171077,15086,12638,198801,2799,3250,1199,1499,2500,210048],["METEOR 350 FIREBALL NEW","GREY / ORANGE",199990,17399,13174,230563,2799,3900,1199,1499,2500,242460],["METEOR 350 STELLAR NEW","MARINE BLUE / MATT GREY",208532,18083,13333,239948,2799,3900,1199,1499,2500,251845],["METEOR 350 AURORA NEW","RETRO GREEN / RED",211475,18318,13389,243182,2799,3900,1199,1499,2500,255079],["METEOR 350 SUPERNOVA NEW","BLACK",221307,19105,13570,253982,2799,3900,1199,1499,2500,265879],["BULLET 650","CANNON BLACK /BATTLESHIP BLUE",364856,30588,25543,420987,2799,4400,0,1499,2500,432185],["CLASSIC 650 TWIN","VALLAM RED/ BRUNTINGTHORPE BLUE",367592,30807,25595,423994,3599,4400,0,1499,2500,435992],["CLASSIC 650 TWIN","TEAL",372427,31194,25688,429309,3599,4400,0,1499,2500,441307],["CLASSIC 650 TWIN","BLACK CHROME",382097,31968,25871,439936,3599,4400,0,1499,2500,451934],["Scram 440","FORCE BLUE NTBT/GREY/TEAL",232371,19990,23023,275384,3299,1450,1199,1499,2500,285331],["Scram 440","TRAIL GREEN",224805,19384,22882,267071,3299,1450,1199,1499,2500,277018],["Super Meteor 650 Astral","BLACK",405988,33879,26324,466191,3599,4400,0,1499,2500,478189],["Super Meteor 650 Interstellar","GREEN / GREY",422972,35238,26647,484857,3599,4400,0,1499,2500,496855],["Super Meteor 650 Celestial","RED / BLUE",439960,36597,26969,503526,3599,4400,0,1499,2500,515524],["NEW HIMALAYAN 450","KAZA BROWN",308029,26042,24463,358534,3299,3700,1199,1499,2500,370731],["NEW HIMALAYAN 450","SLATE POPPY BLUE",312353,26388,24544,363285,3299,3700,1199,1499,2500,375482],["NEW HIMALAYAN 450","KAMET WHITE",316678,26734,24627,368039,3299,3700,1199,1499,2500,380236],["NEW HIMALAYAN 450","HANLE BLACK",322081,27166,24730,373977,3299,3700,1199,1499,2500,386174],["NEW HIMALAYAN 450","MANA BLACK",339564,28565,25062,393191,3299,3700,1199,1499,2500,405388],["Continental GT 650 NEW","Rocker Red/ British Racing Green",358427,30074,25421,413922,3599,3900,1199,1499,2500,426619],["Continental GT 650 NEW","Apex Grey",380921,31874,25848,438643,3599,3900,1199,1499,2500,451340],["Continental GT 650 NEW","Mr Clean",387667,32413,25977,446057,3599,3900,1199,1499,2500,458754],["Interceptor 650 NEW","Canyon Red/Cali Green",337909,28433,25032,391374,3599,3900,1199,1499,2500,404071],["Interceptor 650 NEW","Sunset Strip",346836,29147,25199,401182,3599,3900,1199,1499,2500,413879],["Interceptor 650 NEW","Black Ray",357987,30039,25413,413439,3599,3900,1199,1499,2500,426136],["Interceptor 650 NEW","Mark 2",369137,30931,25625,425693,3599,3900,1199,1499,2500,438390],["BEAR 650","Two Four Nine",399990,33399,26209,459598,3599,3900,1199,1499,2500,472295],["BEAR 650","GLDN SHDW BLACK",391598,32728,26051,450377,3599,3900,1199,1499,2500,463074],["BEAR 650","WILD HONEY",383790,32103,25902,441795,3599,3900,1199,1499,2500,454492],["BEAR 650","Broadwalk White",378208,31657,25797,435662,3599,3900,1199,1499,2500,448359],["Shotgun 650","Sheet Metal Grey",401002,33480,26230,460712,3599,4400,0,1499,2500,472710],["Shotgun 650","Green Drill",412947,34436,26456,473839,3599,4400,0,1499,2500,485837],["Shotgun 650","Stencil White",416139,34691,26518,477348,3599,4400,0,1499,2500,489346],["Guerrilla 450","Apex Red / Twilight Blue",251063,21485,23381,295929,3599,3700,1199,1499,2500,308426],["Guerrilla 450","Apex Green / Apex Black",258309,22065,23517,303891,3299,3700,1199,1499,2500,316088],["Guerrilla 450","Peix Bronze/Smoke Silver/ Shadow Ash Green",269119,22930,23723,315772,3299,3700,1199,1499,2500,327969],["Guerrilla 450","Brava Blue",274523,23362,23827,321712,3299,3700,1199,1499,2500,333909]];
+const PRICE_META = {"terms":" Terms and conditions:\n1) The above prices are subject to change and the prices prevailing at the time of invoicing will be applicable.\n2) The payment made through Cheque/Demand Draft must be in favor of AMAR AUTOS\n3) Local taxes are as applicable. Necessary receipts will be provided at the time of billing/delivery.\n4) Invoicing, Registration & Delivery will only be done on the receipt and realization of full payment","bank":{"A/C HOLDER NAME":"AMAR AUTOS","BANK NAME":"AU SMALL FINANCE BANK (AU BANK)","ACCOUNT NUMBER":"222 125 494 412 0560","BRANCH ADDRESS":"PREET VIHAR, DELHI","IFSC CODE":"AUBL 000 2549"},"addr":"A-64 Gurunanak Pura, Vikas Marg, Laxmi Nagar, East Delhi - 110092","contact":"amarautovikasmarg@gmail.com  ·  9773987191 / 93 / 95"};
+const PRICE_COLS = ['Model','Colour','Ex-Showroom','Road Tax','Insurance (Zero Dep)','On-Road','EW','Engine Guard','RSA','AMC','Helmet','Total'];
+// Column indices in a price row (kept in one place so the sheet layout can change safely).
+const PC = { model:0, colour:1, ex:2, rto:3, ins:4, onroad:5, ew:6, guard:7, rsa:8, amc:9, helmet:10, total:11 };
+
+function priceRows(){
+  const live = (STATE.price || []).filter(r => str(r[0]).trim() && !/^MODEL$/i.test(str(r[0]).trim()) && num(r[2]) > 0);
+  return live.length
+    ? live.map(r => [str(r[0]).replace(/\s+/g,' ').trim(), str(r[1]).replace(/\s+/g,' ').trim(),
+        num(r[2]), num(r[3]), num(r[4]), num(r[5]), num(r[6]), num(r[7]), num(r[8]), num(r[9]), num(r[10]), num(r[11])])
+    : PRICE_FALLBACK;
+}
+function priceIsLive(){ return (STATE.price || []).some(r => str(r[0]).trim() && num(r[2]) > 0); }
+
+function renderPriceList(){
+  const tbl = document.getElementById('tblPrice'); if (!tbl) return;
+  const all = priceRows();
+  const src = document.getElementById('priceSource');
+  if (src) src.innerHTML = priceIsLive()
+    ? `Live from the <b>PRICE</b> tab of your Google Sheet · ${all.length} models · updated whenever you edit the sheet.`
+    : `Showing the built-in copy (${all.length} models). Add a <b>PRICE</b> tab to your Google Sheet to keep it updating automatically.`;
+
+  // model dropdown (built once per render, keeps the current pick)
+  const sel = document.getElementById('priceModelSel');
+  const models = [...new Set(all.map(r => r[0]))].sort();
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— All models —</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    if (models.includes(cur)) sel.value = cur;
+  }
+  const qSel = document.getElementById('qBike');
+  if (qSel) {
+    const cur = qSel.value;
+    qSel.innerHTML = all.map((r,i) => `<option value="${i}">${esc(r[0])} — ${esc(r[1])}</option>`).join('');
+    if (cur && all[+cur]) qSel.value = cur;
+  }
+
+  const q = up(str(document.getElementById('priceSearch')?.value)).trim();
+  const modelPick = str(document.getElementById('priceModelSel')?.value);
+  const rows = all.filter(r =>
+    (!modelPick || r[0] === modelPick) &&
+    (!q || up(r[0]).includes(q) || up(r[1]).includes(q)));
+
+  if (!rows.length) { tbl.innerHTML = `<tr><td class="empty-note">No model matches that search.</td></tr>`; return; }
+  const head = `<thead><tr>${PRICE_COLS.map((c,i)=>`<th class="${i>1?'num':''}">${esc(c)}</th>`).join('')}</tr></thead>`;
+  const body = `<tbody>${rows.map(r => `<tr>
+    <td><b>${esc(r[0])}</b></td><td style="color:var(--text-secondary)">${esc(r[1])}</td>
+    ${r.slice(2).map((v,i)=>`<td class="num"${i===12?' style="font-weight:700"':''}>${fmtMoney(v)}</td>`).join('')}
+  </tr>`).join('')}</tbody>`;
+  tbl.innerHTML = head + body;
+}
+
+// ── Printing ──────────────────────────────────────────────────────────────────
+// Both printouts share the dealership letterhead and carry the date they were printed on.
+function printHeader(title){
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  return `<div class="ps-band"></div>
+  <div class="ps-top">
+    <div class="ps-brand">
+      <div class="ps-logo">
+        <svg viewBox="0 0 100 60" width="54" height="34" aria-hidden="true">
+          <g fill="none" stroke="#111" stroke-width="3">
+            <circle cx="22" cy="42" r="13"/><circle cx="76" cy="42" r="13"/>
+            <path d="M22 42 L42 42 L52 24 L72 24 M52 24 L62 42 L76 42 M42 42 L62 42 M62 24 L72 24 L76 32"/>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div class="ps-name">AMAR AUTOS</div>
+        <div class="ps-tag">Authorised Royal Enfield Dealer</div>
+        <div class="ps-sub">${esc(PRICE_META.addr || '')}<br>${esc(PRICE_META.contact || '')}</div>
+      </div>
+    </div>
+    <div class="ps-date"><span>${esc(title)}</span><b>${esc(dateStr)}</b><span>${esc(timeStr)}</span>
+      <span class="ps-by">Prepared by: <b>${esc((CURRENT_USER && CURRENT_USER.name) || '—')}</b></span></div>
+  </div>`;
+}
+function printFooter(){
+  const b = PRICE_META.bank || {};
+  const bankRows = Object.keys(b).map(k => `<tr><td><b>${esc(k)}</b></td><td>${esc(b[k])}</td></tr>`).join('');
+  return `<div class="ps-foot">
+    ${PRICE_META.terms ? `<div class="ps-terms"><div class="ps-fh">Terms &amp; Conditions</div>${esc(PRICE_META.terms.replace(/^\s*Terms and conditions:\s*/i,''))}</div>` : ''}
+    ${bankRows ? `<div class="ps-bank"><div class="ps-fh">Bank Details</div><table>${bankRows}</table></div>` : ''}
+  </div>
+  <div class="ps-sign">
+    <div><span class="ps-line"></span>Customer Signature</div>
+    <div><span class="ps-line"></span>For AMAR AUTOS${CURRENT_USER && CURRENT_USER.name ? ` — ${esc(CURRENT_USER.name)}` : ''}</div>
+  </div>
+  <div class="ps-thanks">Thank you for choosing Royal Enfield · <b>Pure Motorcycling Since 1901</b></div>
+  <div class="ps-band"></div>`;
+}
+function doPrint(html){
+  const area = document.getElementById('printArea');
+  if (!area) return;
+  area.innerHTML = `<div class="print-sheet">${html}</div>`;
+  window.print();
+}
+function printFullPriceList(){
+  const all = priceRows();
+  const q = up(str(document.getElementById('priceSearch')?.value)).trim();
+  const modelPick = str(document.getElementById('priceModelSel')?.value);
+  const rows = all.filter(r => (!modelPick || r[0] === modelPick) && (!q || up(r[0]).includes(q) || up(r[1]).includes(q)));
+  const body = rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td>
+    ${r.slice(2).map(v=>`<td>${fmtMoney(v)}</td>`).join('')}</tr>`).join('');
+  doPrint(`${printHeader('Price list as on ')}
+    <h3>Price List${modelPick?` — ${esc(modelPick)}`:''}</h3>
+    <table><thead><tr>${PRICE_COLS.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>
+    ${printFooter()}`);
+}
+// Single-bike quotation: the customer only sees the bike they asked about, with a clean breakup.
+function buildQuotation(){
+  const all = priceRows();
+  const idx = +str(document.getElementById('qBike')?.value || 0);
+  const r = all[idx]; if (!r) return '';
+  const cust = str(document.getElementById('qCust')?.value).trim();
+  const mob  = str(document.getElementById('qMobile')?.value).trim();
+  const on = (id) => !!document.getElementById(id)?.checked;
+
+  const lines = [
+    ['Ex-Showroom Price', r[PC.ex]],
+    ['Road Tax / Registration', r[PC.rto]],
+    ['Insurance (Zero Dep)', r[PC.ins]],
+  ];
+  if (on('qEw') && r[PC.ew])       lines.push(['Extended Warranty', r[PC.ew]]);
+  if (on('qGuard') && r[PC.guard]) lines.push(['Engine Guard', r[PC.guard]]);
+  if (on('qRsa') && r[PC.rsa])     lines.push(['Roadside Assistance (RSA)', r[PC.rsa]]);
+  if (on('qAmc') && r[PC.amc])     lines.push(['Annual Maintenance (AMC)', r[PC.amc]]);
+  if (on('qHelmet') && r[PC.helmet]) lines.push(['Helmet', r[PC.helmet]]);
+  const total = lines.reduce((a,l)=>a+l[1], 0);
+
+  return `${printHeader('Quotation date ')}
+    <div class="ps-cust">Quotation for: <b>${esc(cust || '________________')}</b>${mob?` &nbsp;·&nbsp; ${esc(mob)}`:''}</div>
+    <h3>${esc(r[0])} — ${esc(r[1])}</h3>
+    <table>
+      <thead><tr><th style="text-align:left">Particulars</th><th>Amount (₹)</th></tr></thead>
+      <tbody>
+        ${lines.map(l=>`<tr><td colspan="1">${esc(l[0])}</td><td>${fmtMoney(l[1])}</td></tr>`).join('')}
+        <tr class="grand"><td>ON-ROAD TOTAL</td><td>${fmtMoney(total)}</td></tr>
+      </tbody>
+    </table>
+    ${printFooter()}`;
+}
+function refreshQuotePreview(){
+  const el = document.getElementById('qPreview');
+  if (el) el.innerHTML = `<div class="print-sheet">${buildQuotation()}</div>`;
+}
+(function wirePriceList(){
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on('priceSearch','input', renderPriceList);
+  on('priceModelSel','change', renderPriceList);
+  on('printPriceBtn','click', printFullPriceList);
+  on('quoteBtn','click', () => {
+    const box = document.getElementById('quoteBox');
+    if (box) { box.style.display = box.style.display === 'none' ? '' : 'none'; if (box.style.display === '') refreshQuotePreview(); }
+  });
+  on('qCloseBtn','click', () => { const b = document.getElementById('quoteBox'); if (b) b.style.display = 'none'; });
+  on('qPrintBtn','click', () => doPrint(buildQuotation()));
+  ['qCust','qMobile','qBike','qEw','qGuard','qRsa','qAmc','qHelmet']
+    .forEach(id => { on(id,'input', refreshQuotePreview); on(id,'change', refreshQuotePreview); });
+})();
+
 // ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
 // PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
