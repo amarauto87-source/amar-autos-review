@@ -1042,6 +1042,23 @@
   .spa-ins b { color:var(--gold-light); }
   .spa-drops { margin-top:14px; font-size:12.5px; color:var(--text-secondary); }
   .spa-drops .dr { display:inline-block; background:var(--surface-2); border-radius:6px; padding:3px 9px; margin:3px 4px 0 0; }
+  /* Call remarks block inside each sales-person card */
+  .spa-remarks { margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+  .spa-remarks .rk-head { font-family:var(--font-head); font-size:12.5px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-light); display:flex; flex-wrap:wrap; gap:8px; align-items:baseline; }
+  .spa-remarks .rk-cover { font-family:var(--font-ui); font-size:11.5px; letter-spacing:0; text-transform:none; color:var(--text-secondary); }
+  .spa-remarks .rk-themes { margin:10px 0 12px; }
+  .spa-remarks .rk-theme { display:inline-block; background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:4px 11px; margin:4px 5px 0 0; font-size:12px; color:var(--text-secondary); }
+  .spa-remarks .rk-theme b { color:var(--gold-light); margin-left:3px; }
+  .spa-remarks .rk-list { display:flex; flex-direction:column; gap:7px; }
+  .spa-remarks .rk-item { display:flex; gap:10px; align-items:flex-start; background:var(--surface-2); border-radius:8px; padding:8px 11px; font-size:13px; }
+  .spa-remarks .rk-tag { font-family:var(--font-head); font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:20px; flex-shrink:0; margin-top:1px; }
+  .spa-remarks .rk-tag.book { background:rgba(91,155,213,.18); color:#5b9bd5; }
+  .spa-remarks .rk-tag.drop { background:rgba(232,122,106,.18); color:var(--critical); }
+  .spa-remarks .rk-tag.open { background:rgba(95,211,154,.18); color:var(--good); }
+  .spa-remarks .rk-text { flex:1; min-width:0; overflow-wrap:anywhere; }
+  .spa-remarks .rk-meta { color:var(--text-muted); font-size:11.5px; white-space:nowrap; }
+  @media (max-width:640px){ .spa-remarks .rk-meta { display:none; } }
+  .spa-remarks .rk-more, .spa-remarks .rk-empty { font-size:12px; color:var(--text-secondary); margin-top:8px; }
   .spa-hint { font-size:12px; color:var(--text-secondary); margin-bottom:14px; }
   /* ═══════════ Monthly Target setter (admin) ═══════════ */
   .tgt-panel { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:22px; overflow:hidden; }
@@ -5202,6 +5219,52 @@ function renderTargetVsActual(){
   }).join('')}</div>`;
 }
 
+// ── Call remarks ──────────────────────────────────────────────────────────────
+// "Previous Call Remark" is free text the sales person types after a follow-up call. We group the
+// remarks into themes (finance, will visit, comparing, not reachable, …) so the pattern is visible,
+// and show the actual lines underneath so the words are never hidden behind a label.
+const REMARK_THEMES = [
+  { key:'Finance / budget',   re:/\b(finance|emi|loan|budget|down\s?payment|dp|bank|instal)/i },
+  { key:'Will visit / callback', re:/\b(visit|aayeg|aayg|call\s?back|callback|next week|kal|tomorrow|later)/i },
+  { key:'Comparing / other dealer', re:/\b(compare|comparing|other dealer|dusr|honda|bajaj|tvs|yamaha|quote)/i },
+  { key:'Not reachable',      re:/\b(not reachable|no response|npc|switch\s?off|busy|ringing|nr\b)/i },
+  { key:'Exchange',           re:/\b(exchange|old bike|resale|trade)/i },
+  { key:'Stock / colour wait', re:/\b(stock|colour|color|waiting|wait|availab|delivery date)/i },
+  { key:'Test ride',          re:/\b(test ride|tr\b|ride diya|ride done)/i },
+  { key:'Not interested',     re:/\b(not interested|cancel|drop|no plan|postpone)/i },
+];
+function classifyRemark(text){
+  for (const t of REMARK_THEMES) if (t.re.test(text)) return t.key;
+  return 'Other';
+}
+function renderRemarkBlock(s){
+  const list = s.remarks || [];
+  const withPct = s.total ? Math.round((s.total - s.noRemark) / s.total * 100) : 0;
+  if (!list.length) {
+    return `<div class="spa-remarks"><div class="rk-head">📞 Call Remarks
+      <span class="rk-cover">0 of ${s.total} enquiries have a remark</span></div>
+      <div class="rk-empty">No call remarks written yet — every follow-up call should be logged in "Previous Call Remark".</div></div>`;
+  }
+  // theme counts
+  const themes = {};
+  list.forEach(r => { const k = classifyRemark(r.text); themes[k] = (themes[k]||0)+1; });
+  const topThemes = Object.entries(themes).sort((a,b)=>b[1]-a[1]);
+  // newest remarks first, show a handful
+  const recent = list.slice().sort((a,b)=>(b.when?.getTime()||0)-(a.when?.getTime()||0)).slice(0,6);
+  const pill = (c) => c==='booked' ? 'book' : c==='drop' ? 'drop' : 'open';
+  const lbl  = (c) => c==='booked' ? 'BOOKED' : c==='drop' ? 'DROP' : 'OPEN';
+  return `<div class="spa-remarks">
+    <div class="rk-head">📞 Call Remarks <span class="rk-cover">${list.length} of ${s.total} enquiries have a remark (${withPct}%)</span></div>
+    <div class="rk-themes">${topThemes.map(([k,c])=>`<span class="rk-theme">${esc(k)} <b>${c}</b></span>`).join('')}</div>
+    <div class="rk-list">${recent.map(r=>`<div class="rk-item">
+      <span class="rk-tag ${pill(r.cls)}">${lbl(r.cls)}</span>
+      <span class="rk-text">${esc(r.text)}</span>
+      <span class="rk-meta">${r.model?esc(r.model):''}${r.when?' · '+esc(fmtDate(r.when)):''}</span>
+    </div>`).join('')}</div>
+    ${list.length>recent.length?`<div class="rk-more">+${list.length-recent.length} more remarks</div>`:''}
+  </div>`;
+}
+
 // ═══════════════ Sales Person Analysis ═══════════════
 // Reads ENQUIRY STATMENT VIEW (STATE.enqView) for the selected month and, per Owner (sales
 // person), computes conversion, test-ride rate, follow-up gaps, drop patterns, response habits and
@@ -5235,12 +5298,12 @@ function renderSalesPersonAnalysis(){
   // Build a stats object per owner.
   const stats = [...byOwner.entries()].map(([owner, rows]) => {
     let booked=0, drop=0, open=0, testRides=0, noRemark=0;
-    const dropReasons = {}; const models = {};
+    const dropReasons = {}; const models = {}; const remarks = [];
     rows.forEach(r => {
       const c = classify(r);
       if (c === 'booked') booked++; else if (c === 'drop') drop++; else open++;
       if (yes(r[EV.testRide])) testRides++;
-      if (!str(r[EV.remark]).trim()) noRemark++;
+      if (!str(r[EV.remark]).trim()) noRemark++; else remarks.push({ text: str(r[EV.remark]).trim(), cls: c, model: str(r[EV.model]).trim(), when: parseTddDate(r[EV.created], null) });
       if (c === 'drop') { const dr = str(r[EV.dropReason]).trim() || 'No reason given'; dropReasons[dr] = (dropReasons[dr]||0)+1; }
       const m = str(r[EV.model]).trim(); if (m) models[m] = (models[m]||0)+1;
     });
@@ -5248,7 +5311,7 @@ function renderSalesPersonAnalysis(){
     const conv = total ? booked/total : 0;
     const trRate = total ? testRides/total : 0;
     const noRemarkRate = total ? noRemark/total : 0;
-    return { owner, total, booked, drop, open, testRides, noRemark, conv, trRate, noRemarkRate, dropReasons, models };
+    return { owner, total, booked, drop, open, testRides, noRemark, conv, trRate, noRemarkRate, dropReasons, models, remarks };
   }).sort((a,b) => b.conv - a.conv || b.booked - a.booked);
 
   // Team averages for relative comparison.
@@ -5302,6 +5365,7 @@ function renderSalesPersonAnalysis(){
         </div>
         <div class="spa-insights">${ins.map(([cls,ic,txt])=>`<div class="spa-ins ${cls}"><span class="ic">${ic}</span><div>${txt}</div></div>`).join('')}</div>
         ${topDrops.length?`<div class="spa-drops">Drop reasons: ${topDrops.map(([r,c])=>`<span class="dr">${esc(r)} ×${c}</span>`).join('')}</div>`:''}
+        ${renderRemarkBlock(s)}
       </div>
     </div>`;
   }).join('');
