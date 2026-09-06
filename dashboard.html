@@ -1023,6 +1023,21 @@
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
   /* ═══════════ Price List & Quotation ═══════════ */
+  /* Segmented switch — 350s vs the bigger bikes */
+  .seg-wrap { display:inline-flex; background:var(--surface-2); border:1px solid var(--border); border-radius:11px; padding:4px; gap:4px; flex-wrap:wrap; }
+  .seg-wrap .seg { background:transparent; border:none; color:var(--text-secondary); font-family:var(--font-head);
+    font-size:13px; letter-spacing:1px; text-transform:uppercase; padding:9px 20px; border-radius:8px; cursor:pointer; transition:.15s; }
+  .seg-wrap .seg:hover { color:var(--text-primary); }
+  .seg-wrap .seg.active { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); font-weight:700; }
+  /* One card per model, colours listed inside */
+  .pl-card { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; }
+  .pl-head { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    padding:13px 18px; background:var(--surface-2); border-bottom:1px solid var(--border); }
+  .pl-head .pl-model { font-family:var(--font-head); font-size:16px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+  .pl-head .pl-band { font-family:var(--font-head); font-size:17px; font-weight:700; color:var(--gold-light); white-space:nowrap; }
+  .pl-head .pl-band small { font-size:10px; color:var(--text-secondary); letter-spacing:1px; text-transform:uppercase; margin-left:3px; }
+  .pl-table td.pl-total { font-weight:700; color:var(--gold-light); }
+  .qb-lbl { font-family:var(--font-head); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-secondary); align-self:center; }
   .quote-box { background:var(--surface-1); border:1px solid var(--border); border-radius:14px; margin-top:16px; overflow:hidden; }
   .qb-head { background:linear-gradient(180deg,var(--gold-light),var(--gold)); color:var(--on-gold); font-family:var(--font-head); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:14px; padding:12px 18px; }
   .qb-body { padding:16px 18px; }
@@ -2000,29 +2015,35 @@
        backup if that tab isn't reachable. Two print modes: the full list, and a one-page quotation
        for a single bike. Both carry today's date. ══ -->
   <section class="tabpanel" id="tab-pricelist">
-    <h2 class="section-title">💰 Price List</h2>
+    <h2 class="section-title">💰 On-Road Price List</h2>
     <p class="empty-note" id="priceSource" style="text-align:left;padding:0 0 12px;"></p>
 
-    <div class="toolbar" style="margin-bottom:12px;">
-      <input type="search" id="priceSearch" placeholder="🔍 Search model or colour…" style="min-width:230px;">
-      <select id="priceModelSel"><option value="">— All models —</option></select>
-      <button id="printPriceBtn">🖨️ Print full price list</button>
-      <button id="quoteBtn">📄 Make customer quotation</button>
+    <!-- Segmented switch: the 350s are a different conversation from the 440/450/650s, so they
+         get their own view (and their own printout). -->
+    <div class="seg-wrap" id="priceSeg">
+      <button class="seg active" data-seg="350">350 cc</button>
+      <button class="seg" data-seg="big">650 &amp; Above</button>
+      <button class="seg" data-seg="all">All Models</button>
     </div>
 
-    <div class="table-wrap"><table class="data" id="tblPrice"></table></div>
+    <div class="toolbar" style="margin:14px 0 12px;">
+      <input type="search" id="priceSearch" placeholder="🔍 Search model or colour…" style="min-width:220px;">
+      <select id="priceModelSel"><option value="">— All models in this group —</option></select>
+      <button id="quoteBtn">📄 Make Customer Quotation</button>
+      <button id="printPriceBtn">🖨️ Print this price list</button>
+    </div>
 
-    <!-- Quotation builder: pick a bike, add the customer's name, print a clean one-pager -->
+    <!-- Quotation builder sits directly under the toolbar so it's visible the moment it opens. -->
     <div id="quoteBox" class="quote-box" style="display:none;">
       <div class="qb-head">📄 Customer Quotation</div>
       <div class="qb-body">
         <div class="qb-row">
-          <div class="qb-field"><label>Customer Name</label><input type="text" id="qCust" placeholder="Customer ka naam"></div>
+          <div class="qb-field"><label>Customer Name</label><input type="text" id="qCust" placeholder="Customer name"></div>
           <div class="qb-field"><label>Mobile</label><input type="tel" id="qMobile" placeholder="optional"></div>
-          <div class="qb-field"><label>Bike</label><select id="qBike"></select></div>
-
+          <div class="qb-field" style="flex:1 1 300px;"><label>Bike</label><select id="qBike"></select></div>
         </div>
         <div class="qb-row">
+          <span class="qb-lbl">Include:</span>
           <label class="qb-check"><input type="checkbox" id="qEw" checked> Extended Warranty</label>
           <label class="qb-check"><input type="checkbox" id="qGuard" checked> Engine Guard</label>
           <label class="qb-check"><input type="checkbox" id="qRsa" checked> RSA</label>
@@ -2030,12 +2051,14 @@
           <label class="qb-check"><input type="checkbox" id="qHelmet" checked> Helmet</label>
         </div>
         <div class="qb-actions">
-          <button class="qb-print" id="qPrintBtn">🖨️ Print quotation</button>
+          <button class="qb-print" id="qPrintBtn">🖨️ Print Quotation</button>
           <button id="qCloseBtn">Close</button>
         </div>
         <div id="qPreview" class="qb-preview"></div>
       </div>
     </div>
+
+    <div id="priceGroups"></div>
   </section>
 
   <!-- ══ Walk-in Check (Ajeet's login) — enter a mobile, see if the customer came before and to
@@ -2502,114 +2525,31 @@ const SPEC_DETAIL = {
     mileage:'~24 kmpl (real-world)', cluster:'Round TFT with Google Maps navigation', service:'First 500 km, then every 5,000 km / 6 months', warranty:'3 years / unlimited km' },
 };
 
-// Match a spec entry to the model names that appear in the price list / stock / bookings, so a
-// newly launched bike shows up on its own instead of waiting for someone to add it here.
-function specKeyOf(name){
-  const n = up(str(name)).replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
-  // strip common suffixes that vary by variant so "CLASSIC 350 EFI BSVI NEW" → "CLASSIC 350"
-  return n.replace(/\b(EFI|BSVI|BSIV|BS6|BS4|NEW|RETRO|METRO|DUAL|SINGLE|CHANNEL|ABS|TWIN|TWINS|STD|STANDARD|VARIANT|EDITION)\b/g,'')
-          .replace(/\s+/g,' ').trim();
-}
-// Every model the business actually deals in, taken from the live data.
-// Stock and booking rows often carry the colour in the same string ("CLASSIC 350 REDDITCH RED"),
-// so those names are matched against the model keys we already know by longest prefix — otherwise
-// every colour would show up as its own "new model".
-function modelsInBusiness(){
-  const out = new Map();  // key -> display name
-  const known = new Set(MODEL_SPECS.map(m => specKeyOf(m.name)));
-  const addExact = (v) => { const d = str(v).replace(/\s+/g,' ').trim(); if (!d) return;
-    const k = specKeyOf(d); if (k && !out.has(k)) out.set(k, d); };
-  // Price list is the authority on model naming, so read it first.
-  priceRows().forEach(r => addExact(r[PC.model]));
-  const keys = [...new Set([...known, ...out.keys()])].sort((a,b) => b.length - a.length);
-  const addLoose = (v) => {
-    const d = str(v).replace(/\s+/g,' ').trim(); if (!d) return;
-    const k = specKeyOf(d);
-    if (!k) return;
-    const hit = keys.find(kk => kk && (k === kk || k.startsWith(kk + ' ')));
-    if (hit) { if (!out.has(hit)) out.set(hit, hit); return; }   // it's a colour variant of a known model
-    if (!out.has(k)) out.set(k, d);
-  };
-  (STATE.stock || []).forEach(r => addLoose(r[11] || r[9]));
-  (STATE.booking || []).forEach(r => addLoose(r[3]));
-  return out;
-}
-// Live extras for a model: current price band, the colours on the price list, and stock in hand.
-function liveInfoFor(displayName){
-  const key = specKeyOf(displayName);
-  const pr = priceRows().filter(r => specKeyOf(r[PC.model]) === key);
-  const colours = [...new Set(pr.map(r => r[PC.colour]).filter(Boolean))];
-  const totals = pr.map(r => r[PC.total]).filter(v => v > 0);
-  const exs = pr.map(r => r[PC.ex]).filter(v => v > 0);
-  let stockOpen = 0, stockTransit = 0;
-  (STATE.stock || []).forEach(r => {
-    if (specKeyOf(r[11] || r[9]) !== key) return;
-    const st = up(r[17]);
-    if (st === 'OPEN') stockOpen++; else if (st === 'IN-TRANSIT') stockTransit++;
-  });
-  return {
-    colours,
-    exBand: exs.length ? (Math.min(...exs) === Math.max(...exs) ? fmtMoney(exs[0]) : `${fmtMoney(Math.min(...exs))} – ${fmtMoney(Math.max(...exs))}`) : '',
-    onRoadBand: totals.length ? (Math.min(...totals) === Math.max(...totals) ? fmtMoney(totals[0]) : `${fmtMoney(Math.min(...totals))} – ${fmtMoney(Math.max(...totals))}`) : '',
-    stockOpen, stockTransit,
-  };
-}
 function renderModelSpecs(){
   const search = str(document.getElementById('specsSearch').value).toLowerCase();
-  // Start from the written specs, then add anything in the live data that isn't covered yet —
-  // that's how a brand-new launch appears here on its own.
-  const byKey = new Map();
-  MODEL_SPECS.forEach(m => byKey.set(specKeyOf(m.name), { ...m, known:true }));
-  modelsInBusiness().forEach((display, key) => {
-    if (byKey.has(key)) return;
-    byKey.set(key, { name: display, category: 'New model — specs pending', known:false,
-      engine:'—', power:'—', torque:'—', gearbox:'—', seatHeight:'—', kerbWeight:'—', fuelTank:'—', price:'',
-      bestFor:'', features:'',
-      hinglish:'This model is new in our system, so the full technical sheet is not written up yet. Price, colours and stock below are live from the sheet — confirm engine and dimension details from the official Royal Enfield page before quoting.' });
-  });
-
-  let rows = [...byKey.values()];
-  if (search) rows = rows.filter(m => m.name.toLowerCase().includes(search)
+  // Static list only — these figures come from Royal Enfield's own published specs and are
+  // deliberately NOT tied to the price list, so a price edit can never change a spec sheet.
+  const rows = MODEL_SPECS.filter(m => !search
+    || m.name.toLowerCase().includes(search)
     || m.category.toLowerCase().includes(search)
     || (m.bestFor && m.bestFor.toLowerCase().includes(search))
-    || liveInfoFor(m.name).colours.join(' ').toLowerCase().includes(search));
-  // Models we actually sell come first, then the rest; new launches float to the top of their group.
-  const inBiz = modelsInBusiness();
-  rows.sort((a,b) => {
-    const ab = inBiz.has(specKeyOf(a.name)) ? 0 : 1, bb = inBiz.has(specKeyOf(b.name)) ? 0 : 1;
-    if (ab !== bb) return ab - bb;
-    if (a.known !== b.known) return a.known ? 1 : -1;
-    return a.name.localeCompare(b.name);
-  });
-
+    || (m.features && m.features.toLowerCase().includes(search)));
   const el = document.getElementById('specsCards');
   if (!rows.length) { el.innerHTML = '<div class="empty-note">No model found — try another name.</div>'; return; }
   const line = (k, v) => v && v !== '—' ? `<div><span class="spec-k">${esc(k)}</span><span class="spec-v">${esc(v)}</span></div>` : '';
   el.innerHTML = rows.map(m => {
     const d = SPEC_DETAIL[m.name] || {};
-    const live = liveInfoFor(m.name);
-    const stockTxt = live.stockOpen || live.stockTransit
-      ? `${live.stockOpen} in stock${live.stockTransit ? ` · ${live.stockTransit} in transit` : ''}`
-      : 'None in stock right now';
     return `
     <details class="spec-card"${rows.length === 1 ? ' open' : ''}>
       <summary>
-        <span class="spec-name">${esc(m.name)}${!m.known ? ' <span class="spec-new">NEW</span>' : ''}</span>
-        <span class="spec-cat">${esc(m.category)}${live.onRoadBand ? ` · ${live.onRoadBand} on-road` : ''}</span>
+        <span class="spec-name">${esc(m.name)}</span>
+        <span class="spec-cat">${esc(m.category)}</span>
       </summary>
       <div class="spec-body">
         <div class="spec-hinglish">💬 <b>How to explain it to a customer:</b><br>${esc(m.hinglish)}</div>
         ${d.note ? `<div class="spec-note">⚠️ ${esc(d.note)}</div>` : ''}
         ${m.bestFor ? `<div class="spec-line"><span class="spec-k">Best for</span><span class="spec-v">${esc(m.bestFor)}</span></div>` : ''}
         ${m.features ? `<div class="spec-line"><span class="spec-k">Highlights</span><span class="spec-v">${esc(m.features)}</span></div>` : ''}
-
-        <div class="spec-sec">Live from our data</div>
-        <div class="spec-grid">
-          ${line('Ex-Showroom', live.exBand)}
-          ${line('On-Road', live.onRoadBand)}
-          ${line('Stock', stockTxt)}
-          ${live.colours.length ? `<div class="spec-wide"><span class="spec-k">Colours we sell</span><span class="spec-v">${esc(live.colours.join(' · '))}</span></div>` : ''}
-        </div>
 
         <div class="spec-sec">Engine &amp; performance</div>
         <div class="spec-grid">
@@ -2632,6 +2572,7 @@ function renderModelSpecs(){
         ${(d.cluster || d.service || d.warranty) ? `<div class="spec-sec">Features &amp; ownership</div>
         <div class="spec-grid">
           ${line('Instruments', d.cluster)}${line('Service Interval', d.service)}${line('Warranty', d.warranty)}
+          ${line('Ex-Showroom*', m.price)}
         </div>` : ''}
       </div>
     </details>`;
@@ -6371,42 +6312,84 @@ function priceRows(){
 }
 function priceIsLive(){ return (STATE.price || []).some(r => str(r[0]).trim() && num(r[2]) > 0); }
 
+// Which half of the range a model belongs to. The 350s sell on ease and price; the 440/450/650s
+// on power and touring — so they are shown (and printed) separately.
+function priceSeg(model){ return /\b350\b/.test(str(model)) ? '350' : 'big'; }
+let PRICE_SEG = '350';
+
+// Rows for the current segment + search + model filter — used by both the screen and the printout.
+function currentPriceRows(){
+  const all = priceRows();
+  const q = up(str(document.getElementById('priceSearch')?.value)).trim();
+  const modelPick = str(document.getElementById('priceModelSel')?.value);
+  return all.filter(r =>
+    (PRICE_SEG === 'all' || priceSeg(r[PC.model]) === PRICE_SEG) &&
+    (!modelPick || r[PC.model] === modelPick) &&
+    (!q || up(r[PC.model]).includes(q) || up(r[PC.colour]).includes(q)));
+}
 function renderPriceList(){
-  const tbl = document.getElementById('tblPrice'); if (!tbl) return;
+  const wrap = document.getElementById('priceGroups'); if (!wrap) return;
   const all = priceRows();
   const src = document.getElementById('priceSource');
   if (src) src.innerHTML = priceIsLive()
-    ? `Live from the <b>PRICE</b> tab of your Google Sheet · ${all.length} models · updated whenever you edit the sheet.`
+    ? `Live from the <b>PRICE</b> tab of your Google Sheet · ${all.length} models · edit the sheet and it updates here.`
     : `Showing the built-in copy (${all.length} models). Add a <b>PRICE</b> tab to your Google Sheet to keep it updating automatically.`;
 
-  // model dropdown (built once per render, keeps the current pick)
+  // model dropdown scoped to the current segment
+  const segRows = all.filter(r => PRICE_SEG === 'all' || priceSeg(r[PC.model]) === PRICE_SEG);
   const sel = document.getElementById('priceModelSel');
-  const models = [...new Set(all.map(r => r[0]))].sort();
+  const models = [...new Set(segRows.map(r => r[PC.model]))].sort();
   if (sel) {
     const cur = sel.value;
-    sel.innerHTML = '<option value="">— All models —</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
-    if (models.includes(cur)) sel.value = cur;
+    sel.innerHTML = '<option value="">— All models in this group —</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    sel.value = models.includes(cur) ? cur : '';
   }
   const qSel = document.getElementById('qBike');
   if (qSel) {
-    const cur = qSel.value;
-    qSel.innerHTML = all.map((r,i) => `<option value="${i}">${esc(r[0])} — ${esc(r[1])}</option>`).join('');
-    if (cur && all[+cur]) qSel.value = cur;
+    const cur = qSel.value, curTxt = qSel.options[qSel.selectedIndex]?.text;
+    qSel.innerHTML = all.map((r,i) => `<option value="${i}">${esc(r[PC.model])} — ${esc(r[PC.colour])}</option>`).join('');
+    if (curTxt) { const m = [...qSel.options].find(o => o.text === curTxt); if (m) qSel.value = m.value; }
   }
 
-  const q = up(str(document.getElementById('priceSearch')?.value)).trim();
-  const modelPick = str(document.getElementById('priceModelSel')?.value);
-  const rows = all.filter(r =>
-    (!modelPick || r[0] === modelPick) &&
-    (!q || up(r[0]).includes(q) || up(r[1]).includes(q)));
+  const rows = currentPriceRows();
+  if (!rows.length) { wrap.innerHTML = `<div class="empty-note">No model matches this filter.</div>`; return; }
 
-  if (!rows.length) { tbl.innerHTML = `<tr><td class="empty-note">No model matches that search.</td></tr>`; return; }
-  const head = `<thead><tr>${PRICE_COLS.map((c,i)=>`<th class="${i>1?'num':''}">${esc(c)}</th>`).join('')}</tr></thead>`;
-  const body = `<tbody>${rows.map(r => `<tr>
-    <td><b>${esc(r[0])}</b></td><td style="color:var(--text-secondary)">${esc(r[1])}</td>
-    ${r.slice(2).map((v,i)=>`<td class="num"${i===12?' style="font-weight:700"':''}>${fmtMoney(v)}</td>`).join('')}
-  </tr>`).join('')}</tbody>`;
-  tbl.innerHTML = head + body;
+  // Group by model so each bike gets its own small card with its colours listed under it.
+  const groups = new Map();
+  rows.forEach(r => { const k = r[PC.model]; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
+  wrap.innerHTML = [...groups.entries()].map(([model, rs]) => {
+    const lo = Math.min(...rs.map(r => r[PC.total])), hi = Math.max(...rs.map(r => r[PC.total]));
+    const band = lo === hi ? fmtMoney(lo) : `${fmtMoney(lo)} – ${fmtMoney(hi)}`;
+    return `<div class="pl-card">
+      <div class="pl-head">
+        <span class="pl-model">${esc(model)}</span>
+        <span class="pl-band">${band} <small>on-road</small></span>
+      </div>
+      <div class="table-wrap" style="border:none;border-radius:0;max-height:none;">
+        <table class="data pl-table">
+          <thead><tr>
+            <th>Colour</th><th class="num">Ex-Showroom</th><th class="num">Road Tax</th>
+            <th class="num">Insurance</th><th class="num">On-Road</th>
+            <th class="num">EW</th><th class="num">Guard</th><th class="num">RSA</th><th class="num">AMC</th><th class="num">Helmet</th>
+            <th class="num">Total</th>
+          </tr></thead>
+          <tbody>${rs.map(r => `<tr>
+            <td>${esc(r[PC.colour])}</td>
+            <td class="num">${fmtMoney(r[PC.ex])}</td>
+            <td class="num">${fmtMoney(r[PC.rto])}</td>
+            <td class="num">${fmtMoney(r[PC.ins])}</td>
+            <td class="num">${fmtMoney(r[PC.onroad])}</td>
+            <td class="num">${fmtMoney(r[PC.ew])}</td>
+            <td class="num">${fmtMoney(r[PC.guard])}</td>
+            <td class="num">${fmtMoney(r[PC.rsa])}</td>
+            <td class="num">${fmtMoney(r[PC.amc])}</td>
+            <td class="num">${fmtMoney(r[PC.helmet])}</td>
+            <td class="num pl-total">${fmtMoney(r[PC.total])}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── Printing ──────────────────────────────────────────────────────────────────
@@ -6450,29 +6433,52 @@ function printFooter(){
   <div class="ps-thanks">Thank you for choosing Royal Enfield · <b>Pure Motorcycling Since 1901</b></div>
   <div class="ps-band"></div>`;
 }
-// Prints the given sheet. `landscape` switches the page to A4 landscape and applies the compact
-// styles, so the whole price list fits on one page. A <style> element is used because @page can't
-// be changed from a class alone.
-let _pageStyleEl = null;
+// Printing is done inside a hidden iframe that carries its own tiny document. That way the
+// browser prints THAT document, not the dashboard page — so its header/footer never show the
+// dashboard URL, the "Master Dashboard" title or the extra date stamps. The iframe carries only
+// the styles the sheet needs, and @page margin:0 keeps the browser from adding its own margins.
+function printSheetStyles(){
+  // pull the page's own stylesheet text so the sheet looks identical inside the iframe
+  const css = [...document.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  return css;
+}
 function doPrint(html, landscape){
-  const area = document.getElementById('printArea');
-  if (!area) return;
-  if (!_pageStyleEl) { _pageStyleEl = document.createElement('style'); document.head.appendChild(_pageStyleEl); }
-  _pageStyleEl.textContent = `@page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 0; }`;
-  area.innerHTML = `<div class="print-sheet${landscape ? ' compact' : ''}">${html}</div>`;
-  window.print();
+  const old = document.getElementById('printFrame');
+  if (old) old.remove();
+  const f = document.createElement('iframe');
+  f.id = 'printFrame';
+  f.setAttribute('title', '');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+  document.body.appendChild(f);
+  const doc = f.contentDocument || f.contentWindow.document;
+  doc.open();
+  doc.write(`<!doctype html><html><head><title></title><meta charset="utf-8">
+    <style>${printSheetStyles()}</style>
+    <style>
+      @page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 0; }
+      html,body { margin:0; padding:0; background:#fff; }
+      .print-sheet { visibility:visible !important; display:block !important; }
+    </style></head>
+    <body><div class="print-sheet${landscape ? ' compact' : ''}">${html}</div></body></html>`);
+  doc.close();
+  const go = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch(e) {} 
+    setTimeout(() => { const el = document.getElementById('printFrame'); if (el) el.remove(); }, 1500); };
+  if (doc.readyState === 'complete') setTimeout(go, 120); else f.onload = () => setTimeout(go, 120);
 }
 function printFullPriceList(){
-  const all = priceRows();
-  const q = up(str(document.getElementById('priceSearch')?.value)).trim();
-  const modelPick = str(document.getElementById('priceModelSel')?.value);
-  const rows = all.filter(r => (!modelPick || r[0] === modelPick) && (!q || up(r[0]).includes(q) || up(r[1]).includes(q)));
-  const body = rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td>
-    ${r.slice(2).map(v=>`<td>${fmtMoney(v)}</td>`).join('')}</tr>`).join('');
+  const rows = currentPriceRows();
+  if (!rows.length) return;
+  const segName = PRICE_SEG === '350' ? '350 cc Range' : PRICE_SEG === 'big' ? '650 & Above' : 'All Models';
+  const body = rows.map(r => `<tr>
+    <td>${esc(r[PC.model])}</td><td>${esc(r[PC.colour])}</td>
+    <td>${fmtMoney(r[PC.ex])}</td><td>${fmtMoney(r[PC.rto])}</td><td>${fmtMoney(r[PC.ins])}</td>
+    <td>${fmtMoney(r[PC.onroad])}</td><td>${fmtMoney(r[PC.ew])}</td><td>${fmtMoney(r[PC.guard])}</td>
+    <td>${fmtMoney(r[PC.rsa])}</td><td>${fmtMoney(r[PC.amc])}</td><td>${fmtMoney(r[PC.helmet])}</td>
+    <td><b>${fmtMoney(r[PC.total])}</b></td></tr>`).join('');
   doPrint(`${printHeader('Price list as on ')}
-    <h3>On-Road Price List${modelPick?` — ${esc(modelPick)}`:''} &nbsp;·&nbsp; ${rows.length} models</h3>
+    <h3>On-Road Price List — ${esc(segName)} &nbsp;·&nbsp; ${rows.length} variants</h3>
     <table><thead><tr>${PRICE_COLS.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>
-    ${printFooter()}`, true);   // true = landscape, one page
+    ${printFooter()}`, true);   // landscape, single page
 }
 // Single-bike quotation: the customer only sees the bike they asked about, with a clean breakup.
 function buildQuotation(){
@@ -6516,12 +6522,27 @@ function refreshQuotePreview(){
   on('priceSearch','input', renderPriceList);
   on('priceModelSel','change', renderPriceList);
   on('printPriceBtn','click', printFullPriceList);
+  // segmented switch between the 350s, the bigger bikes, and everything
+  const seg = document.getElementById('priceSeg');
+  if (seg) seg.addEventListener('click', (e) => {
+    const btn = e.target.closest('.seg'); if (!btn) return;
+    PRICE_SEG = btn.dataset.seg;
+    seg.querySelectorAll('.seg').forEach(b => b.classList.toggle('active', b === btn));
+    const sel = document.getElementById('priceModelSel'); if (sel) sel.value = '';
+    renderPriceList();
+  });
   on('quoteBtn','click', () => {
-    const box = document.getElementById('quoteBox');
-    if (box) { box.style.display = box.style.display === 'none' ? '' : 'none'; if (box.style.display === '') refreshQuotePreview(); }
+    const box = document.getElementById('quoteBox'); if (!box) return;
+    const opening = box.style.display === 'none';
+    box.style.display = opening ? '' : 'none';
+    if (opening) {
+      refreshQuotePreview();
+      box.scrollIntoView({ behavior:'smooth', block:'start' });   // otherwise it can open off-screen
+      const c = document.getElementById('qCust'); if (c) setTimeout(() => c.focus(), 350);
+    }
   });
   on('qCloseBtn','click', () => { const b = document.getElementById('quoteBox'); if (b) b.style.display = 'none'; });
-  on('qPrintBtn','click', () => doPrint(buildQuotation()));
+  on('qPrintBtn','click', () => doPrint(buildQuotation(), false));
   ['qCust','qMobile','qBike','qEw','qGuard','qRsa','qAmc','qHelmet']
     .forEach(id => { on(id,'input', refreshQuotePreview); on(id,'change', refreshQuotePreview); });
 })();
