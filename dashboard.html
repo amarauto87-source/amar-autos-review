@@ -3114,15 +3114,34 @@ function updateStatusLine(){
   document.getElementById('statusLine').textContent =
     `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 15 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
 }
-function dateInFilter(d){
+// Turn a cell into a Date. Already-parsed Dates pass through; text dates like "01-09-2026 10:30",
+// "1/9/2026" or "2026-09-01" are parsed here, because some exports send them as plain strings.
+function asDate(v){
+  if (v instanceof Date) return isNaN(v) ? null : v;
+  const s = str(v).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);           // 2026-09-01
+  if (m) { const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
+  m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);                // 01-09-2026 or 01/09/2026 (d-m-y)
+  if (m) { const d = new Date(+m[3], +m[2]-1, +m[1]); return isNaN(d) ? null : d; }
+  // "12 Sep 2026" / "Sep 12, 2026" — needs a month name AND a 4-digit year, so plain text like
+  // "Classic 350" is never mistaken for a date (JS would otherwise read 350 as a year).
+  if (/[A-Za-z]{3}/.test(s) && /\b\d{4}\b/.test(s) && /\b\d{1,2}\b/.test(s)) {
+    const d = new Date(s);
+    if (!isNaN(d)) return d;
+  }
+  return null;
+}
+function dateInFilter(dRaw){
+  const d = asDate(dRaw);
   const dayRange = dayFilterRange();
   if (dayRange) {
-    if (!(d instanceof Date) || isNaN(d)) return false;
+    if (!d) return false;
     return d >= dayRange.from && d <= dayRange.to;
   }
   const f = monthYearOfFilter();
   if (!f) return true;
-  if (!(d instanceof Date) || isNaN(d)) return false;
+  if (!d) return false;
   return (d.getMonth()+1) === f.month && d.getFullYear() === f.year;
 }
 // Different sheets spell the same person differently (short code in DELIVERY SHEET/ACTUL
@@ -5303,7 +5322,30 @@ function renderSalesPersonAnalysis(){
     byOwner.get(owner).push(r);
   });
 
-  if (!byOwner.size) { out.innerHTML = `<div class="empty-note">No ENQUIRY STATMENT VIEW data for this month. (Check the month filter, or whether the sheet has data.)</div>`; return; }
+  if (!byOwner.size) {
+    // Explain WHY there's nothing, using what actually loaded — so the cause is visible instead of
+    // guessed: sheet not loading, wrong month, or the owner/date column not being recognised.
+    const all = STATE.enqView || [];
+    const hdrCells = (STATE.enqViewHeader || []).filter(Boolean);
+    const f = monthYearOfFilter(); const nowD = new Date();
+    const wantKey = `${f?f.year:nowD.getFullYear()}-${String(f?f.month:nowD.getMonth()+1).padStart(2,'0')}`;
+    const err = (typeof LAST_SHEET_ERROR !== 'undefined' && LAST_SHEET_ERROR['ENQUIRY STATMENT VIEW']) || '';
+    let why;
+    if (!all.length) {
+      why = `Sheet loaded 0 rows${err ? ' — ' + esc(err) : ''}. Check the tab is named exactly "ENQUIRY STATMENT VIEW" and the file is shared as "Anyone with the link — Viewer".`;
+    } else {
+      const sampleOwners = [...new Set(all.slice(0,60).map(r => str(r[EV.owner])).filter(Boolean))].slice(0,6);
+      const dates = all.slice(0,60).map(r => asDate(r[EV.created])).filter(Boolean);
+      const months = [...new Set(dates.map(v => `${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,'0')}`))].slice(0,6);
+      const inMonth = all.filter(r => dateInFilter(r[EV.created])).length;
+      why = `${all.length} rows loaded. Looking for month <b>${wantKey}</b> — ${inMonth} row(s) match.<br>`
+          + `Owner column = index ${EV.owner}, sample values: ${sampleOwners.length ? esc(sampleOwners.join(', ')) : '<i>(empty — wrong column?)</i>'}<br>`
+          + `Date column = index ${EV.created}, months found: ${months.length ? esc(months.join(', ')) : '<i>(no dates read — wrong column, or Created On is text not a date)</i>'}<br>`
+          + `Header row cells read: ${hdrCells.length}`;
+    }
+    out.innerHTML = `<div class="empty-note" style="text-align:left;border-left:3px solid var(--warning);padding:12px 14px;line-height:1.6;">${why}</div>`;
+    return;
+  }
 
   const classify = (r) => {
     const s = up(str(r[EV.status]) + ' ' + str(r[EV.stage]));
@@ -6062,7 +6104,7 @@ function sniffEvColumns(current){
     let dates=0, phones=0, names=0, stages=0, textLen=0, textN=0, yesno=0, models=0;
     rows.forEach(r => {
       const v = r ? r[c] : null;
-      if (v instanceof Date && !isNaN(v)) dates++;
+      if (asDate(v)) dates++;
       const s = str(v).trim(); if (!s) return;
       if (/^\+?\d[\d\s-]{8,14}$/.test(s)) phones++;
       if (execNames.has(up(s)) || execNames.has(up(s).replace(/^#+/,''))) names++;
