@@ -1619,7 +1619,7 @@
     <!-- ══ Sales Person Analysis — reads ENQUIRY STATMENT VIEW and, per sales person, works out
          what's going well, what's weak, the loopholes, and concrete fixes. Follows the top month
          filter. Cards are collapsed; click a name to expand. ══ -->
-    <h2 class="section-title" id="ovSpAnalysis">🔍 Sales Person Analysis — Kya chal raha hai, kya theek karna hai</h2>
+    <h2 class="section-title" id="ovSpAnalysis">🔍 Sales Person Analysis — What is working, what needs fixing</h2>
     <p class="spa-hint">Each sales person's performance from ENQUIRY STATMENT VIEW data — conversion, test ride, follow-up, drop reasons, and improvement suggestions. Click a name to open details.</p>
     <div id="spAnalysisResult"></div>
   </section>
@@ -2858,15 +2858,31 @@ async function loadAll(silent){
       return true;
     }).filter(r => up(r[0]) !== 'TOTAL');
     // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
-    // Alias table: from the separate "Name Map" sheet if present, AND from columns T–X of the
-    // one-sheet TARGET layout (T = real name, U..X = the other spellings/IDs). Either works, so
-    // the whole setup can live in a single sheet if that's easier.
+    // Alias table: from the separate "Name Map" sheet if present, AND from the one-sheet TARGET
+    // layout. In the single sheet the block starts at whichever column is headed "NAME" (normally
+    // T), with the ID columns to its right — so the block can be moved without breaking anything.
     STATE.nameMapRaw = (nameMap || []).filter(r => str(r[0]));
-    (monthlyTargets || []).forEach(r => {
-      const nm = str(r[19]); // column T
-      if (!nm || up(nm) === 'NAME') return;
-      STATE.nameMapRaw.push([nm, str(r[20]), str(r[21]), str(r[22]), str(r[23])]);
-    });
+    {
+      const rows = (monthlyTargets || []);
+      // locate the NAME header cell anywhere in the sheet (skip column A, that's the month)
+      let nameCol = -1, headerRowIdx = -1;
+      rows.forEach((r, ri) => {
+        if (nameCol >= 0) return;
+        for (let c = 1; c < (r ? r.length : 0); c++) {
+          if (up(str(r[c])).trim() === 'NAME') { nameCol = c; headerRowIdx = ri; return; }
+        }
+      });
+      if (nameCol >= 0) {
+        rows.forEach((r, ri) => {
+          if (ri === headerRowIdx) return;                 // that's the header line
+          const nm = str(r[nameCol]);
+          if (!nm || up(nm) === 'NAME') return;
+          const ids = [];
+          for (let c = nameCol + 1; c <= nameCol + 6; c++) ids.push(str(r[c]));
+          STATE.nameMapRaw.push([nm, ...ids]);
+        });
+      }
+    }
     _ALIAS_TO_CANON = null; // rebuild alias lookup on next use
     STATE.nameMap = nameMap.filter(r => {
       const owner = str(r[1]);
@@ -3946,8 +3962,10 @@ function empTargetMap(){
   const known = new Set((STATE.execList || []).map(n => up(n)));
   CREDENTIALS.forEach(u => { if (u.execKey) known.add(up(u.execKey)); if (u.name) known.add(up(u.name)); });
   hdr.forEach((cell, c) => {
-    const nm = up(str(cell));
-    if (nm && known.has(nm) && c >= 10) {   // only in the employee-target zone
+    const raw = str(cell);
+    if (!raw || c < 10) return;              // only in the employee-target zone
+    const nm = canonName(raw);               // resolve "#ASLAM" / "SANJEET" to the real name
+    if (nm && known.has(nm)) {
       const val = num(dataRow[c]);
       if (!isNaN(val) && dataRow[c] !== '' && dataRow[c] != null) _EMP_TARGET_MAP[nm] = val;
     }
@@ -5991,21 +6009,41 @@ const EV_HEADER_NAMES = {
   type:       ['TYPE OF ENQUIRY','ENQUIRY TYPE'],
   remark:     ['PREVIOUS CALL REMARK','REMARK','REMARKS','LEAD INSIGHTS'],
 };
+// Headers that must NEVER be picked for a key, because they contain the same word but hold
+// something else entirely (e.g. "Lead Ownership Status" is buyer type, not the sales person).
+const EV_HEADER_AVOID = {
+  owner:      /OWNERSHIP|PERSONA|\bASM\b|DEALER|ACCOUNT/,
+  status:     /LEAD STATUS|SUB-?STATUS|OWNERSHIP|ENQUIRY STATUS/,
+  name:       /DEALER|COMPANY|CAMPAIGN|MODEL|USER|FILE/,
+  model:      /PRODUCT ID|\bID\b|\bCODE\b/,
+  remark:     /DATE|STATUS/,
+  created:    /DISQUALIF/,
+};
 let _EV_COLS = null;
 function evCols(){
   if (_EV_COLS) return _EV_COLS;
   const hdr = (STATE.enqViewHeader || []).map(h => up(str(h)).trim());
-  const find = (names) => {
-    for (const n of names) { const i = hdr.indexOf(up(n).trim()); if (i >= 0) return i; }
-    // loose contains-match as a second pass (handles "Owner (User)" style titles)
-    for (const n of names) { const i = hdr.findIndex(h => h && h.includes(up(n).trim())); if (i >= 0) return i; }
+  const ok = (key, h) => { const av = EV_HEADER_AVOID[key]; return !(av && av.test(h)); };
+  // Pass 1: exact header match (strongest signal). Pass 2: header starts with the name.
+  // Pass 3: header contains the name. Every pass skips headers on the avoid list.
+  const find = (key, names) => {
+    for (const n of names) { const t = up(n).trim(); const i = hdr.findIndex(h => h === t && ok(key,h)); if (i >= 0) return i; }
+    for (const n of names) { const t = up(n).trim(); const i = hdr.findIndex(h => h && h.startsWith(t) && ok(key,h)); if (i >= 0) return i; }
+    for (const n of names) { const t = up(n).trim(); const i = hdr.findIndex(h => h && h.includes(t) && ok(key,h)); if (i >= 0) return i; }
     return -1;
   };
   _EV_COLS = {};
+  const haveHeader = hdr.some(h => h);
   Object.keys(EV_FALLBACK).forEach(key => {
-    const i = find(EV_HEADER_NAMES[key] || []);
-    _EV_COLS[key] = i >= 0 ? i : EV_FALLBACK[key];
+    const i = find(key, EV_HEADER_NAMES[key] || []);
+    if (i >= 0) { _EV_COLS[key] = i; return; }
+    // Header present but this column simply isn't in the sheet (e.g. no separate "Status" column):
+    // don't fall back to an old fixed position — that would read a completely different column.
+    _EV_COLS[key] = haveHeader ? -1 : EV_FALLBACK[key];
   });
+  // Sheets that only carry "Stage" use it as the status; and vice-versa.
+  if (_EV_COLS.status < 0 && _EV_COLS.stage >= 0) _EV_COLS.status = _EV_COLS.stage;
+  if (_EV_COLS.stage  < 0 && _EV_COLS.status >= 0) _EV_COLS.stage  = _EV_COLS.status;
   return _EV_COLS;
 }
 
