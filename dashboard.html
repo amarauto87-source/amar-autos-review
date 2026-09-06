@@ -6044,7 +6044,52 @@ function evCols(){
   // Sheets that only carry "Stage" use it as the status; and vice-versa.
   if (_EV_COLS.status < 0 && _EV_COLS.stage >= 0) _EV_COLS.status = _EV_COLS.stage;
   if (_EV_COLS.stage  < 0 && _EV_COLS.status >= 0) _EV_COLS.stage  = _EV_COLS.status;
+  // Last resort: Google sometimes swallows the header row entirely, and the old fixed positions
+  // belong to a different (wider) export — which would silently read the wrong columns and make
+  // the whole report look empty. So when the header is missing, work the columns out from the
+  // DATA itself: dates, phone numbers, known names, stage keywords and the longest free text.
+  if (!haveHeader) Object.assign(_EV_COLS, sniffEvColumns(_EV_COLS));
   return _EV_COLS;
+}
+// Infer ENQUIRY STATMENT VIEW columns from the values when there's no header row.
+function sniffEvColumns(current){
+  const rows = (STATE.enqView || []).slice(0, 250);
+  if (!rows.length) return {};
+  const width = Math.max(...rows.map(r => (r ? r.length : 0)));
+  const score = { created:[], mobile:[], owner:[], stage:[], remark:[], testRide:[], model:[] };
+  const execNames = new Set([...(STATE.execList || []).map(up), ...Object.keys(aliasMap())]);
+  for (let c = 0; c < width; c++) {
+    let dates=0, phones=0, names=0, stages=0, textLen=0, textN=0, yesno=0, models=0;
+    rows.forEach(r => {
+      const v = r ? r[c] : null;
+      if (v instanceof Date && !isNaN(v)) dates++;
+      const s = str(v).trim(); if (!s) return;
+      if (/^\+?\d[\d\s-]{8,14}$/.test(s)) phones++;
+      if (execNames.has(up(s)) || execNames.has(up(s).replace(/^#+/,''))) names++;
+      if (/^(OPEN|BOOKED|DROPPED|DROP|LOST|QUALIFIED|CONTACTED|RETAILED|NEW|CLOSED|INVOICED|DISQUALIFIED|FOLLOW ?UP)$/i.test(s)) stages++;
+      if (/^(Y|N|YES|NO|TRUE|FALSE)$/i.test(s)) yesno++;
+      if (/\b(350|650|450|411|CLASSIC|BULLET|HUNTER|METEOR|HIMALAYAN|INTERCEPTOR|CONTINENTAL|SCRAM|SHOTGUN|BEAR|GUERRILLA)\b/i.test(s)) models++;
+      textLen += s.length; textN++;
+    });
+    score.created.push(dates); score.mobile.push(phones); score.owner.push(names);
+    score.stage.push(stages); score.testRide.push(yesno); score.model.push(models);
+    score.remark.push(textN ? textLen/textN : 0);
+  }
+  const best = (arr, min) => { let bi=-1, bv=min; arr.forEach((v,i)=>{ if (v>bv) { bv=v; bi=i; } }); return bi; };
+  const out = {};
+  const set = (key, idx) => { if (idx >= 0) out[key] = idx; };
+  set('created', best(score.created, 0));
+  set('mobile',  best(score.mobile, 0));
+  set('owner',   best(score.owner, 0));
+  set('stage',   best(score.stage, 0));
+  set('testRide',best(score.testRide, 0));
+  set('model',   best(score.model, 0));
+  // remark = the column with the longest average text that isn't already claimed
+  const claimed = new Set(Object.values(out));
+  const remarkIdx = best(score.remark.map((v,i)=> claimed.has(i) ? 0 : v), 12);
+  set('remark', remarkIdx);
+  if (out.stage != null) out.status = out.stage;
+  return out;
 }
 
 // Which day's turn list to use.
