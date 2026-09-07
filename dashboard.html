@@ -1036,6 +1036,10 @@
   .pl-head .pl-model { font-family:var(--font-head); font-size:16px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
   .pl-head .pl-band { font-family:var(--font-head); font-size:17px; font-weight:700; color:var(--gold-light); white-space:nowrap; }
   .pl-head .pl-band small { font-size:10px; color:var(--text-secondary); letter-spacing:1px; text-transform:uppercase; margin-left:3px; }
+  .pl-head .pl-count { display:inline-block; margin-left:10px; padding:3px 9px; border-radius:20px; background:var(--surface-1);
+    border:1px solid var(--border); font-family:var(--font-ui); font-size:11px; font-weight:500; letter-spacing:0;
+    text-transform:none; color:var(--text-secondary); vertical-align:middle; }
+  .pl-card .pl-table th { position:sticky; top:0; }
   .pl-table td.pl-total { font-weight:700; color:var(--gold-light); }
   .qp-card { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
   .qp-top { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 16px;
@@ -6388,7 +6392,7 @@ function openFormPdf(key){
 // 6 Nil-dep + RT, 7 Zero-dep insurance, 8 On-road (nil dep), 9 EW, 10 Engine guard, 11 RSA,
 // 12 AMC, 13 Helmet, 14 Total.
 const PRICE_FALLBACK = [["NEW BULLET 350","Military Black",165656,14652,12537,192845,2799,3900,1199,1499,2500,204742],["NEW BULLET 350","Standard Maroon / Black",191739,16739,13022,221500,2799,3900,1199,1499,2500,233397],["NEW BULLET 350","BATTALION BLACK",166511,14721,12554,193786,2799,3900,1199,1499,2500,205683],["NEW BULLET 350","Black Gold",209572,18166,13354,241092,2799,3900,1199,1499,2500,252989],["CLASSIC 350 EFI BSVI NEW","REDDITCH RED SC",188434,16475,12961,217870,2799,3900,1199,1499,2500,229767],["CLASSIC 350 EFI BSVI NEW","MADRAS RED",194668,16973,13077,224718,2799,3900,1199,1499,2500,236615],["CLASSIC 350 EFI BSVI NEW","MEDALLION BRONZE",199040,17323,13158,229521,2799,3900,1199,1499,2500,241418],["CLASSIC 350 EFI BSVI NEW","COMMANDO SAND/gorakh green",210684,18255,13373,242312,2799,3900,1199,1499,2500,254209],["CLASSIC 350 EFI BSVI NEW","GUN GREY / STEALTH BLACK",219423,18954,13536,251913,2799,3900,1199,1499,2500,263810],["CLASSIC 350 EFI BSVI NEW","EMERALD GREEN",224275,19342,13627,257244,2799,3900,1199,1499,2500,269141],["GOAN CLASSIC 350 SINGLE TONE","SHACK BLACK / PURPLE HAZE",225311,19425,13646,258382,2799,3900,1199,1499,2500,270279],["GOAN CLASSIC 350 DUAL TONE","RAVE RED /TRIP TEAL GREEN",228187,19655,13699,261541,2799,3900,1199,1499,2500,273438],["HUNTER 350 RETRO","FACTORY BLACK",137640,12411,12017,162068,2799,3250,1199,1499,2500,173315],["HUNTER 350 RETRO","TARMAC BLACK",151025,13482,12265,176772,2799,3250,1199,1499,2500,188019],["HUNTER 350 METRO","DAPPER GREY / RIO WHITE / GRAPHITE GREY",166372,14710,12552,193634,2799,3250,1199,1499,2500,204881],["HUNTER 350 METRO","REBEL BLUE /LONDON RED / TOKYO BLACK / MOONSHOT WHITE / MUMBAI YELLOW",171077,15086,12638,198801,2799,3250,1199,1499,2500,210048],["METEOR 350 FIREBALL NEW","GREY / ORANGE",199990,17399,13174,230563,2799,3900,1199,1499,2500,242460],["METEOR 350 STELLAR NEW","MARINE BLUE / MATT GREY",208532,18083,13333,239948,2799,3900,1199,1499,2500,251845],["METEOR 350 AURORA NEW","RETRO GREEN / RED",211475,18318,13389,243182,2799,3900,1199,1499,2500,255079],["METEOR 350 SUPERNOVA NEW","BLACK",221307,19105,13570,253982,2799,3900,1199,1499,2500,265879],["BULLET 650","CANNON BLACK /BATTLESHIP BLUE",364856,30588,25543,420987,2799,4400,0,1499,2500,432185],["CLASSIC 650 TWIN","VALLAM RED/ BRUNTINGTHORPE BLUE",367592,30807,25595,423994,3599,4400,0,1499,2500,435992],["CLASSIC 650 TWIN","TEAL",372427,31194,25688,429309,3599,4400,0,1499,2500,441307],["CLASSIC 650 TWIN","BLACK CHROME",382097,31968,25871,439936,3599,4400,0,1499,2500,451934],["Scram 440","FORCE BLUE NTBT/GREY/TEAL",232371,19990,23023,275384,3299,1450,1199,1499,2500,285331],["Scram 440","TRAIL GREEN",224805,19384,22882,267071,3299,1450,1199,1499,2500,277018],["Super Meteor 650 Astral","BLACK",405988,33879,26324,466191,3599,4400,0,1499,2500,478189],["Super Meteor 650 Interstellar","GREEN / GREY",422972,35238,26647,484857,3599,4400,0,1499,2500,496855],["Super Meteor 650 Celestial","RED / BLUE",439960,36597,26969,503526,3599,4400,0,1499,2500,515524],["NEW HIMALAYAN 450","KAZA BROWN",308029,26042,24463,358534,3299,3700,1199,1499,2500,370731],["NEW HIMALAYAN 450","SLATE POPPY BLUE",312353,26388,24544,363285,3299,3700,1199,1499,2500,375482],["NEW HIMALAYAN 450","KAMET WHITE",316678,26734,24627,368039,3299,3700,1199,1499,2500,380236],["NEW HIMALAYAN 450","HANLE BLACK",322081,27166,24730,373977,3299,3700,1199,1499,2500,386174],["NEW HIMALAYAN 450","MANA BLACK",339564,28565,25062,393191,3299,3700,1199,1499,2500,405388],["Continental GT 650 NEW","Rocker Red/ British Racing Green",358427,30074,25421,413922,3599,3900,1199,1499,2500,426619],["Continental GT 650 NEW","Apex Grey",380921,31874,25848,438643,3599,3900,1199,1499,2500,451340],["Continental GT 650 NEW","Mr Clean",387667,32413,25977,446057,3599,3900,1199,1499,2500,458754],["Interceptor 650 NEW","Canyon Red/Cali Green",337909,28433,25032,391374,3599,3900,1199,1499,2500,404071],["Interceptor 650 NEW","Sunset Strip",346836,29147,25199,401182,3599,3900,1199,1499,2500,413879],["Interceptor 650 NEW","Black Ray",357987,30039,25413,413439,3599,3900,1199,1499,2500,426136],["Interceptor 650 NEW","Mark 2",369137,30931,25625,425693,3599,3900,1199,1499,2500,438390],["BEAR 650","Two Four Nine",399990,33399,26209,459598,3599,3900,1199,1499,2500,472295],["BEAR 650","GLDN SHDW BLACK",391598,32728,26051,450377,3599,3900,1199,1499,2500,463074],["BEAR 650","WILD HONEY",383790,32103,25902,441795,3599,3900,1199,1499,2500,454492],["BEAR 650","Broadwalk White",378208,31657,25797,435662,3599,3900,1199,1499,2500,448359],["Shotgun 650","Sheet Metal Grey",401002,33480,26230,460712,3599,4400,0,1499,2500,472710],["Shotgun 650","Green Drill",412947,34436,26456,473839,3599,4400,0,1499,2500,485837],["Shotgun 650","Stencil White",416139,34691,26518,477348,3599,4400,0,1499,2500,489346],["Guerrilla 450","Apex Red / Twilight Blue",251063,21485,23381,295929,3599,3700,1199,1499,2500,308426],["Guerrilla 450","Apex Green / Apex Black",258309,22065,23517,303891,3299,3700,1199,1499,2500,316088],["Guerrilla 450","Peix Bronze/Smoke Silver/ Shadow Ash Green",269119,22930,23723,315772,3299,3700,1199,1499,2500,327969],["Guerrilla 450","Brava Blue",274523,23362,23827,321712,3299,3700,1199,1499,2500,333909]];
-const PRICE_META = {"terms":" Terms and conditions:\n1) The above prices are subject to change and the prices prevailing at the time of invoicing will be applicable.\n2) The payment made through Cheque/Demand Draft must be in favor of AMAR AUTOS\n3) Local taxes are as applicable. Necessary receipts will be provided at the time of billing/delivery.\n4) Invoicing, Registration & Delivery will only be done on the receipt and realization of full payment","bank":{"A/C HOLDER NAME":"AMAR AUTOS","BANK NAME":"AU SMALL FINANCE BANK (AU BANK)","ACCOUNT NUMBER":"222 125 494 412 0560","BRANCH ADDRESS":"PREET VIHAR, DELHI","IFSC CODE":"AUBL 000 2549"},"addr":"A-64 Gurunanak Pura, Vikas Marg, Laxmi Nagar, East Delhi - 110092","contact":"amarautovikasmarg@gmail.com  ·  9773987191 / 93 / 95"};
+const PRICE_META = {"terms":" Terms and conditions:\n1) The above prices are subject to change and the prices prevailing at the time of invoicing will be applicable.\n2) The payment made through Cheque/Demand Draft must be in favor of AMAR AUTOS\n3) Local taxes are as applicable. Necessary receipts will be provided at the time of billing/delivery.\n4) Invoicing, Registration & Delivery will only be done on the receipt and realization of full payment","bank":{"A/C HOLDER NAME":"AMAR AUTOS","BANK NAME":"AU SMALL FINANCE BANK (AU BANK)","ACCOUNT NUMBER":"222 125 494 2674687","BRANCH ADDRESS":"PREET VIHAR, DELHI","IFSC CODE":"AUBL 000 2549"},"addr":"B-21, Main Road, Kanti Nagar, East Delhi - 110051","contact":"amarauto@hotmail.com  \u00b7  9810092809 / 8510092800"};
 const PRICE_COLS = ['Model','Colour','Ex-Showroom','Road Tax','Insurance (Zero Dep)','On-Road','EW','Engine Guard','RSA','AMC','Helmet','Total'];
 // Column indices in a price row (kept in one place so the sheet layout can change safely).
 const PC = { model:0, colour:1, ex:2, rto:3, ins:4, onroad:5, ew:6, guard:7, rsa:8, amc:9, helmet:10, total:11 };
@@ -6452,7 +6456,7 @@ function renderPriceList(){
     const band = lo === hi ? fmtMoney(lo) : `${fmtMoney(lo)} – ${fmtMoney(hi)}`;
     return `<div class="pl-card">
       <div class="pl-head">
-        <span class="pl-model">${esc(model)}</span>
+        <span class="pl-model">${esc(model)}<span class="pl-count">${rs.length} colour${rs.length>1?'s':''}</span></span>
         <span class="pl-band">${band} <small>on-road</small></span>
       </div>
       <div class="table-wrap" style="border:none;border-radius:0;max-height:none;">
@@ -6542,44 +6546,64 @@ function fitText(p, s, maxW, size, bold){
 function printFullPriceList(){
   const rows = currentPriceRows();
   if (!rows.length) return;
-  const segName = PRICE_SEG === '350' ? '350 cc Range' : PRICE_SEG === 'big' ? 'Non-350 (above 350 cc)' : 'All Models';
+  const segName = PRICE_SEG === '350' ? '350 cc Range' : PRICE_SEG === 'big' ? 'Non-350 \u2014 Above 350 cc' : 'All Models';
   const p = makePdf({ landscape:true });
-  let y = pdfLetterhead(p, 'PRICE LIST AS ON');
   const M = 28, right = p.W - M;
-  p.text('ON-ROAD PRICE LIST \u2014 ' + segName, M, y, { size:11, bold:true, color:INK });
-  p.text(rows.length + ' variants', right, y, { size:8, color:GREY, align:'right' });
-  y += 8;
-  // column layout: model + colour on the left, the money columns right-aligned
-  const heads = ['MODEL','COLOUR','EX-SHOWROOM','ROAD TAX','INSURANCE','ON-ROAD','EW','GUARD','RSA','AMC','HELMET','TOTAL'];
-  const numCols = heads.length - 2;
-  const leftW = (right - M) * 0.30;
+  // Readable sizes — the sheet runs onto a second page rather than shrinking the type.
+  const FS = 8.6, HFS = 7.6, rowH = 16, groupH = 19;
+  const heads = ['MODEL / COLOUR','EX-SHOWROOM','ROAD TAX','INSURANCE','ON-ROAD','EW','GUARD','RSA','AMC','HELMET','TOTAL'];
+  const numCols = heads.length - 1;
+  const leftW = (right - M) * 0.26;
   const colW = ((right - M) - leftW) / numCols;
-  const xModel = M, xColour = M + leftW * 0.52;
-  const xNum = (i) => M + leftW + colW * (i + 1) - 4;     // right edge of column i
-  const rowH = rows.length > 40 ? 10.2 : rows.length > 25 ? 12 : 14;
-  // header band
-  p.rect(M, y, right - M, 13, INK);
-  p.text(heads[0], xModel + 3, y + 9, { size:6.5, bold:true, color:[1,1,1] });
-  p.text(heads[1], xColour + 3, y + 9, { size:6.5, bold:true, color:[1,1,1] });
-  heads.slice(2).forEach((h, i) => p.text(h, xNum(i), y + 9, { size:6.5, bold:true, color:[1,1,1], align:'right' }));
-  y += 13;
-  let lastModel = '';
-  rows.forEach((r, idx) => {
-    if (idx % 2) p.rect(M, y, right - M, rowH, [0.97,0.97,0.97]);
-    const ty = y + rowH - 3;
-    const showModel = r[PC.model] !== lastModel;
-    if (showModel) p.text(r[PC.model], xModel + 3, ty, { size:6.6, bold:true, color:INK });
-    lastModel = r[PC.model];
-    // colours can be very long ("REBEL BLUE / LONDON RED / TOKYO BLACK ..."), so clip them to the
-    // space available before the first money column instead of letting them run into the numbers
-    p.text(fitText(p, r[PC.colour], M + leftW - 6 - (xColour + 3), 6.6), xColour + 3, ty, { size:6.6, color:[0.3,0.3,0.3] });
+  const xNum = (i) => M + leftW + colW * (i + 1) - 6;
+  // Rows run almost to the bottom of the page; the footer block gets its own space at the end
+  // (a fresh page if it no longer fits), so no room is wasted mid-document.
+  const bottomLimit = p.H - 46;
+  const FOOTER_H = 150;
+
+  const drawTableHead = (y) => {
+    p.rect(M, y, right - M, 17, INK);
+    p.text(heads[0], M + 8, y + 11.5, { size:HFS, bold:true, color:[1,1,1] });
+    heads.slice(1).forEach((h, i) => p.text(h, xNum(i), y + 11.5, { size:HFS, bold:true, color:[1,1,1], align:'right' }));
+    return y + 17;
+  };
+  const startPage = (first) => {
+    let y = pdfLetterhead(p, 'PRICE LIST AS ON');
+    p.text('ON-ROAD PRICE LIST \u2014 ' + segName, M, y, { size:12, bold:true, color:INK });
+    p.text(rows.length + ' variants', right, y, { size:8.5, color:GREY, align:'right' });
+    return drawTableHead(y + 8);
+  };
+
+  let y = startPage(true);
+  let lastModel = '', zebra = 0;
+  rows.forEach((r) => {
+    // model band whenever the model changes
+    if (r[PC.model] !== lastModel) {
+      if (y + groupH + rowH > bottomLimit) { p.newPage(); y = startPage(false); }
+      p.rect(M, y, right - M, groupH, [0.93,0.93,0.93]);
+      p.text(r[PC.model], M + 8, y + 13.5, { size:9.4, bold:true, color:INK });
+      y += groupH; lastModel = r[PC.model]; zebra = 0;
+    }
+    if (y + rowH > bottomLimit) { p.newPage(); y = startPage(false);
+      p.rect(M, y, right - M, groupH, [0.93,0.93,0.93]);
+      p.text(lastModel + '  (contd.)', M + 8, y + 13.5, { size:9.4, bold:true, color:INK });
+      y += groupH; zebra = 0; }
+    if (zebra % 2) p.rect(M, y, right - M, rowH, [0.975,0.975,0.975]);
+    const ty = y + rowH - 4.5;
+    p.text(fitText(p, r[PC.colour], leftW - 22, FS), M + 16, ty, { size:FS, color:[0.25,0.25,0.25] });
     [r[PC.ex], r[PC.rto], r[PC.ins], r[PC.onroad], r[PC.ew], r[PC.guard], r[PC.rsa], r[PC.amc], r[PC.helmet]]
-      .forEach((v, i) => p.text(pdfMoney(v), xNum(i), ty, { size:6.6, color:[0.2,0.2,0.2], align:'right' }));
-    p.text(pdfMoney(r[PC.total]), xNum(9), ty, { size:6.8, bold:true, color:INK, align:'right' });
-    y += rowH;
+      .forEach((v, i) => p.text(pdfMoney(v), xNum(i), ty, { size:FS, color:[0.2,0.2,0.2], align:'right' }));
+    p.text(pdfMoney(r[PC.total]), xNum(9), ty, { size:FS + 0.6, bold:true, color:INK, align:'right' });
+    p.line(M, y + rowH, right, y + rowH, { color:[0.9,0.9,0.9] });
+    y += rowH; zebra++;
   });
-  p.line(M, y, right, y, { color:[0.75,0.75,0.75] });
-  pdfFooter(p, y + 6);
+  if (y + FOOTER_H > p.H) {          // not enough room left — carry the footer to a new page
+    p.newPage();
+    y = pdfLetterhead(p, 'PRICE LIST AS ON');
+    p.text('ON-ROAD PRICE LIST \u2014 ' + segName + '  (continued)', M, y, { size:12, bold:true, color:INK });
+    y += 14;
+  }
+  pdfFooter(p, y + 12);
   openBlob(p.build(), 'Amar-Autos-Price-List.pdf');
 }
 
