@@ -1990,7 +1990,8 @@
          get their own view (and their own printout). -->
     <div class="seg-wrap" id="priceSeg">
       <button class="seg active" data-seg="350">350 cc</button>
-      <button class="seg" data-seg="big">Non-350 (Above 350cc)</button>
+      <button class="seg" data-seg="mid">440 &amp; 450 cc</button>
+      <button class="seg" data-seg="650">650 cc</button>
       <button class="seg" data-seg="all">All Models</button>
     </div>
 
@@ -6408,7 +6409,13 @@ function priceIsLive(){ return (STATE.price || []).some(r => str(r[0]).trim() &&
 
 // Which half of the range a model belongs to. The 350s sell on ease and price; the 440/450/650s
 // on power and touring — so they are shown (and printed) separately.
-function priceSeg(model){ return /\b350\b/.test(str(model)) ? '350' : 'big'; }
+function priceSeg(model){
+  const m = str(model);
+  if (/\b350\b/.test(m)) return '350';
+  if (/\b(440|450)\b/.test(m)) return 'mid';
+  if (/\b650\b/.test(m)) return '650';
+  return 'other';           // anything new shows under "All Models" until it's classified
+}
 let PRICE_SEG = '350';
 
 // Rows for the current segment + search + model filter — used by both the screen and the printout.
@@ -6546,24 +6553,35 @@ function fitText(p, s, maxW, size, bold){
 function printFullPriceList(){
   const rows = currentPriceRows();
   if (!rows.length) return;
-  const segName = PRICE_SEG === '350' ? '350 cc Range' : PRICE_SEG === 'big' ? 'Non-350 \u2014 Above 350 cc' : 'All Models';
+  const segName = PRICE_SEG === '350' ? '350 cc Range'
+    : PRICE_SEG === 'mid' ? '440 & 450 cc'
+    : PRICE_SEG === '650' ? '650 cc Twins'
+    : 'All Models';
   const p = makePdf({ landscape:true });
   const M = 28, right = p.W - M;
   // Readable sizes — the sheet runs onto a second page rather than shrinking the type.
-  const FS = 8.6, HFS = 7.6, rowH = 16, groupH = 19;
-  const heads = ['MODEL / COLOUR','EX-SHOWROOM','ROAD TAX','INSURANCE','ON-ROAD','EW','GUARD','RSA','AMC','HELMET','TOTAL'];
-  const numCols = heads.length - 1;
-  const leftW = (right - M) * 0.26;
-  const colW = ((right - M) - leftW) / numCols;
-  const xNum = (i) => M + leftW + colW * (i + 1) - 6;
+  const FS = 8.6, HFS = 7.6, groupH = 19;
+  // Slightly tighter rows for the longer ranges so each engine size still lands on one page.
+  const rowH = rows.length > 26 ? 14 : rows.length > 21 ? 15 : 16;
+  const heads = ['MODEL','EX-SHOWROOM','ROAD TAX','INSURANCE','ON-ROAD','EW','GUARD','RSA','AMC','HELMET','TOTAL'];
+  // Weighted columns: the smaller add-on figures (EW, RSA, AMC…) need less room than the big
+  // ones, and TOTAL is bold so it needs the most — otherwise it runs into the Helmet column.
+  const leftW = (right - M) * 0.32;
+  const WEIGHTS = [1.05, 0.95, 0.95, 1.05, 0.82, 0.88, 0.82, 0.82, 0.88, 1.30];
+  const wSum = WEIGHTS.reduce((a,b)=>a+b, 0);
+  const unit = ((right - M) - leftW) / wSum;
+  const xEdges = (() => { const e = []; let x = M + leftW;
+    WEIGHTS.forEach(w => { x += unit * w; e.push(x); }); return e; })();
+  const xNum = (i) => xEdges[i] - 5;   // right edge of numeric column i
   // Rows run almost to the bottom of the page; the footer block gets its own space at the end
   // (a fresh page if it no longer fits), so no room is wasted mid-document.
   const bottomLimit = p.H - 46;
-  const FOOTER_H = 150;
+  const FOOTER_H = 120;   // measured height of the terms + bank + signature block
 
   const drawTableHead = (y) => {
     p.rect(M, y, right - M, 17, INK);
-    p.text(heads[0], M + 8, y + 11.5, { size:HFS, bold:true, color:[1,1,1] });
+    p.text(heads[0], M + 6, y + 11.5, { size:HFS, bold:true, color:[1,1,1] });
+    p.text('COLOUR', M + leftW * 0.62 + 4, y + 11.5, { size:HFS, bold:true, color:[1,1,1] });
     heads.slice(1).forEach((h, i) => p.text(h, xNum(i), y + 11.5, { size:HFS, bold:true, color:[1,1,1], align:'right' }));
     return y + 17;
   };
@@ -6577,26 +6595,26 @@ function printFullPriceList(){
   let y = startPage(true);
   let lastModel = '', zebra = 0;
   rows.forEach((r) => {
-    // model band whenever the model changes
-    if (r[PC.model] !== lastModel) {
-      if (y + groupH + rowH > bottomLimit) { p.newPage(); y = startPage(false); }
-      p.rect(M, y, right - M, groupH, [0.93,0.93,0.93]);
-      p.text(r[PC.model], M + 8, y + 13.5, { size:9.4, bold:true, color:INK });
-      y += groupH; lastModel = r[PC.model]; zebra = 0;
-    }
-    if (y + rowH > bottomLimit) { p.newPage(); y = startPage(false);
-      p.rect(M, y, right - M, groupH, [0.93,0.93,0.93]);
-      p.text(lastModel + '  (contd.)', M + 8, y + 13.5, { size:9.4, bold:true, color:INK });
-      y += groupH; zebra = 0; }
+    if (y + rowH > bottomLimit) { p.newPage(); y = startPage(false); lastModel = ''; zebra = 0; }
     if (zebra % 2) p.rect(M, y, right - M, rowH, [0.975,0.975,0.975]);
     const ty = y + rowH - 4.5;
-    p.text(fitText(p, r[PC.colour], leftW - 22, FS), M + 16, ty, { size:FS, color:[0.25,0.25,0.25] });
+    // The model name is printed once per model and the colours sit under it — that keeps the whole
+    // range on one page instead of spending a full band row on every model.
+    const isNew = r[PC.model] !== lastModel;
+    if (isNew) {
+      if (lastModel) p.line(M, y, right, y, { color:[0.55,0.55,0.55], width:0.8 });
+      p.text(fitText(p, r[PC.model], leftW * 0.62 - 8, 8.6, true), M + 6, ty, { size:8.6, bold:true, color:INK });
+      lastModel = r[PC.model];
+    }
+    p.text(fitText(p, r[PC.colour], leftW * 0.38 - 10, FS), M + leftW * 0.62 + 4, ty, { size:FS, color:[0.3,0.3,0.3] });
     [r[PC.ex], r[PC.rto], r[PC.ins], r[PC.onroad], r[PC.ew], r[PC.guard], r[PC.rsa], r[PC.amc], r[PC.helmet]]
       .forEach((v, i) => p.text(pdfMoney(v), xNum(i), ty, { size:FS, color:[0.2,0.2,0.2], align:'right' }));
     p.text(pdfMoney(r[PC.total]), xNum(9), ty, { size:FS + 0.6, bold:true, color:INK, align:'right' });
-    p.line(M, y + rowH, right, y + rowH, { color:[0.9,0.9,0.9] });
+    if (!isNew) p.line(M + leftW * 0.62, y, right, y, { color:[0.92,0.92,0.92] });
     y += rowH; zebra++;
   });
+  p.line(M, y, right, y, { color:[0.55,0.55,0.55], width:0.8 });
+
   if (y + FOOTER_H > p.H) {          // not enough room left — carry the footer to a new page
     p.newPage();
     y = pdfLetterhead(p, 'PRICE LIST AS ON');
