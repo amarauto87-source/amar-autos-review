@@ -2246,18 +2246,49 @@ function updateFestivalBanner(){
 // Staff who have left the dealership. They're removed from the executive list, leaderboard and
 // filters so the team view stays current. Add a name here when someone leaves.
 const EX_EMPLOYEES = new Set(['PRAKSHI']);
-const CREDENTIALS = [
-  { name: 'Deepak',  password: 'Superman@123', role: 'Admin', execKey: null },
-  { name: 'ASLAM',   password: 'Khan@786',     role: 'Sales', execKey: 'ASLAM' },
-  { name: 'RAKESH',  password: 'Mishra@111',   role: 'Sales', execKey: 'RAKESH' },
-  { name: 'SANDEEP', password: 'Sanjeet@123',  role: 'Sales', execKey: 'SANDEEP' },
-  { name: 'POOJA',   password: 'Negi@111',     role: 'Sales', execKey: 'POOJA' },
-  { name: 'SIMMI',   password: 'Khan@786',     role: 'Sales', execKey: 'SIMMI' },
-  { name: 'SHAISTA', password: 'Shaista@123',  role: 'Sales', execKey: 'SHAISTA' },
-  { name: 'HARSH',   password: 'Sharma@111',   role: 'CRT',   execKey: 'HARSH' },
-  { name: 'KASHISH', password: 'KASHISH@111',  role: 'Sales', execKey: 'KASHISH' },
-  { name: 'AJEET',   password: 'Jha@123',      role: 'Walkin', execKey: null },
-];
+// ═══════════════ Secure API ═══════════════
+// Passwords are NOT in this file any more. The dashboard talks to an Apps Script API that runs
+// under the owner's own Google account: it checks the login against a private USERS sheet, hands
+// back a signed token that expires, and only then serves data. That lets the spreadsheet itself
+// go back to being private — previously anyone with the sheet link could read every customer
+// record without logging in at all.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxF5H_dlZN0CUzCAu7K10fPI5OP-cy8FNn7Yp5rUuCLixXsDq5l4ICICzE8y6LJoNbB/exec';
+
+// Filled from the API so the login dropdown still lists the team. Names only — nothing secret.
+let CREDENTIALS = [];
+let AUTH = { token: null, user: null, expires: 0 };
+// Set when a sheet comes back empty or the API reports a problem — the on-screen diagnostics
+// read this to explain WHY a report is blank instead of just showing nothing.
+let LAST_SHEET_ERROR = {};
+
+// One JSONP call to the API. JSONP (not fetch) because Apps Script redirects break CORS.
+let _apiSeq = 0;
+function apiCall(params, cb, timeoutMs){
+  const name = '__api_cb_' + (++_apiSeq) + '_' + Date.now();
+  const q = Object.keys(params)
+    .filter(k => params[k] !== undefined && params[k] !== null)
+    .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+  q.push('callback=' + name);
+  const script = document.createElement('script');
+  let done = false;
+  const finish = (res) => {
+    if (done) return; done = true;
+    clearTimeout(timer);
+    try { delete window[name]; } catch(e) { window[name] = undefined; }
+    if (script.parentNode) script.parentNode.removeChild(script);
+    cb(res);
+  };
+  const timer = setTimeout(() => finish({ ok:false, error:'TIMEOUT', message:'No response from the server' }), timeoutMs || 30000);
+  window[name] = (res) => finish(res);
+  script.onerror = () => finish({ ok:false, error:'NETWORK', message:'Could not reach the server' });
+  script.src = API_URL + (API_URL.indexOf('?') >= 0 ? '&' : '?') + q.join('&');
+  document.head.appendChild(script);
+}
+// Promise wrapper, for the places that already use async/await.
+function api(params, timeoutMs){
+  return new Promise(resolve => apiCall(params, resolve, timeoutMs));
+}
+
 let CURRENT_USER = null;
 // Tabs a non-Admin login should NOT see at all — 'riders' stays CRT+Admin only (Harsh's job, not
 // a sales person's). Funnel used to be here too but Deepak now wants a Sales login to see it
@@ -2634,9 +2665,24 @@ document.getElementById('reFactContinue').addEventListener('click', enterDashboa
 
 function populateLoginDropdown(){
   const sel = document.getElementById('loginName');
-  sel.innerHTML = CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
+  if (!sel) return;
+  sel.innerHTML = CREDENTIALS.length
+    ? CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('')
+    : '<option value="">Loading…</option>';
 }
 populateLoginDropdown();
+// Ask the API who the users are (names only). If it can't be reached, say so plainly rather
+// than leaving an empty dropdown with no explanation.
+apiCall({ action:'users' }, (res) => {
+  const errEl = document.getElementById('loginError');
+  if (res && res.ok && Array.isArray(res.users) && res.users.length) {
+    CREDENTIALS = res.users.map(n => ({ name: n }));
+    populateLoginDropdown();
+    if (errEl && /server/i.test(errEl.textContent)) errEl.textContent = '';
+  } else if (errEl) {
+    errEl.textContent = 'Could not reach the server. Check your internet and refresh.';
+  }
+}, 20000);
 
 // ===== Persistent login =====
 // Login once per device/browser, stay logged in after that — no localStorage/cookie was used
@@ -2645,14 +2691,27 @@ populateLoginDropdown();
 // looked up again in CREDENTIALS to rebuild CURRENT_USER, skipping straight past the login form
 // to today's Spotlight screen. This is meant for an employee's own phone, not a shared showroom
 // device — Logout below clears it, and each person doing that on their own device is enough.
-const SESSION_KEY = 'amarAutosSessionUser';
+const SESSION_KEY = 'amarAutosSession';
+function saveSession(){
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(AUTH)); } catch(e) {}
+}
+function clearSession(){
+  AUTH = { token:null, user:null, expires:0 };
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+// A saved token keeps the person signed in on their own phone until it expires (12 hours by
+// default, set in the Apps Script).
 function trySavedSession(){
-  let savedName;
-  try { savedName = localStorage.getItem(SESSION_KEY); } catch(e) { return false; }
-  if (!savedName) return false;
-  const user = CREDENTIALS.find(u => u.name === savedName);
-  if (!user) { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} return false; }
-  CURRENT_USER = user;
+  let raw;
+  try { raw = localStorage.getItem(SESSION_KEY); } catch(e) { return false; }
+  if (!raw) return false;
+  let saved;
+  try { saved = JSON.parse(raw); } catch(e) { clearSession(); return false; }
+  if (!saved || !saved.token || !saved.user || (saved.expires && saved.expires < Date.now())) {
+    clearSession(); return false;
+  }
+  AUTH = saved;
+  CURRENT_USER = saved.user;
   showReFact();
   return true;
 }
@@ -2661,23 +2720,32 @@ trySavedSession();
 function attemptLogin(){
   const name = document.getElementById('loginName').value;
   const pass = document.getElementById('loginPass').value;
-  const user = CREDENTIALS.find(u => u.name === name && u.password === pass);
   const errEl = document.getElementById('loginError');
-  if (!user) {
-    errEl.textContent = 'Wrong password. Please try again.';
-    return;
-  }
-  errEl.textContent = '';
-  CURRENT_USER = user;
-  try { localStorage.setItem(SESSION_KEY, user.name); } catch(e) {}
-  showReFact();
+  const btn = document.querySelector('#loginForm button[type=submit]');
+  if (!name || !pass) { errEl.textContent = 'Please enter your password.'; return; }
+  errEl.textContent = 'Checking…';
+  if (btn) btn.disabled = true;
+  apiCall({ action:'login', name, pass }, (res) => {
+    if (btn) btn.disabled = false;
+    if (!res || !res.ok) {
+      errEl.textContent = (res && (res.message || res.error)) === 'TIMEOUT'
+        ? 'Server is not responding. Check your internet and try again.'
+        : (res && res.error) || 'Wrong name or password.';
+      return;
+    }
+    errEl.textContent = '';
+    AUTH = { token: res.token, user: res.user, expires: res.expires || 0 };
+    CURRENT_USER = res.user;
+    saveSession();
+    showReFact();
+  }, 25000);
 }
 document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); attemptLogin(); });
 // Logout clears the saved session (so this device goes back to asking for a password next time)
 // and reloads — the reload also cleanly stops the 5-minute auto-refresh interval and resets
 // CURRENT_USER/STATE.
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  clearSession();
   location.reload();
 });
 
@@ -2860,45 +2928,6 @@ function parseCell(v){
 // Loaded via a dynamic <script> tag (JSONP), not fetch(). This avoids CORS/file:// restrictions
 // that some browsers apply to fetch() when this dashboard is opened as a local file — script tags
 // are not subject to those restrictions, and Google's gviz endpoint is designed for this pattern.
-let __gvizCounter = 0;
-function fetchSheetRaw(name){
-  return new Promise((resolve, reject) => {
-    const cbName = '__gvizCb_' + (++__gvizCounter) + '_' + Math.random().toString(36).slice(2);
-    let done = false;
-    const timer = setTimeout(() => {
-      if (done) return;
-      done = true; cleanup();
-      reject(new Error(`Timed out loading sheet "${name}". Check your internet connection and try Refresh again.`));
-    }, 20000);
-    function cleanup(){
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-    window[cbName] = (json) => {
-      if (done) return;
-      done = true; cleanup();
-      if (!json || json.status === 'error') {
-        reject(new Error(`Sheet "${name}" not found or not accessible. Make sure it's shared as "Anyone with the link — Viewer".`));
-        return;
-      }
-      resolve(json.table.rows.map(r => (r.c || []).map(cell => cell ? parseCell(cell.v) : null)));
-    };
-    const tqx = `out:json;responseHandler:${cbName}`;
-    // Cache-buster (_cb) forces the browser to treat every load/refresh as a brand-new request,
-    // never silently reusing a stale cached response for the same sheet+time — this is what
-    // "Force Refresh" actually forces, on top of the manual/auto reload itself.
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=${encodeURIComponent(tqx)}&sheet=${encodeURIComponent(name)}&headers=0&_cb=${Date.now()}`;
-    const script = document.createElement('script');
-    script.src = url;
-    script.onerror = () => {
-      if (done) return;
-      done = true; cleanup();
-      reject(new Error(`Could not reach Google Sheets for "${name}". Check your internet connection, or that the sheet is shared as "Anyone with the link — Viewer".`));
-    };
-    document.head.appendChild(script);
-  });
-}
 
 /* ---------------- global state ---------------- */
 const STATE = {
@@ -3012,23 +3041,6 @@ function matchModelCode(master, bookingModel, bookingColour){
 }
 
 /* ---------------- data loading ---------------- */
-// Optional sheets (added later, may not exist in every copy of the workbook). A single failed or
-// timed-out request used to silently blank the data — e.g. targets showing as 0 — so we retry once
-// after a short pause before giving up. Also records the last error so the UI can explain it.
-let LAST_SHEET_ERROR = {};
-async function fetchSheetOptional(name){
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const rows = await fetchSheetRaw(name);
-      delete LAST_SHEET_ERROR[name];
-      return rows;
-    } catch (e) {
-      LAST_SHEET_ERROR[name] = String(e && e.message ? e.message : e);
-      if (attempt === 0) await new Promise(r => setTimeout(r, 700)); // brief pause, then retry once
-    }
-  }
-  return [[]];
-}
 async function loadAll(silent){
   // silent = true → background auto-refresh: don't pop the full-screen loading overlay and don't
   // disturb the user's scroll position; just swap the data in and re-render in place. The manual
@@ -3037,25 +3049,51 @@ async function loadAll(silent){
   if (!silent) document.getElementById('loading').style.display = 'flex';
   document.getElementById('errorBox').innerHTML = '';
   try {
-    const [booking, delivery, enquiry, review, riderFb, riderReg, targets, nameMap, stock, enqStatement, bookingMsd, walkin, enqView, turnSheet, walkinEntry, monthlyTargets, priceSheet] = await Promise.all([
-      fetchSheetRaw('ACTUL BOOKING'),
-      fetchSheetRaw('DELIVERY SHEET'),
-      fetchSheetRaw('enquiry'),
-      fetchSheetRaw('Google Review'),
-      fetchSheetRaw('RIDER FEEDBACK'),
-      fetchSheetRaw('RIDER REGISTRATION'),
-      fetchSheetRaw('Targets'),
-      fetchSheetRaw('Name Map'),
-      fetchSheetRaw('Stock'),
-      fetchSheetRaw('ENQUIRY STATMENT'),
-      fetchSheetRaw('BOOKING MSD'),
-      fetchSheetRaw('ACTUL WALKIN'),
-      fetchSheetOptional('ENQUIRY STATMENT VIEW'),  // repeat-customer history source
-      fetchSheetOptional('TURN'),                    // daily turn roster
-      fetchSheetOptional('REGISTER'),                // Ajeet's saved entries
-      fetchSheetOptional('MONTHLY TARGETS'),         // admin-set monthly targets
-      fetchSheetOptional('PRICE'),                   // on-road price list
-    ]);
+    // One authenticated request instead of seventeen public ones. The server filters each sheet
+    // to the month being viewed before sending it, so a 14,000-row enquiry sheet arrives as a few
+    // hundred rows — faster than the old approach, and the spreadsheet itself stays private.
+    const monthParam = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
+    const res = await api({ action:'data', token: AUTH.token, month: monthParam }, 60000);
+    if (!res || !res.ok) {
+      if (res && res.error === 'AUTH') {   // token expired or invalid — send them back to sign in
+        clearSession();
+        location.reload();
+        return;
+      }
+      throw new Error((res && (res.message || res.error)) || 'Could not load data');
+    }
+    const D = res.data || {};
+    LAST_SHEET_ERROR = {};
+    Object.keys(D).forEach(k => { if (!Array.isArray(D[k]) || D[k].length <= 1) LAST_SHEET_ERROR[k] = 'sheet is empty or missing'; });
+    STATE.serverMonths = Array.isArray(res.months) ? res.months : (STATE.serverMonths || []);
+    // The API sends dates as "yyyy-MM-dd HH:mm:ss" (stable across devices and locales); turn
+    // them back into real Dates here so every existing date helper keeps working unchanged.
+    const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+    const reviveCell = (v) => {
+      if (typeof v !== 'string') return v;
+      const m = v.match(DATE_RE);
+      if (!m) return v;
+      const d = new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+      return isNaN(d) ? v : d;
+    };
+    const pick = (name) => Array.isArray(D[name]) ? D[name].map(r => r.map(reviveCell)) : [[]];
+    const booking       = pick('ACTUL BOOKING');
+    const delivery      = pick('DELIVERY SHEET');
+    const enquiry       = pick('enquiry');
+    const review        = pick('Google Review');
+    const riderFb       = pick('RIDER FEEDBACK');
+    const riderReg      = pick('RIDER REGISTRATION');
+    const targets       = pick('Targets');
+    const nameMap       = pick('Name Map');
+    const stock         = pick('Stock');
+    const enqStatement  = pick('ENQUIRY STATMENT');
+    const bookingMsd    = pick('BOOKING MSD');
+    const walkin        = pick('ACTUL WALKIN');
+    const enqView       = pick('ENQUIRY STATMENT VIEW');
+    const turnSheet     = pick('TURN');
+    const walkinEntry   = pick('REGISTER');
+    const monthlyTargets= pick('MONTHLY TARGETS');
+    const priceSheet    = pick('PRICE');
 
     STATE.booking = booking.slice(1).filter(r => str(r[1]));
     STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
@@ -3202,6 +3240,13 @@ function buildMonthList(){
     const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
     if (!seen.has(key)) { seen.add(key); list.push({ key, year: d.getFullYear(), month: d.getMonth()+1 }); }
   }
+  // The server sends every month that exists in the data, because the rows we hold are filtered
+  // down to the month being viewed — building the list from those rows alone would leave the
+  // dropdown with a single entry.
+  (STATE.serverMonths || []).forEach(k => {
+    const m = String(k).match(/^(\d{4})-(\d{2})$/);
+    if (m && !seen.has(k)) { seen.add(k); list.push({ key: k, year: +m[1], month: +m[2] }); }
+  });
   STATE.delivery.forEach(r => add(r[2]));
   STATE.booking.forEach(r => add(r[2]));
   add(new Date()); // always include the current month, even before it has any data
@@ -3249,7 +3294,11 @@ function populateFilters(){
   STATE.filterExec = execSel.value;
 }
 
-document.getElementById('monthFilter').addEventListener('change', e => { STATE.filterMonth = e.target.value; renderAll(); renderDataHealthBanner(); updateStatusLine(); });
+document.getElementById('monthFilter').addEventListener('change', e => {
+  // Rows are filtered server-side, so picking a different month means fetching that month.
+  STATE.filterMonth = e.target.value;
+  loadAll(true);
+});
 // Day filter — parses the native <input type="date"> value ("YYYY-MM-DD") as a local date, not
 // UTC, so it lines up with how every other date in this app is compared.
 function parseDateInputValue(v){
@@ -5416,16 +5465,7 @@ function saveTargets(){
   });
 }
 function saveTargetsJsonp(payload, cb){
-  const cbName = 'tgtCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-  let done = false;
-  const cleanup = () => { try { delete window[cbName]; } catch(e){} const s=document.getElementById(cbName); if(s) s.remove(); };
-  const timer = setTimeout(() => { if(!done){ done=true; cleanup(); cb({ ok:false, error:'timeout' }); } }, 12000);
-  window[cbName] = (res) => { if(done) return; done=true; clearTimeout(timer); cleanup(); cb(res); };
-  const params = new URLSearchParams({ ...payload, callback: cbName });
-  const s = document.createElement('script');
-  s.id = cbName; s.src = WALKIN_SAVE_URL + '?' + params.toString();
-  s.onerror = () => { if(!done){ done=true; clearTimeout(timer); cleanup(); cb({ ok:false, error:'script load fail' }); } };
-  document.body.appendChild(s);
+  apiCall(Object.assign({ token: AUTH.token }, payload), cb, 25000);
 }
 
 // ═══════════════ Target vs Actual ═══════════════
@@ -6722,7 +6762,9 @@ function refreshQuotePreview(){
 // ═══════════════ Walk-in Check (Ajeet's tool) ═══════════════
 // PASTE YOUR APPS SCRIPT WEB APP URL HERE (from the setup guide). Until it's set, the tool still
 // works for checking/history/turn — it just can't SAVE entries (it'll show a friendly note).
-const WALKIN_SAVE_URL = 'https://script.google.com/macros/s/AKfycbxCTXgqYDgiC8mmamXqhZkb--7fkMMrfYHPaS8MBE6wjbxiZ464xANE3kL_JlWBAV4/exec';
+// Saves go through the same authenticated API as reads — the server records WHO saved each row
+// from the token, so an entry can't be posted under someone else's name.
+const WALKIN_SAVE_URL = API_URL;
 
 // ENQUIRY STATMENT VIEW columns. Google's reader shifts/drops columns, so we resolve each one by
 // its HEADER NAME and only fall back to the original fixed position if the header didn't load.
@@ -7044,21 +7086,7 @@ function saveWalkinEntry(){
 // JSONP saver: builds a GET URL with the entry as query params + a callback name, injects a
 // <script> tag, and resolves when Apps Script calls back. Times out after 12s.
 function saveViaJsonp(payload, cb){
-  const cbName = 'wcSaveCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-  let done = false;
-  const cleanup = () => { try { delete window[cbName]; } catch(e){} const s=document.getElementById(cbName); if(s) s.remove(); };
-  const timer = setTimeout(() => { if(!done){ done=true; cleanup(); cb({ ok:false, error:'timeout — URL/deploy check karo' }); } }, 12000);
-  window[cbName] = (res) => { if(done) return; done=true; clearTimeout(timer); cleanup(); cb(res); };
-  const params = new URLSearchParams({
-    action: payload.action, mobile: payload.mobile, customer: payload.customer,
-    assignedTo: payload.assignedTo, type: payload.type, financer: payload.financer,
-    model: payload.model || '', enteredBy: payload.enteredBy, callback: cbName,
-  });
-  const s = document.createElement('script');
-  s.id = cbName;
-  s.src = WALKIN_SAVE_URL + '?' + params.toString();
-  s.onerror = () => { if(!done){ done=true; clearTimeout(timer); cleanup(); cb({ ok:false, error:'script load fail — URL galat ya deploy access "Anyone" nahi' }); } };
-  document.body.appendChild(s);
+  apiCall(Object.assign({ token: AUTH.token }, payload), cb, 25000);
 }
 
 // "Aaj ke Walk-in" — role-aware: Ajeet/Admin see all of today's entries (with financer edit),
