@@ -1023,6 +1023,13 @@
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
   /* ═══════════ Price List & Quotation ═══════════ */
+  /* Login screen notice + sign-in activity table */
+  .login-note { margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.5; text-align: center; }
+  #tblLoginLog code { background: var(--surface-2); padding: 2px 7px; border-radius: 5px; font-size: 12.5px; letter-spacing: .5px; }
+  #tblLoginLog tr.log-new td { background: color-mix(in srgb, var(--warning) 10%, transparent); }
+  .log-badge { display: inline-block; background: rgba(224,169,59,.18); color: var(--warning);
+    font-family: var(--font-head); font-size: 10px; font-weight: 700; letter-spacing: .8px;
+    padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
   /* Segmented switch — 350s vs the bigger bikes */
   .seg-wrap { display:inline-flex; background:var(--surface-2); border:1px solid var(--border); border-radius:11px; padding:4px; gap:4px; flex-wrap:wrap; }
   .seg-wrap .seg { background:transparent; border:none; color:var(--text-secondary); font-family:var(--font-head);
@@ -1305,6 +1312,7 @@
         <input type="password" id="loginPass" name="password" autocomplete="current-password" placeholder="Enter your password" />
         <button type="submit" id="loginBtn" class="primary">Login</button>
         <div class="login-error" id="loginError"></div>
+        <div class="login-note">🔒 Logins are recorded (date, device and approximate city) for security.</div>
       </form>
       <div class="footnote">🔒 Employee access only</div>
     </div>
@@ -1416,6 +1424,7 @@
   <button data-tab="riders">Riders</button>
   <button data-tab="specs">📖 Model Specs</button>
   <button data-tab="qrcodes">QR Codes</button>
+  <button data-tab="loginlog" style="display:none;">🔐 Login Activity</button>
   <button data-tab="pricelist" style="display:none;">💰 Price List</button>
   <button data-tab="walkin" style="display:none;">🔁 Walk-in Check</button>
   <button data-tab="walkinlog" style="display:none;">📋 Today's Walk-ins</button>
@@ -1937,6 +1946,26 @@
     <div id="specsCards"></div>
   </section>
 
+  <!-- ══ Login Activity (Admin only) — who signed in, when, and from which device. The device id
+       is the dependable signal here; the city is approximate and mobile networks often report
+       their hub city rather than the real one, so it is shown as a hint, not proof. ══ -->
+  <section class="tabpanel" id="tab-loginlog">
+    <h2 class="section-title">🔐 Login Activity</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 12px;">
+      Every sign-in is listed here, newest first. <b>New device</b> means that person has never
+      signed in from that phone or computer before — that is the signal worth checking.
+      The city comes from the internet connection and is only approximate: on mobile data it often
+      shows the network's hub city, so a different city on its own is not proof of anything.
+    </p>
+    <div class="toolbar" style="margin-bottom:12px;">
+      <input type="search" id="logSearch" placeholder="🔍 Search name, device or city…" style="min-width:230px;">
+      <label class="qb-check"><input type="checkbox" id="logNewOnly"> Show new devices only</label>
+      <button id="logRefresh">↻ Refresh</button>
+    </div>
+    <div id="logSummary" class="kpi-grid" style="margin-bottom:14px;"></div>
+    <div class="table-wrap"><table class="data" id="tblLoginLog"></table></div>
+  </section>
+
   <section class="tabpanel" id="tab-qrcodes">
     <h2 class="section-title">📱 Customer QR Codes — display on screen or print and keep at the counter</h2>
     <div class="qr-grid">
@@ -2251,6 +2280,50 @@ const EX_EMPLOYEES = new Set(['PRAKSHI']);
 // go back to being private — previously anyone with the sheet link could read every customer
 // record without logging in at all.
 const API_URL = 'https://script.google.com/macros/s/AKfycbxF5H_dlZN0CUzCAu7K10fPI5OP-cy8FNn7Yp5rUuCLixXsDq5l4ICICzE8y6LJoNbB/exec';
+
+// ── Device identity & rough location ──────────────────────────────────────────
+// Each browser keeps a random id of its own. That id is what makes "someone signed in from a new
+// device" dependable — unlike the city, which comes from the IP address and on mobile data often
+// reports the network's hub city rather than where the person actually is.
+function deviceId(){
+  const KEY = 'amarAutosDeviceId';
+  let id;
+  try { id = localStorage.getItem(KEY); } catch(e) { return 'unknown'; }
+  if (!id) {
+    id = (Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6)).toUpperCase();
+    try { localStorage.setItem(KEY, id); } catch(e) {}
+  }
+  return id;
+}
+// Best-effort city lookup, started as soon as the page loads so it's usually ready by the time
+// someone signs in. If it fails or is slow, the login goes ahead without it — this must never
+// stand between a sales person and their dashboard.
+let NET_INFO = { city:'', region:'', isp:'' };
+(function lookupLocation(){
+  const done = (d) => {
+    if (!d) return;
+    NET_INFO = {
+      city: String(d.city || ''),
+      region: String(d.region || d.region_name || ''),
+      isp: String((d.connection && d.connection.isp) || d.org || d.isp || '')
+    };
+  };
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = setTimeout(() => { if (ctrl) ctrl.abort(); }, 4000);
+  fetch('https://ipwho.is/', ctrl ? { signal: ctrl.signal } : undefined)
+    .then(r => r.json())
+    .then(d => { clearTimeout(t); if (d && d.success !== false) done(d); })
+    .catch(() => { clearTimeout(t); });
+})();
+// A short, readable description of the device — enough to tell a phone from the showroom desktop.
+function deviceLabel(){
+  const ua = navigator.userAgent || '';
+  const os = /Android/i.test(ua) ? 'Android' : /iPhone|iPad|iPod/i.test(ua) ? 'iPhone/iPad'
+    : /Windows/i.test(ua) ? 'Windows' : /Mac OS/i.test(ua) ? 'Mac' : /Linux/i.test(ua) ? 'Linux' : 'Other';
+  const br = /Edg\//i.test(ua) ? 'Edge' : /OPR\//i.test(ua) ? 'Opera' : /Chrome\//i.test(ua) ? 'Chrome'
+    : /Firefox\//i.test(ua) ? 'Firefox' : /Safari\//i.test(ua) ? 'Safari' : 'Browser';
+  return os + ' · ' + br;
+}
 
 // Filled from the API so the login dropdown still lists the team. Names only — nothing secret.
 let CREDENTIALS = [];
@@ -2725,7 +2798,9 @@ function attemptLogin(){
   if (!name || !pass) { errEl.textContent = 'Please enter your password.'; return; }
   errEl.textContent = 'Checking…';
   if (btn) btn.disabled = true;
-  apiCall({ action:'login', name, pass }, (res) => {
+  apiCall({ action:'login', name, pass,
+            device: deviceId(), dev: deviceLabel(),
+            city: NET_INFO.city, region: NET_INFO.region, isp: NET_INFO.isp }, (res) => {
     if (btn) btn.disabled = false;
     if (!res || !res.ok) {
       errEl.textContent = (res && (res.message || res.error)) === 'TIMEOUT'
@@ -2829,6 +2904,7 @@ function applyRoleRestrictions(){
     if (isSales && SALES_MOVE_TO_MORE_DATA.includes(tab)) return true; // moved into "More Data" instead
     if (tab === 'walkin') return true; // the check tool is only for the Walkin (Ajeet) login
     if (tab === 'pricelist') return false; // price list: Admin + Sales (Ajeet is handled above)
+    if (tab === 'loginlog') return !isAdmin; // sign-in activity is Admin-only
     if (tab === 'walkinlog') return false; // "Aaj ke Walk-in" — sales see their own, admin sees all
     return false;
   }
@@ -3401,8 +3477,9 @@ function asDate(v){
   if (v instanceof Date) return isNaN(v) ? null : v;
   const s = str(v).trim();
   if (!s) return null;
-  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);           // 2026-09-01
-  if (m) { const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
+  // yyyy-mm-dd, optionally with a time — the time matters for the sign-in log
+  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) { const d = new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0)); return isNaN(d) ? null : d; }
   m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);                // 01-09-2026 or 01/09/2026 (d-m-y)
   if (m) { const d = new Date(+m[3], +m[2]-1, +m[1]); return isNaN(d) ? null : d; }
   // "12 Sep 2026" / "Sep 12, 2026" — needs a month name AND a 4-digit year, so plain text like
@@ -6433,6 +6510,75 @@ function openFormPdf(key){
   openBlob(new Blob([bytes], { type:'application/pdf' }), f.file);
 }
 
+
+// ═══════════════ Login Activity (Admin) ═══════════════
+// Columns from the API: Timestamp, Name, Role, Device ID, City, Region, Network, Device, Known
+let LOGIN_LOG_ROWS = [];
+function renderLoginLog(){
+  const tbl = document.getElementById('tblLoginLog'); if (!tbl) return;
+  const q = up(str(document.getElementById('logSearch')?.value)).trim();
+  const newOnly = !!document.getElementById('logNewOnly')?.checked;
+  const rows = LOGIN_LOG_ROWS.filter(r => {
+    if (newOnly && up(r[8]) !== 'NEW') return false;
+    if (!q) return true;
+    return [r[1], r[3], r[4], r[6], r[7]].some(v => up(str(v)).includes(q));
+  });
+
+  // A quick read of the last 30 days: who signed in, from how many devices, and what was new.
+  const sum = document.getElementById('logSummary');
+  if (sum) {
+    const cutoff = Date.now() - 30*86400000;
+    const recent = LOGIN_LOG_ROWS.filter(r => { const d = asDate(r[0]); return d && d.getTime() >= cutoff; });
+    const devices = new Set(recent.map(r => str(r[3])).filter(Boolean));
+    const newOnes = recent.filter(r => up(r[8]) === 'NEW');
+    const people = new Set(recent.map(r => up(r[1])).filter(Boolean));
+    sum.innerHTML =
+      kpiCard('Logins (30 days)', fmtInt(recent.length), 'across the whole team') +
+      kpiCard('People', fmtInt(people.size), 'signed in at least once') +
+      kpiCard('Devices', fmtInt(devices.size), 'phones and computers used') +
+      kpiCard('New devices', fmtInt(newOnes.length), 'first-time sign-ins', undefined,
+              newOnes.length ? 'Worth a look' : null);
+  }
+
+  if (!rows.length) { tbl.innerHTML = `<tr><td class="empty-note">No sign-ins match this filter.</td></tr>`; return; }
+  tbl.innerHTML = `<thead><tr>
+      <th>When</th><th>Name</th><th>Role</th><th>Device ID</th><th>Device</th><th>City (approx)</th><th>Network</th><th></th>
+    </tr></thead><tbody>${rows.map(r => {
+      const isNew = up(r[8]) === 'NEW';
+      const d = asDate(r[0]);
+      const when = d ? `${fmtDate(d)} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : esc(str(r[0]));
+      return `<tr${isNew ? ' class="log-new"' : ''}>
+        <td>${esc(when)}</td>
+        <td><b>${esc(str(r[1]))}</b></td>
+        <td>${esc(str(r[2]))}</td>
+        <td><code>${esc(str(r[3]) || '—')}</code></td>
+        <td>${esc(str(r[7]) || '—')}</td>
+        <td>${esc(str(r[4]) || '—')}${str(r[5]) ? ', ' + esc(str(r[5])) : ''}</td>
+        <td>${esc(str(r[6]) || '—')}</td>
+        <td>${isNew ? '<span class="log-badge">NEW DEVICE</span>' : ''}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+function loadLoginLog(){
+  if (!CURRENT_USER || CURRENT_USER.role !== 'Admin') return;
+  const tbl = document.getElementById('tblLoginLog');
+  if (tbl) tbl.innerHTML = `<tr><td class="empty-note">Loading…</td></tr>`;
+  apiCall({ action:'loginlog', token: AUTH.token, limit: 400 }, (res) => {
+    LOGIN_LOG_ROWS = (res && res.ok && Array.isArray(res.rows)) ? res.rows.filter(r => str(r[0])) : [];
+    if (!LOGIN_LOG_ROWS.length && tbl) {
+      tbl.innerHTML = `<tr><td class="empty-note">No sign-ins recorded yet${res && res.error ? ' — ' + esc(res.error) : ''}.</td></tr>`;
+      return;
+    }
+    renderLoginLog();
+  }, 25000);
+}
+(function wireLoginLog(){
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on('logSearch','input', renderLoginLog);
+  on('logNewOnly','change', renderLoginLog);
+  on('logRefresh','click', loadLoginLog);
+})();
+
 // ═══════════════ Price List ═══════════════
 // Columns: 0 Model, 1 Colour, 2 Ex-showroom, 3 Road tax, 4 Normal insurance, 5 Price with insurance,
 // 6 Nil-dep + RT, 7 Zero-dep insurance, 8 On-road (nil dep), 9 EW, 10 Engine guard, 11 RSA,
@@ -8270,6 +8416,9 @@ function exportCsv(filename, headers, rows, maskOpt){
 
 /* ---------------- tabs ---------------- */
 function switchToTab(tabName, scrollToId){
+  // Sign-in activity is fetched fresh each time the tab is opened rather than on every refresh —
+  // it's an occasional check, not something to pull down with the main data.
+  if (tabName === 'loginlog') setTimeout(loadLoginLog, 0);
   const btn = document.querySelector(`#tabs button[data-tab="${tabName}"]`);
   if (btn) document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
   document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
