@@ -1970,8 +1970,6 @@
     <div class="myday-hero" style="padding:16px 18px;">
       <select id="moreDataSelect" style="width:100%;max-width:440px;font-size:14.5px;padding:11px 13px;">
         <option value="">— Select data —</option>
-        <option value="overview">📊 Overview — sales console, funnel steps, reviews</option>
-        <option value="delivery">🚚 Delivery — billed/delivered bikes</option>
         <option value="booking">📋 Booking — full booking list</option>
         <option value="stock">🏭 Stock — current showroom stock</option>
         <option value="specs">📖 Model Specs — bike details &amp; selling points</option>
@@ -2299,7 +2297,9 @@ const RESTRICTED_TABS = ['riders'];
 // tab bar any more — reachable instead from the single "More Data" tab's dropdown, so the same
 // data is available without repeating itself across a long row of tabs. Admin and CRT logins are
 // unaffected — this list only applies when CURRENT_USER.role === 'Sales'.
-const SALES_MOVE_TO_MORE_DATA = ['dashboard', 'overview', 'delivery', 'booking', 'stock', 'specs'];
+// Overview and Delivery are back on a sales person's tab bar — they need their own numbers
+// and their own deliveries at hand, not two clicks away behind a dropdown.
+const SALES_MOVE_TO_MORE_DATA = ['dashboard', 'booking', 'stock', 'specs'];
 
 // ===== Royal Enfield "Spotlight" — a random Hinglish fact shown at each login =====
 // Pure offline/rule-based (no API, no network call) — same philosophy as the rest of this
@@ -2858,7 +2858,14 @@ function applyRoleRestrictions(){
 }
 
 /* ---------------- helpers ---------------- */
-function str(v){ return (v === null || v === undefined) ? '' : String(v).trim(); }
+function str(v){
+  if (v === null || v === undefined) return '';
+  // A Date printed with String() comes out as "Thu Aug 19 2026 13:59:00 GMT+0000 (Coordinated
+  // Universal Time)" — which is what was leaking into the TDD column. Anywhere a date is turned
+  // into text for display, show it the way the rest of the dashboard does.
+  if (v instanceof Date) return isNaN(v) ? '' : fmtDate(v);
+  return String(v).trim();
+}
 function up(v){ return str(v).toUpperCase(); }
 function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
 function fmtInt(v){ return Math.round(v).toLocaleString('en-IN'); }
@@ -2930,10 +2937,15 @@ function parseCell(v){
 // are not subject to those restrictions, and Google's gviz endpoint is designed for this pattern.
 
 /* ---------------- global state ---------------- */
+// The month the dashboard opens on — whichever month the person is logging in during.
+function currentMonthKey(){
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0');
+}
 const STATE = {
   booking: [], delivery: [], enquiry: [], review: [], riderFb: [], riderReg: [], targets: [], nameMap: [], stock: [],
   enqStatement: [], bookingMsd: [], walkin: [],
-  execList: [], months: [], filterMonth: null, filterExec: 'ALL', dayFilterFrom: null, dayFilterTo: null, lastLoaded: null, initialized: false
+  execList: [], months: [], filterMonth: currentMonthKey(), filterExec: 'ALL', dayFilterFrom: null, dayFilterTo: null, lastLoaded: null, initialized: false
 };
 
 const COL = {
@@ -3260,20 +3272,12 @@ function populateFilters(){
   monthSel.innerHTML = '<option value="ALL">All Months</option>' +
     STATE.months.map(m => `<option value="${m.key}">${monthNames[m.month]} ${m.year}</option>`).join('');
   if (!STATE.initialized) {
-    if (CURRENT_USER && CURRENT_USER.role !== 'Admin') {
-      // Sales/CRT logins default to "All Months" — a non-techie sales person shouldn't have to
-      // understand month filters just to see that their own data loaded; they can narrow to a
-      // specific month themselves if they want to.
-      monthSel.value = 'ALL';
-    } else {
-      // First load: always default to the CURRENT real-world month (the month the dashboard is
-      // being opened in), whether or not it has data yet. A fresh month with no data yet should
-      // still open on that month — not silently jump to last month.
-      const now = new Date();
-      const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-      const hasTodayOption = [...monthSel.options].some(o => o.value === todayKey);
-      monthSel.value = hasTodayOption ? todayKey : (STATE.months.length ? STATE.months[0].key : 'ALL');
-    }
+    // Everyone — Admin and sales alike — opens on the month they are logging in during. Sales
+    // logins used to default to "All Months", which made their target and pace read as 0 because
+    // those are monthly figures.
+    const todayKey = currentMonthKey();
+    const hasTodayOption = [...monthSel.options].some(o => o.value === todayKey);
+    monthSel.value = hasTodayOption ? todayKey : (STATE.months.length ? STATE.months[0].key : 'ALL');
   } else {
     const prevMonth = STATE.filterMonth || 'ALL';
     monthSel.value = [...monthSel.options].some(o => o.value === prevMonth) ? prevMonth : 'ALL';
@@ -4915,9 +4919,10 @@ function computePersonalTarget(execName){
   const dayOfMonth = now.getDate();
   const daysLeft = daysInMonth - dayOfMonth + 1; // today still counts as workable
 
-  const monthTarget = STATE.targets
-    .filter(r => up(r[0]) === up(execName))
-    .reduce((s, r) => s + num(r[monthIdx]), 0);
+  // Use the same source everything else uses — targetFor() prefers the per-employee numbers in
+  // MONTHLY TARGETS (columns K–R) and only falls back to the Targets sheet. Reading the Targets
+  // sheet directly here meant this card showed a different figure from the leaderboard.
+  const monthTarget = targetFor(execName);
 
   let retailSoFar = 0;
   for (const r of STATE.delivery) {
