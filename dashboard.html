@@ -398,6 +398,10 @@
   }
   .kpi-card.kpi-below-target .label { color: var(--critical); }
   .kpi-card.kpi-clickable { transition: transform .12s, border-color .12s; }
+  /* Marks a pending booking taken in an earlier month, so it doesn't read as new business */
+  .carried-tag { display:inline-block; margin-left:7px; padding:2px 8px; border-radius:20px;
+    background:rgba(224,169,59,.16); color:var(--warning); font-family:var(--font-head);
+    font-size:9.5px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; vertical-align:middle; }
   /* Executive Leaderboard: the whole row acts as a progress meter — filled to the achievement %,
      coloured red (far from target) → amber → green (at/over target). The fill sits behind the
      cells so the text stays fully readable. */
@@ -1023,6 +1027,57 @@
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
   /* ═══════════ Price List & Quotation ═══════════ */
+  /* Customer 360 search results — one card per person, one line per touchpoint. Without these
+     the label and its value ran together ("Enquiry01-Sep-2026"), because the markup relies on
+     the layout for separation rather than on spaces in the text. */
+  .c360-sec { font-family: var(--font-head); font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--gold-light); margin: 18px 0 9px; }
+  .c360 { background: var(--surface-1); border: 1px solid var(--border); border-radius: 13px;
+    margin-bottom: 12px; overflow: hidden; }
+  .c360-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding: 13px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .c360-name { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+  .c360-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .c360-act { display: flex; gap: 8px; flex-wrap: wrap; }
+  .c360-body-wrap { padding: 6px 16px 12px; }
+  .c360-line { display: grid; grid-template-columns: 22px 92px 1fr; gap: 10px; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,.10); font-size: 13.5px; }
+  .c360-line:last-child { border-bottom: none; }
+  .c360-ico { text-align: center; }
+  .c360-lab { font-family: var(--font-head); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-secondary); }
+  .c360-body { overflow-wrap: anywhere; line-height: 1.55; }
+  .c360-line.good .c360-lab { color: var(--good); }
+  .c360-line.warn .c360-lab { color: var(--warning); }
+  .c360-line.bad .c360-lab { color: var(--critical); }
+  @media (max-width: 560px) {
+    .c360-line { grid-template-columns: 20px 1fr; row-gap: 2px; }
+    .c360-lab { grid-column: 2; }
+    .c360-body { grid-column: 2; }
+  }
+  /* Call list — one row per customer worth messaging today */
+  .call-list { display: flex; flex-direction: column; gap: 8px; }
+  .call-row { display: grid; grid-template-columns: minmax(150px, 1.6fr) minmax(120px, 1.1fr) auto auto;
+    gap: 12px; align-items: center; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 11px; padding: 12px 15px; }
+  .call-row.urgent { border-color: color-mix(in srgb, var(--critical) 45%, var(--border)); }
+  .call-who { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .call-name { font-weight: 700; font-size: 14.5px; overflow-wrap: anywhere; }
+  .call-meta { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+  .call-note { font-size: 13px; color: var(--text-secondary); }
+  .call-row.urgent .call-note { color: var(--critical); font-weight: 600; }
+  .call-num { font-size: 13.5px; color: var(--text-secondary); white-space: nowrap; }
+  .wa-btn { display: inline-flex; align-items: center; gap: 6px; background: #25D366; color: #06331a;
+    font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 9px; text-decoration: none;
+    white-space: nowrap; transition: filter .15s; }
+  .wa-btn:hover { filter: brightness(1.08); }
+  @media (max-width: 700px) {
+    .call-row { grid-template-columns: 1fr auto; row-gap: 8px; }
+    .call-who { grid-column: 1 / -1; }
+    .call-note { grid-column: 1; }
+    .call-num { grid-column: 1; }
+    .call-act { grid-column: 2; grid-row: 2 / 4; align-self: center; }
+  }
   /* Login screen notice + sign-in activity table */
   .login-note { margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.5; text-align: center; }
   #tblLoginLog code { background: var(--surface-2); padding: 2px 7px; border-radius: 5px; font-size: 12.5px; letter-spacing: .5px; }
@@ -1451,6 +1506,17 @@
 
     <h2 class="section-title">✅ Today's To-Do</h2>
     <div class="chat-panel" id="mydayPriorities"></div>
+
+    <!-- ══ Call list — the customers worth reaching today, each with the message already written.
+         Three groups, in the order that matters: bikes that have arrived, deliveries running late,
+         and enquiries nobody has followed up on. ══ -->
+    <h2 class="section-title" id="callListTitle" style="margin-top:26px;">📞 Today's Call List</h2>
+    <div class="seg-wrap" id="callSeg" style="margin-bottom:14px;">
+      <button class="seg active" data-call="stock">🎉 Bike Arrived</button>
+      <button class="seg" data-call="overdue">⏰ Delivery Late</button>
+      <button class="seg" data-call="followup">💬 No Follow-up</button>
+    </div>
+    <div id="callList"></div>
 
     <div class="panel-row-2col" style="margin-top:20px;">
       <div class="panel">
@@ -2653,56 +2719,251 @@ function renderModelSpecs(){
 }
 document.getElementById('specsSearch').addEventListener('input', renderModelSpecs);
 
-/* ---------------- Quick Search — searches bookings, deliveries, enquiries and reviews at once
-   for a customer name, mobile number, slip number, or model, so a sales person doesn't have to
-   know which tab something lives on. Deliberately NOT scoped by login/executive like the rest of
-   the app — Deepak wants any sales person to be able to look up any customer (mobile/slip no) and
-   see whose customer it is and their full history, e.g. for a walk-in who says "I enquired
-   before" when their usual executive isn't on the floor. Every result row already shows which
-   executive owns it, so nothing is hidden — just no longer filtered by who's searching. */
-function quickSearchAll(term){
-  const t = term.trim().toLowerCase();
-  if (!t) return null;
-  const matchRow = (r) => r.some(c => str(c).toLowerCase().includes(t));
+/* ---------------- Search — one place for everything ----------------
+   Before this, finding out about a customer meant remembering which tab their information lived
+   on: the booking on one, the delivery on another, the last call remark on a third. This searches
+   every sheet at once and, more importantly, STITCHES the results together — one card per person
+   showing their whole story in order, with the buttons to act on it.
 
-  const bookings = STATE.booking.filter(matchRow).slice(0, 25);
-  const deliveries = STATE.delivery.filter(matchRow).slice(0, 25);
-  const enquiries = STATE.enquiry.filter(matchRow).slice(0, 25);
-  const reviews = STATE.review.filter(matchRow).slice(0, 25);
-  return { bookings, deliveries, enquiries, reviews };
+   Deliberately not scoped to the logged-in executive: when a walk-in says "I enquired last month"
+   and their usual salesperson is off the floor, anyone should be able to look them up. Every
+   result shows whose customer it is, so nothing is hidden — mobile numbers still follow the usual
+   masking rule. */
+
+function sqNorm(v){ return str(v).toLowerCase().trim(); }
+function sqPhoneKey(v){
+  const d = str(v).replace(/\D/g, '');
+  return d.length >= 10 ? d.slice(-10) : '';
 }
-function renderQuickSearchResults(term){
+// A person is identified by their mobile where there is one, otherwise by name — that is what
+// lets a booking, a delivery and an enquiry collapse into a single card.
+function sqKeyFor(mobile, name){
+  const p = sqPhoneKey(mobile);
+  if (p) return 'p:' + p;
+  const n = sqNorm(name);
+  return n ? 'n:' + n : '';
+}
+
+function searchEverything(term){
+  const t = sqNorm(term);
+  if (t.length < 2) return null;
+  const phone = sqPhoneKey(term);
+  const hit = (r) => r.some(c => sqNorm(c).includes(t)) || (phone && r.some(c => sqPhoneKey(c) === phone));
+  const EV = evCols();
+  const people = new Map();
+  const person = (mobile, name) => {
+    const k = sqKeyFor(mobile, name);
+    if (!k) return null;
+    if (!people.has(k)) people.set(k, { name: str(name), mobile: str(mobile), owner: '',
+      enquiries: [], bookings: [], deliveries: [], walkins: [], reviews: [], remarks: [] });
+    const p = people.get(k);
+    if (!p.name && name) p.name = str(name);
+    if (!p.mobile && mobile) p.mobile = str(mobile);
+    return p;
+  };
+
+  STATE.booking.filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[6], r[5]); if (!p) return;
+    p.owner = p.owner || str(r[7]);
+    p.bookings.push({ slip: str(r[1]), date: r[2], model: str(r[3]), colour: str(r[4]),
+      exec: str(r[7]), tdd: r[8], status: str(r[9]) });
+  });
+  STATE.delivery.filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[5], r[4]); if (!p) return;
+    p.owner = p.owner || str(r[18]);
+    p.deliveries.push({ date: r[2], receipt: str(r[3]), model: str(r[6]), colour: str(r[7]),
+      pay: str(r[8]), gma: num(r[13]), gear: str(r[14]), exec: str(r[18]) });
+  });
+  STATE.enquiry.filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[5], r[1]); if (!p) return;
+    p.owner = p.owner || str(r[13]);
+    p.enquiries.push({ id: str(r[0]), date: r[14], model: str(r[8]), stage: str(r[9]),
+      type: str(r[11]), testRide: str(r[12]), exec: str(r[13]) });
+  });
+  // Call remarks live in the enquiry view — searching them means "show me everyone we discussed
+  // finance with", which nothing could do before.
+  (STATE.enqView || []).filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[EV.mobile], r[EV.name]); if (!p) return;
+    p.owner = p.owner || str(r[EV.owner]);
+    const rem = str(r[EV.remark]);
+    if (rem) p.remarks.push({ text: rem, date: r[EV.created], stage: str(r[EV.stage]), exec: str(r[EV.owner]) });
+    if (!p.enquiries.length) p.enquiries.push({ id: '', date: r[EV.created], model: str(r[EV.model]),
+      stage: str(r[EV.stage]), type: str(r[EV.type]), testRide: str(r[EV.testRide]), exec: str(r[EV.owner]) });
+  });
+  (STATE.walkin || []).filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[3], r[2]); if (!p) return;
+    p.walkins.push({ date: r[0], exec: str(r[1]), source: 'Walk-in register' });
+  });
+  (STATE.walkinEntry || []).filter(hit).slice(0, 60).forEach(r => {
+    const p = person(r[2], r[3]); if (!p) return;
+    p.walkins.push({ date: r[1], exec: str(r[4]), source: str(r[5]) || 'Walk-in', model: str(r[8]), financer: str(r[6]) });
+  });
+  STATE.review.filter(hit).slice(0, 40).forEach(r => {
+    const p = person('', r[4] || r[2]); if (!p) return;
+    p.reviews.push({ date: r[0], rating: str(r[1]), model: str(r[2]), exec: str(r[3]) });
+  });
+
+  // Stock and price answer a different question — "what have we got, what does it cost" — so they
+  // come back as their own blocks rather than being forced into a person card.
+  const stock = (STATE.stock || []).filter(hit).slice(0, 40).map(r => ({
+    store: str(r[7]), family: str(r[9]), name: str(r[11]), chassis: str(r[12]),
+    age: num(r[16]), status: str(r[17])
+  }));
+  let price = [];
+  try {
+    price = priceRows().filter(r => sqNorm(r[PC.model]).includes(t) || sqNorm(r[PC.colour]).includes(t)).slice(0, 25);
+  } catch(e) { price = []; }
+
+  return { people: [...people.values()], stock, price };
+}
+
+// Is this bike sitting on the floor right now? Used to turn a booking row into "call them today".
+function sqStockFor(model, colour){
+  const m = up(str(model)), c = up(str(colour)).split(/[\/,]/)[0].trim();
+  let open = 0, transit = 0;
+  (STATE.stock || []).forEach(r => {
+    if (up(r[7]) !== 'KN') return;
+    const nm = up(str(r[11]) || str(r[9]));
+    if (!m || !nm.includes(m)) return;
+    if (c && !nm.includes(c)) return;
+    const st = up(r[17]);
+    if (st === 'OPEN') open++; else if (st === 'IN-TRANSIT') transit++;
+  });
+  return { open, transit };
+}
+
+function renderSearchResults(term){
   const el = document.getElementById('quickSearchResults');
-  const results = quickSearchAll(term);
-  if (!results) { el.innerHTML = '<p class="empty-note">Type a customer name, mobile number, slip number, or model to search.</p>'; return; }
-  const { bookings, deliveries, enquiries, reviews } = results;
-  if (!bookings.length && !deliveries.length && !enquiries.length && !reviews.length) {
-    el.innerHTML = '<p class="empty-note">No matches found.</p>';
+  const res = searchEverything(term);
+  if (!res) {
+    el.innerHTML = `<p class="empty-note" style="text-align:left;padding:14px 0;">
+      Type at least 2 characters. Try a mobile number, customer name, slip number, chassis number,
+      a model, or even a word from a call remark like "finance".</p>`;
     return;
   }
-  const execTd = (name) => `<td style="color:var(--gold); font-weight:700;">${esc(str(name))}</td>`;
-  const section = (title, rows, thead, rowFmt) => !rows.length ? '' : `
-    <h4 style="font-family:var(--font-head); font-size:12.5px; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold); margin:16px 0 8px;">${esc(title)} (${rows.length})</h4>
-    <div class="table-wrap" style="max-height:220px;"><table class="data"><thead><tr>${thead.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(rowFmt).join('')}</tbody></table></div>`;
+  const { people, stock, price } = res;
+  if (!people.length && !stock.length && !price.length) {
+    el.innerHTML = '<p class="empty-note" style="text-align:left;padding:14px 0;">No match found anywhere.</p>';
+    return;
+  }
+  // Most complete records first — the person we know most about is usually the one being looked for.
+  people.sort((a, b) => (b.bookings.length + b.deliveries.length + b.enquiries.length + b.remarks.length)
+                      - (a.bookings.length + a.deliveries.length + a.enquiries.length + a.remarks.length));
+
+  const line = (icon, label, body, tone) =>
+    `<div class="c360-line${tone ? ' ' + tone : ''}"><span class="c360-ico">${icon}</span>
+      <span class="c360-lab">${esc(label)}</span><span class="c360-body">${body}</span></div>`;
+
+  const cards = people.slice(0, 12).map(p => {
+    const rows = [];
+
+    p.enquiries.slice(0, 3).forEach(e => {
+      rows.push(line('🔵', 'Enquiry',
+        `${e.date ? esc(fmtDate(e.date)) + ' · ' : ''}${esc(e.model || '—')} · <b>${esc(e.stage || 'Open')}</b>` +
+        `${e.exec ? ' · ' + esc(canonName(e.exec)) : ''}` +
+        `${/^Y/i.test(e.testRide) ? ' · <span style="color:var(--good)">test ride done</span>' : ''}`));
+    });
+
+    p.bookings.slice(0, 3).forEach(b => {
+      const s = sqStockFor(b.model, b.colour);
+      const tdd = asDate(b.tdd);
+      const late = tdd && tdd < new Date(new Date().setHours(0,0,0,0));
+      rows.push(line('📋', 'Booking',
+        `${esc(b.model)}${b.colour ? ' ' + esc(b.colour) : ''} · slip ${esc(b.slip || '—')} · <b>${esc(b.status)}</b>` +
+        `${b.exec ? ' · ' + esc(canonName(b.exec)) : ''}` +
+        `${tdd ? ` · TDD ${esc(fmtDate(tdd))}${late ? ' <span style="color:var(--critical);font-weight:700">(overdue)</span>' : ''}` : ''}` +
+        `${s.open ? ` <span style="color:var(--good);font-weight:700">· ${s.open} in stock now</span>`
+                  : s.transit ? ` <span style="color:var(--warning)">· ${s.transit} in transit</span>` : ''}`,
+        late ? 'warn' : (s.open ? 'good' : '')));
+    });
+
+    p.deliveries.slice(0, 3).forEach(d => {
+      rows.push(line('🚚', 'Delivered',
+        `${d.date ? esc(fmtDate(d.date)) + ' · ' : ''}${esc(d.model)}${d.colour ? ' ' + esc(d.colour) : ''}` +
+        `${d.pay ? ' · ' + esc(d.pay) : ''}${d.gma ? ' · accessories ' + fmtMoney(d.gma) : ''}` +
+        `${d.exec ? ' · ' + esc(canonName(d.exec)) : ''}`, 'good'));
+    });
+
+    if (p.walkins.length) {
+      const w = p.walkins.slice().sort((a, b) => (asDate(b.date) || 0) - (asDate(a.date) || 0));
+      rows.push(line('🚶', 'Walk-ins',
+        `${w.length} visit${w.length > 1 ? 's' : ''} · latest ${w[0].date ? esc(fmtDate(w[0].date)) : '—'}` +
+        `${w[0].exec ? ' with ' + esc(canonName(w[0].exec)) : ''}`));
+    }
+
+    if (p.remarks.length) {
+      const r = p.remarks.slice().sort((a, b) => (asDate(b.date) || 0) - (asDate(a.date) || 0))[0];
+      rows.push(line('💬', 'Last call', `“${esc(r.text)}”${r.date ? ' <span style="color:var(--text-muted)">· ' + esc(fmtDate(r.date)) + '</span>' : ''}`));
+    }
+
+    if (p.reviews.length) {
+      const r = p.reviews[0];
+      rows.push(line('⭐', 'Review', `${esc(r.rating)} stars${r.date ? ' · ' + esc(fmtDate(r.date)) : ''}`, 'good'));
+    } else if (p.deliveries.length) {
+      rows.push(line('⭐', 'Review', '<span style="color:var(--warning)">Not given yet — worth asking</span>', 'warn'));
+    }
+
+    const wa = waBtn(p.mobile, p.owner, p.bookings.length ? 'booking' : 'followUp',
+      { name: p.name, model: (p.bookings[0] || p.enquiries[0] || {}).model || '',
+        colour: (p.bookings[0] || {}).colour || '' });
+
+    return `<div class="c360">
+      <div class="c360-head">
+        <div>
+          <div class="c360-name">${esc(p.name || 'Unnamed customer')}</div>
+          <div class="c360-sub">${maskMobile(p.mobile, p.owner)}${p.owner ? ' · ' + esc(canonName(p.owner)) : ''}</div>
+        </div>
+        <div class="c360-act">${wa}</div>
+      </div>
+      <div class="c360-body-wrap">${rows.join('') || '<div class="empty-note">Nothing recorded yet.</div>'}</div>
+    </div>`;
+  }).join('');
+
+  // Stock block — chassis, ageing, availability
+  const stockBlock = !stock.length ? '' : `
+    <div class="c360-sec">🏍️ Stock (${stock.length})</div>
+    <div class="table-wrap" style="max-height:240px;"><table class="data">
+      <thead><tr><th>Model</th><th>Chassis</th><th>Store</th><th class="num">Age</th><th>Status</th></tr></thead>
+      <tbody>${stock.map(s => `<tr>
+        <td>${esc(s.name || s.family)}</td><td><code style="font-size:12px">${esc(s.chassis)}</code></td>
+        <td>${esc(s.store)}</td>
+        <td class="num"${s.age >= 60 ? ' style="color:var(--critical);font-weight:700"' : ''}>${s.age || 0} d</td>
+        <td>${esc(s.status)}</td></tr>`).join('')}</tbody></table></div>`;
+
+  // Price block — so a model search answers "what does it cost" too
+  const priceBlock = !price.length ? '' : `
+    <div class="c360-sec">💰 Price (${price.length})</div>
+    <div class="table-wrap" style="max-height:240px;"><table class="data">
+      <thead><tr><th>Model</th><th>Colour</th><th class="num">Ex-Showroom</th><th class="num">On-Road</th><th class="num">Total</th></tr></thead>
+      <tbody>${price.map(r => `<tr>
+        <td>${esc(r[PC.model])}</td><td>${esc(r[PC.colour])}</td>
+        <td class="num">${fmtMoney(r[PC.ex])}</td><td class="num">${fmtMoney(r[PC.onroad])}</td>
+        <td class="num" style="font-weight:700;color:var(--gold-light)">${fmtMoney(r[PC.total])}</td></tr>`).join('')}</tbody></table></div>`;
 
   el.innerHTML =
-    section('Bookings', bookings, ['Slip No','Customer','Mobile','Model','Executive','Status'],
-      r => `<tr><td>${esc(str(r[1]))}</td><td>${esc(str(r[5]))}</td><td>${maskMobile(r[6], r[7])}</td><td>${esc(str(r[3]))} ${esc(str(r[4]))}</td>${execTd(r[7])}<td>${esc(str(r[9]))}</td></tr>`) +
-    section('Deliveries', deliveries, ['Bill Date','Customer','Mobile','Model','Executive'],
-      r => `<tr><td>${fmtDate(r[2])}</td><td>${esc(str(r[4]))}</td><td>${maskMobile(r[5], r[18])}</td><td>${esc(str(r[6]))} ${esc(str(r[7]))}</td>${execTd(r[18])}</tr>`) +
-    section('Enquiries', enquiries, ['ENQ No','Name','Mobile','Model','Stage','Owner'],
-      r => `<tr><td>${esc(str(r[0]))}</td><td>${esc(str(r[1]))}</td><td>${maskMobile(r[5], r[13])}</td><td>${esc(str(r[8]))}</td><td>${esc(str(r[9]))}</td>${execTd(r[13])}</tr>`) +
-    section('Reviews', reviews, ['Date','Rating','Model','Sales Person'],
-      r => `<tr><td>${fmtDate(r[0])}</td><td>⭐ ${esc(str(r[1]))}</td><td>${esc(str(r[2]))}</td>${execTd(r[3])}</tr>`);
+    (people.length ? `<div class="c360-sec">👤 Customers (${people.length})</div>` + cards : '') +
+    stockBlock + priceBlock +
+    (people.length > 12 ? `<p class="empty-note" style="text-align:left;">+${people.length - 12} more — narrow the search.</p>` : '');
 }
+
 function openQuickSearchModal(){
-  document.getElementById('modalTitle').textContent = '🔍 Quick Search';
+  document.getElementById('modalTitle').textContent = '🔍 Search Everything';
   document.getElementById('modalBody').innerHTML = `
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Searches every customer, not just your own — so if a walk-in mentions a mobile number or slip number, you can see whose customer it is and their full history, even if it's not yours.</p>
-    <input type="text" id="quickSearchInput" placeholder="Customer name, mobile, slip number, or model…" style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:10px; border-radius:8px; background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);" autofocus>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">
+      One search across enquiries, bookings, deliveries, walk-ins, call remarks, stock and price.
+      Everyone's customers, not just yours — so when someone says "I enquired before", you can see
+      the whole story and who it belongs to.</p>
+    <input type="text" id="quickSearchInput" placeholder="Mobile, name, slip no, chassis, model, or a word from a remark…"
+      style="width:100%; box-sizing:border-box; font-family:inherit; font-size:14px; padding:11px; border-radius:9px;
+             background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);" autofocus>
     <div id="quickSearchResults"></div>`;
-  document.getElementById('quickSearchInput').addEventListener('input', (e) => renderQuickSearchResults(e.target.value));
-  renderQuickSearchResults('');
+  let timer = null;
+  document.getElementById('quickSearchInput').addEventListener('input', (e) => {
+    const v = e.target.value;
+    clearTimeout(timer);
+    timer = setTimeout(() => renderSearchResults(v), 180);   // wait for typing to settle
+  });
+  renderSearchResults('');
   document.getElementById('detailModal').classList.add('open');
   setTimeout(() => document.getElementById('quickSearchInput').focus(), 50);
 }
@@ -3606,6 +3867,7 @@ function renderAll(){
   renderModelSpecs();
   renderAnalytics();
   renderWalkinLog();
+  renderCallList();
   renderPriceList();
   renderTargetVsActual();
   if (CURRENT_USER && CURRENT_USER.role === 'Admin') prefillTargets();
@@ -5963,7 +6225,8 @@ function renderTddTable(rows){
   const sorted = sortTddRows(rows, order);
   renderStaticTable('tblTdd', [
     { key:'slipNo', label:'Slip / Receipt No' },
-    { key:'customer', label:'Customer Name' },
+    { key:'customer', label:'Customer Name', raw:true, fmt: (v, row) =>
+        esc(v) + (row.carried ? ` <span class="carried-tag" title="Booked ${esc(row.carried)} — carried over from an earlier month">carried over</span>` : '') },
     { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) },
     { key:'model', label:'Model' },
     { key:'colour', label:'Colour' },
@@ -6157,13 +6420,24 @@ function renderTodayPriorities(){
 /* ---------------- Pending Delivery Plan tab ----------------
    "Actual booking model-wise delivery plan for the same month" = this month's bookings
    (by BKG DT) that are still pending — i.e. STATUS is not BILLED and not CANCEL. */
+// Every booking still awaiting delivery — deliberately NOT limited to the selected month. A
+// booking taken in August that hasn't been delivered is still pending in September, and used to
+// vanish from this list the moment the month rolled over, which is exactly when it most needs
+// chasing. Month-wise counts elsewhere (bookings this month, targets) stay month-scoped.
 function pendingRows(){
   return STATE.booking.filter(r => {
-    if (!dateInFilter(r[2])) return false;
     if (!execInFilter(r[7])) return false;
     const s = up(r[9]);
-    return s !== 'BILLED' && s !== 'CANCEL';
+    return s !== 'BILLED' && s !== 'CANCEL' && s !== 'CANCELLED' && s !== 'DELIVERED';
   });
+}
+// True when a pending booking was taken before the month being viewed — shown as a small tag so
+// it's obvious these are carried over rather than new.
+function isCarriedOver(bkgDate){
+  const f = monthYearOfFilter();
+  const d = asDate(bkgDate);
+  if (!f || !d) return false;
+  return (d.getFullYear() * 12 + d.getMonth()) < (f.year * 12 + (f.month - 1));
 }
 function renderPending(){
   const rows = pendingRows();
@@ -6183,7 +6457,9 @@ function renderPending(){
   // that's still pending today is exactly the kind of thing this should catch.
   const overdue = overdueRowsFor(null);
   document.getElementById('kpiPending').innerHTML = [
-    kpiCard('Pending Deliveries', fmtInt(rows.length), 'booked this month, not yet billed/cancelled'),
+    kpiCard('Pending Deliveries', fmtInt(rows.length),
+      (() => { const old = rows.filter(r => isCarriedOver(r[2])).length;
+               return old ? `all pending — ${old} carried over from earlier months` : 'all pending, not yet billed/cancelled'; })()),
     kpiCard('Total Bookings (this filter)', fmtInt(totalBookedThisMonth)),
     kpiCard('Pending Models', fmtInt(Object.keys(models).length)),
     kpiCard('Overdue Deliveries', fmtInt(overdue.length), 'TDD already passed', undefined, overdue.length ? 'Needs follow-up' : null),
@@ -6224,6 +6500,9 @@ function renderPending(){
     return {
       slipNo: str(r[1]), customer: str(r[5]), mobile: str(r[6]), model: str(r[3]), colour: str(r[4]),
       exec: str(r[7]), tdd: tddText, days, priorityClass, stockText, status: str(r[9]),
+      // Marks a booking taken before the month being viewed, so a carried-over one is obvious
+      // rather than looking like it was booked this month.
+      carried: isCarriedOver(r[2]) ? fmtDate(asDate(r[2])) : '',
     };
   });
   renderTddTable(tddRows);
@@ -6249,7 +6528,8 @@ function renderPending(){
   }).sort((a,b) => a.daysLeft - b.daysLeft);
   renderStaticTable('tblAtRisk', [
     { key:'slipNo', label:'Slip / Receipt No' },
-    { key:'customer', label:'Customer Name' },
+    { key:'customer', label:'Customer Name', raw:true, fmt: (v, row) =>
+        esc(v) + (row.carried ? ` <span class="carried-tag" title="Booked ${esc(row.carried)} — carried over from an earlier month">carried over</span>` : '') },
     { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) },
     { key:'model', label:'Model' },
     { key:'colour', label:'Colour' },
@@ -6578,6 +6858,170 @@ function loadLoginLog(){
   on('logNewOnly','change', renderLoginLog);
   on('logRefresh','click', loadLoginLog);
 })();
+
+
+
+// ═══════════════ Today's Call List ═══════════════
+// Three groups, each answering "who should I message right now":
+//   stock    – a booked customer's bike has arrived and nobody has told them
+//   overdue  – the promised delivery date has passed
+//   followup – an open enquiry with no call remark, going cold
+// Sales logins only ever see their own customers; Admin sees everyone.
+let CALL_SEG = 'stock';
+const FOLLOWUP_STALE_DAYS = 5;
+
+function callListStock(){
+  // Bookings that are still open, matched against stock actually on the floor.
+  const open = STATE.booking.filter(r => {
+    const st = up(r[9]);
+    return st !== 'CANCEL' && st !== 'CANCELLED' && st !== 'DELIVERED' && st !== 'BILLED';
+  }).filter(r => ownerInFilter(r[7]));
+  const available = {};
+  (STATE.stock || []).forEach(r => {
+    if (up(r[7]) !== 'KN' || up(r[17]) !== 'OPEN') return;
+    const key = up(str(r[11]) || str(r[9]));
+    available[key] = (available[key] || 0) + 1;
+  });
+  const out = [];
+  open.forEach(r => {
+    const model = str(r[3]), colour = str(r[4]);
+    const hit = Object.keys(available).some(k => available[k] > 0 && k.includes(up(model)) &&
+      (!colour || k.includes(up(colour).split(/[\/,]/)[0].trim())));
+    if (!hit) return;
+    out.push({ name: str(r[5]), mobile: r[6], owner: str(r[7]), model, colour,
+      note: 'In stock now', when: r[2], tmpl: 'stockArrived' });
+  });
+  return out;
+}
+function callListOverdue(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  return STATE.booking.filter(r => {
+    const st = up(r[9]);
+    if (st === 'CANCEL' || st === 'CANCELLED' || st === 'DELIVERED' || st === 'BILLED' || st === 'HOLD') return false;
+    if (!ownerInFilter(r[7])) return false;
+    const tdd = asDate(r[8]);
+    return tdd && tdd < today;
+  }).map(r => {
+    const tdd = asDate(r[8]);
+    const late = Math.round((new Date().setHours(0,0,0,0) - tdd.getTime()) / 86400000);
+    return { name: str(r[5]), mobile: r[6], owner: str(r[7]), model: str(r[3]), colour: str(r[4]),
+      note: `${late} day${late===1?'':'s'} past promised date`, when: r[8], tmpl: 'overdue', urgent: late > 7 };
+  }).sort((a,b) => (asDate(a.when)||0) - (asDate(b.when)||0));
+}
+function callListFollowup(){
+  const EV = evCols();
+  const cutoff = Date.now() - FOLLOWUP_STALE_DAYS * 86400000;
+  return (STATE.enqView || []).filter(r => {
+    const stage = up(str(r[EV.stage] ?? r[EV.status]));
+    if (/BOOK|RETAIL|INVOICE|WON|DELIVER|DROP|LOST|CANCEL|CLOSED|DISQUALIF/.test(stage)) return false;
+    if (!ownerInFilter(r[EV.owner])) return false;
+    if (str(r[EV.remark]).trim()) return false;          // already followed up
+    const created = asDate(r[EV.created]);
+    return created && created.getTime() < cutoff;        // and it's gone cold
+  }).map(r => {
+    const created = asDate(r[EV.created]);
+    const age = Math.round((Date.now() - created.getTime()) / 86400000);
+    return { name: str(r[EV.name]) || [str(r[EV.first]), str(r[EV.last])].filter(Boolean).join(' '),
+      mobile: r[EV.mobile], owner: str(r[EV.owner]), model: str(r[EV.model]), colour: '',
+      note: `No remark in ${age} days`, when: r[EV.created], tmpl: 'followUp', urgent: age > 14 };
+  }).sort((a,b) => (asDate(a.when)||0) - (asDate(b.when)||0));
+}
+
+function renderCallList(){
+  const wrap = document.getElementById('callList'); if (!wrap) return;
+  let rows = [];
+  try {
+    rows = CALL_SEG === 'stock' ? callListStock()
+         : CALL_SEG === 'overdue' ? callListOverdue()
+         : callListFollowup();
+  } catch(e) { rows = []; }
+
+  // keep the segment buttons showing live counts, so it's obvious where the work is
+  const seg = document.getElementById('callSeg');
+  if (seg) {
+    const counts = { stock: 0, overdue: 0, followup: 0 };
+    try { counts.stock = callListStock().length; } catch(e) {}
+    try { counts.overdue = callListOverdue().length; } catch(e) {}
+    try { counts.followup = callListFollowup().length; } catch(e) {}
+    seg.querySelectorAll('.seg').forEach(b => {
+      const k = b.dataset.call;
+      const base = b.dataset.label || (b.dataset.label = b.textContent.trim());
+      b.textContent = counts[k] ? `${base} (${counts[k]})` : base;
+    });
+  }
+
+  if (!rows.length) {
+    const msg = CALL_SEG === 'stock' ? 'No booked customer is waiting on a bike that has arrived.'
+      : CALL_SEG === 'overdue' ? 'No delivery is past its promised date. '
+      : `Every open enquiry has a call remark within ${FOLLOWUP_STALE_DAYS} days.`;
+    wrap.innerHTML = `<div class="empty-note" style="text-align:left;padding:14px 0;">✅ ${esc(msg)}</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="call-list">${rows.slice(0, 60).map(c => `
+    <div class="call-row${c.urgent ? ' urgent' : ''}">
+      <div class="call-who">
+        <span class="call-name">${esc(c.name || 'Customer')}</span>
+        <span class="call-meta">${esc(c.model || '')}${c.colour ? ' · ' + esc(c.colour) : ''}</span>
+      </div>
+      <div class="call-note">${esc(c.note)}</div>
+      <div class="call-num">${maskMobile(c.mobile, c.owner)}</div>
+      <div class="call-act">${waBtn(c.mobile, c.owner, c.tmpl, { name: c.name, model: c.model, colour: c.colour })}</div>
+    </div>`).join('')}</div>
+    ${rows.length > 60 ? `<div class="empty-note" style="text-align:left;padding:10px 0;">+${rows.length - 60} more — clear these first.</div>` : ''}`;
+}
+(function wireCallList(){
+  const seg = document.getElementById('callSeg');
+  if (seg) seg.addEventListener('click', (e) => {
+    const btn = e.target.closest('.seg'); if (!btn) return;
+    CALL_SEG = btn.dataset.call;
+    seg.querySelectorAll('.seg').forEach(b => b.classList.toggle('active', b === btn));
+    renderCallList();
+  });
+})();
+
+// ═══════════════ WhatsApp follow-up ═══════════════
+// The dashboard already knows who to call — whose bike has arrived, whose delivery is overdue,
+// which enquiries nobody has followed up. What it didn't do was make that call easy. These
+// helpers turn a name in a table into a one-tap message with the text already written, which is
+// the difference between "22 customers to call" and 22 calls actually happening.
+function waNumber(mobileValue){
+  const digits = str(mobileValue).replace(/\D/g, '');
+  if (digits.length === 10) return '91' + digits;          // plain Indian mobile
+  if (digits.length === 12 && digits.startsWith('91')) return digits;
+  if (digits.length === 11 && digits.startsWith('0')) return '91' + digits.slice(1);
+  return digits.length >= 10 ? '91' + digits.slice(-10) : '';
+}
+// Same rule as the masked mobile column: you can message your own customers, Admin can message
+// anyone, and nobody gets a stranger's number through a link.
+function canMessage(ownerField){
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const ownsIt = CURRENT_USER && CURRENT_USER.execKey && execMatches(ownerField, CURRENT_USER.execKey);
+  return isAdmin || ownsIt;
+}
+function firstName(full){
+  const n = str(full).replace(/\s+/g, ' ').trim();
+  return n ? n.split(' ')[0] : 'Sir/Madam';
+}
+// Ready-made messages. Kept short and polite — a sales person can edit before sending.
+const WA_TEMPLATES = {
+  stockArrived: (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model}${c.colour ? ' (' + c.colour + ')' : ''} showroom pahunch gayi hai. Delivery ke liye kab convenient rahega? Dhanyavaad.`,
+  overdue:      (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model} booking ki delivery date nikal chuki hai. Main aapko update dena chahta tha — kya aap se baat ho sakti hai? Dhanyavaad.`,
+  followUp:     (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapne ${c.model || 'Royal Enfield'} ke baare me poocha tha. Koi sawaal ho ya test ride lena ho to bataiye — main help kar dunga. Dhanyavaad.`,
+  booking:      (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model} booking confirm hai. Koi update chahiye to bataiye. Dhanyavaad.`,
+};
+// Renders the little green WhatsApp button, or nothing when the number isn't visible to this user.
+function waBtn(mobileValue, ownerField, template, ctx){
+  if (!canMessage(ownerField)) return '';
+  const num = waNumber(mobileValue);
+  if (!num) return '';
+  const me = (CURRENT_USER && CURRENT_USER.name) || 'Amar Autos';
+  const build = WA_TEMPLATES[template] || WA_TEMPLATES.followUp;
+  const text = build(Object.assign({ from: me, name: '', model: '', colour: '' }, ctx || {}));
+  const href = 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
+  return `<a class="wa-btn" href="${href}" target="_blank" rel="noopener" title="Send a WhatsApp message" onclick="event.stopPropagation();">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.4.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+    WhatsApp</a>`;
+}
 
 // ═══════════════ Price List ═══════════════
 // Columns: 0 Model, 1 Colour, 2 Ex-showroom, 3 Road tax, 4 Normal insurance, 5 Price with insurance,
