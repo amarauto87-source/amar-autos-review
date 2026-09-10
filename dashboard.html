@@ -5097,12 +5097,18 @@ const STATUS_ACTIONS = {
 // cancelled" rule as allPendingRowsFor()/overdueRowsFor(), just without the exec-filter coupling
 // so this modal can list "my bookings" for a Sales/CRT login or "everyone's" for Admin regardless
 // of whatever the page's month/exec filter happens to be set to right now.
+// "P DONE" means the money has come in but the invoice hasn't been raised — that's the billing
+// desk's job, not the sales person's. So a P DONE booking drops out of every chase list, while
+// still holding its bike in the Book vs Stock allocation (the bike IS spoken for).
+function isBookingClosedForSales(status){
+  const s = up(status);
+  return s === 'BILLED' || s === 'CANCEL' || s === 'CANCELLED' || s === 'DELIVERED' || /^P[\s-]*DONE$/.test(s);
+}
 function myOpenBookings(execName){
   return STATE.booking
     .filter(r => {
       if (execName && !execMatches(r[7], execName)) return false;
-      const s = up(r[9]);
-      return s !== 'BILLED' && s !== 'CANCEL';
+      return !isBookingClosedForSales(r[9]);
     })
     .sort((a, b) => (b[2] instanceof Date ? b[2].getTime() : 0) - (a[2] instanceof Date ? a[2].getTime() : 0));
 }
@@ -6323,8 +6329,7 @@ function allPendingRowsFor(execFilterName){
   return STATE.booking.filter(r => {
     if (execFilterName) { if (!execMatches(r[7], execFilterName)) return false; }
     else { if (!execInFilter(r[7])) return false; }
-    const s = up(r[9]);
-    return s !== 'BILLED' && s !== 'CANCEL';
+    return !isBookingClosedForSales(r[9]);
   });
 }
 
@@ -6427,8 +6432,7 @@ function renderTodayPriorities(){
 function pendingRows(){
   return STATE.booking.filter(r => {
     if (!execInFilter(r[7])) return false;
-    const s = up(r[9]);
-    return s !== 'BILLED' && s !== 'CANCEL' && s !== 'CANCELLED' && s !== 'DELIVERED';
+    return !isBookingClosedForSales(r[9]);
   });
 }
 // True when a pending booking was taken before the month being viewed — shown as a small tag so
@@ -6624,9 +6628,12 @@ function renderPending(){
   // straight from ACTUL BOOKING (all open bookings, ignoring the exec filter) and is ordered by
   // booking date so the earliest booking sits on top within each stock-status group.
   const bookingIndex = (r) => STATE.booking.indexOf(r); // original sheet order = booking order
+  // Note this is NOT isBookingClosedForSales(): a "P DONE" booking is paid for, so its bike is
+  // firmly spoken for and must keep holding its place in the allocation queue. Dropping it would
+  // make that bike look available to the next customer.
   const globalOpenBookings = STATE.booking.filter(r => {
     const s = up(r[9]);
-    return s !== 'BILLED' && s !== 'CANCEL';
+    return s !== 'BILLED' && s !== 'CANCEL' && s !== 'CANCELLED' && s !== 'DELIVERED';
   });
   // The old customer-wise "Whose Booking" table is replaced by the model-dropdown FIFO view
   // (renderBvsModel), which is easier to read: pick a model, see every colour's free stock and the
@@ -6872,10 +6879,8 @@ const FOLLOWUP_STALE_DAYS = 5;
 
 function callListStock(){
   // Bookings that are still open, matched against stock actually on the floor.
-  const open = STATE.booking.filter(r => {
-    const st = up(r[9]);
-    return st !== 'CANCEL' && st !== 'CANCELLED' && st !== 'DELIVERED' && st !== 'BILLED';
-  }).filter(r => ownerInFilter(r[7]));
+  const open = STATE.booking.filter(r => !isBookingClosedForSales(r[9]))
+    .filter(r => ownerInFilter(r[7]));
   const available = {};
   (STATE.stock || []).forEach(r => {
     if (up(r[7]) !== 'KN' || up(r[17]) !== 'OPEN') return;
