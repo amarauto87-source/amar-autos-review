@@ -132,13 +132,38 @@
   }
   body > * { position: relative; z-index: 1; }
 
-  /* ── Masthead ──────────────────────────────────────────────────────────── */
+  /* ── Masthead ──────────────────────────────────────────────────────────────
+     The whole block used to stay stuck to the top — brand, filters, status line and tabs — which
+     on a phone left barely any room for the actual content. Now only the AMAR AUTOS line survives
+     the scroll, as a slim bar; everything else scrolls away and comes back when you return to the
+     top. The header keeps its height reserved so nothing jumps as it collapses. */
   header.top {
     position: sticky; top: 0; z-index: 20;
     background: var(--header-grad);
-    border-bottom: 1px solid rgba(212,175,55,0.32);
+    border-bottom: 1px solid var(--border);
     padding: 17px 26px;
+    transition: padding .18s ease;
   }
+  header.top.collapsed {
+    padding: 7px 26px;
+    background: color-mix(in srgb, var(--page) 82%, transparent);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    box-shadow: 0 6px 22px rgba(0,0,0,.35);
+  }
+  /* Everything except the brand name folds away on scroll. */
+  header.top.collapsed .sub,
+  header.top.collapsed .tagline,
+  header.top.collapsed .festival-banner,
+  header.top.collapsed .controls,
+  header.top.collapsed .status-line,
+  header.top.collapsed .bike-mark-clip,
+  header.top.collapsed .menu-toggle { display: none !important; }
+  header.top.collapsed .logo { width: 30px; height: 30px; font-size: 16px; }
+  header.top.collapsed h1 { font-size: 16px; letter-spacing: 1.4px; }
+  header.top.collapsed .brand { gap: 10px; }
+  /* Tapping the slim bar takes you back to the top, where the filters are. */
+  header.top.collapsed .brand { cursor: pointer; }
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 13px; }
   /* Festival theme banner + selector */
@@ -6921,6 +6946,34 @@ function loadLoginLog(){
 })();
 
 
+
+
+// ── Collapsing masthead ──
+// Past a small scroll the header folds down to just the AMAR AUTOS line. The threshold is a
+// little below the header's own height so it doesn't flicker on and off around the boundary, and
+// the work happens inside requestAnimationFrame so scrolling stays smooth on a phone.
+(function collapsingHeader(){
+  const head = document.querySelector('header.top');
+  if (!head) return;
+  let ticking = false, collapsed = false;
+  const apply = () => {
+    ticking = false;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    const should = y > 90;
+    if (should === collapsed) return;
+    collapsed = should;
+    head.classList.toggle('collapsed', should);
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(apply); }
+  }, { passive: true });
+  // Tapping the slim bar returns to the top, where the filters live.
+  const brand = head.querySelector('.brand');
+  if (brand) brand.addEventListener('click', () => {
+    if (head.classList.contains('collapsed')) window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  apply();
+})();
 
 // ═══════════════ Today's Call List ═══════════════
 // Three groups, each answering "who should I message right now":
