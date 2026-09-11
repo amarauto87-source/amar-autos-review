@@ -58,37 +58,48 @@
     --font-head: 'Barlow Condensed', system-ui, sans-serif;
     --font-ui: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
   }
+  /* ═══════════ Midnight Aurora ═══════════
+     Deep blue-black page with a slow-moving colour wash behind it, and panels that read as
+     frosted glass sitting on top. The accent moved from gold to a cool blue/teal for one
+     reason: red now means only one thing. Anything overdue, unbilled or off-target is the only
+     warm colour on the screen, so it's impossible to miss. */
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --surface-1: #262626;
-    --surface-2: #2E2E2E;
-    --page: #1A1A1A;
-    --text-primary: #F5F1E8;
-    --text-secondary: #B0A99C;
-    --text-muted: #857F74;
-    --grid: #2C2C2C;
-    --baseline: #3C3C3C;
-    --border: rgba(212,175,55,0.14);
-    --good: #4CAF7D;
-    --warning: #E0A93B;
-    --serious: #E0834B;
-    --critical: #E05B4B;
-    --s1: #3987e5;
-    --s2: #d95926;
-    --s3: #199e70;
-    --s4: #c98500;
-    --s5: #d55181;
-    --s6: #17c964;
-    --s7: #9085e9;
-    --s8: #ff4d5e;
-    --brand-red: #ff2a44;
-    --brand-red-2: #c8102e;
-    --brand-glow: rgba(255,42,68,0.35);
-    --header-grad: linear-gradient(180deg, rgba(212,175,55,0.05), transparent), #161616;
-    --gold: #D4AF37;
-    --gold-light: #E3C465;
-    --gold-dim: rgba(212,175,55,0.32);
-    --on-gold: #17130A;
+    --surface-1: rgba(255,255,255,0.065);
+    --surface-2: rgba(255,255,255,0.10);
+    --solid-1: #12151E;
+    --solid-2: #171B26;
+    --page: #080A11;
+    --text-primary: #EEF1F6;
+    --text-secondary: rgba(238,241,246,0.66);
+    --text-muted: rgba(238,241,246,0.44);
+    --grid: rgba(255,255,255,0.09);
+    --baseline: rgba(255,255,255,0.20);
+    --border: rgba(255,255,255,0.12);
+    --good: #5FF0D8;
+    --warning: #FFC46B;
+    --serious: #FF9A6B;
+    --critical: #FF6B81;
+    --s1: #5AA8FF;
+    --s2: #FF9A6B;
+    --s3: #5FF0D8;
+    --s4: #FFC46B;
+    --s5: #C79BFF;
+    --s6: #6BE39A;
+    --s7: #8B93FF;
+    --s8: #FF6B81;
+    --brand-red: #FF5A73;
+    --brand-red-2: #C8102E;
+    --brand-glow: rgba(90,168,255,0.35);
+    --header-grad: linear-gradient(180deg, rgba(90,168,255,0.10), transparent), rgba(255,255,255,0.04);
+    /* "gold" names are kept so every existing rule keeps working — they now carry the cool accent */
+    --gold: #5AA8FF;
+    --gold-light: #7FE6E0;
+    --gold-dim: rgba(90,168,255,0.32);
+    --on-gold: #051018;
+    --glass-blur: blur(20px) saturate(140%);
+    --glass-edge: inset 0 1px 0 rgba(255,255,255,0.20);
+    --glass-drop: 0 16px 38px rgba(0,0,0,0.42);
   }
   * { box-sizing: border-box; }
   body {
@@ -96,12 +107,30 @@
     font-family: var(--font-ui);
     font-size: 15.5px;
     line-height: 1.5;
-    background:
-      radial-gradient(ellipse 900px 460px at 12% -8%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 62%),
-      var(--page);
-    background-attachment: fixed;
+    background: var(--page);
     color: var(--text-primary);
+    position: relative;
   }
+  /* The colour wash sits behind everything and drifts very slowly. It's fixed and non-interactive,
+     so it costs nothing and never gets in the way of a tap. Light theme leaves it out entirely. */
+  :root[data-theme="dark"] body::before {
+    content: "";
+    position: fixed;
+    inset: -30%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(38% 34% at 18% 16%, rgba(70,110,255,.42), transparent 62%),
+      radial-gradient(34% 32% at 84% 20%, rgba(0,200,190,.34), transparent 62%),
+      radial-gradient(42% 38% at 58% 94%, rgba(150,70,255,.32), transparent 62%);
+    filter: blur(60px);
+    animation: aurora-drift 34s ease-in-out infinite alternate;
+  }
+  @keyframes aurora-drift { to { transform: translate3d(-5%, 4%, 0) scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) {
+    :root[data-theme="dark"] body::before { animation: none; }
+  }
+  body > * { position: relative; z-index: 1; }
 
   /* ── Masthead ──────────────────────────────────────────────────────────── */
   header.top {
@@ -113,11 +142,15 @@
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 13px; }
   /* Festival theme banner + selector */
+  /* The one place a festival colour appears. Everywhere else keeps the theme accent, so a
+     warning colour still means a warning. */
   .festival-banner {
     display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
     font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
-    color: var(--on-gold); background: linear-gradient(180deg, var(--gold-light), var(--gold));
-    padding: 3px 11px; border-radius: 999px; box-shadow: 0 3px 10px -4px var(--gold-dim);
+    color: #17130A;
+    background: linear-gradient(180deg, var(--fest-light, var(--gold-light)), var(--fest, var(--gold)));
+    padding: 3px 11px; border-radius: 999px;
+    box-shadow: 0 3px 10px -4px var(--fest-dim, var(--gold-dim));
     animation: festPulse 2.6s ease-in-out infinite;
   }
   .festival-banner .fest-emoji { font-size: 13px; }
@@ -748,6 +781,23 @@
     box-shadow: 0 6px 18px -16px rgba(0,0,0,.6);
     transition: border-color .18s, box-shadow .18s, transform .18s;
   }
+  /* Panels become frosted glass in dark mode: the wash behind shows through, blurred. The
+     backdrop-filter is only applied where it reads — cards, tiles, the header and the tab bar —
+     rather than on every element, which would cost frame rate on an older phone. */
+  :root[data-theme="dark"] .card,
+  :root[data-theme="dark"] .kpi-card,
+  :root[data-theme="dark"] .table-wrap,
+  :root[data-theme="dark"] .chat-panel,
+  :root[data-theme="dark"] .pl-card,
+  :root[data-theme="dark"] .spec-card,
+  :root[data-theme="dark"] .call-row,
+  :root[data-theme="dark"] .quote-box,
+  :root[data-theme="dark"] .seg-wrap {
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-edge), var(--glass-drop);
+  }
+  :root[data-theme="dark"] .card:hover { border-color: rgba(255,255,255,0.22); }
   .card:hover { border-color: var(--gold-dim); box-shadow: 0 14px 30px -18px rgba(0,0,0,.7); transform: translateY(-1px); }
   .card h3 {
     margin: 0 0 11px; font-size: 10.5px; color: var(--gold); text-transform: uppercase;
@@ -2257,18 +2307,22 @@ function festivalActiveOn(d){
   return best;
 }
 
+// The festival greeting stays, but its colour is now confined to the greeting badge itself.
+// Repainting the whole interface for a festival fought with the theme's own accent, and — more
+// importantly — red/amber has one job here: it marks what is overdue or off-target. A festival
+// turning half the screen amber made real warnings disappear into the decoration.
 function applyFestivalTheme(f){
   const root = document.documentElement;
   if (!f) {
-    root.style.removeProperty('--gold');
-    root.style.removeProperty('--gold-light');
-    root.style.removeProperty('--gold-dim');
+    root.style.removeProperty('--fest');
+    root.style.removeProperty('--fest-light');
+    root.style.removeProperty('--fest-dim');
     root.removeAttribute('data-festival');
     return;
   }
-  root.style.setProperty('--gold', f.accent);
-  root.style.setProperty('--gold-light', f.accentLight);
-  root.style.setProperty('--gold-dim', hexToRgba(f.accent, 0.35));
+  root.style.setProperty('--fest', f.accent);
+  root.style.setProperty('--fest-light', f.accentLight);
+  root.style.setProperty('--fest-dim', hexToRgba(f.accent, 0.35));
   root.setAttribute('data-festival', f.key);
 }
 function hexToRgba(hex, a){
