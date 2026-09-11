@@ -133,37 +133,47 @@
   body > * { position: relative; z-index: 1; }
 
   /* ── Masthead ──────────────────────────────────────────────────────────────
-     The whole block used to stay stuck to the top — brand, filters, status line and tabs — which
-     on a phone left barely any room for the actual content. Now only the AMAR AUTOS line survives
-     the scroll, as a slim bar; everything else scrolls away and comes back when you return to the
-     top. The header keeps its height reserved so nothing jumps as it collapses. */
+     The header does NOT stick and does NOT resize. That matters: an earlier version shrank a
+     sticky header on scroll, which changed the page height, which moved the scroll position,
+     which un-shrank the header — a loop that showed up as violent flickering. Instead the header
+     scrolls away like any other content, and a separate slim bar (.mini-bar) is shown over the
+     page once you are past it. Nothing in the layout ever changes size, so there is nothing to
+     oscillate. */
   header.top {
-    position: sticky; top: 0; z-index: 20;
+    position: relative; z-index: 5;
     background: var(--header-grad);
     border-bottom: 1px solid var(--border);
     padding: 17px 26px;
-    transition: padding .18s ease;
   }
-  header.top.collapsed {
-    padding: 7px 26px;
-    background: color-mix(in srgb, var(--page) 82%, transparent);
+  /* The slim bar that replaces it while scrolled. Fixed, so it is outside page flow entirely. */
+  .mini-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 20px;
+    background: color-mix(in srgb, var(--page) 80%, transparent);
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
-    box-shadow: 0 6px 22px rgba(0,0,0,.35);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 6px 22px rgba(0,0,0,.34);
+    cursor: pointer;
+    transform: translateY(-100%);
+    transition: transform .22s ease;
   }
-  /* Everything except the brand name folds away on scroll. */
-  header.top.collapsed .sub,
-  header.top.collapsed .tagline,
-  header.top.collapsed .festival-banner,
-  header.top.collapsed .controls,
-  header.top.collapsed .status-line,
-  header.top.collapsed .bike-mark-clip,
-  header.top.collapsed .menu-toggle { display: none !important; }
-  header.top.collapsed .logo { width: 30px; height: 30px; font-size: 16px; }
-  header.top.collapsed h1 { font-size: 16px; letter-spacing: 1.4px; }
-  header.top.collapsed .brand { gap: 10px; }
-  /* Tapping the slim bar takes you back to the top, where the filters are. */
-  header.top.collapsed .brand { cursor: pointer; }
+  .mini-bar.show { transform: translateY(0); }
+  .mini-bar .mb-logo {
+    width: 28px; height: 28px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .mini-bar .mb-name {
+    font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: 1.6px;
+    color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mini-bar .mb-up {
+    margin-left: auto; flex: none; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-muted); white-space: nowrap;
+  }
+  @media (max-width: 560px) { .mini-bar .mb-up { display: none; } }
   .top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .brand { display: flex; align-items: center; gap: 13px; }
   /* Festival theme banner + selector */
@@ -232,7 +242,7 @@
   .bike-mark .thin { stroke-width: 1.6; }
   .bike-mark .hair { stroke-width: 1; }
   .bike-mark .accent { stroke: #eef1f3; opacity: .8; }
-  header.top { position: sticky; }
+  /* (the masthead is deliberately NOT sticky — see the Masthead block above) */
   header.top > *:not(.bike-mark-clip) { position: relative; z-index: 1; }
   @media (max-width: 900px) { .bike-mark-clip { display: none; } }
 
@@ -6948,30 +6958,33 @@ function loadLoginLog(){
 
 
 
-// ── Collapsing masthead ──
-// Past a small scroll the header folds down to just the AMAR AUTOS line. The threshold is a
-// little below the header's own height so it doesn't flicker on and off around the boundary, and
-// the work happens inside requestAnimationFrame so scrolling stays smooth on a phone.
-(function collapsingHeader(){
+// ── Slim bar while scrolled ──
+// The masthead itself scrolls away untouched; this bar is fixed on top of the page and simply
+// slides in once you are past the header. Because nothing in the layout resizes, the scroll
+// position can never be nudged by the bar appearing — which is what caused the flicker before.
+// Two different thresholds (in at 160, out at 110) give it hysteresis, so hovering right on the
+// boundary can't toggle it back and forth either.
+(function miniBar(){
   const head = document.querySelector('header.top');
   if (!head) return;
-  let ticking = false, collapsed = false;
+  const bar = document.createElement('div');
+  bar.className = 'mini-bar';
+  bar.innerHTML = '<div class="mb-logo">\uD83C\uDFCD\uFE0F</div>' +
+    '<div class="mb-name">AMAR AUTOS</div>' +
+    '<div class="mb-up">Tap to go up</div>';
+  bar.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.body.appendChild(bar);
+
+  let shown = false, ticking = false;
   const apply = () => {
     ticking = false;
     const y = window.scrollY || document.documentElement.scrollTop || 0;
-    const should = y > 90;
-    if (should === collapsed) return;
-    collapsed = should;
-    head.classList.toggle('collapsed', should);
+    if (!shown && y > 160) { shown = true; bar.classList.add('show'); }
+    else if (shown && y < 110) { shown = false; bar.classList.remove('show'); }
   };
   window.addEventListener('scroll', () => {
     if (!ticking) { ticking = true; requestAnimationFrame(apply); }
   }, { passive: true });
-  // Tapping the slim bar returns to the top, where the filters live.
-  const brand = head.querySelector('.brand');
-  if (brand) brand.addEventListener('click', () => {
-    if (head.classList.contains('collapsed')) window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
   apply();
 })();
 
