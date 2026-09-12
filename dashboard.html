@@ -858,6 +858,9 @@
   a { color: var(--s1); }
 
   /* ── Bar rows ──────────────────────────────────────────────────────────── */
+  /* Mode-of-payment matrix: cash reads positive, a blank cell reads as missing data */
+  #tblBankMatrix td.pm-cash { color: var(--good); font-weight: 700; }
+  #tblBankMatrix td.pm-blank { color: var(--critical); }
   .barrow { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; font-size: 12.5px; }
   .barrow .lbl { width: 130px; flex-shrink: 0; color: var(--text-secondary); }
   .barrow .track {
@@ -1553,22 +1556,14 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="myday">🌟 My Day</button>
-  <button data-tab="dashboard" class="active">📊 Dashboard</button>
-  <button data-tab="overview">Overview</button>
+  <button data-tab="myday" class="active">🌟 My Day</button>
+  <button data-tab="overview">📊 Business</button>
   <button data-tab="analytics">🎯 Funnel</button>
-  <button data-tab="delivery">Delivery</button>
-  <button data-tab="booking">📋 Booking</button>
-  <button data-tab="pending">🔎 Book vs Stock</button>
-  <button data-tab="stock">Stock</button>
-  <button data-tab="riders">Riders</button>
-  <button data-tab="specs">📖 Model Specs</button>
-  <button data-tab="qrcodes">QR Codes</button>
-  <button data-tab="loginlog" style="display:none;">🔐 Login Activity</button>
-  <button data-tab="pricelist" style="display:none;">💰 Price List</button>
-  <button data-tab="walkin" style="display:none;">🔁 Walk-in Check</button>
-  <button data-tab="walkinlog" style="display:none;">📋 Today's Walk-ins</button>
-  <button data-tab="moredata" style="display:none;">🗂️ More Data</button>
+  <button data-tab="sales">🏍️ Sales</button>
+  <button data-tab="stock">📦 Stock</button>
+  <button data-tab="pricelist">💰 Price List</button>
+  <button data-tab="customers">👥 Customers</button>
+  <button data-tab="more">🗂️ More</button>
 </nav>
 
 <main>
@@ -1753,92 +1748,6 @@
     <h2 class="section-title" id="tvaTitle">🎯 Target vs Actual — This Month</h2>
     <div id="targetVsActual"></div>
 
-    <h2 class="section-title" id="salesConsoleTitle">🏍️ Sales Console</h2>
-    <div class="grid-3" id="consoleRow">
-      <div class="card">
-        <h3 id="gaugeCardTitle">Bike Target vs Retail</h3>
-        <div class="gauge-wrap">
-          <div class="gauge" id="gauge"></div>
-          <div class="split">
-            <span class="k">Target</span><span class="v" id="sTarget">—</span>
-            <span class="k">Retail</span><span class="v" id="sRetail">—</span>
-            <span class="k">Gap</span><span class="v" id="sGap">—</span>
-          </div>
-        </div>
-        <div class="pace-note" id="paceNote"></div>
-      </div>
-      <div class="card">
-        <h3>VAS Penetration</h3>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Extended Warranty</div>
-            <div class="stat-bar"><i id="ewBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="ewUnits">—</div>
-            <div class="hint" id="ewPct">—</div>
-          </div>
-        </div>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Roadside Assistance</div>
-            <div class="stat-bar"><i id="rsaBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="rsaUnits">—</div>
-            <div class="hint" id="rsaPct">—</div>
-          </div>
-        </div>
-        <div class="stat">
-          <div style="flex:1">
-            <div class="lab">Riding gear attached</div>
-            <div class="stat-bar"><i id="gearBar"></i></div>
-          </div>
-          <div style="text-align:right">
-            <div class="val" id="gearUnits">—</div>
-            <div class="hint" id="gearPct">—</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Accessories &amp; Gear</h3>
-        <div class="stat"><span class="lab">GMA revenue</span><span class="val" id="gmaRev">—</span></div>
-        <div class="stat"><span class="lab">Per bike delivered</span><span class="val" id="gmaPerBike">—</span></div>
-        <div class="stat"><span class="lab">Bikes billed</span><span class="val" id="bikesBilled">—</span></div>
-      </div>
-    </div>
-
-    <div id="storePerformanceSection">
-      <h2 class="section-title">🏪 Store Performance — Whole Showroom</h2>
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Everyone's numbers combined, for context alongside your own above. Kanti Nagar only — Vikas Marg is a separate store and appears just as reference stock on the Stock tab.</p>
-      <div class="kpi-grid" id="kpiStorePerformance"></div>
-    </div>
-
-    <div id="personalTargetSection" style="display:none;">
-      <h2 class="section-title" id="personalTargetTitle">🎯 My Daily Target</h2>
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">Real calendar month, pace-adjusted to today.</p>
-      <div class="kpi-grid" id="kpiPersonalTarget"></div>
-    </div>
-
-    <div class="grid-3" style="margin-top:26px;">
-      <div class="card">
-        <h3>Sales Funnel — enquiry to delivery</h3>
-        <div id="funnelSteps"></div>
-      </div>
-      <div class="card">
-        <h3>Star of the Month</h3>
-        <div id="spotlight"></div>
-      </div>
-      <div class="card">
-        <h3>Booking &amp; Delivery Pipeline</h3>
-        <div id="pipeline"></div>
-      </div>
-    </div>
-
-    <h2 class="section-title" id="ovChampions">🏆 This Month's Champions</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Split across categories so it's not always the same one or two names on top.</p>
-    <div class="kpi-grid" id="kpiChampions"></div>
-
     <h2 class="section-title" id="ovLeaderboard">👤 Executive Leaderboard</h2>
     <div class="table-wrap"><table class="data" id="tblEmployee"></table></div>
     <div id="empTargetNote" class="empty-note" style="text-align:left;padding:8px 0 0;display:none;"></div>
@@ -1903,6 +1812,27 @@
         <h3>Attach Rates (INS / EW / RSA / Gear / AMC)</h3>
         <div id="deliveryAttach"></div>
       </div>
+    </div>
+
+    <!-- ══ Mode of payment (delivery sheet, column I) ══
+         Two views of the same column: the financier split across the showroom, and who is
+         putting business through which bank. The matrix is the one worth reading — it shows a
+         person sending everything to a single financier, or a bank only one person ever uses. -->
+    <h2 class="section-title">🏦 Mode of Payment — Bank-wise</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Financier Split</h3>
+        <div id="finSplit"></div>
+      </div>
+      <div class="card">
+        <h3>Cash vs Finance — by Sales Person</h3>
+        <div id="finByExec"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Who Financed Through Which Bank</h3>
+      <div class="table-wrap" style="max-height:none;"><table class="data" id="tblBankMatrix"></table></div>
+      <p class="empty-note" id="finNote" style="text-align:left;padding:10px 0 0;"></p>
     </div>
 
     <h2 class="section-title">👤 Sales Person-wise Model Sales — Who Sold Which Model</h2>
@@ -3220,13 +3150,14 @@ function applyRoleRestrictions(){
   //    No dashboard, no sales data, nothing else. Just enter a number and see the result.
   if (isWalkin) {
     document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
-      btn.style.display = (btn.dataset.tab === 'walkin' || btn.dataset.tab === 'walkinlog') ? '' : 'none';
+      btn.style.display = btn.dataset.tab === 'customers' ? '' : 'none';
     });
-    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'walkin'));
-    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-walkin'));
-    // rename the log tab for Ajeet, and give it a label
-    const wlBtn = document.querySelector('#tabs button[data-tab="walkinlog"]');
-    if (wlBtn) wlBtn.textContent = '📋 Today\'s Walk-ins';
+    const cBtn = document.querySelector('#tabs button[data-tab="customers"]');
+    if (cBtn) { cBtn.textContent = '🔁 Walk-in Check'; cBtn.classList.add('active'); }
+    // Ajeet sees the check tool and today's log, but not rider registration data
+    document.querySelectorAll('.tabpanel').forEach(p =>
+      p.classList.toggle('active', p.id === 'tab-walkin' || p.id === 'tab-walkinlog'));
+    const rp = document.getElementById('tab-riders'); if (rp) rp.classList.remove('active');
     // hide the whole filter/control bar — Ajeet doesn't need month/exec filters
     const ctrls = document.querySelector('.controls'); if (ctrls) ctrls.style.display = 'none';
     const notifyBtn = document.getElementById('notifyTeamBtn'); if (notifyBtn) notifyBtn.style.display = 'none';
@@ -3248,26 +3179,25 @@ function applyRoleRestrictions(){
   // Riders (registration + feedback, merged into one tab) is the one exception: Deepak wants CRT
   // logins (Harsh handles riders) to see it too, alongside Admin — everyone else (Sales) still doesn't.
   const isSales = CURRENT_USER.role === 'Sales';
+  // With eight tabs the rule is simple enough to state outright: everyone gets their own day,
+  // the funnel, sales, stock and the price list. Company-wide business figures and the odds and
+  // ends behind "More" stay with Admin (and CRT, who looks after riders).
+  const SALES_TABS = ['myday', 'analytics', 'sales', 'stock', 'pricelist', 'customers'];
   function tabHidden(tab){
-    const allowedForCRT = tab === 'riders' && CURRENT_USER.role === 'CRT';
-    if (!isAdmin && RESTRICTED_TABS.includes(tab) && !allowedForCRT) return true;
-    if (isSales && SALES_MOVE_TO_MORE_DATA.includes(tab)) return true; // moved into "More Data" instead
-    if (tab === 'walkin') return true; // the check tool is only for the Walkin (Ajeet) login
-    if (tab === 'pricelist') return false; // price list: Admin + Sales (Ajeet is handled above)
-    if (tab === 'loginlog') return !isAdmin; // sign-in activity is Admin-only
-    if (tab === 'walkinlog') return false; // "Aaj ke Walk-in" — sales see their own, admin sees all
-    return false;
+    if (isAdmin) return false;
+    if (CURRENT_USER.role === 'CRT') return false;      // CRT sees everything except Admin-only bits
+    return SALES_TABS.indexOf(tab) < 0;
   }
   document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
-    if (btn.dataset.tab === 'moredata') { btn.style.display = isSales ? '' : 'none'; return; }
-    if (btn.dataset.tab === 'walkinlog') { btn.style.display = ''; return; } // visible to everyone (not Walkin, handled above)
     btn.style.display = tabHidden(btn.dataset.tab) ? 'none' : '';
   });
+  // "More" holds the sign-in log, which is Admin-only — hide the panel itself for CRT.
+  if (!isAdmin) { const lp = document.getElementById('tab-loginlog'); if (lp) lp.remove(); }
   // Same rule for the Dashboard / My Day quick-jump shortcut buttons — hide any that jump to a
   // tab this user can't open directly any more, so a sales login doesn't get a "Delivery" button
   // that leads to a tab with no visible nav entry to get back from (they still have "More Data").
   document.querySelectorAll('#dashShortcuts button[data-jump], #mydayShortcuts button[data-jump]').forEach(btn => {
-    btn.style.display = tabHidden(btn.dataset.jump) ? 'none' : '';
+    btn.style.display = tabHidden(tabHolding(btn.dataset.jump)) ? 'none' : '';
   });
   if (!isAdmin) {
     // Land on the new "My Day" tab — one screen with just this person's own action list, target
@@ -3330,6 +3260,10 @@ function maskMobile(mobileValue, ownerField){
   return `<span title="Hidden — not your customer" style="color:var(--text-muted);letter-spacing:1px;">••••••${tail}</span>`;
 }
 function fmtId(v){ if (v === null || v === undefined || v === '') return ''; const n = Number(v); return isFinite(n) ? String(Math.round(n)) : String(v); }
+// Some blocks have been retired from the page. Anything that still tries to write into them
+// should quietly do nothing rather than throwing and taking the whole render down with it.
+function setText(id, value){ const el = document.getElementById(id); if (el) el.textContent = value; }
+function setHtml(id, value){ const el = document.getElementById(id); if (el) el.innerHTML = value; }
 function fmtDate(d){
   if (!(d instanceof Date) || isNaN(d)) return '';
   const dd = String(d.getDate()).padStart(2,'0');
@@ -3956,6 +3890,7 @@ function renderAll(){
   renderModelSpecs();
   renderAnalytics();
   renderWalkinLog();
+  renderPaymentMode();
   renderCallList();
   renderPriceList();
   renderTargetVsActual();
@@ -4555,8 +4490,9 @@ function renderStorePerformance(){
   // above the other. Only show this store-wide block when it actually adds something: i.e. when
   // the view is scoped to one person, so they can compare themselves against the whole showroom.
   const section = document.getElementById('storePerformanceSection');
+  if (!section) return;                      // block retired from the page
   const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
-  if (section) section.style.display = isSingleExec ? '' : 'none';
+  section.style.display = isSingleExec ? '' : 'none';
   if (!isSingleExec) return;
 
   const agg = computeStoreWideAgg();
@@ -4568,14 +4504,14 @@ function renderStorePerformance(){
   const stockOpenKN = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN').length;
   const stockTransitKN = STATE.stock.filter(r => up(r[17]) === 'IN-TRANSIT' && up(r[7]) === 'KN').length;
   const agedStockKN = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN' && num(r[16]) >= AGED_STOCK_DAYS).length;
-  document.getElementById('kpiStorePerformance').innerHTML = [
+  setHtml('kpiStorePerformance', [
     kpiCard('Total Retail', fmtInt(agg.retail), 'bikes billed, whole showroom'),
     kpiCard('Target', fmtInt(target), 'bikes (this filter)'),
     kpiCard('Achievement', fmtPct(achv), 'vs target', achv*100, target && achv < PERF_THRESHOLDS.achv ? 'Below target' : null, {tab:'booking', scroll:'atRiskTitle'}),
     kpiCard('Stock — Open', fmtInt(stockOpenKN), 'ready to deliver now'),
     kpiCard('Stock — In-Transit', fmtInt(stockTransitKN), 'dispatched, arriving soon'),
     kpiCard('Aged Stock', fmtInt(agedStockKN), `open ${AGED_STOCK_DAYS}+ days — see Stock tab`, undefined, agedStockKN ? 'Needs attention' : null, {tab:'stock'}),
-  ].join('');
+  ].join(''));
 }
 
 /* ---------------- Sales Console ---------------- */
@@ -4802,6 +4738,10 @@ function drawGauge(elId, achv, pace){
 }
 
 function renderSalesConsole(){
+  // The Sales Console block was retired — its figures now live in "Target vs Actual" and the
+  // leaderboard. Nothing below has anywhere to write, so stop here rather than throwing.
+  if (!document.getElementById('sTarget')) return;
+
   const agg = computeDeliveryAgg(null);
   const target = targetFor(null);
   const achv = target ? agg.retail/target : 0;
@@ -4813,8 +4753,8 @@ function renderSalesConsole(){
   // login, or an Admin who's picked one name from the executive filter) — otherwise (Admin,
   // filter = ALL) it stays "Sales Console" since it's already showing the whole store.
   const isSingleExec = STATE.filterExec && STATE.filterExec !== 'ALL';
-  document.getElementById('salesConsoleTitle').textContent =
-    isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console';
+  setText('salesConsoleTitle',
+    isSingleExec ? `👤 My Performance — ${STATE.filterExec}` : '🏍️ Sales Console');
 
   // Pace is only meaningful against the real calendar month. When a specific month is filtered
   // (or "All Months" is on), fall back to a flat 100% pace so the marker never implies a
@@ -4826,10 +4766,10 @@ function renderSalesConsole(){
   const pace = isCurrentMonth ? now.getDate() / daysInMonth : 1;
 
   drawGauge('gauge', achv, pace);
-  document.getElementById('gaugeCardTitle').textContent =
-    isCurrentMonth ? `Bike Target vs Retail · Day ${now.getDate()} of ${daysInMonth}` : 'Bike Target vs Retail';
-  document.getElementById('sTarget').textContent = fmtInt(target);
-  document.getElementById('sRetail').textContent = fmtInt(agg.retail);
+  setText('gaugeCardTitle',
+    isCurrentMonth ? `Bike Target vs Retail · Day ${now.getDate()} of ${daysInMonth}` : 'Bike Target vs Retail');
+  setText('sTarget', fmtInt(target));
+  setText('sRetail', fmtInt(agg.retail));
   const gap = Math.max(0, target - agg.retail);
   const gapEl = document.getElementById('sGap');
   gapEl.textContent = fmtInt(gap);
@@ -4863,11 +4803,11 @@ function renderSalesConsole(){
   setAttach('rsaUnits', 'rsaPct', 'rsaBar', agg.rsa, rsaPct, PERF_THRESHOLDS.rsaPct);
   setAttach('gearUnits', 'gearPct', 'gearBar', agg.gear, gearPct, null);
 
-  document.getElementById('gmaRev').textContent = fmtMoney(agg.gma);
+  setText('gmaRev', fmtMoney(agg.gma));
   const perBikeEl = document.getElementById('gmaPerBike');
   perBikeEl.textContent = fmtMoney(gmaPerBike);
   perBikeEl.style.color = (agg.retail && gmaPerBike < PERF_THRESHOLDS.gmaPerBike) ? 'var(--critical)' : '';
-  document.getElementById('bikesBilled').textContent = fmtInt(agg.retail);
+  setText('bikesBilled', fmtInt(agg.retail));
 }
 
 /* ── Sales funnel ───────────────────────────────────────────────────────────
@@ -7148,6 +7088,96 @@ function waBtn(mobileValue, ownerField, template, ctx){
     WhatsApp</a>`;
 }
 
+
+// ═══════════════ Mode of payment — bank wise ═══════════════
+// Column I of the delivery sheet holds either "CASH" or the financier's name. It's read as
+// written, so a new bank needs no code change — it just appears. Blank cells are counted as
+// "Not entered" rather than quietly dropped, because a missing value would otherwise make the
+// cash share look higher than it is.
+function paymentBreakdown(){
+  const rows = STATE.delivery.filter(r =>
+    str(r[3]) && dateInFilter(r[2]) && execInFilter(r[18]) && up(r[9]) !== 'CANCEL');
+  const byBank = {};          // bank -> count
+  const byExec = {};          // exec -> { bank -> count }
+  let cash = 0, fin = 0, blank = 0;
+  rows.forEach(r => {
+    const raw = str(r[8]).replace(/\s+/g, ' ').trim();
+    const bank = raw ? up(raw) : 'NOT ENTERED';
+    byBank[bank] = (byBank[bank] || 0) + 1;
+    if (bank === 'CASH') cash++; else if (raw) fin++; else blank++;
+    const e = canonName(r[18]) || '—';
+    if (!byExec[e]) byExec[e] = {};
+    byExec[e][bank] = (byExec[e][bank] || 0) + 1;
+  });
+  return { rows: rows.length, byBank, byExec, cash, fin, blank };
+}
+
+function renderPaymentMode(){
+  const splitEl = document.getElementById('finSplit');
+  if (!splitEl) return;
+  const p = paymentBreakdown();
+  const total = p.rows;
+  const noteEl = document.getElementById('finNote');
+
+  if (!total) {
+    splitEl.innerHTML = '<div class="empty-note">No deliveries in this filter.</div>';
+    document.getElementById('finByExec').innerHTML = '';
+    document.getElementById('tblBankMatrix').innerHTML = '';
+    if (noteEl) noteEl.textContent = '';
+    return;
+  }
+
+  const banks = Object.keys(p.byBank).sort((a, b) => p.byBank[b] - p.byBank[a]);
+  const colourFor = (b) => b === 'CASH' ? 'var(--good)' : b === 'NOT ENTERED' ? 'var(--critical)' : 'var(--s1)';
+  splitEl.innerHTML = banks.map(b => {
+    const n = p.byBank[b], pct = n / total * 100;
+    return `<div class="barrow"><div class="lbl">${esc(b)}</div>
+      <div class="track"><div class="fill" style="width:${pct}%;background:${colourFor(b)}"></div></div>
+      <div class="val">${fmtInt(n)} (${pct.toFixed(0)}%)</div></div>`;
+  }).join('');
+
+  // cash vs finance per person, sorted by who closes the most cash
+  const execNames = Object.keys(p.byExec).sort((a, b) =>
+    ((p.byExec[b]['CASH'] || 0) - (p.byExec[a]['CASH'] || 0)));
+  document.getElementById('finByExec').innerHTML = execNames.map(n => {
+    const row = p.byExec[n];
+    const c = row['CASH'] || 0;
+    const f = Object.keys(row).reduce((t, k) => t + (k === 'CASH' || k === 'NOT ENTERED' ? 0 : row[k]), 0);
+    const t = c + f;
+    const pct = t ? c / t * 100 : 0;
+    return `<div class="barrow"><div class="lbl">${esc(n)}</div>
+      <div class="track"><div class="fill" style="width:${pct}%;background:var(--good)"></div></div>
+      <div class="val">${fmtInt(c)} cash / ${fmtInt(f)} fin</div></div>`;
+  }).join('');
+
+  // the matrix: every bank as a column, every person as a row
+  const bankCols = banks.filter(b => b !== 'CASH' && b !== 'NOT ENTERED');
+  const head = ['Sales Person', 'Cash', ...bankCols, 'Not entered', 'Total'];
+  const body = execNames.map(n => {
+    const row = p.byExec[n];
+    const cash = row['CASH'] || 0;
+    const blank = row['NOT ENTERED'] || 0;
+    const cells = bankCols.map(b => row[b] || 0);
+    const tot = cash + blank + cells.reduce((a, v) => a + v, 0);
+    const cell = (v, cls) => v
+      ? `<td class="num${cls ? ' ' + cls : ''}">${fmtInt(v)}</td>`
+      : `<td class="num" style="color:var(--text-muted);">·</td>`;
+    return `<tr><td><b>${esc(n)}</b></td>${cell(cash, 'pm-cash')}` +
+      cells.map(v => cell(v)).join('') +
+      cell(blank, 'pm-blank') +
+      `<td class="num"><b>${fmtInt(tot)}</b></td></tr>`;
+  }).join('');
+  document.getElementById('tblBankMatrix').innerHTML =
+    `<thead><tr>${head.map((h, i) => `<th${i ? ' class="num"' : ''}>${esc(h)}</th>`).join('')}</tr></thead>` +
+    `<tbody>${body}</tbody>`;
+
+  if (noteEl) {
+    noteEl.innerHTML = p.blank
+      ? `⚠️ <b>${fmtInt(p.blank)} of ${fmtInt(total)} deliveries have no mode of payment</b> in column I — the split above is incomplete until those are filled.`
+      : `${fmtInt(p.cash)} cash · ${fmtInt(p.fin)} financed · across ${banks.filter(b => b !== 'CASH' && b !== 'NOT ENTERED').length} bank(s).`;
+  }
+}
+
 // ═══════════════ Price List ═══════════════
 // Columns: 0 Model, 1 Colour, 2 Ex-showroom, 3 Road tax, 4 Normal insurance, 5 Price with insurance,
 // 6 Nil-dep + RT, 7 Zero-dep insurance, 8 On-road (nil dep), 9 EW, 10 Engine guard, 11 RSA,
@@ -8984,13 +9014,38 @@ function exportCsv(filename, headers, rows, maskOpt){
 }
 
 /* ---------------- tabs ---------------- */
+// Sixteen tabs was too many to hold in your head, and several said the same thing twice. The
+// panels themselves are untouched — a tab now simply shows a GROUP of them, stacked. That keeps
+// every render function, id and report working exactly as before while cutting the tab bar in half.
+const TAB_GROUPS = {
+  myday:     ['myday'],
+  overview:  ['overview'],                 // "Business"
+  analytics: ['analytics'],                // "Funnel"
+  sales:     ['delivery', 'booking'],      // one bike's story, start to finish
+  stock:     ['pending', 'stock'],         // what's booked against what's on the floor
+  pricelist: ['pricelist'],
+  customers: ['walkin', 'walkinlog', 'riders'],
+  more:      ['specs', 'qrcodes', 'loginlog', 'moredata'],
+};
+function panelsForTab(tabName){ return TAB_GROUPS[tabName] || [tabName]; }
+// Old tab names are still used by shortcut buttons and report links all over the file. Map them
+// to whichever tab now holds that panel, so nothing needs rewiring.
+function tabHolding(panelName){
+  if (TAB_GROUPS[panelName]) return panelName;
+  for (const t in TAB_GROUPS) if (TAB_GROUPS[t].indexOf(panelName) >= 0) return t;
+  return panelName;
+}
+
 function switchToTab(tabName, scrollToId){
-  // Sign-in activity is fetched fresh each time the tab is opened rather than on every refresh —
+  // Sign-in activity is fetched fresh each time it's opened rather than on every refresh —
   // it's an occasional check, not something to pull down with the main data.
-  if (tabName === 'loginlog') setTimeout(loadLoginLog, 0);
+  tabName = tabHolding(tabName);                 // accepts an old panel name too
+  const group = panelsForTab(tabName);
+  if (group.indexOf('loginlog') >= 0) setTimeout(loadLoginLog, 0);
   const btn = document.querySelector(`#tabs button[data-tab="${tabName}"]`);
   if (btn) document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
-  document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
+  document.querySelectorAll('.tabpanel').forEach(p =>
+    p.classList.toggle('active', group.indexOf(p.id.replace('tab-','')) >= 0));
   if (scrollToId) {
     // let the panel become visible first, then scroll the target section into view
     setTimeout(() => {
