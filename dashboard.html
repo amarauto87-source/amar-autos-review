@@ -2988,7 +2988,18 @@ function openQuickSearchModal(){
 }
 document.getElementById('quickSearchBtn').addEventListener('click', openQuickSearchModal);
 
+// The rider fact sits on screen for a few seconds while someone reads it. Data loading used to
+// wait for the "Enter Dashboard" click, so that time was thrown away and the spinner then ran for
+// the full fetch. Now the fetch starts the instant the login lands, and by the time the button is
+// pressed the dashboard is usually already built.
+let PREFETCH = null;
+function prefetchData(){
+  if (PREFETCH) return PREFETCH;
+  PREFETCH = loadAll(true).catch(() => {});   // silent: no overlay behind the fact card
+  return PREFETCH;
+}
 function showReFact(){
+  prefetchData();
   const f = getDailyFact();
   document.getElementById('reFactTitle').textContent = f.title;
   document.getElementById('reFactText').textContent = f.text;
@@ -3003,7 +3014,17 @@ function enterDashboard(){
   document.getElementById('appShell').style.display = 'block';
   applyRoleRestrictions();
   linkOneSignalIdentity();
-  loadAll();
+  // Reuse whatever the prefetch already fetched; only fall back to a fresh load if it failed.
+  // Charts measured while the shell was hidden would have come out the wrong size, so once it's
+  // visible everything is drawn again — cheap, because no data is fetched a second time.
+  if (PREFETCH) {
+    PREFETCH.then(() => {
+      if (!STATE.lastLoaded) { loadAll(); return; }
+      populateFilters();
+      renderAll();
+      updateStatusLine();
+    });
+  } else loadAll();
   // Background auto-refresh: silent (no overlay, no scroll jump) and every 15 minutes instead of
   // 5, so it stops interrupting. It also skips refreshing while the tab is hidden and instead
   // refreshes once when the user comes back, so a backgrounded tab isn't hammering the sheet.
@@ -3016,13 +3037,28 @@ function enterDashboard(){
 }
 document.getElementById('reFactContinue').addEventListener('click', enterDashboard);
 
+// The team list barely changes, so the last one is kept in this browser. On every visit after
+// the first the dropdown is filled instantly from that copy and the person can sign in straight
+// away, while a fresh list is fetched in the background and quietly replaces it. Waiting two or
+// three seconds for a list of eight names that hasn't changed in months was the slow part.
+const NAMES_KEY = 'amarAutosUserNames';
+function cachedNames(){
+  try { const raw = localStorage.getItem(NAMES_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e) { return null; }
+}
 function populateLoginDropdown(){
   const sel = document.getElementById('loginName');
   if (!sel) return;
+  const keep = sel.value;
   sel.innerHTML = CREDENTIALS.length
     ? CREDENTIALS.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('')
     : '<option value="">Loading…</option>';
+  if (keep && CREDENTIALS.some(u => u.name === keep)) sel.value = keep;   // don't lose their pick
 }
+(function seedFromCache(){
+  const names = cachedNames();
+  if (names && names.length) CREDENTIALS = names.map(n => ({ name: n }));
+})();
 populateLoginDropdown();
 // Ask the API who the users are (names only). If it can't be reached, say so plainly rather
 // than leaving an empty dropdown with no explanation.
@@ -3030,9 +3066,11 @@ apiCall({ action:'users' }, (res) => {
   const errEl = document.getElementById('loginError');
   if (res && res.ok && Array.isArray(res.users) && res.users.length) {
     CREDENTIALS = res.users.map(n => ({ name: n }));
+    try { localStorage.setItem(NAMES_KEY, JSON.stringify(res.users)); } catch(e) {}
     populateLoginDropdown();
     if (errEl && /server/i.test(errEl.textContent)) errEl.textContent = '';
-  } else if (errEl) {
+  } else if (errEl && !CREDENTIALS.length) {
+    // Only complain when there's nothing to show — with a cached list they can already sign in.
     errEl.textContent = 'Could not reach the server. Check your internet and refresh.';
   }
 }, 20000);
