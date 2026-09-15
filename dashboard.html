@@ -2428,6 +2428,7 @@ let AUTH = { token: null, user: null, expires: 0 };
 // Set when a sheet comes back empty or the API reports a problem — the on-screen diagnostics
 // read this to explain WHY a report is blank instead of just showing nothing.
 let LAST_SHEET_ERROR = {};
+let DATE_WARNINGS = {};
 
 // One JSONP call to the API. JSONP (not fetch) because Apps Script redirects break CORS.
 let _apiSeq = 0;
@@ -3486,6 +3487,10 @@ async function loadAll(silent){
     const D = res.data || {};
     LAST_SHEET_ERROR = {};
     Object.keys(D).forEach(k => { if (!Array.isArray(D[k]) || D[k].length <= 1) LAST_SHEET_ERROR[k] = 'sheet is empty or missing'; });
+    // The server tells us when a month filter matched nothing because it couldn't read the dates.
+    // That used to show up as a silently blank dashboard; now it says so, with an example of the
+    // date it choked on, so the sheet can be fixed rather than guessed at.
+    DATE_WARNINGS = (res && res.dateWarnings) || {};
     STATE.serverMonths = Array.isArray(res.months) ? res.months : (STATE.serverMonths || []);
     // The API sends dates as "yyyy-MM-dd HH:mm:ss" (stable across devices and locales); turn
     // them back into real Dates here so every existing date helper keeps working unchanged.
@@ -3750,6 +3755,21 @@ document.getElementById('allMonthsBtn').addEventListener('click', () => {
 // comfortable with dev tools/console can immediately tell "data aaya ya nahi", and screenshot
 // this banner instead of guessing when something looks wrong.
 function renderDataHealthBanner(){
+  // A date the server can't read is the most common reason a report looks empty, so it goes to
+  // the top of the health banner rather than being buried.
+  const dw = Object.keys(DATE_WARNINGS || {});
+  if (dw.length) {
+    const el = document.getElementById('dataHealthBanner');
+    if (el) {
+      // the banner is shown by class, not by inline display
+      el.className = 'data-health-banner show empty';
+      el.innerHTML = `<b>⚠️ Date format problem in ${dw.map(esc).join(', ')}.</b><br>
+        ${esc(DATE_WARNINGS[dw[0]])}<br>
+        <span style="opacity:.85;font-weight:500;">Showing recent rows instead of this month's.
+        Fix that date column in the sheet (select it → Format → Number → Date), then refresh.</span>`;
+      return;
+    }
+  }
   const el = document.getElementById('dataHealthBanner');
   if (!STATE.initialized) { el.className = 'data-health-banner'; return; }
   const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
