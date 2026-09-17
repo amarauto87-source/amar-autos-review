@@ -2777,6 +2777,7 @@ function sqKeyFor(mobile, name){
 }
 
 function searchEverything(term){
+  const EC = enqCols();
   const t = sqNorm(term);
   if (t.length < 2) return null;
   const phone = sqPhoneKey(term);
@@ -2795,22 +2796,22 @@ function searchEverything(term){
   };
 
   STATE.booking.filter(hit).slice(0, 60).forEach(r => {
-    const p = person(r[6], r[5]); if (!p) return;
+    const p = person(r[6], r[EC.mobile]); if (!p) return;
     p.owner = p.owner || str(r[7]);
-    p.bookings.push({ slip: str(r[1]), date: r[2], model: str(r[3]), colour: str(r[4]),
-      exec: str(r[7]), tdd: r[8], status: str(r[9]) });
+    p.bookings.push({ slip: str(r[EC.name]), date: r[2], model: str(r[3]), colour: str(r[4]),
+      exec: str(r[7]), tdd: r[EC.model], status: str(r[EC.status]) });
   });
   STATE.delivery.filter(hit).slice(0, 60).forEach(r => {
-    const p = person(r[5], r[4]); if (!p) return;
+    const p = person(r[EC.mobile], r[4]); if (!p) return;
     p.owner = p.owner || str(r[18]);
     p.deliveries.push({ date: r[2], receipt: str(r[3]), model: str(r[6]), colour: str(r[7]),
-      pay: str(r[8]), gma: num(r[13]), gear: str(r[14]), exec: str(r[18]) });
+      pay: str(r[EC.model]), gma: num(r[EC.owner]), gear: str(r[EC.created]), exec: str(r[18]) });
   });
   STATE.enquiry.filter(hit).slice(0, 60).forEach(r => {
-    const p = person(r[5], r[1]); if (!p) return;
-    p.owner = p.owner || str(r[13]);
-    p.enquiries.push({ id: str(r[0]), date: r[14], model: str(r[8]), stage: str(r[9]),
-      type: str(r[11]), testRide: str(r[12]), exec: str(r[13]) });
+    const p = person(r[EC.mobile], r[EC.name]); if (!p) return;
+    p.owner = p.owner || str(r[EC.owner]);
+    p.enquiries.push({ id: str(r[EC.enqNo]), date: r[EC.created], model: str(r[EC.model]), stage: str(r[EC.status]),
+      type: str(r[EC.type]), testRide: str(r[EC.testRide]), exec: str(r[EC.owner]) });
   });
   // Call remarks live in the enquiry view — searching them means "show me everyone we discussed
   // finance with", which nothing could do before.
@@ -2824,21 +2825,21 @@ function searchEverything(term){
   });
   (STATE.walkin || []).filter(hit).slice(0, 60).forEach(r => {
     const p = person(r[3], r[2]); if (!p) return;
-    p.walkins.push({ date: r[0], exec: str(r[1]), source: 'Walk-in register' });
+    p.walkins.push({ date: r[EC.enqNo], exec: str(r[EC.name]), source: 'Walk-in register' });
   });
   (STATE.walkinEntry || []).filter(hit).slice(0, 60).forEach(r => {
     const p = person(r[2], r[3]); if (!p) return;
-    p.walkins.push({ date: r[1], exec: str(r[4]), source: str(r[5]) || 'Walk-in', model: str(r[8]), financer: str(r[6]) });
+    p.walkins.push({ date: r[EC.name], exec: str(r[4]), source: str(r[EC.mobile]) || 'Walk-in', model: str(r[EC.model]), financer: str(r[6]) });
   });
   STATE.review.filter(hit).slice(0, 40).forEach(r => {
     const p = person('', r[4] || r[2]); if (!p) return;
-    p.reviews.push({ date: r[0], rating: str(r[1]), model: str(r[2]), exec: str(r[3]) });
+    p.reviews.push({ date: r[EC.enqNo], rating: str(r[EC.name]), model: str(r[2]), exec: str(r[3]) });
   });
 
   // Stock and price answer a different question — "what have we got, what does it cost" — so they
   // come back as their own blocks rather than being forced into a person card.
   const stock = (STATE.stock || []).filter(hit).slice(0, 40).map(r => ({
-    store: str(r[7]), family: str(r[9]), name: str(r[11]), chassis: str(r[12]),
+    store: str(r[7]), family: str(r[EC.status]), name: str(r[EC.type]), chassis: str(r[EC.testRide]),
     age: num(r[16]), status: str(r[17])
   }));
   let price = [];
@@ -3525,7 +3526,13 @@ async function loadAll(silent){
     STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
     // Keep any row that carries identifying data. (Column A is sometimes blank in exports, so
     // requiring it silently dropped whole sheets and left reports empty.)
-    STATE.enquiry = enquiry.slice(1).filter(r => str(r[0]) || str(r[5]) || str(r[13]) || str(r[14]));
+    STATE.enquiryHeader = enquiry[0] || [];
+    _ENQ_COLS = null;                       // layout may have changed since the last load
+    {
+      const EC = enqCols();
+      STATE.enquiry = enquiry.slice(1).filter(r =>
+        str(r[EC.enqNo]) || str(r[EC.mobile]) || str(r[EC.owner]) || str(r[EC.created]));
+    }
     STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
     STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
     STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
@@ -4341,10 +4348,11 @@ function renderDashBookingsByExec(){
 // only to compute the conversion % note on the bar above. Mirrors the column layout used
 // everywhere else in this file (COL.ENQUIRY: Owner=13, Created On=14).
 function enquiryCountForExec(name){
+  const EC = enqCols();
   let n = 0;
   for (const r of STATE.enquiry) {
-    if (!dateInFilter(r[14])) continue;
-    if (!execMatches(r[13], name)) continue;
+    if (!dateInFilter(r[EC.created])) continue;
+    if (!execMatches(r[EC.owner], name)) continue;
     n++;
   }
   return n;
@@ -4441,9 +4449,10 @@ function renderDashFunnel(retail){
   el.innerHTML = `<svg class="funnel-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Channel-wise booking funnel vs target">${bands}</svg>`;
 }
 function renderDashFunnel_OLD_UNUSED(retail){
+  const EC = enqCols();
   const el = document.getElementById('dFunnel'); if (!el) return;
   let enq=0, testRides=0, booked=0;
-  for (const r of STATE.enquiry) { if(!dateInFilter(r[14]))continue; if(!ownerInFilter(r[13]))continue; enq++; if(up(r[12])==='YES')testRides++; if(up(r[9])==='BOOKED')booked++; }
+  for (const r of STATE.enquiry) { if(!dateInFilter(r[EC.created]))continue; if(!ownerInFilter(r[EC.owner]))continue; enq++; if(up(r[EC.testRide])==='YES')testRides++; if(up(r[EC.status])==='BOOKED')booked++; }
   const steps = [
     { name:'Enquiries', val:enq, conv:null, colr:'var(--gold-light)' },
     { name:'Test rides', val:testRides, conv:enq?testRides/enq:null, colr:'var(--gold)' },
@@ -4884,15 +4893,16 @@ function renderSalesConsole(){
    of the dashboard reads. Each bar's width is its share of the top of the
    funnel, so the taper itself shows the drop-off. */
 function renderFunnelSteps(){
+  const EC = enqCols();
   const el = document.getElementById('funnelSteps');
   if (!el) return;
   let enq = 0, testRides = 0, booked = 0;
   for (const r of STATE.enquiry) {
-    if (!dateInFilter(r[14])) continue;
-    if (!ownerInFilter(r[13])) continue;
+    if (!dateInFilter(r[EC.created])) continue;
+    if (!ownerInFilter(r[EC.owner])) continue;
     enq++;
-    if (up(r[12]) === 'YES') testRides++;
-    if (up(r[9]) === 'BOOKED') booked++;
+    if (up(r[EC.testRide]) === 'YES') testRides++;
+    if (up(r[EC.status]) === 'BOOKED') booked++;
   }
   const retail = computeDeliveryAgg(null).retail;
   const steps = [
@@ -5578,12 +5588,13 @@ function renderChampions(){
 
 /* ---------------- Enquiry Funnel ---------------- */
 function renderFunnel(){
+  const EC = enqCols();
   const groups = {};
   for (const r of STATE.enquiry) {
-    const type = str(r[11]) || '(blank)';
-    const stage = r[9];
-    const owner = r[13];
-    const created = r[14];
+    const type = str(r[EC.type]) || '(blank)';
+    const stage = r[EC.status];
+    const owner = r[EC.owner];
+    const created = r[EC.created];
     if (!dateInFilter(created)) continue;
     if (!ownerInFilter(owner)) continue;
     const g = groups[type] || (groups[type] = { total:0, booked:0 });
@@ -7115,6 +7126,53 @@ function renderCallList(){
   });
 })();
 
+
+// ═══════════════ enquiry sheet columns ═══════════════
+// The enquiry export is the same report as ENQUIRY STATMENT VIEW but with three
+// "(Do Not Modify)" columns from Dynamics at the front, so every column sits three places
+// further right. Hard-coded positions silently read the wrong field — "Type of Enquiry" landed
+// where the date was expected, and the month filter matched nothing.
+// Resolved by header name instead, with the old fixed positions as a last resort.
+const ENQ_FALLBACK = { enqNo:0, name:1, mobile:5, status:9, type:11, testRide:12, owner:13, created:14, model:8 };
+const ENQ_HEADERS = {
+  enqNo:    ['ENQ NUMBER', 'ENQUIRY NUMBER', 'ENQ NO'],
+  name:     ['NAME', 'CUSTOMER NAME'],
+  mobile:   ['MOBILE PHONE', 'MOBILE', 'PHONE', 'MOBILE NO'],
+  model:    ['MAIN CONSIDERATION MODEL', 'MODEL'],
+  status:   ['STAGE', 'STATUS'],
+  type:     ['TYPE OF ENQUIRY', 'ENQUIRY TYPE', 'SOURCE'],
+  testRide: ['TEST RIDE TAKEN', 'TEST RIDE'],
+  owner:    ['OWNER', 'SALES PERSON', 'EXECUTIVE'],
+  created:  ['CREATED ON', 'ENQUIRY DATE', 'CREATED'],
+};
+// "Name" would also match "First Name" and "Name (Dealer…)", so those are kept out.
+const ENQ_AVOID = { name: ['FIRST', 'MIDDLE', 'LAST', 'DEALER'], owner: ['LEAD OWNERSHIP', 'STATUS'] };
+let _ENQ_COLS = null;
+function enqCols(){
+  if (_ENQ_COLS) return _ENQ_COLS;
+  const head = (STATE.enquiryHeader || []).map(h => up(str(h)).replace(/\s+/g, ' ').trim());
+  const out = Object.assign({}, ENQ_FALLBACK);
+  if (head.length) {
+    Object.keys(ENQ_HEADERS).forEach(key => {
+      const avoid = ENQ_AVOID[key] || [];
+      let at = -1;
+      for (const want of ENQ_HEADERS[key]) {
+        at = head.findIndex(h => h === want && !avoid.some(a => h.includes(a)));
+        if (at >= 0) break;
+      }
+      if (at < 0) {
+        for (const want of ENQ_HEADERS[key]) {
+          at = head.findIndex(h => h.includes(want) && !avoid.some(a => h.includes(a)));
+          if (at >= 0) break;
+        }
+      }
+      if (at >= 0) out[key] = at;
+    });
+  }
+  _ENQ_COLS = out;
+  return out;
+}
+
 // ═══════════════ WhatsApp follow-up ═══════════════
 // The dashboard already knows who to call — whose bike has arrived, whose delivery is overdue,
 // which enquiries nobody has followed up. What it didn't do was make that call easy. These
@@ -8638,6 +8696,7 @@ function classifyChannel(type){
 // "how are we tracking this month" view, so it deliberately ignores the month filter dropdown
 // above (which is for browsing other tabs' historical data).
 function computeFunnelTargets(){
+  const EC = enqCols();
   const now = new Date();
   // Follow the top month filter. The enquiry sheet only holds one month's data at a time, so the
   // funnel must count enquiries from the SAME month the user has selected — otherwise a mismatch
@@ -8656,11 +8715,11 @@ function computeFunnelTargets(){
 
   const counts = { walkin: {enq:0,booked:0}, tele: {enq:0,booked:0}, service: {enq:0,booked:0}, field: {enq:0,booked:0}, web: {enq:0,booked:0} };
   STATE.enquiry.forEach(r => {
-    const d = r[14];
+    const d = r[EC.created];
     if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) return;
-    const ch = classifyChannel(r[11]);
+    const ch = classifyChannel(r[EC.type]);
     counts[ch].enq++;
-    if (up(r[9]) === 'BOOKED') counts[ch].booked++;
+    if (up(r[EC.status]) === 'BOOKED') counts[ch].booked++;
   });
 
   const rows = FUNNEL_CHANNELS.map(c => {
@@ -8713,6 +8772,7 @@ function renderFunnelTargets(){
 // Respects the month filter dropdown (unlike the target section above, which is always the
 // real current month) so it can also be used to review past months.
 function renderPerformanceHeatmap(){
+  const EC = enqCols();
   const el = document.getElementById('perfHeatmap');
   if (!el) return;
   const execs = STATE.execList;
@@ -8721,13 +8781,13 @@ function renderPerformanceHeatmap(){
   const grid = {};
   execs.forEach(e => { grid[e] = { walkin:0, tele:0, service:0, field:0, web:0 }; });
   STATE.enquiry.forEach(r => {
-    if (!dateInFilter(r[14])) return;
-    if (up(r[9]) !== 'BOOKED') return;
+    if (!dateInFilter(r[EC.created])) return;
+    if (up(r[EC.status]) !== 'BOOKED') return;
     // Alias-aware match: the owner may be written as "#ASLAM", "SANJEET", "POOJA NEGI" etc.
-    const owner = str(r[13]);
+    const owner = str(r[EC.owner]);
     const match = execs.find(e => execMatches(owner, e));
     if (!match) return;
-    grid[match][classifyChannel(r[11])]++;
+    grid[match][classifyChannel(r[EC.type])]++;
   });
 
   const max = Math.max(1, ...execs.flatMap(e => Object.values(grid[e])));
@@ -8752,17 +8812,18 @@ function renderPerformanceHeatmap(){
 /* ---------------- Smart Suggestions (data-driven, no live AI call — see the note in the HTML
    above for why) ---------------- */
 function computeSmartSuggestions(){
+  const EC = enqCols();
   const items = [];
 
   // 1. Weakest vs strongest converting enquiry channel — only compare channels with enough
   // volume (5+) to mean anything, and only flag a real gap (10+ points), not noise.
   const chGroups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, service:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
   for (const r of STATE.enquiry) {
-    if (!dateInFilter(r[14])) continue;
-    if (!ownerInFilter(r[13])) continue;
-    const ch = classifyChannel(r[11]);
+    if (!dateInFilter(r[EC.created])) continue;
+    if (!ownerInFilter(r[EC.owner])) continue;
+    const ch = classifyChannel(r[EC.type]);
     chGroups[ch].total++;
-    if (up(r[9]) === 'BOOKED') chGroups[ch].booked++;
+    if (up(r[EC.status]) === 'BOOKED') chGroups[ch].booked++;
   }
   const chStats = FUNNEL_CHANNELS.map(c => {
     const g = chGroups[c.key];
@@ -8797,7 +8858,7 @@ function computeSmartSuggestions(){
   STATE.stock.forEach(r => {
     if (up(r[17]) !== 'OPEN') return;
     if (up(r[7]) !== 'KN') return;
-    const fam = modelFamilyKey(r[11] || r[9]);
+    const fam = modelFamilyKey(r[EC.type] || r[EC.status]);
     stockByFamily[fam] = (stockByFamily[fam] || 0) + 1;
   });
   const pendingByFamily = {};
@@ -8821,13 +8882,13 @@ function computeSmartSuggestions(){
   // 5. Most common reason enquiries are being lost, across the whole team (RE Portal data).
   const ownerByEnq = {};
   STATE.enquiry.forEach(r => {
-    const enq = str(r[0]);
-    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[13]);
+    const enq = str(r[EC.enqNo]);
+    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[EC.owner]);
   });
   let totalMatched = 0, totalDropped = 0;
   const reasonCounts = {};
   STATE.enqStatement.forEach(r => {
-    const enq = str(r[0]);
+    const enq = str(r[EC.enqNo]);
     if (!ownerByEnq[enq]) return;
     totalMatched++;
     const status = up(str(r[25]));
@@ -8860,6 +8921,7 @@ function renderSmartSuggestions(){
 }
 
 function renderAnalytics(){
+  const EC = enqCols();
   renderFunnelTargets();
 
   const trend = computeMonthlyTrend();
@@ -8872,11 +8934,11 @@ function renderAnalytics(){
   // vocabulary across the tab
   const groups = { walkin:{total:0,booked:0}, tele:{total:0,booked:0}, service:{total:0,booked:0}, field:{total:0,booked:0}, web:{total:0,booked:0} };
   for (const r of STATE.enquiry) {
-    if (!dateInFilter(r[14])) continue;
-    if (!ownerInFilter(r[13])) continue;
-    const ch = classifyChannel(r[11]);
+    if (!dateInFilter(r[EC.created])) continue;
+    if (!ownerInFilter(r[EC.owner])) continue;
+    const ch = classifyChannel(r[EC.type]);
     groups[ch].total++;
-    if (up(r[9]) === 'BOOKED') groups[ch].booked++;
+    if (up(r[EC.status]) === 'BOOKED') groups[ch].booked++;
   }
   const funnelItems = FUNNEL_CHANNELS.map((c,i) => {
     const g = groups[c.key];
@@ -8894,19 +8956,20 @@ function renderAnalytics(){
 // Coverage is partial by nature (only enquiries present in both sheets match) — the note under
 // the table always states exactly how many matched.
 function renderEnquiryQuality(){
+  const EC = enqCols();
   const noteEl = document.getElementById('enquiryQualityNote');
   if (!noteEl) return;
 
   const ownerByEnq = {};
   STATE.enquiry.forEach(r => {
-    const enq = str(r[0]);
-    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[13]);
+    const enq = str(r[EC.enqNo]);
+    if (enq && !ownerByEnq[enq]) ownerByEnq[enq] = str(r[EC.owner]);
   });
 
   const byExec = {};
   let matched = 0;
   STATE.enqStatement.forEach(r => {
-    const enq = str(r[0]);
+    const enq = str(r[EC.enqNo]);
     const ownerRaw = ownerByEnq[enq];
     if (!ownerRaw) return;
     const execName = STATE.execList.find(name => execMatches(ownerRaw, name)) || mapOwnerToExec(ownerRaw);
