@@ -1126,6 +1126,25 @@
   /* walk-in log cards */
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
+  /* Status block: one fact per row, colour carrying whether it's fine or not */
+  .st-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1px;
+    background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .st-row { background:var(--surface-1); padding:11px 14px; }
+  .st-k { font-size:11.5px; color:var(--text-secondary); letter-spacing:.6px; text-transform:uppercase; }
+  .st-v { font-size:15px; font-weight:700; margin-top:3px; }
+  .st-v.good { color:var(--good); } .st-v.bad { color:var(--critical); } .st-v.muted { color:var(--text-muted); }
+  .st-h { font-size:11.5px; color:var(--text-secondary); margin-top:3px; line-height:1.45; }
+  /* Control panel rows: label + help on the left, the input on the right */
+  .set-row { display:grid; grid-template-columns:1fr 280px; gap:16px; align-items:center;
+    padding:11px 0; border-bottom:1px solid var(--border); }
+  .set-row:last-child { border-bottom:none; }
+  .set-key { font-weight:600; font-size:14px; }
+  .set-help { font-size:12.5px; color:var(--text-secondary); margin-top:2px; line-height:1.5; }
+  .set-input input, .set-input select { width:100%; }
+  @media (max-width:700px) {
+    .set-row { grid-template-columns:1fr; gap:7px; }
+    .set-input { width:100%; }
+  }
   /* ═══════════ Price List & Quotation ═══════════ */
   /* Customer 360 search results — one card per person, one line per touchpoint. Without these
      the label and its value ran together ("Enquiry01-Sep-2026"), because the markup relies on
@@ -1576,6 +1595,7 @@
   <button data-tab="pricelist">💰 Price List</button>
   <button data-tab="customers">👥 Customers</button>
   <button data-tab="more">🗂️ More</button>
+  <button data-tab="control">⚙️ Control</button>
 </nav>
 
 <main>
@@ -1623,6 +1643,13 @@
         <div class="panel-body" id="mydayRank"></div>
       </div>
     </div>
+
+    <!-- ══ Attach rates for whoever is logged in. These used to live only on the old Dashboard tab
+         and on Overview — neither of which a sales login can open — so the one group of numbers a
+         sales person is measured on was invisible to the person being measured. ══ -->
+    <h2 class="section-title" style="margin-top:26px;">🛡️ My Attach Rates — This Month</h2>
+    <div class="kpi-grid" id="myAttach"></div>
+    <p class="empty-note" id="myAttachNote" style="text-align:left;padding:8px 0 0;"></p>
 
     <!-- Sabka retail vs apna retail — ek hi jagah, taaki competition bana rahe, bina poora dense
          Dashboard tab khole. No customer data here at all (names + retail/target numbers only). -->
@@ -2042,6 +2069,25 @@
   <!-- ══ Login Activity (Admin only) — who signed in, when, and from which device. The device id
        is the dependable signal here; the city is approximate and mobile networks often report
        their hub city rather than the real one, so it is shown as a hint, not proof. ══ -->
+  <!-- ══ Control panel — Admin only. Every value here lives in the SETTINGS sheet and is read by
+       the Apps Script, so thresholds, email recipients and the details printed on quotations can
+       be changed without editing code or redeploying anything. ══ -->
+  <section class="tabpanel" id="tab-settings">
+    <h2 class="section-title">⚙️ Control Panel</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 14px;">
+      These settings are read by the daily emails, the reports and the printed quotations.
+      Change what you need and press Save — nothing has to be re-deployed.
+      Leave a box empty to go back to its default.
+    </p>
+    <div id="statusBlock"></div>
+    <div id="settingsForm"></div>
+    <div class="toolbar" style="margin-top:16px;">
+      <button id="settingsSave" class="primary">💾 Save settings</button>
+      <button id="settingsReload">↻ Reload</button>
+      <span id="settingsMsg" class="empty-note" style="padding:0 0 0 10px;"></span>
+    </div>
+  </section>
+
   <section class="tabpanel" id="tab-loginlog">
     <h2 class="section-title">🔐 Login Activity</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;">
@@ -3234,7 +3280,10 @@ function applyRoleRestrictions(){
   // the funnel, sales, stock and the price list. Company-wide business figures and the odds and
   // ends behind "More" stay with Admin (and CRT, who looks after riders).
   const SALES_TABS = ['myday', 'analytics', 'sales', 'stock', 'pricelist', 'customers'];
+  // The control tab holds settings and the sign-in log — Admin only, for everyone else it and
+  // its panels are removed outright rather than merely hidden.
   function tabHidden(tab){
+    if (tab === 'control') return !isAdmin;
     if (isAdmin) return false;
     if (CURRENT_USER.role === 'CRT') return false;      // CRT sees everything except Admin-only bits
     return SALES_TABS.indexOf(tab) < 0;
@@ -3242,8 +3291,11 @@ function applyRoleRestrictions(){
   document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
     btn.style.display = tabHidden(btn.dataset.tab) ? 'none' : '';
   });
-  // "More" holds the sign-in log, which is Admin-only — hide the panel itself for CRT.
-  if (!isAdmin) { const lp = document.getElementById('tab-loginlog'); if (lp) lp.remove(); }
+  // "More" holds the sign-in log and the control panel, both Admin-only — remove those panels
+  // outright for anyone else rather than relying on the tab being hidden.
+  if (!isAdmin) {
+    ['tab-loginlog', 'tab-settings'].forEach(id => { const p = document.getElementById(id); if (p) p.remove(); });
+  }
   // Same rule for the Dashboard / My Day quick-jump shortcut buttons — hide any that jump to a
   // tab this user can't open directly any more, so a sales login doesn't get a "Delivery" button
   // that leads to a tab with no visible nav entry to get back from (they still have "More Data").
@@ -3967,6 +4019,7 @@ function renderAll(){
   renderAnalytics();
   renderWalkinLog();
   renderPaymentMode();
+  renderMyAttach();
   renderCallList();
   renderPriceList();
   renderTargetVsActual();
@@ -6909,6 +6962,203 @@ function openFormPdf(key){
 }
 
 
+
+
+// ═══════════════ Control panel — status ═══════════════
+// Answers the one question the settings themselves can't: is any of this actually running?
+// A trigger that quietly stops firing is otherwise invisible until someone notices an email
+// that never arrived.
+function renderStatus(st){
+  const el = document.getElementById('statusBlock');
+  if (!el) return;
+  if (!st) { el.innerHTML = ''; return; }
+
+  const ago = (stamp) => {
+    const d = asDate(stamp);
+    if (!d) return null;
+    const hrs = (Date.now() - d.getTime()) / 3600000;
+    return { d, hrs };
+  };
+  const line = (label, value, tone, hint) => `
+    <div class="st-row">
+      <div class="st-k">${esc(label)}</div>
+      <div class="st-v ${tone || ''}">${value}</div>
+      ${hint ? `<div class="st-h">${esc(hint)}</div>` : ''}
+    </div>`;
+
+  // triggers
+  const want = [
+    { fn: 'sendDailySummary',   label: 'Night summary' },
+    { fn: 'sendMorningCallList',label: 'Morning call list' },
+    { fn: 'backupSheet',        label: 'Weekly backup' },
+  ];
+  const have = st.triggers || [];
+  const trigRows = want.map(w => have.indexOf(w.fn) >= 0
+    ? line(w.label, '✅ scheduled', 'good')
+    : line(w.label, '⚠️ no trigger', 'bad', `Add a time-driven trigger for ${w.fn} in Apps Script`)
+  ).join('');
+
+  // last runs — anything older than about a day and a half has probably stopped
+  const runRow = (label, stamp, err) => {
+    if (err) return line(label, '❌ failed', 'bad', err.slice(0, 120));
+    if (!stamp) return line(label, '— not run yet', 'muted');
+    const a = ago(stamp);
+    if (!a) return line(label, esc(stamp), 'muted');
+    const stale = a.hrs > 36;
+    return line(label, `${esc(fmtDate(a.d))} · ${String(a.d.getHours()).padStart(2,'0')}:${String(a.d.getMinutes()).padStart(2,'0')}`,
+      stale ? 'bad' : 'good', stale ? `${Math.round(a.hrs)} hours ago — check the trigger` : null);
+  };
+
+  // sheets the script expects to find
+  const missing = Object.keys(st.sheets || {}).filter(k => st.sheets[k] < 0);
+  const empty = Object.keys(st.sheets || {}).filter(k => st.sheets[k] === 0);
+
+  el.innerHTML = `
+  <div class="card" style="margin-bottom:14px;">
+    <h3>🚦 Status</h3>
+    <div class="st-grid">
+      ${line('Script version', esc(st.version), 'good')}
+      ${line('Server time', esc(st.now), 'muted')}
+      ${trigRows}
+      ${runRow('Last summary sent', st.lastTeamSend || st.lastSummary, st.lastSummaryError)}
+      ${runRow('Last call list sent', st.lastCallList, st.lastCallListError)}
+      ${runRow('Last backup', st.lastBackup, st.lastBackupError)}
+      ${line('Sheets found', `${Object.keys(st.sheets || {}).length - missing.length} of ${Object.keys(st.sheets || {}).length}`,
+        missing.length ? 'bad' : 'good', missing.length ? 'Missing: ' + missing.join(', ') : (empty.length ? 'Empty: ' + empty.join(', ') : null))}
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <h3>👥 Who can sign in</h3>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">
+      Add, remove or change these in the <b>USERS</b> tab of the sheet — name, password, role, exec key, email.
+      Passwords are never shown here.
+    </p>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="data">
+        <thead><tr><th>Name</th><th>Role</th><th>Exec key</th><th>Email</th><th>Password</th></tr></thead>
+        <tbody>${(st.users || []).map(u => `
+          <tr>
+            <td><b>${esc(u.name)}</b></td>
+            <td>${esc(u.role)}</td>
+            <td>${esc(u.execKey) || '<span style="color:var(--text-muted)">—</span>'}</td>
+            <td>${u.email ? esc(u.email) : '<span style="color:var(--warning)">not set</span>'}</td>
+            <td>${u.hasPassword ? '<span style="color:var(--good)">set</span>' : '<span style="color:var(--critical)">missing</span>'}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function loadStatus(){
+  if (!CURRENT_USER || CURRENT_USER.role !== 'Admin') return;
+  apiCall({ action:'status', token: AUTH.token }, (res) => {
+    renderStatus(res && res.ok ? res : null);
+  }, 25000);
+}
+
+// ═══════════════ Control panel ═══════════════
+// The settings themselves come from the server rather than being listed here, so adding one to
+// the Apps Script is enough — this page renders whatever it is given.
+let SETTINGS_ROWS = [];
+
+// Grouped only for readability; the grouping is derived from the key, so a new setting lands in
+// the right place on its own.
+const SETTINGS_GROUPS = [
+  { key: 'email',    title: '📧 Emails',            help: 'Who gets what, and whether each report goes out at all.' },
+  { key: 'owner',    title: '📧 Emails',            help: '' },
+  { key: 'followUp', title: '⏱️ When to flag something', help: 'How long before the dashboard and the emails call something overdue.' },
+  { key: 'billing',  title: '⏱️ When to flag something', help: '' },
+  { key: 'stock',    title: '⏱️ When to flag something', help: '' },
+  { key: 'login',    title: '🔐 Security',          help: '' },
+  { key: 'backup',   title: '💾 Backup',            help: 'The weekly copy of the whole spreadsheet.' },
+  { key: 'showroom', title: '🏍️ Printed on quotations', help: 'Appears on the price list and every customer quotation.' },
+  { key: 'bank',     title: '🏦 Bank details',      help: 'Printed at the bottom of each quotation.' },
+];
+const settingsMsg = (text, good) => {
+  const el = document.getElementById('settingsMsg');
+  if (el) { el.textContent = text; el.style.color = good ? 'var(--good)' : 'var(--critical)'; }
+};
+
+function renderSettings(){
+  const wrap = document.getElementById('settingsForm');
+  if (!wrap) return;
+  if (!SETTINGS_ROWS.length) { wrap.innerHTML = '<div class="empty-note">Loading…</div>'; return; }
+
+  // yes/no settings get a dropdown rather than a free-text box — typing "Y" or "true" into a
+  // box that expects "yes" is an easy way to silently switch a report off.
+  const isYesNo = (v, def) => /^(yes|no)$/i.test(str(def));
+  const order = [];
+  SETTINGS_GROUPS.forEach(g => { if (!order.some(o => o.title === g.title)) order.push({ title: g.title, help: g.help, keys: [] }); });
+  SETTINGS_ROWS.forEach(row => {
+    const prefix = String(row.key).split('.')[0];
+    const g = SETTINGS_GROUPS.find(x => x.key === prefix);
+    const bucket = order.find(o => o.title === (g ? g.title : '⚙️ Other')) ||
+                   (order.push({ title: '⚙️ Other', help: '', keys: [] }), order[order.length - 1]);
+    bucket.keys.push(row);
+  });
+
+  wrap.innerHTML = order.filter(g => g.keys.length).map(g => `
+    <div class="card" style="margin-bottom:14px;">
+      <h3>${esc(g.title)}</h3>
+      ${g.help ? `<p class="empty-note" style="text-align:left;padding:0 0 10px;">${esc(g.help)}</p>` : ''}
+      ${g.keys.map(row => `
+        <div class="set-row">
+          <div class="set-label">
+            <div class="set-key">${esc(row.key.split('.').slice(1).join('.') || row.key)}</div>
+            <div class="set-help">${esc(row.help)}</div>
+          </div>
+          <div class="set-input">
+            ${isYesNo(row.value, row.def)
+              ? `<select data-set="${esc(row.key)}">
+                   <option value="yes"${/^(y|yes|true|1|on)$/i.test(str(row.value)) ? ' selected' : ''}>Yes</option>
+                   <option value="no"${/^(y|yes|true|1|on)$/i.test(str(row.value)) ? '' : ' selected'}>No</option>
+                 </select>`
+              : `<input type="text" data-set="${esc(row.key)}" value="${esc(row.value)}" placeholder="${esc(row.def)}">`}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function loadSettings(){
+  if (!CURRENT_USER || CURRENT_USER.role !== 'Admin') return;
+  settingsMsg('', true);
+  const wrap = document.getElementById('settingsForm');
+  if (wrap) wrap.innerHTML = '<div class="empty-note">Loading…</div>';
+  apiCall({ action:'settings', token: AUTH.token }, (res) => {
+    if (!res || !res.ok) {
+      if (wrap) wrap.innerHTML = `<div class="empty-note">Could not load settings${res && res.error ? ' — ' + esc(res.error) : ''}.</div>`;
+      return;
+    }
+    SETTINGS_ROWS = res.settings || [];
+    renderSettings();
+  }, 25000);
+}
+
+function saveSettings(){
+  const btn = document.getElementById('settingsSave');
+  const values = {};
+  document.querySelectorAll('#settingsForm [data-set]').forEach(el => { values[el.dataset.set] = el.value; });
+  if (!Object.keys(values).length) return;
+  if (btn) btn.disabled = true;
+  settingsMsg('Saving…', true);
+  apiCall({ action:'savesettings', token: AUTH.token, values: JSON.stringify(values) }, (res) => {
+    if (btn) btn.disabled = false;
+    if (res && res.ok) {
+      settingsMsg(`✅ Saved ${res.saved} setting${res.saved === 1 ? '' : 's'}. The next refresh and the next email will use them.`, true);
+      loadSettings();
+    } else {
+      settingsMsg('❌ ' + ((res && (res.message || res.error)) || 'Could not save'), false);
+    }
+  }, 25000);
+}
+
+(function wireSettings(){
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on('settingsSave', 'click', saveSettings);
+  on('settingsReload', 'click', () => { loadSettings(); loadStatus(); });
+})();
+
 // ═══════════════ Login Activity (Admin) ═══════════════
 // Columns from the API: Timestamp, Name, Role, Device ID, City, Region, Network, Device, Known
 let LOGIN_LOG_ROWS = [];
@@ -7171,6 +7421,66 @@ function enqCols(){
   }
   _ENQ_COLS = out;
   return out;
+}
+
+
+// ═══════════════ My attach rates ═══════════════
+// Every figure is shown against its target where one is set, and against the team average
+// otherwise — a bare "62%" tells a sales person nothing without knowing what good looks like.
+function renderMyAttach(){
+  const el = document.getElementById('myAttach');
+  if (!el) return;
+  const note = document.getElementById('myAttachNote');
+  const me = (CURRENT_USER && CURRENT_USER.execKey) ||
+             (STATE.filterExec && STATE.filterExec !== 'ALL' ? STATE.filterExec : '');
+  if (!me) {
+    el.innerHTML = '<div class="empty-note" style="grid-column:1/-1">Pick an executive from the filter at the top to see their attach rates.</div>';
+    if (note) note.textContent = '';
+    return;
+  }
+
+  const mine = computeDeliveryAgg(me);
+  const team = computeDeliveryAgg(null);
+  if (!mine.retail) {
+    el.innerHTML = '<div class="empty-note" style="grid-column:1/-1">No bikes billed yet this month — attach rates start with the first delivery.</div>';
+    if (note) note.textContent = '';
+    return;
+  }
+
+  const pct = (n, d) => d ? Math.round(n / d * 100) : 0;
+  const tEw = num(monthlyTargetVal(3)), tRsa = num(monthlyTargetVal(4));
+  const tGma = num(monthlyTargetVal(5)), tGear = num(monthlyTargetVal(6));
+
+  const myEw   = pct(mine.ew, mine.retail),   teamEw   = pct(team.ew, team.retail);
+  const myRsa  = pct(mine.rsa, mine.retail),  teamRsa  = pct(team.rsa, team.retail);
+  const myGear = pct(mine.gear, mine.retail), teamGear = pct(team.gear, team.retail);
+  const myGma  = Math.round(mine.gma / mine.retail);
+  const teamGma = team.retail ? Math.round(team.gma / team.retail) : 0;
+
+  // Flagged when it misses its target — or, with no target set, when it sits clearly below
+  // what the rest of the team is managing.
+  const flag = (v, target, teamV) => target ? v < target : (teamV && v < teamV - 10);
+
+  el.innerHTML = [
+    kpiCard('Extended Warranty', myEw + '%',
+      tEw ? `target ${fmtInt(tEw)}%` : `team ${fmtInt(teamEw)}%`, undefined,
+      flag(myEw, tEw, teamEw) ? 'Needs attention' : null),
+    kpiCard('RSA', myRsa + '%',
+      tRsa ? `target ${fmtInt(tRsa)}%` : `team ${fmtInt(teamRsa)}%`, undefined,
+      flag(myRsa, tRsa, teamRsa) ? 'Needs attention' : null),
+    kpiCard('Accessories per bike', fmtMoney(myGma),
+      tGma ? `target ${fmtMoney(tGma)}` : `team ${fmtMoney(teamGma)}`, undefined,
+      flag(myGma, tGma, teamGma) ? 'Needs attention' : null),
+    kpiCard('Gear per bike', myGear + '%',
+      tGear ? `target ${fmtInt(tGear)}%` : `team ${fmtInt(teamGear)}%`, undefined,
+      flag(myGear, tGear, teamGear) ? 'Needs attention' : null),
+  ].join('');
+
+  if (note) {
+    note.innerHTML = `On ${fmtInt(mine.retail)} bike${mine.retail === 1 ? '' : 's'} billed this month — ` +
+      `${fmtInt(mine.ew)} with EW, ${fmtInt(mine.rsa)} with RSA, ${fmtInt(mine.gear)} with gear, ` +
+      `${fmtMoney(mine.gma)} accessories in total.`;
+  }
 }
 
 // ═══════════════ WhatsApp follow-up ═══════════════
@@ -9162,7 +9472,8 @@ const TAB_GROUPS = {
   // group code and the One Ride code are all things a sales person hands to a customer at
   // delivery. Sitting behind an Admin-only tab, they were unreachable by the people who use them.
   customers: ['walkin', 'walkinlog', 'qrcodes', 'riders'],
-  more:      ['specs', 'loginlog', 'moredata'],
+  more:      ['specs', 'moredata'],
+  control:   ['settings', 'loginlog'],   // Admin only — see applyRoleRestrictions
 };
 // Some logins are limited to part of a group. The walk-in desk, for instance, gets the check
 // tool and today's log but not the rest of the Customers tab.
@@ -9185,6 +9496,7 @@ function switchToTab(tabName, scrollToId){
   tabName = tabHolding(tabName);                 // accepts an old panel name too
   const group = panelsForTab(tabName);
   if (group.indexOf('loginlog') >= 0) setTimeout(loadLoginLog, 0);
+  if (group.indexOf('settings') >= 0) { setTimeout(loadSettings, 0); setTimeout(loadStatus, 0); }
   const btn = document.querySelector(`#tabs button[data-tab="${tabName}"]`);
   if (btn) document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
   document.querySelectorAll('.tabpanel').forEach(p =>
