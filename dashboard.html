@@ -69,6 +69,10 @@
     --on-gold: #17130A;
     --font-head: 'Barlow Condensed', system-ui, sans-serif;
     --font-ui: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* The light theme's own solid field colours — the same native-dropdown problem in reverse */
+    --field-bg: #FFFFFF;
+    --field-fg: #1A1510;
+    --picker-filter: none;
   }
   /* ═══════════ Midnight Aurora ═══════════
      Deep blue-black page with a slow-moving colour wash behind it, and panels that read as
@@ -112,6 +116,10 @@
     --glass-blur: blur(20px) saturate(140%);
     --glass-edge: inset 0 1px 0 rgba(255,255,255,0.20);
     --glass-drop: 0 16px 38px rgba(0,0,0,0.42);
+    /* solid, because native dropdowns and date pickers are drawn by the OS, not by us */
+    --field-bg: #1B2130;
+    --field-fg: #EEF1F6;
+    --picker-filter: invert(1) brightness(1.6);
   }
   * { box-sizing: border-box; }
   body {
@@ -269,15 +277,29 @@
   }
   .controls-backdrop { display: none; }
   .controls-close { display: none; }
-  select, input[type="text"], input[type="password"] {
-    background: var(--surface-2); color: var(--text-primary);
+  /* Form fields must use a SOLID background, not the translucent surface the cards use. The
+     open part of a <select> is drawn by the operating system over its own white panel, so a
+     translucent white gave white text on white — the list was there but unreadable. */
+  select, input[type="text"], input[type="password"], input[type="search"],
+  input[type="date"], input[type="number"], input[type="tel"], input[type="email"], textarea {
+    background: var(--field-bg); color: var(--field-fg);
     border: 1px solid var(--border); border-radius: 9px;
     padding: 7px 10px; font-size: 13px; font-family: inherit;
   }
-  select:focus, input[type="text"]:focus, input[type="password"]:focus {
+  /* The dropdown list itself. Both are needed: some browsers style the popup from `option`,
+     others from the `select` while it is open. */
+  select option, select optgroup {
+    background: var(--field-bg); color: var(--field-fg);
+  }
+  select:focus, input[type="text"]:focus, input[type="password"]:focus,
+  input[type="search"]:focus, input[type="date"]:focus, input[type="number"]:focus,
+  input[type="tel"]:focus, input[type="email"]:focus, textarea:focus {
     outline: none; border-color: var(--gold);
     box-shadow: 0 0 0 3px var(--gold-dim);
   }
+  /* Placeholder text and the date picker's icon also inherit white otherwise */
+  ::placeholder { color: var(--text-muted); opacity: 1; }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: var(--picker-filter); cursor: pointer; }
   button {
     background: var(--surface-2); color: var(--text-primary);
     border: 1px solid var(--border); border-radius: 9px;
@@ -291,14 +313,20 @@
   }
   button:hover { border-color: var(--gold-dim); }
   button.primary:hover { filter: brightness(1.06); }
-  header.top select, header.top input[type="text"], header.top input[type="date"], header.top button {
+  /* Buttons may keep the translucent header look — they are drawn by us. Selects and date
+     inputs may not: the browser draws their open panel itself, over its own solid background,
+     so a translucent fill there left white text on white. */
+  header.top button {
     background: rgba(255,255,255,0.06); color: #EDE9E1; border-color: rgba(255,255,255,0.14);
     backdrop-filter: blur(4px);
+  }
+  header.top select, header.top input[type="text"], header.top input[type="date"] {
+    background: var(--field-bg); color: var(--field-fg); border-color: rgba(255,255,255,0.14);
   }
   header.top button.primary {
     background: linear-gradient(180deg, var(--gold-light), var(--gold)); border-color: transparent; color: var(--on-gold);
   }
-  header.top select option { color: #111; }
+  header.top select option { background: var(--field-bg); color: var(--field-fg); }
 
   .data-health-banner {
     margin-top: 10px; padding: 12px 16px; border-radius: 11px; font-size: 13.5px; font-weight: 600;
@@ -996,12 +1024,16 @@
        the inline header bar (always dark), wrong here since the drawer follows the
        theme and goes light in light mode. */
     header.top .controls button, header.top .controls select, header.top .controls input[type="text"], header.top .controls input[type="date"] {
-      background: var(--surface-2); color: var(--text-primary); border-color: var(--border); backdrop-filter: none;
+      background: var(--field-bg); color: var(--field-fg); border-color: var(--border); backdrop-filter: none;
     }
     header.top .controls button.primary {
       background: linear-gradient(180deg, var(--gold-light), var(--gold)); color: var(--on-gold); border-color: transparent;
     }
-    header.top select.controls option, .controls select option { color: #111; }
+    /* Was a hard-coded #111, which is invisible on the dark dropdown panel the browser draws
+       in dark mode — the list was there but unreadable. Follows the theme's field colours now. */
+    header.top select.controls option, .controls select option {
+      background: var(--field-bg); color: var(--field-fg);
+    }
     .controls-backdrop.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 240; }
     /* Needs .controls-prefixed specificity to beat ".controls button { width: 100% }"
        — without it the ✕ stretched into a full-width bar across the drawer top. */
