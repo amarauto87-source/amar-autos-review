@@ -1158,6 +1158,23 @@
   /* walk-in log cards */
   .wcl-item { display:flex; gap:14px; align-items:center; background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
   #tab-walkinlog { overflow-wrap:anywhere; }
+  /* Security review. Colour carries severity, and every item shows the innocent explanation
+     too — this screen can end up pointed at a real person. */
+  .sec-item { border-radius: 11px; padding: 13px 15px; margin-bottom: 10px;
+    border: 1px solid var(--border); background: var(--surface-1); }
+  .sec-high { border-left: 4px solid var(--critical); }
+  .sec-medium { border-left: 4px solid var(--warning); }
+  .sec-low { border-left: 4px solid var(--text-muted); }
+  .sec-head { font-size: 14.5px; display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+  .sec-tag { font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase;
+    background: var(--surface-2); color: var(--text-secondary); padding: 3px 9px; border-radius: 20px; }
+  .sec-detail { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.55; }
+  .sec-ok { background: color-mix(in srgb, var(--good) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--good) 38%, transparent);
+    border-radius: 11px; padding: 14px 16px; font-size: 13.5px; }
+  .log-map { color: var(--s1); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .log-map:hover { text-decoration: underline; }
+  .log-acc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   /* Used when a panel can't load — carries the reason, not just an empty space */
   .warn-box { background:color-mix(in srgb, var(--critical) 14%, transparent);
     border:1px solid color-mix(in srgb, var(--critical) 42%, transparent);
@@ -2174,7 +2191,12 @@
   </section>
 
   <section class="tabpanel" id="tab-loginlog">
-    <h2 class="section-title">🔐 Login Activity</h2>
+    <!-- ══ A short review of the sign-in history before the raw list, because scanning hundreds
+         of rows by eye is how a real signal gets missed. Only patterns that mean something. ══ -->
+    <h2 class="section-title">🛡️ Security Review — Last 60 Days</h2>
+    <div id="securityReview"></div>
+
+    <h2 class="section-title" style="margin-top:26px;">🔐 Login Activity</h2>
     <p class="empty-note" style="text-align:left;padding:0 0 12px;">
       Every sign-in is listed here, newest first. <b>New device</b> means that person has never
       signed in from that phone or computer before — that is the signal worth checking.
@@ -2543,6 +2565,42 @@ let NET_INFO = { city:'', region:'', isp:'' };
     .then(d => { clearTimeout(t); if (d && d.success !== false) done(d); })
     .catch(() => { clearTimeout(t); });
 })();
+
+// ═══════════════ Exact location at sign-in ═══════════════
+// The IP lookup above gives a city, and on mobile data that city is often the operator's gateway
+// rather than where the person actually is — fine as a rough hint, useless as a record of where
+// someone signed in from. GPS gives the real answer, but only with permission.
+//
+// Two rules this follows. It never blocks the login: if the person is slow to decide, or the fix
+// takes too long, the sign-in goes ahead with whatever is known. And it never pretends — a
+// declined or missing fix is recorded as "city from internet only", not dressed up as a location.
+let GEO = { lat: '', lng: '', acc: '', denied: false };
+// The login screen runs before any authenticated call, so it can't read the setting from the
+// server yet. The last known answer is kept in this browser; a fresh one arrives with the data.
+let LOCATION_ON = (() => { try { return localStorage.getItem('amarAutosAskLocation') === '1'; } catch(e) { return false; } })();
+function askLocation(timeoutMs){
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(GEO);
+    let settled = false;
+    const finish = () => { if (!settled) { settled = true; resolve(GEO); } };
+    const timer = setTimeout(finish, timeoutMs || 8000);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        clearTimeout(timer);
+        GEO = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6),
+                acc: Math.round(pos.coords.accuracy), denied: false };
+        finish();
+      },
+      (err) => {
+        clearTimeout(timer);
+        GEO.denied = (err && err.code === 1);   // 1 = the person said no
+        finish();
+      },
+      { enableHighAccuracy: true, timeout: timeoutMs || 8000, maximumAge: 60000 }
+    );
+  });
+}
+
 // A short, readable description of the device — enough to tell a phone from the showroom desktop.
 function deviceLabel(){
   const ua = navigator.userAgent || '';
@@ -3253,7 +3311,7 @@ function trySavedSession(){
 }
 trySavedSession();
 
-function attemptLogin(){
+async function attemptLogin(){
   const name = document.getElementById('loginName').value;
   const pass = document.getElementById('loginPass').value;
   const errEl = document.getElementById('loginError');
@@ -3261,9 +3319,19 @@ function attemptLogin(){
   if (!name || !pass) { errEl.textContent = 'Please enter your password.'; return; }
   errEl.textContent = 'Checking…';
   if (btn) btn.disabled = true;
+
+  // Ask for the exact location only where the showroom has switched it on, and never let it hold
+  // the sign-in up: eight seconds at most, then the login proceeds with whatever is known.
+  if (LOCATION_ON) {
+    errEl.textContent = 'Checking location…';
+    await askLocation(8000);
+    errEl.textContent = 'Checking…';
+  }
+
   apiCall({ action:'login', name, pass,
             device: deviceId(), dev: deviceLabel(),
-            city: NET_INFO.city, region: NET_INFO.region, isp: NET_INFO.isp }, (res) => {
+            city: NET_INFO.city, region: NET_INFO.region, isp: NET_INFO.isp,
+            lat: GEO.lat, lng: GEO.lng, acc: GEO.acc, geoDenied: GEO.denied ? '1' : '' }, (res) => {
     if (btn) btn.disabled = false;
     if (!res || !res.ok) {
       errEl.textContent = (res && (res.message || res.error)) === 'TIMEOUT'
@@ -3639,6 +3707,10 @@ async function loadAll(silent){
     // date it choked on, so the sheet can be fixed rather than guessed at.
     DATE_WARNINGS = (res && res.dateWarnings) || {};
     STATE.settings = res.settings || STATE.settings || {};
+    if (STATE.settings.askLocation !== undefined) {
+      LOCATION_ON = !!STATE.settings.askLocation;
+      try { localStorage.setItem('amarAutosAskLocation', LOCATION_ON ? '1' : '0'); } catch(e) {}
+    }
     STATE.serverMonths = Array.isArray(res.months) ? res.months : (STATE.serverMonths || []);
     // The API sends dates as "yyyy-MM-dd HH:mm:ss" (stable across devices and locales); turn
     // them back into real Dates here so every existing date helper keeps working unchanged.
@@ -3815,8 +3887,11 @@ async function loadAll(silent){
 function buildMonthList(){
   const seen = new Set();
   const list = [];
-  function add(d){
-    if (!(d instanceof Date) || isNaN(d)) return;
+  function add(v){
+    // asDate, not `instanceof Date`: a date typed as text still has to count, otherwise that
+    // whole month quietly disappears from the filter.
+    const d = asDate(v);
+    if (!d) return;
     const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
     if (!seen.has(key)) { seen.add(key); list.push({ key, year: d.getFullYear(), month: d.getMonth()+1 }); }
   }
@@ -4517,8 +4592,8 @@ function computeBookingsTrendByExec(){
     const values = monthsSorted.map(m => {
       let count = 0;
       for (const r of STATE.booking) {
-        const d = r[2];
-        if (!(d instanceof Date) || isNaN(d)) continue;
+        const d = asDate(r[2]);
+        if (!d) continue;
         if ((d.getMonth() + 1) !== m.month || d.getFullYear() !== m.year) continue;
         if (execMatches(r[7], name)) count++;
       }
@@ -5528,8 +5603,8 @@ function computePersonalTarget(execName){
   let retailSoFar = 0;
   for (const r of STATE.delivery) {
     if (!billedOk(r[9])) continue;
-    const d = r[2];
-    if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) continue;
+    const d = asDate(r[2]);
+    if (!d || d.getFullYear() !== year || d.getMonth() !== month) continue;
     if (!execMatches(r[18], execName)) continue;
     retailSoFar++;
   }
@@ -7444,6 +7519,120 @@ function saveSettings(){
   on('settingsReload', 'click', () => { loadSettings(); loadStatus(); });
 })();
 
+
+// ═══════════════ Security review ═══════════════
+// Looks through the sign-in log for the handful of patterns that actually indicate a problem.
+// Deliberately narrow: a long list of "anomalies" trains people to ignore it, so only patterns
+// worth a second look are reported, and each says plainly what was observed.
+function securityReview(){
+  const rows = LOGIN_LOG_ROWS || [];
+  const findings = [];
+  if (!rows.length) return findings;
+
+  const R = (r) => ({
+    when: asDate(r[0]), name: up(str(r[1])), role: str(r[2]), device: str(r[3]),
+    city: str(r[4]), net: str(r[6]), dev: str(r[7]),
+    lat: Number(str(r[9])) || null, lng: Number(str(r[10])) || null,
+  });
+  const all = rows.map(R).filter(x => x.when);
+  const cutoff = Date.now() - 60 * 86400000;
+  const recent = all.filter(x => x.when.getTime() >= cutoff);
+  if (!recent.length) return findings;
+
+  // ── 1. One device, more than one person. This is the strongest signal there is: it means a
+  //       password was handed over, or someone signed in on a colleague's phone.
+  const byDevice = {};
+  recent.forEach(x => { if (!x.device) return;
+    (byDevice[x.device] = byDevice[x.device] || new Set()).add(x.name); });
+  Object.keys(byDevice).forEach(dev => {
+    const people = [...byDevice[dev]];
+    if (people.length > 1) {
+      const last = recent.filter(x => x.device === dev).slice(0, 1)[0];
+      findings.push({
+        level: 'high',
+        title: `One phone used by ${people.length} different logins`,
+        detail: `${people.join(', ')} have all signed in from the same device (${esc(last.dev || dev)}).`,
+        who: people.join(', ')
+      });
+    }
+  });
+
+  // ── 2. One person on a lot of devices. A sales person needs one phone, maybe two.
+  const byPerson = {};
+  recent.forEach(x => { if (!x.name) return;
+    (byPerson[x.name] = byPerson[x.name] || new Set()).add(x.device); });
+  Object.keys(byPerson).forEach(name => {
+    const n = byPerson[name].size;
+    if (n >= 4) findings.push({
+      level: 'medium',
+      title: `${name} has signed in from ${n} devices`,
+      detail: `Most people use one or two. ${n} in sixty days is unusual.`,
+      who: name
+    });
+  });
+
+  // ── 3. Signing in at hours when the showroom is shut.
+  const odd = recent.filter(x => { const h = x.when.getHours(); return h < 7 || h >= 23; });
+  if (odd.length) {
+    const names = [...new Set(odd.map(x => x.name))];
+    findings.push({
+      level: odd.length > 5 ? 'medium' : 'low',
+      title: `${odd.length} sign-in${odd.length === 1 ? '' : 's'} between 11pm and 7am`,
+      detail: names.join(', ') + ' — outside showroom hours.',
+      who: names.join(', ')
+    });
+  }
+
+  // ── 4. Signed in from far away. Only where there is a real GPS fix — an IP city is far too
+  //       rough to make this kind of claim about someone.
+  const fixes = recent.filter(x => x.lat && x.lng);
+  if (fixes.length >= 3) {
+    const mid = { lat: fixes.map(f => f.lat).sort((a,b)=>a-b)[Math.floor(fixes.length/2)],
+                  lng: fixes.map(f => f.lng).sort((a,b)=>a-b)[Math.floor(fixes.length/2)] };
+    const km = (a, b) => {
+      const R = 6371, t = (d) => d * Math.PI / 180;
+      const dLat = t(b.lat - a.lat), dLng = t(b.lng - a.lng);
+      const h = Math.sin(dLat/2)**2 + Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLng/2)**2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    };
+    const far = fixes.filter(f => km(mid, f) > 50);
+    if (far.length) {
+      const names = [...new Set(far.map(f => f.name))];
+      findings.push({
+        level: 'low',
+        title: `${far.length} sign-in${far.length === 1 ? '' : 's'} more than 50 km from the showroom`,
+        detail: names.join(', '),
+        who: names.join(', ')
+      });
+    }
+  }
+
+  const order = { high: 0, medium: 1, low: 2 };
+  return findings.sort((a, b) => order[a.level] - order[b.level]);
+}
+
+function renderSecurityReview(){
+  const el = document.getElementById('securityReview');
+  if (!el) return;
+  const f = securityReview();
+  if (!LOGIN_LOG_ROWS || !LOGIN_LOG_ROWS.length) {
+    el.innerHTML = '<div class="empty-note">No sign-in history yet.</div>';
+    return;
+  }
+  if (!f.length) {
+    el.innerHTML = `<div class="sec-ok">✅ Nothing unusual in the last sixty days — no shared devices,
+      no odd hours, nothing far from the showroom.</div>`;
+    return;
+  }
+  const badge = { high: ['🔴', 'Worth asking about'], medium: ['🟠', 'Keep an eye on'], low: ['🟡', 'Probably nothing'] };
+  el.innerHTML = f.map(x => `
+    <div class="sec-item sec-${x.level}">
+      <div class="sec-head">${badge[x.level][0]} <b>${esc(x.title)}</b>
+        <span class="sec-tag">${badge[x.level][1]}</span></div>
+      <div class="sec-detail">${esc(x.detail)}</div>
+    </div>`).join('');
+}
+
 // ═══════════════ Login Activity (Admin) ═══════════════
 // Columns from the API: Timestamp, Name, Role, Device ID, City, Region, Network, Device, Known
 let LOGIN_LOG_ROWS = [];
@@ -7475,18 +7664,27 @@ function renderLoginLog(){
 
   if (!rows.length) { tbl.innerHTML = `<tr><td class="empty-note">No sign-ins match this filter.</td></tr>`; return; }
   tbl.innerHTML = `<thead><tr>
-      <th>When</th><th>Name</th><th>Role</th><th>Device ID</th><th>Device</th><th>City (approx)</th><th>Network</th><th></th>
+      <th>When</th><th>Name</th><th>Role</th><th>Device</th><th>Where</th><th>Network</th><th></th>
     </tr></thead><tbody>${rows.map(r => {
       const isNew = up(r[8]) === 'NEW';
       const d = asDate(r[0]);
       const when = d ? `${fmtDate(d)} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : esc(str(r[0]));
+      // Columns 9–13 are the GPS fix, added later; older rows simply don't have them.
+      const lat = str(r[9]), lng = str(r[10]), acc = str(r[11]), map = str(r[12]);
+      const city = [str(r[4]), str(r[5])].filter(Boolean).join(', ');
+      // An exact fix and an IP guess are not the same thing and must not look the same. The map
+      // link is only offered where there is a real fix behind it.
+      const where = (lat && lng)
+        ? `<a href="${esc(map || 'https://www.google.com/maps?q=' + lat + ',' + lng)}" target="_blank" rel="noopener"
+             class="log-map">📍 ${esc(city || 'View on map')}</a>
+           <div class="log-acc">exact · &plusmn;${esc(acc || '?')} m</div>`
+        : `${esc(city || '—')}<div class="log-acc">from internet, approximate</div>`;
       return `<tr${isNew ? ' class="log-new"' : ''}>
         <td>${esc(when)}</td>
         <td><b>${esc(str(r[1]))}</b></td>
         <td>${esc(str(r[2]))}</td>
-        <td><code>${esc(str(r[3]) || '—')}</code></td>
-        <td>${esc(str(r[7]) || '—')}</td>
-        <td>${esc(str(r[4]) || '—')}${str(r[5]) ? ', ' + esc(str(r[5])) : ''}</td>
+        <td>${esc(str(r[7]) || '—')}<div class="log-acc"><code>${esc(str(r[3]) || '—')}</code></div></td>
+        <td>${where}</td>
         <td>${esc(str(r[6]) || '—')}</td>
         <td>${isNew ? '<span class="log-badge">NEW DEVICE</span>' : ''}</td>
       </tr>`;
@@ -7503,6 +7701,7 @@ function loadLoginLog(){
       return;
     }
     renderLoginLog();
+  renderSecurityReview();
   }, 25000);
 }
 (function wireLoginLog(){
@@ -9236,8 +9435,8 @@ function computeMonthlyTrend(){
     let count = 0;
     for (const r of STATE.delivery) {
       if (!billedOk(r[9])) continue;
-      const d = r[2];
-      if (!(d instanceof Date) || isNaN(d)) continue;
+      const d = asDate(r[2]);
+      if (!d) continue;
       if ((d.getMonth()+1) === m.month && d.getFullYear() === m.year) count++;
     }
     return count;
@@ -9310,8 +9509,10 @@ function computeFunnelTargets(){
 
   const counts = { walkin: {enq:0,booked:0}, tele: {enq:0,booked:0}, service: {enq:0,booked:0}, field: {enq:0,booked:0}, web: {enq:0,booked:0} };
   STATE.enquiry.forEach(r => {
-    const d = r[EC.created];
-    if (!(d instanceof Date) || isNaN(d) || d.getFullYear() !== year || d.getMonth() !== month) return;
+    // This check used to demand a real Date object. The enquiry export often carries the date
+    // as text, so every row was skipped and the funnel showed zero across the board.
+    const d = asDate(r[EC.created]);
+    if (!d || d.getFullYear() !== year || d.getMonth() !== month) return;
     const ch = classifyChannel(r[EC.type]);
     counts[ch].enq++;
     if (up(r[EC.status]) === 'BOOKED') counts[ch].booked++;
