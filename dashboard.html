@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202609232025';
+  window.__BUILD = '202609232040';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2650,7 +2650,7 @@ let NET_INFO = { city:'', region:'', isp:'' };
 // Two rules this follows. It never blocks the login: if the person is slow to decide, or the fix
 // takes too long, the sign-in goes ahead with whatever is known. And it never pretends — a
 // declined or missing fix is recorded as "city from internet only", not dressed up as a location.
-let GEO = { lat: '', lng: '', acc: '', denied: false };
+let GEO = { lat: '', lng: '', acc: '', denied: false, reason: '' };
 // The login screen runs before any authenticated call, so it can't read the setting from the
 // server yet. The last known answer is kept in this browser; a fresh one arrives with the data.
 // On by default. The owner wants every sign-in located, so the page asks unless the server
@@ -2658,27 +2658,42 @@ let GEO = { lat: '', lng: '', acc: '', denied: false };
 // Apps Script deployment — one that never sent the flag — silently switched GPS off for everyone.
 let LOCATION_ON = (() => { try { return localStorage.getItem('amarAutosAskLocation') !== '0'; } catch(e) { return true; } })();
 let LOCATION_REQUIRED = (() => { try { return localStorage.getItem('amarAutosRequireLocation') !== '0'; } catch(e) { return true; } })();
-function askLocation(timeoutMs){
+// Two attempts. The first asks for a precise fix. If the device can't produce one in time — a
+// laptop has no GPS chip, and a phone indoors can be slow — a second, quicker attempt accepts the
+// network-based position instead, which is far better than nothing. And the reason for any failure
+// is kept, because "said no", "phone's location is switched off" and "took too long" need three
+// different fixes and used to be recorded as the same thing.
+function geoOnce(opts){
   return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(GEO);
-    let settled = false;
-    const finish = () => { if (!settled) { settled = true; resolve(GEO); } };
-    const timer = setTimeout(finish, timeoutMs || 8000);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        clearTimeout(timer);
-        GEO = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6),
-                acc: Math.round(pos.coords.accuracy), denied: false };
-        finish();
-      },
-      (err) => {
-        clearTimeout(timer);
-        GEO.denied = (err && err.code === 1);   // 1 = the person said no
-        finish();
-      },
-      { enableHighAccuracy: true, timeout: timeoutMs || 8000, maximumAge: 60000 }
-    );
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    const guard = setTimeout(() => finish({ ok: false, code: 3 }), (opts.timeout || 8000) + 1500);
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { clearTimeout(guard); finish({ ok: true, pos }); },
+        (err) => { clearTimeout(guard); finish({ ok: false, code: err ? err.code : 0 }); },
+        opts
+      );
+    } catch (e) { clearTimeout(guard); finish({ ok: false, code: 0 }); }
   });
+}
+async function askLocation(timeoutMs){
+  GEO = { lat: '', lng: '', acc: '', denied: false, reason: '' };
+  if (!navigator.geolocation) { GEO.reason = 'unsupported'; return GEO; }
+
+  let r = await geoOnce({ enableHighAccuracy: true, timeout: timeoutMs || 8000, maximumAge: 60000 });
+  // 1 = refused outright: asking again would only ask again, so stop here.
+  if (!r.ok && r.code !== 1) {
+    r = await geoOnce({ enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 });
+  }
+  if (r.ok) {
+    GEO = { lat: r.pos.coords.latitude.toFixed(6), lng: r.pos.coords.longitude.toFixed(6),
+            acc: Math.round(r.pos.coords.accuracy), denied: false, reason: '' };
+  } else {
+    GEO.denied = r.code === 1;
+    GEO.reason = r.code === 1 ? 'denied' : r.code === 2 ? 'unavailable' : r.code === 3 ? 'timeout' : 'error';
+  }
+  return GEO;
 }
 
 // A short, readable description of the device — enough to tell a phone from the showroom desktop.
@@ -3417,7 +3432,8 @@ async function attemptLogin(){
   apiCall({ action:'login', name, pass,
             device: deviceId(), dev: deviceLabel(),
             city: NET_INFO.city, region: NET_INFO.region, isp: NET_INFO.isp,
-            lat: GEO.lat, lng: GEO.lng, acc: GEO.acc, geoDenied: GEO.denied ? '1' : '' }, (res) => {
+            lat: GEO.lat, lng: GEO.lng, acc: GEO.acc, geoDenied: GEO.denied ? '1' : '',
+            geoReason: GEO.reason }, (res) => {
     if (btn) btn.disabled = false;
     if (!res || !res.ok) {
       errEl.textContent = (res && (res.message || res.error)) === 'TIMEOUT'
