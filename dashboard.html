@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202609232013';
+  window.__BUILD = '202609232025';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -3378,10 +3378,11 @@ function trySavedSession(){
   }
   AUTH = saved;
   CURRENT_USER = saved.user;
-  // Straight to the dashboard. The rider fact used to sit here and cost a tap before anyone
-  // could see a number — on a phone at the counter that is a second nobody has to spare.
-  prefetchData();
-  enterDashboard();
+  // Straight to the dashboard — but not synchronously. This function runs part-way down the
+  // script, before STATE and the renderers further below have been created; opening the
+  // dashboard right here threw "Cannot access 'STATE' before initialization" for anyone who
+  // was already signed in. Waiting one tick lets the rest of the script finish first.
+  setTimeout(() => { prefetchData(); enterDashboard(); }, 0);
   return true;
 }
 trySavedSession();
