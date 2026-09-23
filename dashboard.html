@@ -980,18 +980,6 @@
   .login-card .footnote { text-align: center; font-size: 10.5px; color: var(--text-muted); margin-top: 16px; }
 
   /* ── Daily spotlight card ──────────────────────────────────────────────── */
-  .re-fact-card .banner { background: linear-gradient(160deg, #1C1712 0%, #141110 100%); }
-  .re-fact-icon { font-size: 30px; text-align: center; margin-bottom: 10px; }
-  .re-fact-label {
-    font-family: var(--font-head); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--gold); font-weight: 600; text-align: center; margin-bottom: 10px;
-  }
-  .re-fact-title {
-    font-family: var(--font-head); font-size: 19px; font-weight: 600; text-align: center;
-    color: var(--text-primary); margin-bottom: 10px; letter-spacing: .6px;
-  }
-  .re-fact-text { font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); text-align: center; }
-  .re-fact-date { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 14px; letter-spacing: .4px; }
 
   /* ── Mobile ────────────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
@@ -1199,6 +1187,42 @@
   .warn-box b { color:var(--warning); }
   /* Lead follow-up cards. Worked from a phone, so the controls stack rather than sitting in a
      table row where a date picker and a remarks box would be unusable. */
+  /* ═══ Home launcher ═══ */
+  .home-greet { padding: 6px 0 16px; }
+  .hg-hi { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+  .hg-date { font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
+  .home-alerts { margin-bottom: 18px; display: grid; gap: 8px; }
+  .ha-row { background: color-mix(in srgb, var(--critical) 13%, transparent);
+    border: 1px solid color-mix(in srgb, var(--critical) 36%, transparent);
+    border-radius: 11px; padding: 12px 15px; font-size: 13.5px; line-height: 1.55; }
+  /* Tiles sized so four fit on a laptop and two on a phone, with a tap target big enough to
+     hit without looking. */
+  .tile-grid { display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+  .tile { text-align: left; cursor: pointer; font-family: inherit;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 15px;
+    padding: 18px 17px 16px; min-height: 148px; display: flex; flex-direction: column;
+    transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease; }
+  .tile:hover { transform: translateY(-2px); border-color: var(--gold);
+    box-shadow: 0 10px 26px -14px rgba(0,0,0,.65); }
+  .tile:active { transform: translateY(0); }
+  .tile-icon { font-size: 26px; line-height: 1; }
+  .tile-title { font-size: 16.5px; font-weight: 700; margin-top: 11px; color: var(--text-primary); }
+  .tile-blurb { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45; flex: 1; }
+  .tile-count { font-size: 21px; font-weight: 800; margin-top: 12px; color: var(--gold);
+    letter-spacing: -.5px; }
+  .tile-count span { font-size: 11.5px; font-weight: 500; color: var(--text-muted);
+    letter-spacing: 0; margin-left: 3px; }
+  /* Only tiles with something waiting get the warm colour — if everything glowed, nothing would. */
+  .tile-warn { border-color: color-mix(in srgb, var(--critical) 45%, transparent); }
+  .tile-warn .tile-count { color: var(--critical); }
+  @media (max-width: 560px) {
+    .tile-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .tile { min-height: 132px; padding: 15px 13px 13px; }
+    .tile-title { font-size: 15px; }
+    .tile-blurb { font-size: 11.5px; }
+    .hg-hi { font-size: 20px; }
+  }
   .lead-card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px;
     padding:13px 15px; margin-bottom:10px; }
   .lead-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
@@ -1585,22 +1609,8 @@
   </div>
 </div>
 
-<div id="reFactOverlay" class="login-overlay" style="display:none;">
-  <div class="login-card re-fact-card">
-    <div class="banner">
-      <div class="re-fact-icon">🏍️</div>
-      <h1>Royal Enfield Spotlight</h1>
-      <div class="sub">Something special, every day</div>
-    </div>
-    <div class="fields">
-      <div class="re-fact-label" id="reFactLabel">KYA AAP JAANTE HAIN?</div>
-      <div class="re-fact-title" id="reFactTitle"></div>
-      <div class="re-fact-text" id="reFactText"></div>
-      <button type="button" id="reFactContinue" class="primary" style="width:100%;margin-top:22px;padding:11px;font-size:13.5px;border-radius:9px;">Enter Dashboard →</button>
-      <div class="re-fact-date" id="reFactDate"></div>
-    </div>
-  </div>
-</div>
+<!-- The rider-fact card was removed: it cost a tap before anyone could see a number. -->
+
 
 <div id="appShell" style="display:none;">
 
@@ -1649,7 +1659,7 @@
           <button id="notifyTeamBtn" title="Send a WhatsApp update to your team">📢 Notify Team</button>
           <div class="more-menu-sep"></div>
           <button id="themeToggle" title="Switch light/dark theme">🌓 Theme</button>
-          <div class="festival-select-wrap" title="Festival theme lagta hai apne aap 1 hafte pehle, festival khatam hone par hat jaata hai">
+          <div class="festival-select-wrap" title="The festival theme appears automatically a week before and clears once the festival is over">
             <label for="festivalSelect">🎊 Festival Theme</label>
             <select id="festivalSelect">
               <option value="auto">Auto (by date)</option>
@@ -1679,7 +1689,8 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="myday" class="active">🌟 My Day</button>
+  <button data-tab="home" class="active">🏠 Home</button>
+  <button data-tab="myday">🌟 My Day</button>
   <button data-tab="overview">📊 Business</button>
   <button data-tab="analytics">🎯 Funnel</button>
   <button data-tab="sales">🏍️ Sales</button>
@@ -1699,6 +1710,15 @@
        on by default (see applyRoleRestrictions()); Admin can also open it and use the top exec
        filter to preview any one person's day. Deliberately far shorter than the Dashboard tab
        below, which stays available for anyone who wants the full wall-display view. -->
+  <!-- ══ Home. Opens on a grid of tiles, one per section, so nothing has to be hunted for in a
+       tab strip that scrolls off the side of a phone. Each tile carries a live number, so the
+       screen is useful to look at even before anything is tapped. ══ -->
+  <section class="tabpanel active" id="tab-home">
+    <div id="homeGreet"></div>
+    <div id="homeAlerts"></div>
+    <div class="tile-grid" id="homeTiles"></div>
+  </section>
+
   <section class="tabpanel" id="tab-myday">
     <div class="myday-hero" id="mydayHero"></div>
 
@@ -2151,10 +2171,10 @@
   <section class="tabpanel" id="tab-specs">
     <h2 class="section-title">📖 Model Specifications — Royal Enfield Current Lineup</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Kisi bhi model par click karo — poori details + customer ko Hinglish me kaise samjhana hai, sab khul jayega. Data Royal Enfield ke official positioning se hai; jahan koi number 100% pakka nahi wahan "confirm karein" likha hai — customer ko quote karne se pehle price list se check kar lena. Prices approximate ex-showroom hain, variant/colour/city se badalti hain.
+      Kisi bhi model par click karo — poori details + customer ko Hinglish me kaise samjhana hai, sab khul jayega. Data Royal Enfield ke official positioning se hai; jahan koi number 100% pakka nahi wahan "confirm" likha hai — customer ko quote karne se pehle price list se check kar lena. Prices approximate ex-showroom hain, variant/colour/city se badalti hain.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
-      <input type="text" id="specsSearch" placeholder="Model, category ya 'best for' search karo…" />
+      <input type="text" id="specsSearch" placeholder="Model, category ya 'best for' Search…" />
     </div>
     <div id="specsCards"></div>
   </section>
@@ -2670,7 +2690,7 @@ let CURRENT_USER = null;
 // a sales person's). Funnel used to be here too but Deepak now wants a Sales login to see it
 // directly (competition/context), so it's open to everyone.
 const RESTRICTED_TABS = ['riders'];
-// Sales-only decluttering (Deepak: "itna report bahut jyada ho jaata hai, kam karo"): these tabs
+// Sales-only decluttering (Deepak: "that many reports is too many — reduce it"): these tabs
 // still exist and work exactly as before, they're just not separate buttons in a Sales login's
 // tab bar any more — reachable instead from the single "More Data" tab's dropdown, so the same
 // data is available without repeating itself across a long row of tabs. Admin and CRT logins are
@@ -2683,36 +2703,7 @@ const SALES_MOVE_TO_MORE_DATA = ['dashboard', 'booking', 'stock', 'specs'];
 // Pure offline/rule-based (no API, no network call) — same philosophy as the rest of this
 // dashboard. A random fact is picked on every login, so each executive sees something different
 // each time. All facts are official RE information, written in Hinglish for the sales team.
-const RE_FACTS = [
-  { title: "1901 se — motorcycling ka sabse purana naam", text: "Royal Enfield duniya ka sabse purana motorcycle brand hai jo aaj bhi continuously ban raha hai — Harley-Davidson se bhi purana, BMW se bhi. Pehle din se motto: \"Made Like a Gun, Goes Like a Bullet.\"" },
-  { title: "Redditch se Chennai tak", text: "Royal Enfield 1901 me England ke Redditch me shuru hua tha. Baad me poora production India shift ho gaya — aaj Chennai brand ki sabse badi factory aur global engineering hub hai." },
-  { title: "Himalayan 450 — pahaadon ke liye bani", text: "Himalayan 450 me naya liquid-cooled Sherpa 450 engine hai — purane air-cooled 411 se bahut bada step. 6-speed gearbox, USD forks aur full-colour TFT navigation display milta hai." },
-  { title: "Classic 350 — sabse zyada bikne wali", text: "Classic 350 Royal Enfield ki duniya bhar me sabse zyada bikne wali bike hai, modern J-series platform par bani. Wahi classic thump-thump exhaust note isi ki pehchaan hai." },
-  { title: "Woh legendary 'thump'", text: "Royal Enfield ke single-cylinder engine apni deep, low-rpm exhaust note ke liye famous hain — riders ise seedha \"thump\" kehte hain. Motorcycling ki sabse pehchani awaazon me se ek." },
-  { title: "Hunter 350 — the roadster", text: "Hunter 350 ka 349cc J-series engine Classic aur Meteor jaisa hi hai, par chhoti, halki roadster body me — young riders aur city ke liye nimble bike." },
-  { title: "Meteor 350 — the cruiser", text: "Meteor 350 pehli RE bike thi jisme Tripper mila — handlebar par ek chhota round navigation pod jo phone se turn-by-turn directions dikhata hai." },
-  { title: "Continental GT 650 — café racer", text: "650 Twins family ka hissa, Continental GT 650 RE ka café-racer hai — clip-on bars, sporty crouch, aur wahi smooth 648cc parallel-twin engine jo Interceptor me hai." },
-  { title: "Interceptor 650 — classic roadster twin", text: "Interceptor 650 ne 1960s ke ek purane naam ko wapas zinda kiya, ab modern air/oil-cooled 648cc parallel-twin ke saath — balanced aur torquey delivery ke liye jaana jaata hai." },
-  { title: "Super Meteor 650 — cruiser twin", text: "Super Meteor 650 650-Twin platform par RE ka cruiser hai — lamba wheelbase, aage set footpegs, aur highway touring ke liye relaxed riding stance." },
-  { title: "650 Twin platform", text: "Interceptor 650, Continental GT 650, Super Meteor 650 aur Shotgun 650 — sab ek hi 648cc parallel-twin engine share karte hain. Ek achha engine, chaar alag personalities." },
-  { title: "Bullet — aaj bhi parivaar me", text: "Bullet naam 1932 ka hai (England) — duniya ke sabse lambe time se continuously bante model naamo me se ek. Aaj bhi RE ki lineup me hai, modern 350 (aur ab 650) form me." },
-  { title: "Asli gearbox, asli skill", text: "Royal Enfield ki manual-clutch, foot-shift bikes us rider ko reward karti hain jisne sach me chalana seekha ho. Rider aur machine ke beech ka yahi connection brand ki pehchaan hai." },
-  { title: "Showroom se zyada — community", text: "Royal Enfield owner communities banati hai — ride-outs, Himalayan Odyssey, city rider groups. Har buyer ek riding culture join karta hai, sirf gaadi nahi khareedta." },
-  { title: "Make in India, ride the world", text: "Chennai me bani Royal Enfield bikes 60+ deshon me export aur ride hoti hain — ek Indian-made motorcycle brand jiski sach me global pehchaan hai." },
-  { title: "Simplicity hi asli baat hai", text: "Jab dusre zyada se zyada electronics daal rahe hain, RE jaan-boojh kar analogue riding experience ke kareeb rehta hai — mazaa ride me hai, screen ke settings me nahi." },
-  { title: "East Delhi ka apna Amar Autos", text: "Hamare East Delhi showroom se nikalne wali har Royal Enfield 120+ saal ki heritage leke jaati hai — pehli Redditch workshop se leke aaj showroom me khadi bike tak." },
-  { title: "Test ride sab kuch hai", text: "Thump, torque aur riding feel itni distinctive hai ki zyaadatar RE buyers kehte hain — sale to test ride par hi close hoti hai. Kaagaz ke numbers ye feel nahi de paate." },
-  { title: "Logo me itihaas", text: "Royal Enfield ka cannon logo company ki 1900s ki jadon se aata hai jab wo British armed forces ko precision parts supply karti thi — isi liye motto bike ko bullet se jodta hai." },
-  { title: "Har terrain ke liye", text: "Highway cruiser Super Meteor se leke Himalaya-ready Himalayan 450 tak — RE ki aaj ki lineup jaan-boojh kar cruiser, roadster, scrambler aur adventure-touring me faili hui hai." },
-  { title: "Guerrilla 450 — naya roadster", text: "Guerrilla 450 me Himalayan wala liquid-cooled Sherpa 450 engine hai (40 bhp), par sheher/street ke liye roadster form me. 350 se upgrade chahne walon ke liye modern option." },
-];
 
-// Every login shows a RANDOM fact (not one fixed per day), so each executive — and each time they
-// log in — sees something different. Kept in Hinglish and to official RE facts only.
-function getDailyFact(){
-  const idx = Math.floor(Math.random() * RE_FACTS.length);
-  return RE_FACTS[idx];
-}
 
 // A curated pool of dealership sales tactics — NOT generated live by any AI model (a real
 // generative-AI call would mean either a client-exposed API key, at real financial risk if
@@ -2720,22 +2711,22 @@ function getDailyFact(){
 // rotates in per day using the same day-of-year pattern as the Spotlight fact above, so it keeps
 // feeling fresh without ever claiming to be something it isn't.
 const GROWTH_TIPS = [
-  "Test ride khatam hote hi turant booking ka poochho — excitement us waqt peak par hota hai, thodi der baad thanda pad jaata hai.",
-  "Jo customer test ride le chuka hai par book nahi kiya, unhe 48 ghante ke andar follow-up karo — uske baad conversion chance tezi se girta hai.",
-  "Delivery ke waqt hi Google review maango — satisfaction us pal sabse zyada hoti hai.",
-  "EW aur RSA ko 'extra kharcha' ki tarah mat becho — 'peace of mind' aur 'resale value' ke angle se samjhao.",
-  "1+ saal purane customers ko unki free service due date se pehle khud call karo — service revenue aur trust dono badhta hai.",
-  "60+ din se pade stock par ek chhota accessory-bundle offer bana ke push karo, capital block nahi rehna chahiye.",
-  "Walk-in customer ke haath mein turant chaabi de do — touch-and-feel se decision jaldi banta hai.",
-  "Referral laane wale purane customer ko ek chhota gift/discount do — word-of-mouth sabse sasta aur strongest marketing hai.",
-  "Weekend/Sunday floor par extra staff rakho — footfall hafte ka sabse zyada usi din hota hai.",
-  "Web/phone se aayi enquiry ko utni hi priority do jitni walk-in ko — aksar wahi sabse zyada neglect hoti hai.",
-  "EMI/financing options pehle hi bata do, cost ka jhatka lagne se pehle — bahut log budget dekh kar hi chale jaate hain.",
-  "Delivery se pehle bike poori tarah clean/polish karke do — pehla impression sabse zyada yaad rehta hai.",
-  "Local riding club ya event mein dukaan ka banner/presence rakho — organic leads aur brand visibility milti hai.",
-  "Jo customer accessory nahi le raha, delivery ke kuch din baad unhe accessorized bike ki photo WhatsApp karo — impulse upsell ka acha mauka.",
-  "Festival season se 3-4 hafte pehle hi stock aur staff plan bana lo — last-moment mein demand miss ho jaati hai.",
-  "Koi booking cancel ho to turant waiting-list wale customer ko call karo — stock aise hi khaali mat rakho.",
+  "Ask for the booking the moment a test ride ends — that is when interest peaks, and it cools quickly afterwards.",
+  "Follow up within 48 hours with anyone who took a test ride but did not book — the chance of conversion falls sharply after that.",
+  "Ask for the Google review at handover — that is the moment the customer is happiest.",
+  "Do not pitch EW and RSA as an extra cost — explain them as peace of mind and better resale value.",
+  "Call customers over a year old before their free service is due — it builds both service revenue and trust.",
+  "Push stock sitting over 60 days with a small accessory bundle — that capital should not stay blocked.",
+  "Put the key in a walk-in customer's hand straight away — touching the bike speeds up the decision.",
+  "Give a small gift or discount to customers who bring a referral — word of mouth is the cheapest and strongest marketing there is.",
+  "Keep extra staff on the floor at the weekend — that is when footfall is highest.",
+  "Give web and phone enquiries the same priority as a walk-in — they are the ones most often neglected.",
+  "Mention EMI and finance options early, before the price lands — many people walk away on the budget alone.",
+  "Clean and polish the bike fully before handover — the first impression is the one that stays.",
+  "Keep a presence at local riding clubs and events — it brings organic leads and visibility.",
+  "WhatsApp a photo of an accessorised bike a few days after delivery to customers who took none — it is a good moment for an upsell.",
+  "Plan stock and staffing three to four weeks before the festival season — demand gets missed at the last moment.",
+  "Call the next customer on the waiting list as soon as a booking is cancelled — do not leave that stock idle.",
 ];
 function getDailyGrowthTip(){
   const d = new Date();
@@ -2752,7 +2743,7 @@ function getDailyGrowthTip(){
 // confirm the exact number before quoting a customer. Update this list by hand when RE changes
 // the lineup or a price revision happens.
 // Royal Enfield line-up. Data is from Royal Enfield's own positioning; where an exact figure isn't
-// 100% confirmed it says "confirm karein" rather than guessing, so no one quotes a wrong number to
+// 100% confirmed it says "confirm" rather than guessing, so no one quotes a wrong number to
 // a customer. Categories corrected per RE's actual positioning:
 //   • Classic 350 / Bullet 350 = Roadster / Modern-Classic (retro street bikes), NOT "Cruiser".
 //     People often call the Classic a cruiser because of its vintage look, but its riding position
@@ -2784,7 +2775,7 @@ const MODEL_SPECS = [
     features: 'A genuine cruiser: low 765 mm seat, feet-forward riding position, 15 L tank and Tripper navigation as standard. Fireball, Stellar and Supernova trims.',
     hinglish: 'This is the REAL cruiser in the 350 line-up (Classic and Bullet are not). The low 765 mm seat makes it comfortable for shorter riders and ladies. Best for relaxed long highway rides — feet forward, bigger tank, Tripper navigation included. When a customer asks for comfort, show them this.' },
 
-  { name: 'Scram 440', category: 'Scrambler (450 platform)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa)', power: 'confirm karein (~40 bhp class)', torque: 'confirm karein', gearbox: '6-Speed', seatHeight: 'confirm karein', kerbWeight: 'confirm karein', fuelTank: 'confirm karein', price: 'Newest addition — confirm current ex-showroom & full specs from RE site',
+  { name: 'Scram 440', category: 'Scrambler (450 platform)', engine: '452cc, liquid-cooled, single-cylinder (Sherpa)', power: 'confirm (~40 bhp class)', torque: 'confirm', gearbox: '6-Speed', seatHeight: 'confirm', kerbWeight: 'confirm', fuelTank: 'confirm', price: 'Newest addition — confirm current ex-showroom & full specs from RE site',
     bestFor: 'Riders who want light off-road ability without the size of a Himalayan',
     features: 'A 443cc scrambler built on the Himalayan 411 platform — 19-inch front wheel, 200 mm ground clearance, 6-speed gearbox and a more relaxed, road-friendly setup.',
     hinglish: 'Sits between a street bike and an adventure bike. Good for a customer who takes bad roads or the occasional trail but does not want a tall, heavy ADV. The 6-speed box makes highway cruising easier than the old Scram 411.' },
@@ -3219,19 +3210,12 @@ function prefetchData(){
   PREFETCH = loadAll(true).catch(() => {});   // silent: no overlay behind the fact card
   return PREFETCH;
 }
-function showReFact(){
-  prefetchData();
-  const f = getDailyFact();
-  document.getElementById('reFactTitle').textContent = f.title;
-  document.getElementById('reFactText').textContent = f.text;
-  const today = new Date();
-  document.getElementById('reFactDate').textContent = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  document.getElementById('loginOverlay').style.display = 'none';
-  document.getElementById('reFactOverlay').style.display = 'flex';
-}
 
 function enterDashboard(){
-  document.getElementById('reFactOverlay').style.display = 'none';
+  // The login overlay used to be dismissed by the rider-fact screen. With that screen gone it has
+  // to be dismissed here, or the dashboard renders behind a login form that never goes away.
+  const lo = document.getElementById('loginOverlay');
+  if (lo) lo.style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
   applyRoleRestrictions();
   linkOneSignalIdentity();
@@ -3256,7 +3240,6 @@ function enterDashboard(){
     }
   });
 }
-document.getElementById('reFactContinue').addEventListener('click', enterDashboard);
 
 // The team list barely changes, so the last one is kept in this browser. On every visit after
 // the first the dropdown is filled instantly from that copy and the person can sign in straight
@@ -3342,7 +3325,10 @@ function trySavedSession(){
   }
   AUTH = saved;
   CURRENT_USER = saved.user;
-  showReFact();
+  // Straight to the dashboard. The rider fact used to sit here and cost a tap before anyone
+  // could see a number — on a phone at the counter that is a second nobody has to spare.
+  prefetchData();
+  enterDashboard();
   return true;
 }
 trySavedSession();
@@ -3389,7 +3375,8 @@ async function attemptLogin(){
     AUTH = { token: res.token, user: res.user, expires: res.expires || 0 };
     CURRENT_USER = res.user;
     saveSession();
-    showReFact();
+    prefetchData();
+    enterDashboard();
   }, 25000);
 }
 document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); attemptLogin(); });
@@ -3511,11 +3498,10 @@ function applyRoleRestrictions(){
     btn.style.display = tabHidden(tabHolding(btn.dataset.jump)) ? 'none' : '';
   });
   if (!isAdmin) {
-    // Land on the new "My Day" tab — one screen with just this person's own action list, target
-    // and standing — instead of the dense, company-wide Dashboard tab. Deepak/Admin still lands
-    // on Dashboard as before; Admin can open My Day too and use the exec filter to preview anyone.
-    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'myday'));
-    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-myday'));
+    // Everyone lands on Home now — the tile grid shows the whole dashboard at once, so there is
+    // no reason to drop a sales login straight into one section. This used to force My Day and
+    // left the Home panel rendered but hidden.
+    switchToTab('home');
     // lock the executive filter to their own name so every KPI/table only shows their own numbers
     const execSel = document.getElementById('execFilter');
     execSel.disabled = true;
@@ -4027,7 +4013,7 @@ document.getElementById('allMonthsBtn').addEventListener('click', () => {
 // ---------------- Data Health Banner ----------------
 // Plain-language confirmation, right under the header, of exactly how much data loaded for
 // THIS login (own numbers for a sales person, everyone's for Admin) — so someone who isn't
-// comfortable with dev tools/console can immediately tell "data aaya ya nahi", and screenshot
+// comfortable with dev tools/console can immediately tell "whether data arrived", and screenshot
 // this banner instead of guessing when something looks wrong.
 function renderDataHealthBanner(){
   // A date the server can't read is the most common reason a report looks empty, so it goes to
@@ -4235,6 +4221,7 @@ function renderAll(){
   renderAnalytics();
   renderWalkinLog();
   renderPaymentMode();
+  renderHome();
   renderMyAttach();
   renderCallList();
   renderPriceList();
@@ -4495,20 +4482,20 @@ function renderRcReports(ctx){
   // Only the Dashboard tab does this — the rest of the app is unchanged.
   const hin = false; // everyone sees English now
   const T = hin ? {
-    sectionH: '📑 Reports — dekhne ke liye click karo',
-    enqPend: n => `<b>${n}</b> walk-in ki enquiry pending`,
-    bkgPend: n => `<b>${n}</b> booking system me daalni hai`,
-    allPunched: 'Sab ho gaya ✅',
+    sectionH: '📑 Reports — click to open',
+    enqPend: n => `<b>${n}</b> walk-in enquiries still to enter`,
+    bkgPend: n => `<b>${n}</b> bookings still to enter in the system`,
+    allPunched: 'All done ✅',
     top: 'Top', consultants: 'sales log',
     champ: 'Category-wise sabse best performers',
-    pipe: (r,a,c) => `<b>${r}</b> ready · ${a} stock ka wait · ${c} agle mahine`,
-    reviews: n => `${n} reviews is filter me`,
-    byExec: 'Har executive ki booking count + trend',
+    pipe: (r,a,c) => `<b>${r}</b> ready · ${a} waiting on stock · ${c} next month`,
+    reviews: n => `${n} reviews in this filter`,
+    byExec: 'Booking count and trend for each executive',
     funnel: 'Channel-wise target vs booked',
-    specs: 'Har model ke selling points',
+    specs: 'Selling points for each model',
     tEnq:'Enquiry Not Punched', tBkg:'Booking Not Punched', tLb:'Executive Leaderboard',
     tCh:'Champions', tPipe:'Booking & Delivery Pipeline', tRev:'Google Reviews',
-    tExec:'Bookings — Executive-wise', tFun:'Sales Funnel — poora', tSpec:'Model Specs',
+    tExec:'Bookings — Executive-wise', tFun:'Sales Funnel — full', tSpec:'Model Specs',
   } : {
     sectionH: '📑 Reports — click to open full',
     enqPend: n => `<b>${n}</b> walk-in enquiry pending`,
@@ -5423,7 +5410,7 @@ function closeDetailModal(){ document.getElementById('detailModal').classList.re
 const DASHBOARD_LIVE_URL = 'https://amarauto87-source.github.io/amar-autos-review/dashboard.html';
 function defaultNotifyMessage(){
   const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  return `📢 *Amar Autos Dashboard Update*\n${today}\n\nDashboard update ho gaya hai — apna target, pending deliveries aur reviews check kar lo.\n\n👉 ${DASHBOARD_LIVE_URL}`;
+  return `📢 *Amar Autos Dashboard Update*\n${today}\n\nThe dashboard has been updated — please check your target, pending deliveries and reviews.\n\n👉 ${DASHBOARD_LIVE_URL}`;
 }
 function openNotifyTeamModal(){
   document.getElementById('modalTitle').textContent = '📢 Notify Team';
@@ -5714,7 +5701,7 @@ function renderMyDay(){
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   heroEl.innerHTML = `
-    <div class="greet">👋 Namaste, ${esc(greetName)}!</div>
+    <div class="greet">👋 Hello, ${esc(greetName)}</div>
     <div class="date">${esc(today)}</div>
     <div class="tip"><b>💡 Today's tip:</b> ${esc(getDailyGrowthTip())}</div>`;
 
@@ -6065,7 +6052,7 @@ function renderMissingEnqAlertBanner(rows){
 function defaultMissingEnqAlertMessage(overRows){
   const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   const lines = overRows.map(r => `• ${r.name} — ${fmtInt(r.missing)} enquiry pending`).join('\n');
-  return `🚨 *Missing Enquiry Alert*\n${today}\n\nIn logon ki walk-in enquiry abhi tak punch nahi hui hai:\n${lines}\n\nPlease aaj hi punch karo — followup isi se hota hai.`;
+  return `🚨 *Missing Enquiry Alert*\n${today}\n\nThese walk-ins have not been entered as enquiries yet:\n${lines}\n\nPlease enter them today — follow-up depends on it.`;
 }
 function openMissingEnqAlertModal(overRows){
   document.getElementById('modalTitle').textContent = '📢 Missing Enquiry Alert';
@@ -6439,7 +6426,7 @@ function renderSalesPersonAnalysis(){
   });
 }
 
-// Executive x Model grid — "kaunsa sales person kaunsa model kitna bech raha hai" in one view.
+// Executive x Model grid — "which sales person is selling how much of which model" in one view.
 // Built from the same already-filtered billed-delivery rows renderDelivery() uses, so it always
 // agrees with the numbers directly above it. Models are columns, ordered by total units sold.
 function renderExecModelMatrix(rows){
@@ -6759,11 +6746,11 @@ function computeTodayPriorities(){
     // cut tab clutter). Surfacing the count here keeps it from silently disappearing.
     const missingEnq = computeMissingEnquiryCount(name);
     if (missingEnq) {
-      items.push({ icon: '📝', text: `${missingEnq} walk-in customer${missingEnq===1?'':'s'} ki enquiry abhi tak punch nahi hui — aaj hi punch karo, followup isi se hota hai.`, cls: 'urgent' });
+      items.push({ icon: '📝', text: `${missingEnq} walk-in customer${missingEnq===1?'':'s'} has no enquiry entered yet — please enter it today, follow-up depends on it.`, cls: 'urgent' });
     }
     const missingBkg = computeMissingBookingPunchCount(name);
     if (missingBkg) {
-      items.push({ icon: '⚠️', text: `${missingBkg} booking${missingBkg===1?'':'s'} abhi tak RE Portal (MSD) me punch nahi hui — jaldi punch kar do.`, cls: 'urgent' });
+      items.push({ icon: '⚠️', text: `${missingBkg} booking${missingBkg===1?'':'s'} has not been entered in the RE Portal (MSD) yet — please enter it soon.`, cls: 'urgent' });
     }
     const overdue = overdueRowsFor(name);
     if (overdue.length) {
@@ -7180,6 +7167,83 @@ function openFormPdf(key){
 
 
 
+
+
+// ═══════════════ Home — the launcher ═══════════════
+// Every section as a tile with a live number on it. The tab strip works, but on a phone it
+// scrolls sideways and half of it is off screen — this makes the whole dashboard visible at once.
+// Tiles are built from the same role rules as the tabs, so nobody sees a tile they cannot open.
+const HOME_TILES = [
+  { tab: 'myday',     icon: '🌟', title: 'My Day',        blurb: 'Today\'s to-do and call list',
+    count: () => (typeof callListStock === 'function'
+      ? callListStock().length + callListOverdue().length + callListFollowup().length : 0),
+    unit: 'to call', warn: (n) => n > 0 },
+  { tab: 'overview',  icon: '📊', title: 'Business',      blurb: 'Targets, leaderboard, reviews',
+    count: () => STATE.delivery ? computeDeliveryAgg(null).retail : 0, unit: 'billed this month' },
+  { tab: 'analytics', icon: '🎯', title: 'Funnel',        blurb: 'Enquiries through to delivery',
+    count: () => (STATE.enquiry || []).length, unit: 'enquiries' },
+  { tab: 'sales',     icon: '🏍️', title: 'Sales',         blurb: 'Deliveries and bookings',
+    count: () => (typeof pendingRows === 'function' ? pendingRows().length : 0), unit: 'pending delivery' },
+  { tab: 'stock',     icon: '📦', title: 'Stock',         blurb: 'What is on the floor, what is booked',
+    count: () => (STATE.stock || []).filter(r => up(r[17]) !== 'BILLED').length, unit: 'in stock' },
+  { tab: 'pricelist', icon: '💰', title: 'Price List',    blurb: 'On-road prices and quotations',
+    count: () => (STATE.price || []).length, unit: 'models' },
+  { tab: 'customers', icon: '👥', title: 'Customers',     blurb: 'Walk-ins, riders, QR codes' },
+  { tab: 'leads',     icon: '📲', title: 'Lead Follow-up', blurb: 'Meta leads to call back',
+    count: () => LEADS.filter(l => { const d = leadDue(l); return d !== null && d >= 0; }).length,
+    unit: 'due today', warn: (n) => n > 0 },
+  { tab: 'more',      icon: '🗂️', title: 'More',          blurb: 'Model specs and raw data' },
+  { tab: 'control',   icon: '⚙️', title: 'Control Panel', blurb: 'Settings, sign-ins, security' },
+];
+
+function renderHome(){
+  const grid = document.getElementById('homeTiles');
+  if (!grid) return;
+
+  // greeting
+  const greet = document.getElementById('homeGreet');
+  if (greet) {
+    const name = (CURRENT_USER && CURRENT_USER.name) || '';
+    const d = new Date();
+    const hour = d.getHours();
+    const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    greet.innerHTML = `<div class="home-greet">
+      <div class="hg-hi">${esc(part)}${name ? ', ' + esc(name) : ''}</div>
+      <div class="hg-date">${esc(d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' }))}</div>
+    </div>`;
+  }
+
+  // the two or three things that actually need doing today, above the tiles
+  const alerts = document.getElementById('homeAlerts');
+  if (alerts) {
+    const items = (typeof computeTodayPriorities === 'function' ? computeTodayPriorities() : [])
+      .filter(x => x && x.cls === 'urgent').slice(0, 3);
+    alerts.innerHTML = items.length
+      ? `<div class="home-alerts">${items.map(x => `<div class="ha-row">${x.html || esc(x.text || '')}</div>`).join('')}</div>`
+      : '';
+  }
+
+  const visible = (tab) => {
+    const btn = document.querySelector(`#tabs button[data-tab="${tab}"]`);
+    return btn && btn.style.display !== 'none';
+  };
+  grid.innerHTML = HOME_TILES.filter(t => visible(t.tab)).map(t => {
+    let n = null;
+    try { n = t.count ? t.count() : null; } catch (e) { n = null; }
+    const warn = n !== null && t.warn && t.warn(n);
+    return `<button class="tile${warn ? ' tile-warn' : ''}" data-go="${t.tab}">
+      <div class="tile-icon">${t.icon}</div>
+      <div class="tile-title">${esc(t.title)}</div>
+      <div class="tile-blurb">${esc(t.blurb)}</div>
+      ${n !== null ? `<div class="tile-count">${fmtInt(n)} <span>${esc(t.unit || '')}</span></div>` : ''}
+    </button>`;
+  }).join('');
+}
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('.tile[data-go]');
+  if (t) switchToTab(t.dataset.go);
+});
 
 // ═══════════════ Meta lead follow-up ═══════════════
 // Each lead is a small card rather than a table row: on a phone, a row with a status picker, a
@@ -8038,10 +8102,10 @@ function firstName(full){
 }
 // Ready-made messages. Kept short and polite — a sales person can edit before sending.
 const WA_TEMPLATES = {
-  stockArrived: (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model}${c.colour ? ' (' + c.colour + ')' : ''} showroom pahunch gayi hai. Delivery ke liye kab convenient rahega? Dhanyavaad.`,
-  overdue:      (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model} booking ki delivery date nikal chuki hai. Main aapko update dena chahta tha — kya aap se baat ho sakti hai? Dhanyavaad.`,
-  followUp:     (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapne ${c.model || 'Royal Enfield'} ke baare me poocha tha. Koi sawaal ho ya test ride lena ho to bataiye — main help kar dunga. Dhanyavaad.`,
-  booking:      (c) => `Namaste ${firstName(c.name)} ji, Amar Autos se ${c.from}. Aapki ${c.model} booking confirm hai. Koi update chahiye to bataiye. Dhanyavaad.`,
+  stockArrived: (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${c.model}${c.colour ? ' (' + c.colour + ')' : ''} has arrived at the showroom. When would suit you for delivery? Thank you.`,
+  overdue:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. The promised delivery date for your ${c.model} has passed. I wanted to give you an update — could we speak? Thank you.`,
+  followUp:     (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. You had enquired about the ${c.model || 'Royal Enfield'}. If you have any questions or would like a test ride, do let me know — happy to help. Thank you.`,
+  booking:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${c.model} booking is confirmed. Let me know if you need any update. Thank you.`,
 };
 // Renders the little green WhatsApp button, or nothing when the number isn't visible to this user.
 function waBtn(mobileValue, ownerField, template, ctx){
@@ -8677,7 +8741,7 @@ function runWalkinCheck(){
   const out = document.getElementById('wcResult');
   if (!inp || !out) return;
   const mobile = str(inp.value).replace(/\D/g,'');
-  if (mobile.length < 6) { out.innerHTML = `<div class="empty-note">Poora mobile number daalo</div>`; return; }
+  if (mobile.length < 6) { out.innerHTML = `<div class="empty-note">Enter the full mobile number</div>`; return; }
 
   const hist = historyForMobile(mobile);
   const custName = hist.length ? hist[0].name : '';
@@ -8783,12 +8847,12 @@ function saveWalkinEntry(){
     assignedTo, type: WC_CURRENT.type, financer, model,
     enteredBy: (CURRENT_USER && CURRENT_USER.name) || 'AJEET',
   };
-  if (!WALKIN_SAVE_URL) { if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Save URL set nahi hai (setup guide dekho)';} return; }
+  if (!WALKIN_SAVE_URL) { if(msg){msg.style.color='var(--warning)';msg.textContent='⚠️ Save URL is not set (see the setup guide)';} return; }
   if (btn) btn.disabled = true; if (msg){msg.style.color='var(--text-secondary)';msg.textContent='Saving…';}
   saveViaJsonp(payload, (res) => {
     if (btn) btn.disabled = false;
     if (res && res.ok) {
-      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Save ho gaya';}
+      if (msg){msg.style.color='var(--good)';msg.textContent='✅ Saved';}
       // mirror the entry locally so "Aaj ke Walk-in" shows it immediately (col order matches REGISTER
       // + model in col I=index 8)
       STATE.walkinEntry = STATE.walkinEntry || [];
@@ -8797,7 +8861,7 @@ function saveWalkinEntry(){
       const mobInp = document.getElementById('wcMobile'); if (mobInp) mobInp.value = '';
       const out = document.getElementById('wcResult'); if (out) setTimeout(() => { out.innerHTML = ''; }, 1400);
     } else {
-      const err = res && res.error ? res.error : 'Apps Script se jawab nahi mila';
+      const err = res && res.error ? res.error : 'No response from Apps Script';
       if (msg){msg.style.color='var(--critical)';msg.textContent='❌ Save fail: ' + err;}
     }
   });
@@ -9077,7 +9141,7 @@ function renderBvsModel(globalOpenBookings){
     </div>`;
   });
 
-  result.innerHTML = blocks.length ? blocks.join('') : '<div class="empty-note">Is model ki na booking hai na stock.</div>';
+  result.innerHTML = blocks.length ? blocks.join('') : '<div class="empty-note">This model has neither bookings nor stock.</div>';
 }
 document.getElementById('bvsModelSelect').addEventListener('change', () => renderBvsModel(BVS_ALL_BOOKINGS));
 
@@ -9675,7 +9739,7 @@ function computeSmartSuggestions(){
     const sorted = chStats.slice().sort((a, b) => a.pct - b.pct);
     const weakest = sorted[0], strongest = sorted[sorted.length - 1];
     if (strongest.pct - weakest.pct >= 10) {
-      items.push({ icon: '📉', text: `"${weakest.label}" enquiries sirf ${weakest.pct.toFixed(0)}% convert ho rahi hain (${fmtInt(weakest.total)} enquiries) — "${strongest.label}" (${strongest.pct.toFixed(0)}%) jaisa follow-up process yahan bhi try karo.` });
+      items.push({ icon: '📉', text: `"${weakest.label}" enquiries convert at only ${weakest.pct.toFixed(0)}% (${fmtInt(weakest.total)} enquiries) — "${strongest.label}" (${strongest.pct.toFixed(0)}%) jaisa follow-up process yahan bhi try karo.` });
     }
   }
 
@@ -9712,7 +9776,7 @@ function computeSmartSuggestions(){
     .filter(([fam, count]) => count >= 2 && !pendingByFamily[fam])
     .sort((a, b) => b[1] - a[1]);
   if (deadStock.length) {
-    items.push({ icon: '📦', text: `${deadStock[0][0]} ke ${fmtInt(deadStock[0][1])} bikes stock mein hain lekin inke against koi booking pending nahi hai — chhota test-ride push ya offer chala sakte ho taaki capital block na rahe.` });
+    items.push({ icon: '📦', text: `${fmtInt(deadStock[0][1])} ${deadStock[0][0]} are in stock with no booking against them — a small test-ride push or offer chala sakte ho taaki capital block na rahe.` });
   }
 
   // 4. Aged stock — same 60-day threshold as the Stock tab.
@@ -9745,7 +9809,7 @@ function computeSmartSuggestions(){
   const topReason = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1])[0];
   if (topReason && totalMatched >= 10) {
     const dropPct = Math.round((totalDropped / totalMatched) * 100);
-    items.push({ icon: '🗣️', text: `Sabse zyada leads "${topReason[0]}" ki wajah se gir rahi hain (${fmtInt(topReason[1])} baar, kul ${dropPct}% enquiries drop ho rahi hain) — is specific reason par team ke saath baat karo.` });
+    items.push({ icon: '🗣️', text: `Most leads are lost to "${topReason[0]}" (${fmtInt(topReason[1])} times, ${dropPct}% of all enquiries drop out) — this specific reason par team ke saath baat karo.` });
   }
 
   // Always end with one rotating general tip, clearly labelled as such (not data-driven).
@@ -9994,6 +10058,7 @@ function exportCsv(filename, headers, rows, maskOpt){
 // panels themselves are untouched — a tab now simply shows a GROUP of them, stacked. That keeps
 // every render function, id and report working exactly as before while cutting the tab bar in half.
 const TAB_GROUPS = {
+  home:      ['home'],                  // the launcher — every section as a tile
   myday:     ['myday'],
   overview:  ['overview'],                 // "Business"
   analytics: ['analytics'],                // "Funnel"
