@@ -2578,6 +2578,7 @@ let GEO = { lat: '', lng: '', acc: '', denied: false };
 // The login screen runs before any authenticated call, so it can't read the setting from the
 // server yet. The last known answer is kept in this browser; a fresh one arrives with the data.
 let LOCATION_ON = (() => { try { return localStorage.getItem('amarAutosAskLocation') === '1'; } catch(e) { return false; } })();
+let LOCATION_REQUIRED = false;
 function askLocation(timeoutMs){
   return new Promise((resolve) => {
     if (!navigator.geolocation) return resolve(GEO);
@@ -3267,6 +3268,12 @@ populateLoginDropdown();
 // than leaving an empty dropdown with no explanation.
 apiCall({ action:'users' }, (res) => {
   const errEl = document.getElementById('loginError');
+  // Arrives before anyone signs in, which is exactly when the location prompt has to be decided.
+  if (res && res.askLocation !== undefined) {
+    LOCATION_ON = !!res.askLocation;
+    LOCATION_REQUIRED = !!res.requireLocation;
+    try { localStorage.setItem('amarAutosAskLocation', LOCATION_ON ? '1' : '0'); } catch(e) {}
+  }
   if (res && res.ok && Array.isArray(res.users) && res.users.length) {
     CREDENTIALS = res.users.map(n => ({ name: n }));
     try { localStorage.setItem(NAMES_KEY, JSON.stringify(res.users)); } catch(e) {}
@@ -3325,6 +3332,16 @@ async function attemptLogin(){
   if (LOCATION_ON) {
     errEl.textContent = 'Checking location…';
     await askLocation(8000);
+    // Refusing and simply not getting a fix are different things. Someone standing inside a
+    // steel-roofed showroom can allow location and still get nothing — locking them out for that
+    // would punish the wrong person. Only an outright refusal stops the sign-in.
+    if (LOCATION_REQUIRED && GEO.denied) {
+      errEl.innerHTML = '📍 <b>Location is needed to sign in.</b><br>' +
+        'Tap the 🔒 or ⓘ icon next to the web address, set <b>Location</b> to <b>Allow</b>, ' +
+        'then reload this page and try again.';
+      if (btn) btn.disabled = false;
+      return;
+    }
     errEl.textContent = 'Checking…';
   }
 
