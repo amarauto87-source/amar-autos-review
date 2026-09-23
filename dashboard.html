@@ -11,15 +11,32 @@
      every single open. Add the file back and restore this line if the install-to-home-screen
      prompt is wanted later. -->
 <script>
-  // Turning this on is what makes the second and every later open near-instant: the shell comes
-  // from the phone's own cache while a fresh copy downloads in the background. Live data is never
-  // cached — the worker sends every API request straight to the network.
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./pwa-cache.js').catch(() => {});
-    });
-  }
+  // ── Fired before anything else on the page ──────────────────────────────────────────────────
+  // The login screen needs two things from the server: the list of names, and whether to ask for
+  // location. Both used to be requested by code sitting at the bottom of a 677 KB file, so the
+  // request didn't even leave the phone until everything had been parsed — about 1.8 seconds of
+  // doing nothing on a mid-range handset. Kicked off here instead, it travels while the rest of
+  // the page is still loading, and the answer is usually waiting by the time the form appears.
+  window.__BOOT = { users: null, waiters: [] };
+  (function () {
+    var API = 'https://script.google.com/macros/s/AKfycbyod0g1r7SB5ZQS4bCzPRKi0iQJrpQz67u86fsP9IXhgwlgAQU0JbzagDoEIEQY4xhA/exec';
+    window.__bootUsers = function (res) {
+      window.__BOOT.users = res;
+      window.__BOOT.waiters.splice(0).forEach(function (f) { try { f(res); } catch (e) {} });
+    };
+    var sc = document.createElement('script');
+    sc.src = API + '?action=users&callback=__bootUsers&_=' + Date.now();
+    sc.onerror = function () { window.__bootUsers(null); };
+    document.head.appendChild(sc);
+
+    // Registering the cache worker here rather than on "load" — waiting for load meant the very
+    // thing that makes later opens fast was itself the last thing to start.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./pwa-cache.js').catch(function () {});
+    }
+  })();
 </script>
+
 <meta name="theme-color" content="#100e0b">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3266,7 +3283,19 @@ function populateLoginDropdown(){
 populateLoginDropdown();
 // Ask the API who the users are (names only). If it can't be reached, say so plainly rather
 // than leaving an empty dropdown with no explanation.
-apiCall({ action:'users' }, (res) => {
+// Uses the answer the early request already has, or waits for it — either way no second call.
+(function (handle) {
+  const boot = window.__BOOT;
+  if (boot && boot.users !== null) return handle(boot.users);
+  if (boot) {
+    let done = false;
+    boot.waiters.push((r) => { if (!done) { done = true; handle(r); } });
+    // if the early call never comes back, fall back to a normal one
+    setTimeout(() => { if (!done) { done = true; apiCall({ action:'users' }, handle, 20000); } }, 12000);
+    return;
+  }
+  apiCall({ action:'users' }, handle, 20000);
+})((res) => {
   const errEl = document.getElementById('loginError');
   // Arrives before anyone signs in, which is exactly when the location prompt has to be decided.
   if (res && res.askLocation !== undefined) {
@@ -3283,7 +3312,7 @@ apiCall({ action:'users' }, (res) => {
     // Only complain when there's nothing to show — with a cached list they can already sign in.
     errEl.textContent = 'Could not reach the server. Check your internet and refresh.';
   }
-}, 20000);
+});
 
 // ===== Persistent login =====
 // Login once per device/browser, stay logged in after that — no localStorage/cookie was used
