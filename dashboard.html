@@ -11,6 +11,31 @@
      every single open. Add the file back and restore this line if the install-to-home-screen
      prompt is wanted later. -->
 <script>
+  // ── Always run the newest version ────────────────────────────────────────────────────────
+  // The page is served from the phone's cache for speed, which meant a freshly uploaded version
+  // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
+  // page checks the live copy once, quietly, and reloads a single time if it is out of date.
+  window.__BUILD = '202609232013';
+  (function () {
+    if (location.protocol === 'file:') return;
+    var KEY = 'amarAutosReloadedFor';
+    fetch(location.pathname + '?buildcheck=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (html) {
+        var m = html.match(/window\.__BUILD = '([0-9]+)'/);
+        if (!m || m[1] === window.__BUILD) return;              // already current
+        // guard against a reload loop if something odd happens
+        if (sessionStorage.getItem(KEY) === m[1]) return;
+        sessionStorage.setItem(KEY, m[1]);
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage('clear-shell-cache');
+        }
+        setTimeout(function () { location.reload(); }, 150);
+      })
+      .catch(function () {});
+  })();
+</script>
+<script>
   // ── Fired before anything else on the page ──────────────────────────────────────────────────
   // The login screen needs two things from the server: the list of names, and whether to ask for
   // location. Both used to be requested by code sitting at the bottom of a 677 KB file, so the
@@ -1187,6 +1212,14 @@
   .warn-box b { color:var(--warning); }
   /* Lead follow-up cards. Worked from a phone, so the controls stack rather than sitting in a
      table row where a date picker and a remarks box would be unusable. */
+  /* ═══ Phone header — was taking half the screen before any content appeared ═══ */
+  @media (max-width: 600px) {
+    header.top .brand h1, header.top .brand .title { font-size: 16px !important; letter-spacing: .5px !important; line-height: 1.25 !important; }
+    header.top .brand .sub, header.top .brand .tagline { display: none !important; }
+    header.top .brand .logo { width: 36px !important; height: 36px !important; font-size: 18px !important; }
+    #statusLine { display: none !important; }
+    header.top { padding-top: 12px !important; padding-bottom: 10px !important; }
+  }
   /* ═══ Home launcher ═══ */
   .home-greet { padding: 6px 0 16px; }
   .hg-hi { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
@@ -1197,8 +1230,8 @@
     border-radius: 11px; padding: 12px 15px; font-size: 13.5px; line-height: 1.55; }
   /* Tiles sized so four fit on a laptop and two on a phone, with a tap target big enough to
      hit without looking. */
-  .tile-grid { display: grid; gap: 12px;
-    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+  .tile-grid { display: grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { .tile-grid { grid-template-columns: repeat(2, 1fr); } }
   .tile { text-align: left; cursor: pointer; font-family: inherit;
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 15px;
     padding: 18px 17px 16px; min-height: 148px; display: flex; flex-direction: column;
@@ -1213,6 +1246,14 @@
     letter-spacing: -.5px; }
   .tile-count span { font-size: 11.5px; font-weight: 500; color: var(--text-muted);
     letter-spacing: 0; margin-left: 3px; }
+  /* Secondary sections — small, one row, out of the way */
+  .home-more { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .hm-link { background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    font-family: inherit; font-size: 13px; padding: 9px 14px; border-radius: 22px; cursor: pointer; }
+  .hm-link:hover { border-color: var(--gold); color: var(--text-primary); }
+  .hm-link b { color: var(--gold); margin-left: 3px; }
+  .hm-warn { border-color: color-mix(in srgb, var(--critical) 45%, transparent); }
+  .hm-warn b { color: var(--critical); }
   /* Only tiles with something waiting get the warm colour — if everything glowed, nothing would. */
   .tile-warn { border-color: color-mix(in srgb, var(--critical) 45%, transparent); }
   .tile-warn .tile-count { color: var(--critical); }
@@ -1692,14 +1733,12 @@
   <button data-tab="home" class="active">🏠 Home</button>
   <button data-tab="myday">🌟 My Day</button>
   <button data-tab="overview">📊 Business</button>
-  <button data-tab="analytics">🎯 Funnel</button>
   <button data-tab="sales">🏍️ Sales</button>
   <button data-tab="stock">📦 Stock</button>
   <button data-tab="pricelist">💰 Price List</button>
   <button data-tab="customers">👥 Customers</button>
-  <button data-tab="more">🗂️ More</button>
   <button data-tab="leads">📲 Follow-up</button>
-  <button data-tab="control">⚙️ Control</button>
+  <button data-tab="control">⚙️ Admin</button>
 </nav>
 
 <main>
@@ -3479,7 +3518,7 @@ function applyRoleRestrictions(){
   // With eight tabs the rule is simple enough to state outright: everyone gets their own day,
   // the funnel, sales, stock and the price list. Company-wide business figures and the odds and
   // ends behind "More" stay with Admin (and CRT, who looks after riders).
-  const SALES_TABS = ['myday', 'analytics', 'sales', 'stock', 'pricelist', 'customers'];
+  const SALES_TABS = ['home', 'myday', 'sales', 'stock', 'pricelist', 'customers'];
   // The control tab holds settings and the sign-in log — Admin only, for everyone else it and
   // its panels are removed outright rather than merely hidden.
   // Who may see the lead follow-up tab. The server enforces this too (action=leads checks the
@@ -7188,26 +7227,24 @@ function openFormPdf(key){
 // scrolls sideways and half of it is off screen — this makes the whole dashboard visible at once.
 // Tiles are built from the same role rules as the tabs, so nobody sees a tile they cannot open.
 const HOME_TILES = [
-  { tab: 'myday',     icon: '🌟', title: 'My Day',        blurb: 'Today\'s to-do and call list',
+  // The four things used every day get big tiles. Everything else is one small link below —
+  // a wall of ten equal tiles was the confusion: nothing stood out, so nothing was obvious.
+  { tab: 'myday',     icon: '🌟', title: 'Today',       blurb: 'Your calls and to-do',       primary: true,
     count: () => (typeof callListStock === 'function'
       ? callListStock().length + callListOverdue().length + callListFollowup().length : 0),
     unit: 'to call', warn: (n) => n > 0 },
-  { tab: 'overview',  icon: '📊', title: 'Business',      blurb: 'Targets, leaderboard, reviews',
-    count: () => STATE.delivery ? computeDeliveryAgg(null).retail : 0, unit: 'billed this month' },
-  { tab: 'analytics', icon: '🎯', title: 'Funnel',        blurb: 'Enquiries through to delivery',
-    count: () => (STATE.enquiry || []).length, unit: 'enquiries' },
-  { tab: 'sales',     icon: '🏍️', title: 'Sales',         blurb: 'Deliveries and bookings',
-    count: () => (typeof pendingRows === 'function' ? pendingRows().length : 0), unit: 'pending delivery' },
-  { tab: 'stock',     icon: '📦', title: 'Stock',         blurb: 'What is on the floor, what is booked',
+  { tab: 'sales',     icon: '🏍️', title: 'Sales',       blurb: 'Bookings and deliveries',    primary: true,
+    count: () => (typeof pendingRows === 'function' ? pendingRows().length : 0), unit: 'pending' },
+  { tab: 'stock',     icon: '📦', title: 'Stock',       blurb: 'Bikes on the floor',         primary: true,
     count: () => (STATE.stock || []).filter(r => up(r[17]) !== 'BILLED').length, unit: 'in stock' },
-  { tab: 'pricelist', icon: '💰', title: 'Price List',    blurb: 'On-road prices and quotations',
-    count: () => (STATE.price || []).length, unit: 'models' },
-  { tab: 'customers', icon: '👥', title: 'Customers',     blurb: 'Walk-ins, riders, QR codes' },
-  { tab: 'leads',     icon: '📲', title: 'Lead Follow-up', blurb: 'Meta leads to call back',
+  { tab: 'pricelist', icon: '💰', title: 'Prices',      blurb: 'Price list and quotation',   primary: true },
+
+  { tab: 'overview',  icon: '📊', title: 'Business' },
+  { tab: 'leads',     icon: '📲', title: 'Lead follow-up',
     count: () => LEADS.filter(l => { const d = leadDue(l); return d !== null && d >= 0; }).length,
-    unit: 'due today', warn: (n) => n > 0 },
-  { tab: 'more',      icon: '🗂️', title: 'More',          blurb: 'Model specs and raw data' },
-  { tab: 'control',   icon: '⚙️', title: 'Control Panel', blurb: 'Settings, sign-ins, security' },
+    warn: (n) => n > 0 },
+  { tab: 'customers', icon: '👥', title: 'Customers & QR' },
+  { tab: 'control',   icon: '⚙️', title: 'Admin' },
 ];
 
 function renderHome(){
@@ -7241,9 +7278,13 @@ function renderHome(){
     const btn = document.querySelector(`#tabs button[data-tab="${tab}"]`);
     return btn && btn.style.display !== 'none';
   };
-  grid.innerHTML = HOME_TILES.filter(t => visible(t.tab)).map(t => {
-    let n = null;
-    try { n = t.count ? t.count() : null; } catch (e) { n = null; }
+  const count = (t) => { try { return t.count ? t.count() : null; } catch (e) { return null; } };
+  const shown = HOME_TILES.filter(t => visible(t.tab));
+  const big = shown.filter(t => t.primary);
+  const small = shown.filter(t => !t.primary);
+
+  grid.innerHTML = big.map(t => {
+    const n = count(t);
     const warn = n !== null && t.warn && t.warn(n);
     return `<button class="tile${warn ? ' tile-warn' : ''}" data-go="${t.tab}">
       <div class="tile-icon">${t.icon}</div>
@@ -7252,10 +7293,21 @@ function renderHome(){
       ${n !== null ? `<div class="tile-count">${fmtInt(n)} <span>${esc(t.unit || '')}</span></div>` : ''}
     </button>`;
   }).join('');
+
+  // the rest, as one quiet row of links — reachable, but not competing for attention
+  let row = document.getElementById('homeMore');
+  if (!row) { row = document.createElement('div'); row.id = 'homeMore'; grid.after(row); }
+  row.className = 'home-more';
+  row.innerHTML = small.map(t => {
+    const n = count(t);
+    const warn = n !== null && t.warn && t.warn(n);
+    return `<button class="hm-link${warn ? ' hm-warn' : ''}" data-go="${t.tab}">
+      ${t.icon} ${esc(t.title)}${n ? ` <b>${fmtInt(n)}</b>` : ''}</button>`;
+  }).join('');
 }
 
 document.addEventListener('click', (e) => {
-  const t = e.target.closest('.tile[data-go]');
+  const t = e.target.closest('.tile[data-go], .hm-link[data-go]');
   if (t) switchToTab(t.dataset.go);
 });
 
@@ -10074,8 +10126,7 @@ function exportCsv(filename, headers, rows, maskOpt){
 const TAB_GROUPS = {
   home:      ['home'],                  // the launcher — every section as a tile
   myday:     ['myday'],
-  overview:  ['overview'],                 // "Business"
-  analytics: ['analytics'],                // "Funnel"
+  overview:  ['overview', 'analytics'],    // Business — targets, leaderboard AND the funnel
   sales:     ['delivery', 'booking'],      // one bike's story, start to finish
   stock:     ['pending', 'stock'],         // what's booked against what's on the floor
   pricelist: ['pricelist'],
