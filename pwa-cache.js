@@ -7,7 +7,7 @@
 //
 // The previous version did the opposite — network first — so every single open waited for the
 // full ~300 KB download before showing anything, and the cache only ever helped when offline.
-const CACHE_NAME = 'amar-autos-v2';
+const CACHE_NAME = 'amar-autos-v3';   // bumped: clears every older cached build on activation
 
 // Nothing is pre-listed by filename on purpose. The dashboard page has been renamed before, and
 // a worker that hard-codes the wrong name silently caches nothing at all. Instead every
@@ -41,6 +41,9 @@ self.addEventListener('fetch', (event) => {
     url.hostname.indexOf('ipwho.is') >= 0 ||
     url.hostname.indexOf('onesignal') >= 0;
   if (isLive) return;                       // let the browser handle it normally
+
+  // The page's "am I the latest version?" check must never be answered from the cache.
+  if (url.search.indexOf('buildcheck=') >= 0) return;
 
   // Everything else is the shell: serve the cached copy at once, then refresh it in the
   // background so the next open already has the newer build.
