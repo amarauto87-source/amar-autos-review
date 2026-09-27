@@ -15,11 +15,14 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202609232040';
+  window.__BUILD = '202609271430';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
-    fetch(location.pathname + '?buildcheck=' + Date.now(), { cache: 'no-store' })
+    // Only the first 2 KB are asked for — the build stamp sits near the top. Fetching the whole
+    // 700 KB page on every open just to read one number competed with the data for the phone's
+    // bandwidth. A server that ignores the range simply sends the whole page, which still works.
+    fetch(location.pathname + '?buildcheck=' + Date.now(), { cache: 'no-store', headers: { Range: 'bytes=0-2047' } })
       .then(function (r) { return r.ok ? r.text() : ''; })
       .then(function (html) {
         var m = html.match(/window\.__BUILD = '([0-9]+)'/);
@@ -42,17 +45,28 @@
   // request didn't even leave the phone until everything had been parsed — about 1.8 seconds of
   // doing nothing on a mid-range handset. Kicked off here instead, it travels while the rest of
   // the page is still loading, and the answer is usually waiting by the time the form appears.
-  window.__BOOT = { users: null, waiters: [] };
+  window.__BOOT = { users: null, waiters: [], skipped: false };
   (function () {
     var API = 'https://script.google.com/macros/s/AKfycbyod0g1r7SB5ZQS4bCzPRKi0iQJrpQz67u86fsP9IXhgwlgAQU0JbzagDoEIEQY4xhA/exec';
+    // Someone already signed in never sees the login screen, so the name list is not needed —
+    // skipping it leaves the server free to answer the data request first.
+    var signedIn = false;
+    try {
+      var sv = JSON.parse(localStorage.getItem('amarAutosSession') || 'null');
+      signedIn = !!(sv && sv.token && (!sv.expires || sv.expires > Date.now()));
+    } catch (e) {}
     window.__bootUsers = function (res) {
       window.__BOOT.users = res;
       window.__BOOT.waiters.splice(0).forEach(function (f) { try { f(res); } catch (e) {} });
     };
-    var sc = document.createElement('script');
-    sc.src = API + '?action=users&callback=__bootUsers&_=' + Date.now();
-    sc.onerror = function () { window.__bootUsers(null); };
-    document.head.appendChild(sc);
+    if (signedIn) {
+      window.__BOOT.skipped = true;
+    } else {
+      var sc = document.createElement('script');
+      sc.src = API + '?action=users&callback=__bootUsers&_=' + Date.now();
+      sc.onerror = function () { window.__bootUsers(null); };
+      document.head.appendChild(sc);
+    }
 
     // Registering the cache worker here rather than on "load" — waiting for load meant the very
     // thing that makes later opens fast was itself the last thing to start.
@@ -2425,7 +2439,8 @@
 <!-- OneSignal Web Push SDK — used to subscribe each logged-in employee's own device/browser for
      push notifications, tagged with their name. See the ONESIGNAL_APP_ID note further down for
      why the actual "send" button lives on OneSignal's own dashboard rather than on this page. -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<!-- The SDK itself is loaded a few seconds after sign-in (see loadOneSignal) — as a normal tag it
+     held up the first screen on every open. -->
 
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
@@ -2452,8 +2467,17 @@ OneSignalDeferred.push(async function(OneSignal) {
 // Deepak can target just them from OneSignal's dashboard later, and asks the browser for
 // notification permission. Called once, right as they enter the dashboard. Never blocks the
 // dashboard itself — push is a bonus, not a requirement, so failures here are swallowed.
+function loadOneSignal(){
+  if (window.__osLoaded) return;
+  window.__osLoaded = true;
+  const sc = document.createElement('script');
+  sc.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+  sc.async = true;
+  document.head.appendChild(sc);
+}
 function linkOneSignalIdentity(){
   if (!CURRENT_USER) return;
+  loadOneSignal();
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
     try {
@@ -2694,6 +2718,16 @@ async function askLocation(timeoutMs){
     GEO.reason = r.code === 1 ? 'denied' : r.code === 2 ? 'unavailable' : r.code === 3 ? 'timeout' : 'error';
   }
   return GEO;
+}
+
+// Location is started as soon as someone begins signing in (picks a name or taps the password
+// box), not when they press the button. Finding a position can take several seconds; done this
+// way it happens while the password is being typed, and the button rarely has to wait at all.
+let GEO_PENDING = null;
+function warmLocation(){
+  if (!LOCATION_ON) return Promise.resolve(GEO);
+  if (!GEO_PENDING) GEO_PENDING = askLocation(8000);
+  return GEO_PENDING;
 }
 
 // A short, readable description of the device — enough to tell a phone from the showroom desktop.
@@ -3275,18 +3309,18 @@ function enterDashboard(){
   if (lo) lo.style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
   applyRoleRestrictions();
-  linkOneSignalIdentity();
-  // Reuse whatever the prefetch already fetched; only fall back to a fresh load if it failed.
-  // Charts measured while the shell was hidden would have come out the wrong size, so once it's
-  // visible everything is drawn again — cheap, because no data is fetched a second time.
+  // Something useful on screen at once: the copy of the data saved on this phone last time, or —
+  // on the very first open — the Home tiles with a spinner. The fresh data, already on its way
+  // (prefetch), replaces it silently when it lands.
+  if (!STATE.lastLoaded && !showDataCopy()) {
+    try { renderHome(); } catch (e) {}
+    document.getElementById('loading').style.display = 'flex';
+  }
+  // Push-notification setup loads a large third-party script; it can wait until the page is up.
+  setTimeout(linkOneSignalIdentity, 4000);
   if (PREFETCH) {
-    PREFETCH.then(() => {
-      if (!STATE.lastLoaded) { loadAll(); return; }
-      populateFilters();
-      renderAll();
-      updateStatusLine();
-    });
-  } else loadAll();
+    PREFETCH.then(() => { if (!STATE.lastLoaded) loadAll(); });
+  } else loadAll(!!STATE.fromCopy);
   // Background auto-refresh: silent (no overlay, no scroll jump) and every 15 minutes instead of
   // 5, so it stops interrupting. It also skips refreshing while the tab is hidden and instead
   // refreshes once when the user comes back, so a backgrounded tab isn't hammering the sheet.
@@ -3326,6 +3360,7 @@ populateLoginDropdown();
 // Uses the answer the early request already has, or waits for it — either way no second call.
 (function (handle) {
   const boot = window.__BOOT;
+  if (boot && boot.skipped) return;          // already signed in — the login screen isn't shown
   if (boot && boot.users !== null) return handle(boot.users);
   if (boot) {
     let done = false;
@@ -3379,6 +3414,8 @@ function saveSession(){
 function clearSession(){
   AUTH = { token:null, user:null, expires:0 };
   try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  // the saved copy of the data goes with the session (see saveDataCopy)
+  try { localStorage.removeItem('amarAutosDataCopy'); } catch(e) {}
 }
 // A saved token keeps the person signed in on their own phone until it expires (12 hours by
 // default, set in the Apps Script).
@@ -3415,7 +3452,7 @@ async function attemptLogin(){
   // the sign-in up: eight seconds at most, then the login proceeds with whatever is known.
   if (LOCATION_ON) {
     errEl.textContent = 'Checking location…';
-    await askLocation(8000);
+    await warmLocation();
     // Refusing and simply not getting a fix are different things. Someone standing inside a
     // steel-roofed showroom can allow location and still get nothing — locking them out for that
     // would punish the wrong person. Only an outright refusal stops the sign-in.
@@ -3450,6 +3487,8 @@ async function attemptLogin(){
   }, 25000);
 }
 document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); attemptLogin(); });
+['focus', 'input'].forEach(ev => document.getElementById('loginPass').addEventListener(ev, () => warmLocation(), { once: true }));
+document.getElementById('loginName').addEventListener('change', () => warmLocation(), { once: true });
 // Logout clears the saved session (so this device goes back to asking for a password next time)
 // and reloads — the reload also cleanly stops the 5-minute auto-refresh interval and resets
 // CURRENT_USER/STATE.
@@ -3780,7 +3819,10 @@ function matchModelCode(master, bookingModel, bookingColour){
 }
 
 /* ---------------- data loading ---------------- */
-async function loadAll(silent){
+async function loadAll(silent, opts){
+  // Called straight from an event listener, the first argument is the event — not a flag.
+  if (silent && typeof silent === 'object') silent = false;
+  opts = opts || {};
   // silent = true → background auto-refresh: don't pop the full-screen loading overlay and don't
   // disturb the user's scroll position; just swap the data in and re-render in place. The manual
   // "Force Refresh" and the first load call this normally (overlay shown) so the user gets clear
@@ -3792,7 +3834,11 @@ async function loadAll(silent){
     // to the month being viewed before sending it, so a 14,000-row enquiry sheet arrives as a few
     // hundred rows — faster than the old approach, and the spreadsheet itself stays private.
     const monthParam = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
-    const res = await api({ action:'data', token: AUTH.token, month: monthParam }, 60000);
+    const res = await api({ action:'data', token: AUTH.token, month: monthParam,
+                            fresh: opts.fresh ? '1' : undefined }, 60000);
+    // The month was changed while this was on its way — its answer is no longer wanted.
+    const nowMonth = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
+    if (nowMonth !== monthParam) return;
     if (!res || !res.ok) {
       if (res && res.error === 'AUTH') {   // token expired or invalid — send them back to sign in
         clearSession();
@@ -3801,189 +3847,253 @@ async function loadAll(silent){
       }
       throw new Error((res && (res.message || res.error)) || 'Could not load data');
     }
-    const D = res.data || {};
-    LAST_SHEET_ERROR = {};
-    Object.keys(D).forEach(k => { if (!Array.isArray(D[k]) || D[k].length <= 1) LAST_SHEET_ERROR[k] = 'sheet is empty or missing'; });
-    // The server tells us when a month filter matched nothing because it couldn't read the dates.
-    // That used to show up as a silently blank dashboard; now it says so, with an example of the
-    // date it choked on, so the sheet can be fixed rather than guessed at.
-    DATE_WARNINGS = (res && res.dateWarnings) || {};
-    STATE.settings = res.settings || STATE.settings || {};
-    if (STATE.settings.askLocation === false) {
-      LOCATION_ON = false;
-      try { localStorage.setItem('amarAutosAskLocation', '0'); } catch(e) {}
-    }
-    STATE.serverMonths = Array.isArray(res.months) ? res.months : (STATE.serverMonths || []);
-    // The API sends dates as "yyyy-MM-dd HH:mm:ss" (stable across devices and locales); turn
-    // them back into real Dates here so every existing date helper keeps working unchanged.
-    const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
-    const reviveCell = (v) => {
-      if (typeof v !== 'string') return v;
-      const m = v.match(DATE_RE);
-      if (!m) return v;
-      const d = new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
-      return isNaN(d) ? v : d;
-    };
-    const pick = (name) => Array.isArray(D[name]) ? D[name].map(r => r.map(reviveCell)) : [[]];
-    const booking       = pick('ACTUL BOOKING');
-    const delivery      = pick('DELIVERY SHEET');
-    const enquiry       = pick('enquiry');
-    const review        = pick('Google Review');
-    const riderFb       = pick('RIDER FEEDBACK');
-    const riderReg      = pick('RIDER REGISTRATION');
-    const targets       = pick('Targets');
-    const nameMap       = pick('Name Map');
-    const stock         = pick('Stock');
-    const enqStatement  = pick('ENQUIRY STATMENT');
-    const bookingMsd    = pick('BOOKING MSD');
-    const walkin        = pick('ACTUL WALKIN');
-    const enqView       = pick('ENQUIRY STATMENT VIEW');
-    const turnSheet     = pick('TURN');
-    const walkinEntry   = pick('REGISTER');
-    const monthlyTargets= pick('MONTHLY TARGETS');
-    const priceSheet    = pick('PRICE');
-
-    STATE.booking = booking.slice(1).filter(r => str(r[1]));
-    STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
-    // Keep any row that carries identifying data. (Column A is sometimes blank in exports, so
-    // requiring it silently dropped whole sheets and left reports empty.)
-    STATE.enquiryHeader = enquiry[0] || [];
-    _ENQ_COLS = null;                       // layout may have changed since the last load
-    {
-      const EC = enqCols();
-      STATE.enquiry = enquiry.slice(1).filter(r =>
-        str(r[EC.enqNo]) || str(r[EC.mobile]) || str(r[EC.owner]) || str(r[EC.created]));
-    }
-    STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
-    STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
-    STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
-    // Targets and Name Map both have a few title/instruction rows above the real data (a title,
-    // an instructions line, a column-header row). We used to skip a FIXED number of rows
-    // (slice(4)) to get past those — but if Deepak ever adds/removes a row at the top of either
-    // sheet (a blank line, an extra note), that fixed count goes stale and silently eats the
-    // first real data row instead (this is exactly what caused ASLAM — always the first row in
-    // both sheets — to vanish from the Executive filter and get a ₹0 target: the real sheet
-    // currently has 3 header rows, not 4, so slice(4) was dropping his row).
-    // Filter by CONTENT instead — much more robust against the sheet's top rows shifting.
-    const TARGETS_HEADER_MARKERS = ['EXECUTIVE', 'TOTAL'];
-    STATE.targets = targets.filter(r => {
-      const name = str(r[0]);
-      if (!name) return false; // blank rows, and rows whose only content is in a later column
-      const upn = up(name);
-      if (TARGETS_HEADER_MARKERS.includes(upn)) return false; // "Executive" header label / TOTAL row (added back in separately by callers that want it)
-      if (name.startsWith('🎯') || upn.startsWith('ENTER EACH')) return false; // title / instructions row
-      return true;
-    }).filter(r => up(r[0]) !== 'TOTAL');
-    // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
-    // Price list rows (header row skipped by content, like the other sheets).
-    STATE.price = (priceSheet || []).filter(r => str(r[0]).trim() && !/^MODEL$/i.test(str(r[0]).trim()));
-
-    // Alias table: from the separate "Name Map" sheet if present, AND from the one-sheet TARGET
-    // layout. In the single sheet the block starts at whichever column is headed "NAME" (normally
-    // T), with the ID columns to its right — so the block can be moved without breaking anything.
-    STATE.nameMapRaw = (nameMap || []).filter(r => str(r[0]));
-    {
-      const rows = (monthlyTargets || []);
-      // locate the NAME header cell anywhere in the sheet (skip column A, that's the month)
-      let nameCol = -1, headerRowIdx = -1;
-      rows.forEach((r, ri) => {
-        if (nameCol >= 0) return;
-        for (let c = 1; c < (r ? r.length : 0); c++) {
-          if (up(str(r[c])).trim() === 'NAME') { nameCol = c; headerRowIdx = ri; return; }
-        }
-      });
-      if (nameCol >= 0) {
-        rows.forEach((r, ri) => {
-          if (ri === headerRowIdx) return;                 // that's the header line
-          const nm = str(r[nameCol]);
-          if (!nm || up(nm) === 'NAME') return;
-          const ids = [];
-          for (let c = nameCol + 1; c <= nameCol + 6; c++) ids.push(str(r[c]));
-          STATE.nameMapRaw.push([nm, ...ids]);
-        });
-      }
-    }
-    _ALIAS_TO_CANON = null; // rebuild alias lookup on next use
-    STATE.nameMap = nameMap.filter(r => {
-      const owner = str(r[1]);
-      if (!owner) return false;
-      const upo = up(owner);
-      if (upo.includes('OWNER NAME') || upo.includes('SALES EXECUTIVE')) return false; // header row
-      if (upo.includes('ENQUIRY OWNER') || upo.startsWith('THE ENQUIRY SHEET')) return false; // title / instructions row
-      return true;
-    }).filter(r => str(r[2])); // only rows where the mapped Sales Executive (column C) is actually filled in
-    STATE.stock = stock.slice(1).filter(r => str(r[12]));
-    // ENQUIRY STATMENT / BOOKING MSD are Royal Enfield's own system data (imported live via
-    // IMPORTRANGE from RE's dealer portal, not filled in by hand by the sales team) — dealership
-    // wide, no sales-executive column, so they're not filtered by exec anywhere. Row 0 is the
-    // header row on both sheets, same as the other sheets.
-    STATE.enqStatement = enqStatement.slice(1).filter(r => str(r[0]));
-    STATE.bookingMsd = bookingMsd.slice(1).filter(r => str(r[0]));
-    // ACTUL WALKIN: hand-filled log of showroom walk-ins. Columns: Date | Sales Person | Customer |
-    // Mobile. Row 0 is the header. Keep only rows that actually have a customer + mobile, since the
-    // walk-in-vs-enquiry match is done on the mobile number. Used ONLY by the two new Overview
-    // tables (renderWalkinChecks) — nowhere else in the dashboard.
-    STATE.walkin = walkin.slice(1).filter(r => str(r[2]) || str(r[3]));
-    // Walk-in Check tool data (Ajeet's login). ENQUIRY STATMENT VIEW = RE portal view with the
-    // Owner (sales person) column, used to detect repeat customers. TURN = daily roster. WALKIN
-    // ENTRY = entries Ajeet saves through the tool (read back so sales/admin can see them).
-    // ENQUIRY STATMENT VIEW. gviz may or may not hand back the header row, so decide by content:
-    // a header row is one whose cells are the column titles. We keep it to resolve columns by NAME
-    // (positions shift when Google drops/adds columns), and treat everything else as data.
-    {
-      const evAll = (enqView || []);
-      const looksLikeHeader = (r) => r && (up(str(r[0])) === 'ENQ NUMBER' || r.some(c => /ENQ NUMBER|MOBILE PHONE|PREVIOUS CALL REMARK/i.test(str(c))));
-      STATE.enqViewHeader = evAll.find(looksLikeHeader) || [];
-      STATE.enqView = evAll.filter(r => !looksLikeHeader(r));
-      _EV_COLS = null; // recompute column positions from the header
-    }
-    STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
-    STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
-    // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
-    // Admin-set monthly targets. IMPORTANT: gviz sometimes swallows the first row as "headers"
-    // and sometimes returns it as data — so we must NOT blindly skip row 1. Instead we decide by
-    // content: a DATA row is one whose column A resolves to a month (or that carries per-employee
-    // numbers in K–R); anything else is treated as the header row (which holds the K–R names).
-    {
-      const mtAll = (monthlyTargets || []);
-      const hasEmpNums = (r) => { for (let c = 10; c <= 17; c++) { const v = r && r[c]; if (v !== '' && v != null && isFinite(Number(v))) return true; } return false; };
-      const isDataRow = (r) => !!normMonthKey(r && r[0]) || hasEmpNums(r);
-      STATE.monthlyTargets = mtAll.filter(isDataRow);
-      STATE.monthlyTargetsHeader = mtAll.find(r => !isDataRow(r)) || [];
-      _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
-    }
-    try {
-      // Browser backup is ONLY a fallback for months the sheet doesn't have. The sheet is the
-      // source of truth, so a stale browser copy must never hide the real sheet numbers.
-      const saved = JSON.parse(lsGet('monthlyTargets') || '{}');
-      Object.values(saved).forEach(row => {
-        const exists = STATE.monthlyTargets.some(r => normMonthKey(r[0]) === normMonthKey(row[0]));
-        if (!exists) STATE.monthlyTargets.push(row); // only add months the sheet is missing
-      });
-    } catch(e) {}
-
-    // People who have left — kept out of the executive list, leaderboard, filters and targets.
-    // (Their past deliveries still sit in the sheets; this only hides them as active consultants.)
-    STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean).filter(n => !EX_EMPLOYEES.has(n));
-    buildMonthList();
-    populateFilters();
-    STATE.initialized = true;
-    STATE.lastLoaded = new Date();
-    // On a silent background refresh, keep the user exactly where they were — save the scroll
-    // position, re-render, then restore it, so a background update never yanks the page around.
-    const savedScroll = silent ? window.scrollY : null;
-    renderAll();
-    renderDataHealthBanner();
-    updateStatusLine();
-    if (silent && savedScroll != null) window.scrollTo(0, savedScroll);
+    applyData(res, silent);
+    saveDataCopy(monthParam, res);
   } catch (err) {
     console.error(err);
-    document.getElementById('errorBox').innerHTML =
-      `<div class="error-box"><strong>Couldn't load data.</strong> ${esc(err.message || String(err))}<br/>
-      Make sure the Google Sheet is shared as "Anyone with the link — Viewer" (File → Share), then hit Refresh.</div>`;
+    if (STATE.fromCopy) {
+      // A saved copy is already on screen — say it's not fresh, but don't wipe it with an error.
+      document.getElementById('errorBox').innerHTML =
+        `<div class="error-box"><strong>Showing saved data — could not reach the server just now.</strong> ${esc(err.message || String(err))}. It will try again automatically, or press Force Refresh.</div>`;
+    } else {
+      document.getElementById('errorBox').innerHTML =
+        `<div class="error-box"><strong>Couldn't load data.</strong> ${esc(err.message || String(err))}<br/>
+        Make sure the Google Sheet is shared as "Anyone with the link — Viewer" (File → Share), then hit Refresh.</div>`;
+    }
   } finally {
     document.getElementById('loading').style.display = 'none';
   }
+}
+
+// ── Saved copy of the last data, kept on this phone ─────────────────────────────────────────
+// The sheet takes several seconds to answer. Instead of a blank screen for that long, the
+// dashboard opens straight away on the copy it received last time, and the fresh numbers replace
+// it silently a few seconds later. The copy belongs to whoever is signed in and is deleted at
+// logout, so a shared device never shows one person's data to the next.
+const DATA_COPY_KEY = 'amarAutosDataCopy';
+const DATA_COPY_MAX_AGE = 3 * 24 * 3600 * 1000;
+function saveDataCopy(month, res){
+  try {
+    const who = CURRENT_USER && CURRENT_USER.name;
+    if (!who) return;
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(DATA_COPY_KEY) || '{}'); } catch(e) {}
+    if (!all || all.user !== who) all = { user: who, months: {} };
+    all.months[month] = { at: Date.now(), res };
+    // keep the three most recently viewed months at most
+    const keys = Object.keys(all.months).sort((a, b) => all.months[b].at - all.months[a].at);
+    keys.slice(3).forEach(k => delete all.months[k]);
+    const txt = JSON.stringify(all);
+    try { localStorage.setItem(DATA_COPY_KEY, txt); }
+    catch (e) {   // phone storage full — keep just this month
+      localStorage.setItem(DATA_COPY_KEY, JSON.stringify({ user: who, months: { [month]: all.months[month] } }));
+    }
+  } catch (e) {}
+}
+function readDataCopy(month){
+  try {
+    const all = JSON.parse(localStorage.getItem(DATA_COPY_KEY) || 'null');
+    if (!all || !CURRENT_USER || all.user !== CURRENT_USER.name) return null;
+    const c = all.months && all.months[month];
+    if (!c || !c.res || !c.res.ok || (Date.now() - c.at) > DATA_COPY_MAX_AGE) return null;
+    return c;
+  } catch (e) { return null; }
+}
+// Put the saved copy on screen. Returns true when there was one to show.
+function showDataCopy(){
+  const monthParam = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
+  const c = readDataCopy(monthParam);
+  if (!c) return false;
+  try {
+    applyData(c.res, false, { fromCopy: true, copyAt: new Date(c.at) });
+    // The full-screen "Loading live data" cover is up from the moment the page starts; with the
+    // saved copy on screen there is nothing to wait for, so it goes. The status line under the
+    // header says the fresh data is still on its way.
+    document.getElementById('loading').style.display = 'none';
+    return true;
+  } catch (e) { console.error(e); STATE.fromCopy = false; return false; }
+}
+
+// Turns a server answer into STATE and draws everything. Used for fresh data and for the saved copy.
+function applyData(res, silent, meta){
+  meta = meta || {};
+  const D = res.data || {};
+  LAST_SHEET_ERROR = {};
+  Object.keys(D).forEach(k => { if (!Array.isArray(D[k]) || D[k].length <= 1) LAST_SHEET_ERROR[k] = 'sheet is empty or missing'; });
+  // The server tells us when a month filter matched nothing because it couldn't read the dates.
+  // That used to show up as a silently blank dashboard; now it says so, with an example of the
+  // date it choked on, so the sheet can be fixed rather than guessed at.
+  DATE_WARNINGS = (res && res.dateWarnings) || {};
+  STATE.settings = res.settings || STATE.settings || {};
+  if (STATE.settings.askLocation === false) {
+    LOCATION_ON = false;
+    try { localStorage.setItem('amarAutosAskLocation', '0'); } catch(e) {}
+  }
+  STATE.serverMonths = Array.isArray(res.months) ? res.months : (STATE.serverMonths || []);
+  // The API sends dates as "yyyy-MM-dd HH:mm:ss" (stable across devices and locales); turn
+  // them back into real Dates here so every existing date helper keeps working unchanged.
+  const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+  const reviveCell = (v) => {
+    if (typeof v !== 'string') return v;
+    const m = v.match(DATE_RE);
+    if (!m) return v;
+    const d = new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    return isNaN(d) ? v : d;
+  };
+  const pick = (name) => Array.isArray(D[name]) ? D[name].map(r => r.map(reviveCell)) : [[]];
+  const booking       = pick('ACTUL BOOKING');
+  const delivery      = pick('DELIVERY SHEET');
+  const enquiry       = pick('enquiry');
+  const review        = pick('Google Review');
+  const riderFb       = pick('RIDER FEEDBACK');
+  const riderReg      = pick('RIDER REGISTRATION');
+  const targets       = pick('Targets');
+  const nameMap       = pick('Name Map');
+  const stock         = pick('Stock');
+  const enqStatement  = pick('ENQUIRY STATMENT');
+  const bookingMsd    = pick('BOOKING MSD');
+  const walkin        = pick('ACTUL WALKIN');
+  const enqView       = pick('ENQUIRY STATMENT VIEW');
+  const turnSheet     = pick('TURN');
+  const walkinEntry   = pick('REGISTER');
+  const monthlyTargets= pick('MONTHLY TARGETS');
+  const priceSheet    = pick('PRICE');
+
+  STATE.booking = booking.slice(1).filter(r => str(r[1]));
+  STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
+  // Keep any row that carries identifying data. (Column A is sometimes blank in exports, so
+  // requiring it silently dropped whole sheets and left reports empty.)
+  STATE.enquiryHeader = enquiry[0] || [];
+  _ENQ_COLS = null;                       // layout may have changed since the last load
+  {
+    const EC = enqCols();
+    STATE.enquiry = enquiry.slice(1).filter(r =>
+      str(r[EC.enqNo]) || str(r[EC.mobile]) || str(r[EC.owner]) || str(r[EC.created]));
+  }
+  STATE.review = review.slice(1).filter(r => str(r[0]) || str(r[3]));
+  STATE.riderFb = riderFb.slice(1).filter(r => str(r[1]));
+  STATE.riderReg = riderReg.slice(1).filter(r => str(r[1]));
+  // Targets and Name Map both have a few title/instruction rows above the real data (a title,
+  // an instructions line, a column-header row). We used to skip a FIXED number of rows
+  // (slice(4)) to get past those — but if Deepak ever adds/removes a row at the top of either
+  // sheet (a blank line, an extra note), that fixed count goes stale and silently eats the
+  // first real data row instead (this is exactly what caused ASLAM — always the first row in
+  // both sheets — to vanish from the Executive filter and get a ₹0 target: the real sheet
+  // currently has 3 header rows, not 4, so slice(4) was dropping his row).
+  // Filter by CONTENT instead — much more robust against the sheet's top rows shifting.
+  const TARGETS_HEADER_MARKERS = ['EXECUTIVE', 'TOTAL'];
+  STATE.targets = targets.filter(r => {
+    const name = str(r[0]);
+    if (!name) return false; // blank rows, and rows whose only content is in a later column
+    const upn = up(name);
+    if (TARGETS_HEADER_MARKERS.includes(upn)) return false; // "Executive" header label / TOTAL row (added back in separately by callers that want it)
+    if (name.startsWith('🎯') || upn.startsWith('ENTER EACH')) return false; // title / instructions row
+    return true;
+  }).filter(r => up(r[0]) !== 'TOTAL');
+  // Raw Name Map rows — used by the alias table (column A = real name, B..E = IDs/spellings).
+  // Price list rows (header row skipped by content, like the other sheets).
+  STATE.price = (priceSheet || []).filter(r => str(r[0]).trim() && !/^MODEL$/i.test(str(r[0]).trim()));
+
+  // Alias table: from the separate "Name Map" sheet if present, AND from the one-sheet TARGET
+  // layout. In the single sheet the block starts at whichever column is headed "NAME" (normally
+  // T), with the ID columns to its right — so the block can be moved without breaking anything.
+  STATE.nameMapRaw = (nameMap || []).filter(r => str(r[0]));
+  {
+    const rows = (monthlyTargets || []);
+    // locate the NAME header cell anywhere in the sheet (skip column A, that's the month)
+    let nameCol = -1, headerRowIdx = -1;
+    rows.forEach((r, ri) => {
+      if (nameCol >= 0) return;
+      for (let c = 1; c < (r ? r.length : 0); c++) {
+        if (up(str(r[c])).trim() === 'NAME') { nameCol = c; headerRowIdx = ri; return; }
+      }
+    });
+    if (nameCol >= 0) {
+      rows.forEach((r, ri) => {
+        if (ri === headerRowIdx) return;                 // that's the header line
+        const nm = str(r[nameCol]);
+        if (!nm || up(nm) === 'NAME') return;
+        const ids = [];
+        for (let c = nameCol + 1; c <= nameCol + 6; c++) ids.push(str(r[c]));
+        STATE.nameMapRaw.push([nm, ...ids]);
+      });
+    }
+  }
+  _ALIAS_TO_CANON = null; // rebuild alias lookup on next use
+  STATE.nameMap = nameMap.filter(r => {
+    const owner = str(r[1]);
+    if (!owner) return false;
+    const upo = up(owner);
+    if (upo.includes('OWNER NAME') || upo.includes('SALES EXECUTIVE')) return false; // header row
+    if (upo.includes('ENQUIRY OWNER') || upo.startsWith('THE ENQUIRY SHEET')) return false; // title / instructions row
+    return true;
+  }).filter(r => str(r[2])); // only rows where the mapped Sales Executive (column C) is actually filled in
+  STATE.stock = stock.slice(1).filter(r => str(r[12]));
+  // ENQUIRY STATMENT / BOOKING MSD are Royal Enfield's own system data (imported live via
+  // IMPORTRANGE from RE's dealer portal, not filled in by hand by the sales team) — dealership
+  // wide, no sales-executive column, so they're not filtered by exec anywhere. Row 0 is the
+  // header row on both sheets, same as the other sheets.
+  STATE.enqStatement = enqStatement.slice(1).filter(r => str(r[0]));
+  STATE.bookingMsd = bookingMsd.slice(1).filter(r => str(r[0]));
+  // ACTUL WALKIN: hand-filled log of showroom walk-ins. Columns: Date | Sales Person | Customer |
+  // Mobile. Row 0 is the header. Keep only rows that actually have a customer + mobile, since the
+  // walk-in-vs-enquiry match is done on the mobile number. Used ONLY by the two new Overview
+  // tables (renderWalkinChecks) — nowhere else in the dashboard.
+  STATE.walkin = walkin.slice(1).filter(r => str(r[2]) || str(r[3]));
+  // Walk-in Check tool data (Ajeet's login). ENQUIRY STATMENT VIEW = RE portal view with the
+  // Owner (sales person) column, used to detect repeat customers. TURN = daily roster. WALKIN
+  // ENTRY = entries Ajeet saves through the tool (read back so sales/admin can see them).
+  // ENQUIRY STATMENT VIEW. gviz may or may not hand back the header row, so decide by content:
+  // a header row is one whose cells are the column titles. We keep it to resolve columns by NAME
+  // (positions shift when Google drops/adds columns), and treat everything else as data.
+  {
+    const evAll = (enqView || []);
+    const looksLikeHeader = (r) => r && (up(str(r[0])) === 'ENQ NUMBER' || r.some(c => /ENQ NUMBER|MOBILE PHONE|PREVIOUS CALL REMARK/i.test(str(c))));
+    STATE.enqViewHeader = evAll.find(looksLikeHeader) || [];
+    STATE.enqView = evAll.filter(r => !looksLikeHeader(r));
+    _EV_COLS = null; // recompute column positions from the header
+  }
+  STATE.turn = (turnSheet || []).slice(1).filter(r => str(r[0]) && str(r[2]));
+  STATE.walkinEntry = (walkinEntry || []).slice(1).filter(r => str(r[2])); // has a mobile
+  // Admin-set monthly targets: Month(0) Retail(1) Booking(2) EW%(3) RSA%(4) GMA/bike(5) Gear/exec(6) Rider(7)
+  // Admin-set monthly targets. IMPORTANT: gviz sometimes swallows the first row as "headers"
+  // and sometimes returns it as data — so we must NOT blindly skip row 1. Instead we decide by
+  // content: a DATA row is one whose column A resolves to a month (or that carries per-employee
+  // numbers in K–R); anything else is treated as the header row (which holds the K–R names).
+  {
+    const mtAll = (monthlyTargets || []);
+    const hasEmpNums = (r) => { for (let c = 10; c <= 17; c++) { const v = r && r[c]; if (v !== '' && v != null && isFinite(Number(v))) return true; } return false; };
+    const isDataRow = (r) => !!normMonthKey(r && r[0]) || hasEmpNums(r);
+    STATE.monthlyTargets = mtAll.filter(isDataRow);
+    STATE.monthlyTargetsHeader = mtAll.find(r => !isDataRow(r)) || [];
+    _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
+  }
+  try {
+    // Browser backup is ONLY a fallback for months the sheet doesn't have. The sheet is the
+    // source of truth, so a stale browser copy must never hide the real sheet numbers.
+    const saved = JSON.parse(lsGet('monthlyTargets') || '{}');
+    Object.values(saved).forEach(row => {
+      const exists = STATE.monthlyTargets.some(r => normMonthKey(r[0]) === normMonthKey(row[0]));
+      if (!exists) STATE.monthlyTargets.push(row); // only add months the sheet is missing
+    });
+  } catch(e) {}
+
+  // People who have left — kept out of the executive list, leaderboard, filters and targets.
+  // (Their past deliveries still sit in the sheets; this only hides them as active consultants.)
+  STATE.execList = STATE.targets.map(r => up(r[0])).filter(Boolean).filter(n => !EX_EMPLOYEES.has(n));
+  buildMonthList();
+  populateFilters();
+  STATE.initialized = true;
+  STATE.fromCopy = !!meta.fromCopy;
+  STATE.lastLoaded = meta.fromCopy ? (meta.copyAt || new Date()) : new Date();
+  if (!meta.fromCopy) { const eb = document.getElementById('errorBox'); if (eb) eb.innerHTML = ''; }
+  // On a silent background refresh, keep the user exactly where they were — save the scroll
+  // position, re-render, then restore it, so a background update never yanks the page around.
+  const savedScroll = silent ? window.scrollY : null;
+  renderAll({ split: !silent });
+  renderDataHealthBanner();
+  updateStatusLine();
+  if (silent && savedScroll != null) window.scrollTo(0, savedScroll);
 }
 
 function buildMonthList(){
@@ -4070,7 +4180,8 @@ document.getElementById('dayFilterClearBtn').addEventListener('click', () => {
   renderAll(); renderDataHealthBanner(); updateStatusLine();
 });
 document.getElementById('execFilter').addEventListener('change', e => { STATE.filterExec = e.target.value; renderAll(); renderDataHealthBanner(); });
-document.getElementById('refreshBtn').addEventListener('click', loadAll);
+// "Force Refresh" skips the server's short-term copy and reads the sheet itself.
+document.getElementById('refreshBtn').addEventListener('click', () => loadAll(false, { fresh: true }));
 // One-click "show everything" — a non-techie sales person doesn't need to understand month
 // filters to see their own numbers; this just resets the month filter to ALL and re-renders.
 document.getElementById('allMonthsBtn').addEventListener('click', () => {
@@ -4152,8 +4263,11 @@ function updateStatusLine(){
   const filterText = dayRange
     ? (STATE.dayFilterTo ? `Day filter: ${fmtShort(dayRange.from)} – ${fmtShort(dayRange.to)}` : `Day filter: ${fmtShort(dayRange.from)}`)
     : (STATE.filterMonth === 'ALL' ? 'All Months' : 'Month filter active');
+  const when = STATE.fromCopy
+    ? `Saved copy from ${STATE.lastLoaded.toLocaleString('en-IN', { day:'numeric', month:'short', hour:'numeric', minute:'2-digit' })} — updating…`
+    : `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')}`;
   document.getElementById('statusLine').textContent =
-    `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')} · auto-refreshes every 15 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
+    `${when} · auto-refreshes every 15 min · ${filterText} · ${STATE.booking.length} bookings · ${STATE.delivery.length} deliveries · ${STATE.enquiry.length} enquiries · ${STATE.review.length} reviews · ${STATE.riderReg.length} riders registered · ${STATE.riderFb.length} feedback entries · ${STATE.stock.length} bikes in stock`;
 }
 // Turn a cell into a Date. Already-parsed Dates pass through; text dates like "01-09-2026 10:30",
 // "1/9/2026" or "2026-09-01" are parsed here, because some exports send them as plain strings.
@@ -4268,35 +4382,33 @@ function ownerInFilter(owner){
 }
 
 /* ---------------- render orchestrator ---------------- */
-function renderAll(){
-  renderMyDay();
-  renderDashboard();
-  renderTodayPriorities();
-  renderStorePerformance();
-  renderSalesConsole();
-  renderFunnelSteps();
-  renderSpotlight();
-  renderPipeline();
-  renderPersonalTarget();
-  renderChampions();
-  renderEmployeeTable();
-  renderFunnel();
-  renderReviews();
-  renderWalkinChecks();
-  renderDelivery();
-  renderPending();
-  renderStock();
-  renderRiders();
-  renderModelSpecs();
-  renderAnalytics();
-  renderWalkinLog();
-  renderPaymentMode();
-  renderHome();
-  renderMyAttach();
-  renderCallList();
-  renderPriceList();
-  renderTargetVsActual();
-  if (CURRENT_USER && CURRENT_USER.role === 'Admin') prefillTargets();
+// Every panel is drawn from STATE. One panel failing must not leave all the others blank, so each
+// is drawn on its own. With split, only the screens someone sees first (Home, My Day) are drawn
+// straight away; the rest follow in small batches a moment later, so the phone shows something
+// immediately instead of freezing until all thirty panels are built.
+const RENDER_FIRST = [renderHome, renderMyDay, renderMyAttach, renderCallList, renderTodayPriorities, renderPersonalTarget];
+const RENDER_REST = [renderDashboard, renderStorePerformance, renderSalesConsole, renderFunnelSteps, renderSpotlight, renderPipeline, renderChampions, renderEmployeeTable, renderFunnel, renderReviews, renderWalkinChecks, renderDelivery, renderPending, renderStock, renderRiders, renderModelSpecs, renderAnalytics, renderWalkinLog, renderPaymentMode, renderPriceList, renderTargetVsActual];
+let _renderGen = 0;
+function runRenderers(list){
+  list.forEach(f => {
+    try { f(); } catch (e) { console.error(f.name, e); }
+  });
+}
+function renderAll(opts){
+  const gen = ++_renderGen;
+  runRenderers(RENDER_FIRST);
+  const finish = () => { if (CURRENT_USER && CURRENT_USER.role === 'Admin') { try { prefillTargets(); } catch (e) {} } };
+  if (!(opts && opts.split)) { runRenderers(RENDER_REST); finish(); return; }
+  const batches = [];
+  for (let k = 0; k < RENDER_REST.length; k += 5) batches.push(RENDER_REST.slice(k, k + 5));
+  const next = () => {
+    if (gen !== _renderGen) return;            // a newer draw has started — this one is stale
+    const b = batches.shift();
+    if (!b) { finish(); return; }
+    runRenderers(b);
+    setTimeout(next, 0);
+  };
+  setTimeout(next, 0);
 }
 
 /* ══ Dashboard tab — showroom wall-display, driven by the same live data ═══════
@@ -7283,7 +7395,8 @@ function renderHome(){
 
   // the two or three things that actually need doing today, above the tiles
   const alerts = document.getElementById('homeAlerts');
-  if (alerts) {
+  if (alerts && !STATE.initialized) alerts.innerHTML = '';
+  else if (alerts) {
     const items = (typeof computeTodayPriorities === 'function' ? computeTodayPriorities() : [])
       .filter(x => x && x.cls === 'urgent').slice(0, 3);
     alerts.innerHTML = items.length
@@ -7295,7 +7408,8 @@ function renderHome(){
     const btn = document.querySelector(`#tabs button[data-tab="${tab}"]`);
     return btn && btn.style.display !== 'none';
   };
-  const count = (t) => { try { return t.count ? t.count() : null; } catch (e) { return null; } };
+  // Before the first data arrives the tiles are shown without numbers — a "0" there would be wrong.
+  const count = (t) => { if (!STATE.initialized) return null; try { return t.count ? t.count() : null; } catch (e) { return null; } };
   const shown = HOME_TILES.filter(t => visible(t.tab));
   const big = shown.filter(t => t.primary);
   const small = shown.filter(t => !t.primary);
