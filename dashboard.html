@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610052330';
+  window.__BUILD = '202610052350';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -518,6 +518,10 @@
     width: 100%; max-width: 920px; max-height: 82vh; overflow: hidden;
     display: flex; flex-direction: column; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
   }
+  /* The theme's card colour is see-through; a popup full of names and numbers must not show the
+     page behind it, so it gets the solid field colour and the page behind is blurred. */
+  .modal-card { background: var(--field-bg); }
+  .modal-backdrop { background: rgba(0,0,0,0.72); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
   .modal-head {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     padding: 14px 18px; border-bottom: 1px solid var(--border);
@@ -1629,6 +1633,9 @@
   .fs-week .fw-bad { font-size:11.5px; color:var(--critical); font-weight:600; }
   .fs-week .fw-ok { font-size:11.5px; color:var(--good); }
   .fs-week.fest { border-color:var(--gold-dim); }
+  .fs-click { cursor:pointer; transition: transform .12s, border-color .12s, box-shadow .12s; }
+  .fs-click:hover, .fs-click:focus-visible { border-color:var(--gold) !important; transform:translateY(-1px);
+    box-shadow:0 6px 18px -10px rgba(0,0,0,.6); outline:none; }
   .fs-act { display:inline-block; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; border:1px solid currentColor; }
   .fs-act.order { color:var(--critical); }
   .fs-act.hold  { color:var(--warning); }
@@ -4000,22 +4007,28 @@ function renderFestiveShield(){
     const end = new Date(w.getTime() + 6 * 86400000);
     const inWeek = bookings.filter(b => b.tdd && b.tdd >= w && b.tdd <= new Date(end.getTime() + 86399000));
     const fest = FESTIVE_DATES.some(f => { const d = festiveDate(f.key); return d >= w && d <= end; });
-    weeks.push({ w, end, n: inWeek.length, noBike: inWeek.filter(b => !b.bike).length, fest });
+    weeks.push({ w, end, n: inWeek.length, noBike: inWeek.filter(b => !b.bike).length, fest, list: inWeek });
   }
   const overdueTdd = bookings.filter(b => b.tdd && b.tdd < weekStart);
   const noTdd = bookings.filter(b => !b.tdd);
   const fmtShort = d => d.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
-  const weekCell = (lbl, n, bad, fest) => `<div class="fs-week${fest ? ' fest' : ''}">
+  // Every box opens its own list (see openFestiveDetail) — the lists are kept here for that.
+  const lists = {};
+  const weekCell = (lbl, n, bad, fest, key, list) => { lists[key] = { title: /^w\d/.test(key) ? 'Deliveries due ' + lbl.replace(/^🪔\s*/, '') : lbl, list }; return `<div class="fs-week fs-click${fest ? ' fest' : ''}" role="button" tabindex="0" data-fs="${key}" title="Click to see these bookings">`;
+  };
+  const weekCellBody = (lbl, n, bad) => `
       <div class="fw-lbl">${lbl}</div><div class="fw-n">${fmtInt(n)}</div>
       ${n ? (bad ? `<div class="fw-bad">${fmtInt(bad)} without a bike</div>` : `<div class="fw-ok">all have a bike</div>`) : '<div class="fw-lbl">no deliveries due</div>'}
     </div>`;
+  const cell = (lbl, list, fest, key) => weekCell(lbl, list.length, 0, fest, key, list) +
+    weekCellBody(lbl, list.length, list.filter(b => !b.bike).length);
   document.getElementById('fsTimeline').innerHTML =
     `<div class="fs-timeline">${miles}</div>
      <div class="empty-note" style="text-align:left;padding:12px 0 0;">Deliveries promised (TDD) per week — 🪔 marks a festival week:</div>
      <div class="fs-weeks">
-       ${overdueTdd.length ? weekCell('Already past TDD', overdueTdd.length, overdueTdd.filter(b => !b.bike).length, false) : ''}
-       ${weeks.map(x => weekCell(`${x.fest ? '🪔 ' : ''}${fmtShort(x.w)} – ${fmtShort(x.end)}`, x.n, x.noBike, x.fest)).join('')}
-       ${noTdd.length ? weekCell('No TDD written', noTdd.length, noTdd.filter(b => !b.bike).length, false) : ''}
+       ${overdueTdd.length ? cell('Already past TDD', overdueTdd, false, 'past') : ''}
+       ${weeks.map((x, i) => cell(`${x.fest ? '🪔 ' : ''}${fmtShort(x.w)} – ${fmtShort(x.end)}`, x.list, x.fest, 'w' + i)).join('')}
+       ${noTdd.length ? cell('No TDD written', noTdd, false, 'notdd') : ''}
      </div>`;
 
   // ── headline numbers ──
@@ -4037,6 +4050,21 @@ function renderFestiveShield(){
     ...(bookings.some(b => b.typo) ? [kpiCard('Colour spelling to fix', fmtInt(bookings.filter(b => b.typo).length), 'matched anyway — see ✏️ in the hold list')] : []),
     kpiCard('Colours fully booked', fmtInt(fullyBooked), 'none of these may go to a walk-in', null, fullyBooked ? 'Do not sell' : null),
   ].join('');
+  // Same order as the cards above; each one opens its own list.
+  lists.all     = { title: 'Open bookings', list: bookings };
+  lists.held    = { title: 'Bike held on the floor — tag these, do not sell', list: bookings.filter(b => b.bike && b.bike.open) };
+  lists.transit = { title: 'Bike in transit — already promised', list: bookings.filter(b => b.bike && !b.bike.open) };
+  lists.none    = { title: 'No bike yet — order or transfer', list: bookings.filter(b => !b.bike) };
+  lists.free    = { title: 'Free to sell now — oldest first', kind: 'free', list: pool.filter(p => p.open && !p.booking) };
+  lists.typo    = { title: 'Colour spelt differently from stock — correct it in the booking sheet', list: bookings.filter(b => b.typo) };
+  lists.fully   = { title: 'Colours fully booked — none may go to a walk-in', kind: 'fully', list: pool.filter(p => p.open) };
+  const kpiKeys = ['all', 'held', 'transit', 'none', 'free'].concat(bookings.some(b => b.typo) ? ['typo'] : []).concat(['fully']);
+  document.querySelectorAll('#fsKpis .kpi-card').forEach((card, i) => {
+    const k = kpiKeys[i]; if (!k) return;
+    card.dataset.fs = k; card.classList.add('fs-click');
+    card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0'); card.title = 'Click to see the list';
+  });
+  STATE.festiveLists = lists;
 
   // ── sell or hold, per model & colour ──
   const groups = {};
@@ -4147,6 +4175,55 @@ function renderFestiveShield(){
     { key:'transitFree', label:'Free in transit', num:true },
     { key:'order', label:'Suggested order', num:true, raw:true, fmt: v => v ? `<span class="table-flag">${fmtInt(v)}</span>` : '0' },
   ], orderRows);
+}
+
+// One popup for every box and card in this section, so the detail is one tap away.
+function openFestiveDetail(key){
+  const item = (STATE.festiveLists || {})[key];
+  if (!item) return;
+  let body;
+  if (item.kind === 'free') {
+    const rows = item.list.slice().sort((a, b) => b.age - a.age);
+    body = rows.length ? `<p class="empty-note" style="text-align:left;padding:0 0 10px;">${fmtInt(rows.length)} bike${rows.length === 1 ? '' : 's'} nobody is waiting for. Sell the oldest first.</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Model &amp; colour</th><th>Chassis</th><th class="num">Age (days)</th></tr></thead><tbody>
+      ${rows.map(p => `<tr><td>${esc(p.name)}</td><td>${esc(p.chassis)}</td><td class="num">${p.age >= AGED_STOCK_DAYS ? `<span class="table-flag">⚠️ ${fmtInt(p.age)}</span>` : fmtInt(p.age)}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty-note">Nothing is free right now — every bike on the floor is held for a booking.</div>';
+  } else if (item.kind === 'fully') {
+    const g = {};
+    item.list.forEach(p => { const k = p.code || p.uname; const x = g[k] || (g[k] = { name: p.name, held: [], free: 0 }); p.booking ? x.held.push(p.booking) : x.free++; });
+    const rows = Object.values(g).filter(x => x.held.length && !x.free).sort((a, b) => b.held.length - a.held.length || a.name.localeCompare(b.name));
+    body = rows.length ? `<div class="table-wrap"><table class="data"><thead><tr><th>Model &amp; colour</th><th class="num">On floor</th><th>Held for</th></tr></thead><tbody>
+      ${rows.map(x => `<tr><td><b>${esc(x.name)}</b></td><td class="num">${fmtInt(x.held.length)}</td><td style="white-space:normal;">${x.held.map(b => `${esc(b.customer)} <span style="color:var(--text-muted)">(${esc(b.exec)})</span>`).join(', ')}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty-note">No colour is fully booked right now.</div>';
+  } else {
+    const rows = item.list.slice().sort((a, b) =>
+      (a.bike ? (a.bike.open ? 2 : 1) : 0) - (b.bike ? (b.bike.open ? 2 : 1) : 0) ||
+      (a.tdd ? a.tdd.getTime() : 9e15) - (b.tdd ? b.tdd.getTime() : 9e15));
+    const noBike = rows.filter(b => !b.bike).length;
+    body = rows.length ? `<p class="empty-note" style="text-align:left;padding:0 0 10px;">${fmtInt(rows.length)} booking${rows.length === 1 ? '' : 's'}${noBike ? ` · <b style="color:var(--critical)">${fmtInt(noBike)} without a bike</b>` : ''}</p>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Bike</th><th>Customer</th><th>Mobile</th><th>Sales person</th><th>Model &amp; colour</th><th>TDD</th><th>Booked on</th><th>Receipt</th></tr></thead><tbody>
+      ${rows.map(b => {
+        const bike = !b.bike ? `<span class="table-flag">❌ No bike</span>`
+          : b.bike.open ? `✅ ${esc(b.bike.chassis || 'held')}` : `🚚 In transit ${esc(b.bike.chassis || '')}`;
+        return `<tr><td>${bike}</td><td>${esc(b.customer)}</td><td>${maskMobile(b.mobile, b.exec)}</td><td>${esc(b.exec)}</td>
+          <td>${esc(`${b.model} ${b.colour}`.trim())}${b.typo ? `<div style="font-size:11.5px;color:var(--warning)">✏️ stock spells it: ${esc(b.typo)}</div>` : ''}</td>
+          <td>${b.tdd ? esc(fmtDate(b.tdd)) : '—'}</td><td>${esc(fmtDate(b.bookedOn))}</td><td>${esc(b.slip)}</td></tr>`;
+      }).join('')}
+      </tbody></table></div>` : '<div class="empty-note">No bookings here.</div>';
+  }
+  document.getElementById('modalTitle').textContent = '🪔 ' + item.title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('detailModal').classList.add('open');
+}
+{
+  const sec = document.getElementById('tab-festive');
+  if (sec) {
+    sec.addEventListener('click', (e) => { const t = e.target.closest('[data-fs]'); if (t) openFestiveDetail(t.dataset.fs); });
+    sec.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const t = e.target.closest('[data-fs]'); if (t) { e.preventDefault(); openFestiveDetail(t.dataset.fs); }
+    });
+  }
 }
 
 // A clean printout the floor team can use to tag each held bike with the customer's name.
