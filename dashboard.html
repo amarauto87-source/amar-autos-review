@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Amar Autos — Master Dashboard</title>
 <!-- PWA: makes the dashboard installable (own icon, standalone window, works offline on the last
-     data it saw) — see manifest.json + OneSignalSDKWorker.js/pwa-cache.js uploaded alongside this
+     data it saw) — see manifest.json + pwa-cache.js uploaded alongside this
      file. Browsers just need these three tags to offer "Add to Home Screen" / "Install app". -->
 <!-- No manifest link: manifest.json isn't in the repo, so the browser was fetching a 404 on
      every single open. Add the file back and restore this line if the install-to-home-screen
@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610021615';
+  window.__BUILD = '202610052330';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -1242,6 +1242,16 @@
   .ha-row { background: color-mix(in srgb, var(--critical) 13%, transparent);
     border: 1px solid color-mix(in srgb, var(--critical) 36%, transparent);
     border-radius: 11px; padding: 12px 15px; font-size: 13.5px; line-height: 1.55; }
+  /* ── Birthdays ── */
+  .bd-card { margin-bottom: 18px; border-radius: 13px; padding: 13px 16px; display: grid; gap: 8px;
+    background: color-mix(in srgb, var(--gold) 12%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); }
+  .bd-big { font-size: 15px; }
+  .bd-sub, .bd-soon { font-size: 13px; color: var(--text-secondary); }
+  .bd-list { display: grid; gap: 6px; }
+  .bd-rider { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; }
+  .bd-wish { display: inline-block; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+    text-decoration: none; color: var(--good); border: 1px solid currentColor; white-space: nowrap; }
   /* Tiles sized so four fit on a laptop and two on a phone, with a tap target big enough to
      hit without looking. */
   .tile-grid { display: grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
@@ -1604,6 +1614,26 @@
   @media (max-width:820px){ .rc-tiles { grid-template-columns:1fr 1fr; } }
   /* three tiles when "Not Punched" is hidden (its source tabs were deleted) — no empty slot */
   .rc-tiles.three { grid-template-columns:repeat(3,1fr); }
+  /* ── Festive Booking Shield ── */
+  .fs-timeline { display:flex; gap:10px; flex-wrap:wrap; align-items:stretch; }
+  .fs-mile { flex:1 1 140px; border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:var(--surface-1); }
+  .fs-mile .fm-name { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-secondary); }
+  .fs-mile .fm-date { font-size:15px; font-weight:700; margin-top:2px; }
+  .fs-mile .fm-left { font-size:12px; color:var(--gold-light); margin-top:2px; }
+  .fs-mile.past { opacity:.55; }
+  .fs-mile.next { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold-dim) inset; }
+  .fs-weeks { display:grid; grid-template-columns:repeat(auto-fit, minmax(92px, 1fr)); gap:8px; margin-top:12px; }
+  .fs-week { border:1px solid var(--border); border-radius:10px; padding:8px 10px; background:var(--surface-1); }
+  .fs-week .fw-lbl { font-size:11px; color:var(--text-secondary); }
+  .fs-week .fw-n { font-size:18px; font-weight:700; }
+  .fs-week .fw-bad { font-size:11.5px; color:var(--critical); font-weight:600; }
+  .fs-week .fw-ok { font-size:11.5px; color:var(--good); }
+  .fs-week.fest { border-color:var(--gold-dim); }
+  .fs-act { display:inline-block; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; border:1px solid currentColor; }
+  .fs-act.order { color:var(--critical); }
+  .fs-act.hold  { color:var(--warning); }
+  .fs-act.free  { color:var(--good); }
+
   @media (max-width:820px){ .rc-tiles.three { grid-template-columns:1fr 1fr; } .rc-tiles.three > .rc-tile:nth-child(3) { grid-column: span 2; } }
   .rc-tile { background:var(--surface-1); border:1px solid var(--border); border-left:4px solid #e0362f; border-radius:12px; padding:15px 18px; }
   .rc-tile.g { border-left-color:#4CAF7D; } .rc-tile.a { border-left-color:#e0a93b; } .rc-tile.b { border-left-color:#5b9bd5; }
@@ -1772,6 +1802,7 @@
   <section class="tabpanel active" id="tab-home">
     <div id="homeGreet"></div>
     <div id="homeAlerts"></div>
+    <div id="homeBirthdays"></div>
     <div class="tile-grid" id="homeTiles"></div>
   </section>
 
@@ -1995,7 +2026,7 @@
     </div>
 
     <h2 class="section-title" id="anEnqFunnel" style="margin-top:30px;">🎯 Enquiry Funnel — by Source</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Har enquiry source se kitni enquiry aayi aur kitni booking me badli — conversion % ke saath.</p>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">How many enquiries came from each source and how many turned into bookings, with the conversion %.</p>
     <div class="table-wrap"><table class="data" id="tblFunnel"></table></div>
     <div class="card" style="margin-top:16px;">
       <h3>Enquiry → Booking Conversion by Channel</h3>
@@ -2097,10 +2128,58 @@
     </details>
   </section>
 
+  <!-- ══ Festive Booking Shield — Navratri to Diwali. Every pending booking gets a specific bike
+       held for it (oldest stock first), so the festive walk-in rush never sells a bike that a
+       booked customer is waiting for. Shows what can be sold freely, what must not be sold, and
+       what has to be ordered. Shown automatically from 3 weeks before Navratri until just after
+       Diwali. ══ -->
+  <section class="tabpanel" id="tab-festive">
+    <h2 class="section-title" id="fsTitle">🪔 Festive Booking Shield — Navratri to Diwali</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 12px;">Every pending booking is matched to one specific bike in KN stock — first booked, first served; oldest bike first. Those bikes are <b>held</b>: do not sell them to a walk-in. Anything left over is free to sell. Bookings with no bike need an order now, before the Navratri rush empties the floor.</p>
+    <div id="fsTimeline"></div>
+    <div class="kpi-grid" id="fsKpis" style="margin-top:14px;"></div>
+
+    <h2 class="section-title" id="fsSellTitle" style="margin-top:26px;">🚦 Sell or Hold — by model &amp; colour</h2>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
+        <input type="checkbox" id="fsShowAll"> Also show colours with no bookings (free stock)
+      </label>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblFsSell"></table></div>
+
+    <h2 class="section-title" id="fsHoldTitle" style="margin-top:26px;">🏷️ Hold List — tag these bikes for the customer</h2>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <select id="fsHoldFilter">
+        <option value="ALL">All bookings</option>
+        <option value="NONE">❌ No bike yet</option>
+        <option value="TRANSIT">🚚 Bike in transit</option>
+        <option value="HELD">✅ Bike held</option>
+      </select>
+      <button type="button" id="fsPrint">🖨️ Print hold list</button>
+    </div>
+    <div class="table-wrap"><table class="data" id="tblFsHold"></table></div>
+
+    <div id="fsOrderWrap">
+      <h2 class="section-title" id="fsOrderTitle" style="margin-top:26px;">📦 Order Plan — before Diwali (Admin)</h2>
+      <div class="toolbar" style="margin-bottom:10px;gap:14px;flex-wrap:wrap;">
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
+          Festive boost on normal sales:
+          <select id="fsBoost"><option value="1">1× (normal)</option><option value="1.5" selected>1.5×</option><option value="2">2×</option><option value="2.5">2.5×</option></select>
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
+          Days for a bike to arrive after ordering:
+          <select id="fsLead"><option value="5">5</option><option value="7">7</option><option value="10" selected>10</option><option value="15">15</option></select>
+        </label>
+      </div>
+      <div id="fsOrderNote" class="empty-note" style="text-align:left;padding:0 0 10px;"></div>
+      <div class="table-wrap"><table class="data" id="tblFsOrder"></table></div>
+    </div>
+  </section>
+
   <section class="tabpanel" id="tab-pending">
     <h2 class="section-title">🔎 Book vs Stock — Select a Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Model chuno — us model ki har colour ka stock (FREE hai ya nahi) aur uspe kiski booking hai, sab dikhega. Bookings <b>FIFO</b> order me hain (jisne pehle booking kiya wo pehle) — jab bike aaye to sabse upar wale customer ko milegi. Sabhi sales person ki booking sabko dikhti hai; customer ka mobile chhupa rehta hai.
+      Pick a model to see the stock of every colour (free or not) and whose booking is on it. Bookings are in <b>FIFO</b> order (first to book is first in line) — when a bike arrives, the customer at the top gets it. Every sales person's bookings are visible to everyone; customer mobiles stay hidden.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
@@ -2112,7 +2191,7 @@
 
     <h2 class="section-title" id="modelFinderTitle" style="margin-top:30px;">🔎 Model Finder — Bookings vs Stock by Colour (summary)</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Per colour: how many are pending vs how many are Open in KN stock right now. Shortfall = booking hai par stock nahi.
+      Per colour: how many are pending vs how many are Open in KN stock right now. Shortfall = booked, but no stock.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <select id="modelFinderSelect"></select>
@@ -2178,6 +2257,9 @@
   </section>
 
   <section class="tabpanel" id="tab-riders">
+    <h2 class="section-title">🎂 Rider Birthdays — next 30 days</h2>
+    <div id="riderBirthdays"></div>
+
     <h2 class="section-title">🪖 Rider Registration</h2>
     <div class="kpi-grid" id="kpiRiderReg"></div>
 
@@ -2227,7 +2309,7 @@
   <section class="tabpanel" id="tab-specs">
     <h2 class="section-title">📖 Model Specifications — Royal Enfield Current Lineup</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Kisi bhi model par click karo — poori details + customer ko Hinglish me kaise samjhana hai, sab khul jayega. Data Royal Enfield ke official positioning se hai; jahan koi number 100% pakka nahi wahan "confirm" likha hai — customer ko quote karne se pehle price list se check kar lena. Prices approximate ex-showroom hain, variant/colour/city se badalti hain.
+      Click any model for full details and ready-to-use selling points. Data follows Royal Enfield's official positioning; where a number is not 100% certain it says "confirm" — check the price list before quoting a customer. Prices are approximate ex-showroom and change by variant, colour and city.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <input type="text" id="specsSearch" placeholder="Model, category ya 'best for' Search…" />
@@ -2439,56 +2521,11 @@
 
 </div><!-- /#appShell -->
 
-<!-- OneSignal Web Push SDK — used to subscribe each logged-in employee's own device/browser for
-     push notifications, tagged with their name. See the ONESIGNAL_APP_ID note further down for
-     why the actual "send" button lives on OneSignal's own dashboard rather than on this page. -->
-<!-- The SDK itself is loaded a few seconds after sign-in (see loadOneSignal) — as a normal tag it
-     held up the first screen on every open. -->
 
 <script>
 const SHEET_ID = '1v3jbBmhgttwZQCTA1lc_ydXTqPWsYGdYReAHl30gzHU';
 const AUTO_REFRESH_MS = 15 * 60 * 1000; // auto-refresh every 15 minutes, silently in the background
 
-/* ---------------- OneSignal push notifications (subscribe side only) ----------------
-   This page can subscribe each employee's own browser and tag it with their name — that part
-   works fine client-side. Actually SENDING a push needs a server-to-server call (OneSignal's
-   create-notification REST endpoint doesn't allow direct browser calls — no CORS headers, this
-   is a documented OneSignal limitation, not something fixable from this static page). So there's
-   deliberately no REST API key or "send" button in this file: sending is done from OneSignal's
-   own dashboard at https://dashboard.onesignal.com/apps/2b7b8dfe-c594-4bda-af83-38b6fadda684 —
-   log in there, pick "New Push", and either send to everyone or filter by the external_id tag
-   (each employee's execKey/name, set below) to reach just one person. A proper "Send" button
-   right here would need a small server-side proxy in front of the REST API — worth doing later
-   if this becomes a regular thing, but out of scope for a single static HTML file today.
-   Only the App ID lives here — that's meant to be public, same as any OneSignal web integration. */
-const ONESIGNAL_APP_ID = '2b7b8dfe-c594-4bda-af83-38b6fadda684';
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({ appId: ONESIGNAL_APP_ID });
-});
-// Tags this browser with the logged-in person's execKey/name (an "External ID" in OneSignal) so
-// Deepak can target just them from OneSignal's dashboard later, and asks the browser for
-// notification permission. Called once, right as they enter the dashboard. Never blocks the
-// dashboard itself — push is a bonus, not a requirement, so failures here are swallowed.
-function loadOneSignal(){
-  if (window.__osLoaded) return;
-  window.__osLoaded = true;
-  const sc = document.createElement('script');
-  sc.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-  sc.async = true;
-  document.head.appendChild(sc);
-}
-function linkOneSignalIdentity(){
-  if (!CURRENT_USER) return;
-  loadOneSignal();
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    try {
-      await OneSignal.login(CURRENT_USER.execKey || CURRENT_USER.name);
-      await OneSignal.Notifications.requestPermission();
-    } catch (e) { /* ignore — notification permission is optional, never block the app on it */ }
-  });
-}
 
 /* ---------------- theme ---------------- */
 /* ═══════════════ Festival themes ═══════════════
@@ -2793,10 +2830,10 @@ const RESTRICTED_TABS = ['riders'];
 // and their own deliveries at hand, not two clicks away behind a dropdown.
 const SALES_MOVE_TO_MORE_DATA = ['dashboard', 'booking', 'stock', 'specs'];
 
-// ===== Royal Enfield "Spotlight" — a random Hinglish fact shown at each login =====
+// ===== Royal Enfield "Spotlight" — a random fact shown at each login =====
 // Pure offline/rule-based (no API, no network call) — same philosophy as the rest of this
 // dashboard. A random fact is picked on every login, so each executive sees something different
-// each time. All facts are official RE information, written in Hinglish for the sales team.
+// each time. All facts are official RE information, written for the sales team.
 
 
 // A curated pool of dealership sales tactics — NOT generated live by any AI model (a real
@@ -3319,8 +3356,6 @@ function enterDashboard(){
     try { renderHome(); } catch (e) {}
     document.getElementById('loading').style.display = 'flex';
   }
-  // Push-notification setup loads a large third-party script; it can wait until the page is up.
-  setTimeout(linkOneSignalIdentity, 4000);
   if (PREFETCH) {
     PREFETCH.then(() => { if (!STATE.lastLoaded) loadAll(); });
   } else loadAll(!!STATE.fromCopy);
@@ -3821,6 +3856,324 @@ function matchModelCode(master, bookingModel, bookingColour){
   return null; // no stock entry currently carries a matching code — shown separately, never silently dropped
 }
 
+/* ══ Festive Booking Shield (Navratri → Diwali) ══════════════════════════════════════════════
+   The festive weeks bring a rush of walk-in buyers who want a bike today. Without a plan, the
+   floor sells whatever is standing there — including the very bike a booked customer is waiting
+   for — and the booked customer is told "it hasn't come yet". This section prevents that:
+
+   1. Every open booking is matched to ONE specific bike (chassis) in Kanti Nagar stock.
+      Order: first booked, first served (booking date); for each booking, a bike already on the
+      floor (Open) is preferred over one in transit, and the oldest bike is used first.
+   2. Bikes matched that way are HELD — not to be sold to a walk-in.
+   3. Whatever is left over in each model/colour is FREE to sell.
+   4. A booking with no bike at all needs an order (or a transfer) now.
+   5. Admin also gets an order estimate: unmet bookings + expected walk-in sales until Diwali
+      (last 30 days' sales × a festive boost) − free stock.
+
+   Vikas Marg (VM) stock is never counted as ours — it is only mentioned as a possible transfer.
+   Dates below are for 2026; change them here for next year. */
+const FESTIVE_DATES = [
+  { key: 'navratri',  name: 'Navratri begins',      date: '2026-10-11' },
+  { key: 'dussehra',  name: 'Dussehra',             date: '2026-10-20' },
+  { key: 'dhanteras', name: 'Dhanteras',            date: '2026-11-06' },
+  { key: 'diwali',    name: 'Diwali',               date: '2026-11-08' },
+];
+const FESTIVE_SHOW_FROM_DAYS = 21;   // start showing this many days before Navratri
+const FESTIVE_SHOW_AFTER_DAYS = 3;   // keep showing this many days after Diwali
+
+function festiveDate(key){
+  const f = FESTIVE_DATES.find(x => x.key === key);
+  if (!f) return null;
+  const [y, m, d] = f.date.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function festiveSeasonActive(){
+  const today = todayMidnight();
+  const start = new Date(festiveDate('navratri').getTime() - FESTIVE_SHOW_FROM_DAYS * 86400000);
+  const end = new Date(festiveDate('diwali').getTime() + FESTIVE_SHOW_AFTER_DAYS * 86400000);
+  return today >= start && today <= end;
+}
+const stockStatusOf = (r) => up(str(r[17])).replace(/\s+/g, '-');   // OPEN / IN-TRANSIT / BILLED
+
+// Bookings are typed by hand and the colour is often misspelt — "BATTLAION" for "BATTALION",
+// "SUPEROVA" for "SUPERNOVA". An exact match would call those "no bike" while the right bike
+// stands on the floor marked free to sell — exactly the mistake this section exists to stop. So a
+// distinctive colour word also matches a stock word that is one or two typing slips away
+// (letters swapped, missed or extra). Returns 'exact', 'typo' or ''.
+function editDistance(a, b){
+  if (Math.abs(a.length - b.length) > 2) return 9;
+  const d = [];
+  for (let i = 0; i <= a.length; i++) { d[i] = [i]; }
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    const c = a[i-1] === b[j-1] ? 0 : 1;
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + c);
+    if (i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) d[i][j] = Math.min(d[i][j], d[i-2][j-2] + 1);  // swapped letters
+  }
+  return d[a.length][b.length];
+}
+function colourMatchKind(stockName, bookingColour){
+  if (colourMatches(stockName, bookingColour)) return 'exact';
+  const nameWords = up(stockName).split(/[^A-Z0-9]+/).filter(Boolean);
+  const words = up(bookingColour).split(/[^A-Z0-9]+/).filter(w => w.length > 2);
+  const distinctive = words.filter(w => !GENERIC_COLOUR_WORDS.has(w));
+  if (!distinctive.length) return '';
+  const close = (w) => nameWords.some(n => n.length >= 5 && w.length >= 5 && editDistance(w, n) <= (w.length >= 8 ? 2 : 1));
+  return distinctive.every(w => nameWords.includes(w) || close(w)) &&
+         words.filter(w => GENERIC_COLOUR_WORDS.has(w)).every(w => nameWords.includes(w)) ? 'typo' : '';
+}
+
+// The heart of it: one bike per booking. Recomputed on every data load, so as soon as a bike is
+// billed or a new one arrives, the holds move by themselves.
+function festiveAllocate(){
+  const pool = [];
+  STATE.stock.forEach(r => {
+    if (up(str(r[7])) !== 'KN') return;
+    const st = stockStatusOf(r);
+    if (st !== 'OPEN' && st !== 'IN-TRANSIT') return;
+    const name = str(r[11] || r[9]);
+    pool.push({ code: str(r[10]), name, uname: up(name), fam: modelFamilyKey(name),
+                chassis: str(r[12]), age: num(r[16]) || 0, open: st === 'OPEN', booking: null });
+  });
+  // on the floor first, then the oldest — an old bike should go out before a fresh one
+  pool.sort((a, b) => (b.open - a.open) || (b.age - a.age));
+
+  const bookings = STATE.booking
+    .filter(r => !isBookingClosedForSales(r[9]) && str(r[3]))
+    .map(r => {
+      const bd = asDate(r[2]);
+      return { row: r, slip: str(r[1]), bookedOn: bd, customer: str(r[5]), mobile: str(r[6]),
+               exec: str(r[7]), model: str(r[3]), colour: str(r[4]),
+               tdd: parseTddDate(r[8], r[2]), fam: modelFamilyKey(str(r[3])), bike: null };
+    })
+    .sort((a, b) => (a.bookedOn ? a.bookedOn.getTime() : 9e15) - (b.bookedOn ? b.bookedOn.getTime() : 9e15));
+
+  // Exact spellings are served first, so a misspelt booking can never take a bike from a
+  // correctly typed one; then the misspelt ones get whatever is left.
+  bookings.forEach(b => {
+    const bike = pool.find(p => !p.booking && p.fam === b.fam && colourMatchKind(p.uname, b.colour) === 'exact');
+    if (bike) { bike.booking = b; b.bike = bike; }
+  });
+  bookings.forEach(b => {
+    if (b.bike) return;
+    const bike = pool.find(p => !p.booking && p.fam === b.fam && colourMatchKind(p.uname, b.colour) === 'typo');
+    if (bike) { bike.booking = b; b.bike = bike; b.typo = bike.name; }
+  });
+  return { pool, bookings };
+}
+
+// VM bikes that would suit a booking — a transfer to ask for, never counted as ours.
+function vmMatchesFor(model, colour){
+  const fam = modelFamilyKey(model);
+  return STATE.stock.filter(r => up(str(r[7])) === 'VM' && stockStatusOf(r) === 'OPEN' &&
+    modelFamilyKey(str(r[11] || r[9])) === fam && colourMatchKind(up(str(r[11] || r[9])), colour)).length;
+}
+
+function renderFestiveShield(){
+  const sec = document.getElementById('tab-festive');
+  if (!sec) return;
+  const active = festiveSeasonActive();
+  sec.dataset.season = active ? 'on' : 'off';
+  if (!active) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const today = todayMidnight();
+  const { pool, bookings } = festiveAllocate();
+  STATE.festive = { pool, bookings };
+
+  // ── timeline: the four dates, plus bookings promised for each week up to Diwali ──
+  const diwali = festiveDate('diwali');
+  const nextKey = (FESTIVE_DATES.find(f => festiveDate(f.key) >= today) || {}).key;
+  const miles = FESTIVE_DATES.map(f => {
+    const d = festiveDate(f.key);
+    const left = Math.round((d - today) / 86400000);
+    const cls = left < 0 ? 'past' : (f.key === nextKey ? 'next' : '');
+    const leftTxt = left < 0 ? 'done' : left === 0 ? 'today' : `in ${left} day${left === 1 ? '' : 's'}`;
+    return `<div class="fs-mile ${cls}"><div class="fm-name">${esc(f.name)}</div>
+      <div class="fm-date">${esc(d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' }))}</div>
+      <div class="fm-left">${leftTxt}</div></div>`;
+  }).join('');
+  // weeks from this Monday until the week of Diwali
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  const weeks = [];
+  for (let w = new Date(weekStart); w <= diwali; w = new Date(w.getTime() + 7 * 86400000)) {
+    const end = new Date(w.getTime() + 6 * 86400000);
+    const inWeek = bookings.filter(b => b.tdd && b.tdd >= w && b.tdd <= new Date(end.getTime() + 86399000));
+    const fest = FESTIVE_DATES.some(f => { const d = festiveDate(f.key); return d >= w && d <= end; });
+    weeks.push({ w, end, n: inWeek.length, noBike: inWeek.filter(b => !b.bike).length, fest });
+  }
+  const overdueTdd = bookings.filter(b => b.tdd && b.tdd < weekStart);
+  const noTdd = bookings.filter(b => !b.tdd);
+  const fmtShort = d => d.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+  const weekCell = (lbl, n, bad, fest) => `<div class="fs-week${fest ? ' fest' : ''}">
+      <div class="fw-lbl">${lbl}</div><div class="fw-n">${fmtInt(n)}</div>
+      ${n ? (bad ? `<div class="fw-bad">${fmtInt(bad)} without a bike</div>` : `<div class="fw-ok">all have a bike</div>`) : '<div class="fw-lbl">no deliveries due</div>'}
+    </div>`;
+  document.getElementById('fsTimeline').innerHTML =
+    `<div class="fs-timeline">${miles}</div>
+     <div class="empty-note" style="text-align:left;padding:12px 0 0;">Deliveries promised (TDD) per week — 🪔 marks a festival week:</div>
+     <div class="fs-weeks">
+       ${overdueTdd.length ? weekCell('Already past TDD', overdueTdd.length, overdueTdd.filter(b => !b.bike).length, false) : ''}
+       ${weeks.map(x => weekCell(`${x.fest ? '🪔 ' : ''}${fmtShort(x.w)} – ${fmtShort(x.end)}`, x.n, x.noBike, x.fest)).join('')}
+       ${noTdd.length ? weekCell('No TDD written', noTdd.length, noTdd.filter(b => !b.bike).length, false) : ''}
+     </div>`;
+
+  // ── headline numbers ──
+  const held = bookings.filter(b => b.bike && b.bike.open).length;
+  const transit = bookings.filter(b => b.bike && !b.bike.open).length;
+  const none = bookings.filter(b => !b.bike).length;
+  const freeNow = pool.filter(p => p.open && !p.booking).length;
+  const fullyBooked = (() => {   // model/colours where every bike on the floor is held
+    const g = {};
+    pool.filter(p => p.open).forEach(p => { const k = p.code || p.uname; (g[k] = g[k] || { held:0, free:0 }); p.booking ? g[k].held++ : g[k].free++; });
+    return Object.values(g).filter(x => x.held && !x.free).length;
+  })();
+  document.getElementById('fsKpis').innerHTML = [
+    kpiCard('Open bookings', fmtInt(bookings.length), 'all sales persons, not yet billed'),
+    kpiCard('Bike held on floor', fmtInt(held), 'tag these — do not sell'),
+    kpiCard('Bike in transit', fmtInt(transit), 'arriving, already promised'),
+    kpiCard('No bike yet', fmtInt(none), none ? 'order or transfer now' : 'every booking is covered', null, none ? 'Needs an order' : null),
+    kpiCard('Free to sell now', fmtInt(freeNow), 'on the floor, nobody waiting for it'),
+    ...(bookings.some(b => b.typo) ? [kpiCard('Colour spelling to fix', fmtInt(bookings.filter(b => b.typo).length), 'matched anyway — see ✏️ in the hold list')] : []),
+    kpiCard('Colours fully booked', fmtInt(fullyBooked), 'none of these may go to a walk-in', null, fullyBooked ? 'Do not sell' : null),
+  ].join('');
+
+  // ── sell or hold, per model & colour ──
+  const groups = {};
+  pool.forEach(p => {
+    const k = p.code || p.uname;
+    const g = groups[k] || (groups[k] = { name: p.name, code: p.code, fam: p.fam, open:0, transit:0, held:0, heldTransit:0, short:0, wanted: [] });
+    if (p.open) { g.open++; if (p.booking) g.held++; } else { g.transit++; if (p.booking) g.heldTransit++; }
+  });
+  // bookings with no bike: attach to the stock colour they belong to, or to their own text
+  const codeMaster = new Map();
+  pool.forEach(p => { const k = p.code || p.uname; if (!codeMaster.has(k)) codeMaster.set(k, { code: k, family: p.fam, name: p.uname }); });
+  bookings.filter(b => !b.bike).forEach(b => {
+    const m = matchModelCode(codeMaster, b.model, b.colour);
+    const k = m ? m.code : ('BOOKED:' + up(b.model) + ' ' + up(b.colour));
+    const g = groups[k] || (groups[k] = { name: `${b.model} ${b.colour}`.trim(), code: '', fam: b.fam, open:0, transit:0, held:0, heldTransit:0, short:0, wanted: [] });
+    g.short++; g.wanted.push(b);
+  });
+  const showAll = document.getElementById('fsShowAll').checked;
+  const rows = Object.values(groups).map(g => {
+    const free = g.open - g.held;
+    const vm = g.short ? vmMatchesFor(g.wanted[0].model, g.wanted[0].colour) : 0;
+    let rank, action;
+    if (g.short) { rank = 0; action = `<span class="fs-act order">Order ${fmtInt(g.short)}</span>${vm ? ` <span style="font-size:12px;color:var(--text-secondary)">· VM has ${fmtInt(vm)}</span>` : ''}`; }
+    else if (g.held + g.heldTransit && !free) { rank = 1; action = `<span class="fs-act hold">All booked — do not sell</span>`; }
+    else if (g.held + g.heldTransit) { rank = 2; action = `<span class="fs-act free">Sell up to ${fmtInt(free)}</span>`; }
+    else { rank = 3; action = `<span class="fs-act free">Free: ${fmtInt(free)}</span>`; }
+    return { rank, fam: g.fam, name: g.name, open: g.open, transit: g.transit, held: g.held + g.heldTransit,
+             free: Math.max(0, free), short: g.short, action };
+  }).filter(r => showAll || r.rank < 3)
+    .sort((a, b) => a.rank - b.rank || b.short - a.short || a.fam.localeCompare(b.fam) || a.name.localeCompare(b.name));
+  // "What to do" sits right after the name so it is visible on a phone without scrolling sideways.
+  renderStaticTable('tblFsSell', [
+    { key:'name', label:'Model & colour' },
+    { key:'action', label:'What to do', raw:true },
+    { key:'free', label:'Free to sell', num:true },
+    { key:'held', label:'Held for bookings', num:true },
+    { key:'short', label:'Bookings without bike', num:true, raw:true, fmt: v => v ? `<span class="table-flag">${fmtInt(v)}</span>` : '0' },
+    { key:'open', label:'On floor (KN)', num:true },
+    { key:'transit', label:'In transit', num:true },
+  ], rows);
+
+  // ── hold list ──
+  const filt = document.getElementById('fsHoldFilter').value;
+  const holdRows = bookings.filter(b =>
+      filt === 'ALL' || (filt === 'NONE' && !b.bike) || (filt === 'TRANSIT' && b.bike && !b.bike.open) || (filt === 'HELD' && b.bike && b.bike.open))
+    .map(b => ({
+      state: !b.bike ? 0 : b.bike.open ? 2 : 1,
+      tddSort: b.tdd ? b.tdd.getTime() : 9e15,
+      slip: b.slip, bookedOn: fmtDate(b.bookedOn), customer: b.customer, exec: b.exec,
+      model: `${b.model} ${b.colour}`.trim(), typo: b.typo || '', tdd: b.tdd ? fmtDate(b.tdd) : '—',
+      bike: !b.bike ? (() => { const vm = vmMatchesFor(b.model, b.colour); return `❌ No bike${vm ? ` (VM has ${vm})` : ''}`; })()
+          : b.bike.open ? `✅ ${b.bike.chassis || '(no chassis no.)'}`
+          : `🚚 In transit ${b.bike.chassis || ''}`.trim(),
+      age: b.bike && b.bike.open ? b.bike.age : null,
+    }))
+    .sort((a, b) => a.state - b.state || a.tddSort - b.tddSort);
+  STATE.festiveHoldRows = holdRows;
+  renderStaticTable('tblFsHold', [
+    { key:'bike', label:'Bike held (chassis)', raw:true, fmt: (v, r) => r.state === 0 ? `<span class="table-flag">${esc(v)}</span>` : esc(v) },
+    { key:'customer', label:'Customer' },
+    { key:'exec', label:'Sales person' },
+    { key:'model', label:'Model & colour', raw:true, fmt: (v, r) => esc(v) + (r.typo
+        ? `<div style="font-size:11.5px;color:var(--warning);">✏️ spelt differently from stock (${esc(r.typo)}) — please correct it in the booking sheet</div>` : '') },
+    { key:'tdd', label:'TDD (promised)' },
+    { key:'bookedOn', label:'Booked on' },
+    { key:'slip', label:'Receipt no.' },
+    { key:'age', label:'Bike age (days)', num:true, raw:true, fmt: v => v == null ? '—' : fmtInt(v) },
+  ], holdRows);
+
+  // ── order plan (Admin) ──
+  const orderWrap = document.getElementById('fsOrderWrap');
+  orderWrap.style.display = isAdmin ? '' : 'none';
+  if (!isAdmin) return;
+  const boost = Number(document.getElementById('fsBoost').value) || 1.5;
+  const lead = Number(document.getElementById('fsLead').value) || 10;
+  const daysToDiwali = Math.max(0, Math.round((diwali - today) / 86400000));
+  const orderBy = new Date(diwali.getTime() - lead * 86400000);
+  const sold30 = {};
+  const haveRate = !!STATE.recentSales;
+  Object.entries(STATE.recentSales || {}).forEach(([k, n]) => {
+    const fam = modelFamilyKey(k.split('||')[0]);
+    sold30[fam] = (sold30[fam] || 0) + n;
+  });
+  const fams = {};
+  const famRow = f => fams[f] || (fams[f] = { fam: f, short: 0, free: 0, transitFree: 0, sold30: sold30[f] || 0 });
+  bookings.filter(b => !b.bike).forEach(b => famRow(b.fam).short++);
+  pool.filter(p => !p.booking).forEach(p => { if (p.open) famRow(p.fam).free++; else famRow(p.fam).transitFree++; });
+  Object.keys(sold30).forEach(f => famRow(f));
+  const orderRows = Object.values(fams).map(x => {
+    const expected = haveRate ? Math.round(x.sold30 / 30 * daysToDiwali * boost) : 0;
+    const order = Math.max(0, x.short + expected - x.free - x.transitFree);
+    return Object.assign(x, { expected, order });
+  }).filter(x => x.short || x.expected || x.order)
+    .sort((a, b) => b.order - a.order || b.short - a.short || a.fam.localeCompare(b.fam));
+  const orderLeft = Math.round((orderBy - today) / 86400000);
+  document.getElementById('fsOrderNote').innerHTML = haveRate
+    ? `Estimate for the ${fmtInt(daysToDiwali)} days to Diwali: bookings without a bike, plus walk-in sales expected at the last 30 days' pace × ${boost}, minus bikes that are free (on the floor or in transit). ` +
+      `<b>Place orders by ${esc(orderBy.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' }))}</b>` +
+      (orderLeft < 0 ? ' — that date has passed, so order today.' : orderLeft === 0 ? ' — that is today.' : ` (${orderLeft} day${orderLeft === 1 ? '' : 's'} from now)`) +
+      ` so they arrive ${lead} days later, before Dhanteras/Diwali. This is a guide, not a guarantee — adjust for what you know about the market.`
+    : `Showing only bookings without a bike. Update the Apps Script (version 5.3 or later) to also see expected walk-in sales and a suggested order quantity.`;
+  renderStaticTable('tblFsOrder', [
+    { key:'fam', label:'Model family' },
+    { key:'short', label:'Bookings without bike', num:true },
+    { key:'sold30', label:'Sold, last 30 days', num:true, raw:true, fmt: v => haveRate ? fmtInt(v) : '—' },
+    { key:'expected', label:'Expected walk-in sales to Diwali', num:true, raw:true, fmt: v => haveRate ? fmtInt(v) : '—' },
+    { key:'free', label:'Free on floor', num:true },
+    { key:'transitFree', label:'Free in transit', num:true },
+    { key:'order', label:'Suggested order', num:true, raw:true, fmt: v => v ? `<span class="table-flag">${fmtInt(v)}</span>` : '0' },
+  ], orderRows);
+}
+
+// A clean printout the floor team can use to tag each held bike with the customer's name.
+function printFestiveHoldList(){
+  const rows = (STATE.festiveHoldRows || []);
+  const w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups to print the hold list.'); return; }
+  const today = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Hold list — ${esc(today)}</title>
+    <style>body{font-family:system-ui,Arial,sans-serif;margin:24px;color:#111}h1{font-size:18px;margin:0 0 4px}
+    p{margin:0 0 14px;color:#555;font-size:12px}table{border-collapse:collapse;width:100%;font-size:12px}
+    th,td{border:1px solid #bbb;padding:6px 8px;text-align:left}th{background:#f1ece2}
+    tr.none td:first-child{color:#b00020;font-weight:700}</style></head><body>
+    <h1>Amar Autos — Festive Hold List</h1><p>${esc(today)} · Tag each bike with the customer's name. Do not sell a held bike to a walk-in.</p>
+    <table><thead><tr><th>Bike held (chassis)</th><th>Customer</th><th>Sales person</th><th>Model &amp; colour</th><th>TDD</th><th>Receipt no.</th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.state === 0 ? 'none' : ''}"><td>${esc(r.bike)}</td><td>${esc(r.customer)}</td><td>${esc(r.exec)}</td><td>${esc(r.model)}</td><td>${esc(r.tdd)}</td><td>${esc(r.slip)}</td></tr>`).join('')}
+    </tbody></table></body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
+['fsShowAll', 'fsHoldFilter', 'fsBoost', 'fsLead'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => { if (STATE.initialized) renderFestiveShield(); });
+});
+{ const pb = document.getElementById('fsPrint'); if (pb) pb.addEventListener('click', printFestiveHoldList); }
+
 /* ---------------- data loading ---------------- */
 async function loadAll(silent, opts){
   // Called straight from an event listener, the first argument is the event — not a flag.
@@ -3837,8 +4190,15 @@ async function loadAll(silent, opts){
     // to the month being viewed before sending it, so a 14,000-row enquiry sheet arrives as a few
     // hundred rows — faster than the old approach, and the spreadsheet itself stays private.
     const monthParam = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
-    const res = await api({ action:'data', token: AUTH.token, month: monthParam,
-                            fresh: opts.fresh ? '1' : undefined }, 60000);
+    // One automatic retry: a slow or dropped answer from Google is common on mobile data, and a
+    // second try a few seconds later almost always works — far better than an empty screen.
+    const ask = () => api({ action:'data', token: AUTH.token, month: monthParam,
+                            fresh: opts.fresh ? '1' : undefined }, 45000);
+    let res = await ask();
+    if (!res || (!res.ok && res.error !== 'AUTH')) {
+      await new Promise(r => setTimeout(r, 2500));
+      res = await ask();
+    }
     // The month was changed while this was on its way — its answer is no longer wanted.
     const nowMonth = (STATE.filterMonth && STATE.filterMonth !== 'ALL') ? STATE.filterMonth : 'ALL';
     if (nowMonth !== monthParam) return;
@@ -3850,22 +4210,54 @@ async function loadAll(silent, opts){
       }
       throw new Error((res && (res.message || res.error)) || 'Could not load data');
     }
+    guardAgainstBlank(res, monthParam);
     applyData(res, silent);
     saveDataCopy(monthParam, res);
+    showPatchedNote(res);
   } catch (err) {
     console.error(err);
     if (STATE.fromCopy) {
       // A saved copy is already on screen — say it's not fresh, but don't wipe it with an error.
       document.getElementById('errorBox').innerHTML =
-        `<div class="error-box"><strong>Showing saved data — could not reach the server just now.</strong> ${esc(err.message || String(err))}. It will try again automatically, or press Force Refresh.</div>`;
+        `<div class="error-box"><strong>Showing saved data — could not reach the server just now.</strong> It will try again automatically, or press Force Refresh.</div>`;
     } else {
       document.getElementById('errorBox').innerHTML =
         `<div class="error-box"><strong>Couldn't load data.</strong> ${esc(err.message || String(err))}<br/>
-        Make sure the Google Sheet is shared as "Anyone with the link — Viewer" (File → Share), then hit Refresh.</div>`;
+        Check your internet and press Force Refresh. If it keeps failing, an Admin can check Admin → Status. (Keep the Google Sheet private — the dashboard does not need it shared.)</div>`;
     }
   } finally {
     document.getElementById('loading').style.display = 'none';
   }
+}
+
+// ── Never blank ──────────────────────────────────────────────────────────────────────────────
+// The server already swaps in the last complete copy of a tab that was empty or half-pasted when
+// it was read (Apps Script 5.4+). This is the same safety on the phone, for the case the server
+// had no complete copy to offer: a key tab that arrives empty is taken from this phone's saved
+// copy instead of blanking the dashboard.
+const CRITICAL_SHEETS = ['ACTUL BOOKING', 'DELIVERY SHEET', 'Stock'];
+function guardAgainstBlank(res, monthParam){
+  if (!res || !res.data) return;
+  const c = readDataCopy(monthParam);
+  const prev = c && c.res && c.res.data;
+  res.patched = Array.isArray(res.patched) ? res.patched.slice() : [];
+  CRITICAL_SHEETS.forEach(name => {
+    const now = res.data[name];
+    const old = prev && prev[name];
+    if ((!Array.isArray(now) || now.length <= 1) && Array.isArray(old) && old.length > 1) {
+      res.data[name] = old;
+      if (res.patched.indexOf(name) < 0) res.patched.push(name);
+      if (!res.goodAt) res.goodAt = new Date(c.at).toLocaleString('en-IN');
+    }
+  });
+}
+function showPatchedNote(res){
+  const box = document.getElementById('errorBox');
+  if (!box || !res || !res.patched || !res.patched.length) return;
+  const names = res.patched.map(n => n === 'Stock' ? 'STOCK' : n).join(', ');
+  box.innerHTML = `<div class="error-box" style="border-color:var(--warning);">
+    <strong>${esc(names)} was being updated in the sheet just now</strong> — showing its last complete copy${res.goodAt ? ' (' + esc(String(res.goodAt)) + ')' : ''}.
+    It refreshes by itself; nothing to do. ${CURRENT_USER && CURRENT_USER.role === 'Admin' ? 'If you deliberately removed rows, press Force Refresh to accept the new data.' : ''}</div>`;
 }
 
 // ── Saved copy of the last data, kept on this phone ─────────────────────────────────────────
@@ -3973,6 +4365,8 @@ function applyData(res, silent, meta){
   // date it choked on, so the sheet can be fixed rather than guessed at.
   DATE_WARNINGS = (res && res.dateWarnings) || {};
   STATE.settings = res.settings || STATE.settings || {};
+  STATE.recentSales = res.recentSales || null;
+  STATE.teamBirthdays = Array.isArray(res.teamBirthdays) ? res.teamBirthdays : (STATE.teamBirthdays || []);   // server 5.5+      // bikes billed in the last 30 days, by model||colour (server 5.3+)
   if (STATE.settings.askLocation === false) {
     LOCATION_ON = false;
     try { localStorage.setItem('amarAutosAskLocation', '0'); } catch(e) {}
@@ -4462,7 +4856,7 @@ function ownerInFilter(owner){
 // straight away; the rest follow in small batches a moment later, so the phone shows something
 // immediately instead of freezing until all thirty panels are built.
 const RENDER_FIRST = [renderHome, renderMyDay, renderMyAttach, renderCallList, renderTodayPriorities, renderPersonalTarget];
-const RENDER_REST = [renderDashboard, renderStorePerformance, renderSalesConsole, renderFunnelSteps, renderSpotlight, renderPipeline, renderChampions, renderEmployeeTable, renderFunnel, renderReviews, renderWalkinChecks, renderDelivery, renderPending, renderStock, renderRiders, renderModelSpecs, renderAnalytics, renderWalkinLog, renderPaymentMode, renderPriceList, renderTargetVsActual];
+const RENDER_REST = [renderFestiveShield, renderRiderBirthdays, renderDashboard, renderStorePerformance, renderSalesConsole, renderFunnelSteps, renderSpotlight, renderPipeline, renderChampions, renderEmployeeTable, renderFunnel, renderReviews, renderWalkinChecks, renderDelivery, renderPending, renderStock, renderRiders, renderModelSpecs, renderAnalytics, renderWalkinLog, renderPaymentMode, renderPriceList, renderTargetVsActual];
 let _renderGen = 0;
 function runRenderers(list){
   list.forEach(f => {
@@ -5646,7 +6040,7 @@ function renderEmployeeTable(){
       noteEl.style.display = '';
       noteEl.innerHTML = mtRows
         ? `⚠️ Per-employee targets not found in MONTHLY TARGETS columns K–R. Sheet has ${mtRows} row(s); employee names read: ${found ? Object.keys(map).join(', ') : '(none)'}. Check that row 2 has the numbers under K–R.`
-        : `⚠️ MONTHLY TARGETS sheet did not load${err ? ' — ' + esc(err) : ''}. Try "Force Refresh" once; if it keeps failing, check the sheet name and that the file is shared as "Anyone with the link — Viewer".`;
+        : `⚠️ MONTHLY TARGETS sheet did not load${err ? ' — ' + esc(err) : ''}. Try "Force Refresh" once; if it keeps failing, check the tab is still named MONTHLY TARGETS.`;
     } else {
       noteEl.style.display = 'none';
       noteEl.innerHTML = '';
@@ -5731,14 +6125,7 @@ function openNotifyTeamModal(){
     <div style="margin-top:12px; text-align:right;">
       <button type="button" id="notifySendBtn" class="primary">✅ Send via WhatsApp</button>
     </div>
-    <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
-      <p class="empty-note" style="text-align:left;padding:0 0 10px;">🔔 Want it as an actual phone notification instead of WhatsApp? Every employee who's logged in on their own phone is already tagged and ready — send from OneSignal's own dashboard (it can target everyone, or just one person by name).</p>
-      <div style="text-align:right;">
-        <a href="https://dashboard.onesignal.com/apps/${ONESIGNAL_APP_ID}" target="_blank" rel="noopener" style="text-decoration:none;">
-          <button type="button">🔔 Open OneSignal Dashboard</button>
-        </a>
-      </div>
-    </div>`;
+`;
   document.getElementById('notifySendBtn').addEventListener('click', () => {
     const msg = document.getElementById('notifyMsgBox').value;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -6509,7 +6896,7 @@ function renderTargetVsActual(){
     const rows = STATE.monthlyTargets || [];
     let reason;
     if (!rows.length) {
-      reason = '⚠️ MONTHLY TARGETS sheet is not loading (coming back empty). Check: the sheet exists in the spreadsheet, and the file is shared as "Anyone with the link — Viewer".';
+      reason = '⚠️ MONTHLY TARGETS sheet is not loading (coming back empty). Check that the MONTHLY TARGETS tab exists in the spreadsheet.';
     } else {
       const found = rows.map(r => normMonthKey(r[0])).filter(Boolean);
       const matchNow = rows.some(r => normMonthKey(r[0]) === wantKey);
@@ -6633,7 +7020,7 @@ function renderSalesPersonAnalysis(){
     const err = (typeof LAST_SHEET_ERROR !== 'undefined' && LAST_SHEET_ERROR['ENQUIRY STATMENT VIEW']) || '';
     let why;
     if (!all.length) {
-      why = `Sheet loaded 0 rows${err ? ' — ' + esc(err) : ''}. Check the tab is named exactly "ENQUIRY STATMENT VIEW" and the file is shared as "Anyone with the link — Viewer".`;
+      why = `Sheet loaded 0 rows${err ? ' — ' + esc(err) : ''}. Check the tab is named exactly "ENQUIRY STATMENT VIEW".`;
     } else {
       const sampleOwners = [...new Set(all.slice(0,60).map(r => str(r[EV.owner])).filter(Boolean))].slice(0,6);
       const dates = all.slice(0,60).map(r => asDate(r[EV.created])).filter(Boolean);
@@ -7086,6 +7473,20 @@ function computeTodayPriorities(){
     if (agg.retail && (agg.rsa/agg.retail) < PERF_THRESHOLDS.rsaPct) items.push({ icon: '🚨', text: 'Your RSA attach rate is below 50% — remember to offer it at billing.', cls: '' });
     if (agg.retail && (agg.gma/agg.retail) < PERF_THRESHOLDS.gmaPerBike) items.push({ icon: '💰', text: 'Your average GMA per bike is below ₹7,500 — try upselling accessories/gear.', cls: '' });
   }
+  // Festive season: a booking with no bike in stock is the one that gets missed in the rush.
+  if (festiveSeasonActive() && (STATE.stock || []).length) {
+    const { bookings } = festiveAllocate();
+    const mine = isAdmin ? bookings
+      : bookings.filter(b => execMatches(b.exec, (CURRENT_USER && (CURRENT_USER.execKey || CURRENT_USER.name)) || ''));
+    const none = mine.filter(b => !b.bike).length;
+    if (none) {
+      const text = isAdmin
+        ? `Festive rush: ${none} open booking${none === 1 ? ' has' : 's have'} no bike in stock — order before the walk-in rush empties the floor.`
+        : `Festive rush: ${none} of your booking${none === 1 ? ' has' : 's have'} no bike in stock yet — make sure it is ordered.`;
+      items.unshift({ icon: '🪔', text, cls: 'urgent',
+        html: esc(text) + ' <button type="button" class="hm-link" data-go="stock">Open Festive Shield</button>' });
+    }
+  }
   if (!items.length) items.push({ icon: '🎉', text: 'All caught up — no urgent follow-ups right now. Keep up the good work!', cls: 'ok' });
   return items;
 }
@@ -7484,6 +7885,106 @@ function openFormPdf(key){
 // Every section as a tile with a live number on it. The tab strip works, but on a phone it
 // scrolls sideways and half of it is off screen — this makes the whole dashboard visible at once.
 // Tiles are built from the same role rules as the tabs, so nobody sees a tile they cannot open.
+/* ══ Birthdays — staff and riders ════════════════════════════════════════════════════════════
+   Staff: a "Birthday" column in the USERS tab (only day and month reach the page — never the
+   year). Riders: the Date of Birth column of RIDER REGISTRATION. Shown on Home (everyone sees a
+   colleague's birthday; Admin and CRT also see riders', with a one-tap WhatsApp wish), and as an
+   upcoming list on the Riders tab. */
+const BIRTHDAY_UPCOMING_DAYS = 7;
+// Days from today until the next time this month-day comes round (0 = today). 29 Feb is
+// celebrated on 28 Feb in other years.
+function daysUntilBirthday(month, day){
+  const today = todayMidnight();
+  const y = today.getFullYear();
+  const at = (yr) => {
+    const leap = (yr % 4 === 0 && yr % 100 !== 0) || yr % 400 === 0;
+    const d = (month === 2 && day === 29 && !leap) ? 28 : day;
+    return new Date(yr, month - 1, d);
+  };
+  let next = at(y);
+  if (next < today) next = at(y + 1);
+  return Math.round((next - today) / 86400000);
+}
+function teamBirthdaysSoon(maxDays){
+  return (STATE.teamBirthdays || []).map(b => {
+    const [m, d] = String(b.md || '').split('-').map(Number);
+    if (!m || !d) return null;
+    return { name: b.name, month: m, day: d, inDays: daysUntilBirthday(m, d) };
+  }).filter(b => b && b.inDays <= maxDays).sort((a, b) => a.inDays - b.inDays);
+}
+function riderBirthdaysSoon(maxDays){
+  return (STATE.riderReg || []).map(r => {
+    const dob = asDate(r[10]);
+    if (!dob) return null;
+    const m = dob.getMonth() + 1, d = dob.getDate();
+    return { name: str(r[1]), mobile: str(r[2]), bike: str(r[4]), city: str(r[9]),
+             month: m, day: d, inDays: daysUntilBirthday(m, d), turning: null };
+  }).filter(b => b && b.name && b.inDays <= maxDays).sort((a, b) => a.inDays - b.inDays || a.name.localeCompare(b.name));
+}
+const canSeeRiders = () => !CURRENT_USER || CURRENT_USER.role === 'Admin' || CURRENT_USER.role === 'CRT';
+function whenText(inDays, month, day){
+  if (inDays === 0) return 'today';
+  if (inDays === 1) return 'tomorrow';
+  return new Date(2000, month - 1, day).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+function birthdayWishLink(rider){
+  const digits = String(rider.mobile || '').replace(/\D/g, '').slice(-10);
+  if (digits.length !== 10) return '';
+  const first = (rider.name || '').split(/\s+/)[0] || rider.name;
+  const msg = `Happy Birthday, ${first}! 🎂\n\nWishing you a fantastic year ahead and many happy miles` +
+    (rider.bike ? ` on your ${rider.bike}` : '') + `. Ride safe!\n\n— Team Amar Autos, Royal Enfield Kanti Nagar`;
+  return `https://wa.me/91${digits}?text=${encodeURIComponent(msg)}`;
+}
+// Home card. Returns '' when there is nothing to celebrate in the coming week.
+function birthdayCardHtml(){
+  const me = CURRENT_USER ? up(CURRENT_USER.name) : '';
+  const team = teamBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS);
+  const riders = canSeeRiders() ? riderBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS) : [];
+  const teamToday = team.filter(b => b.inDays === 0 && up(b.name) !== me);
+  const teamSoon = team.filter(b => b.inDays > 0);
+  const ridersToday = riders.filter(b => b.inDays === 0);
+  const ridersSoon = riders.filter(b => b.inDays > 0);
+  if (!teamToday.length && !teamSoon.length && !ridersToday.length && !ridersSoon.length) return '';
+  const lines = [];
+  if (teamToday.length) lines.push(`<div class="bd-big">🎉 Today is <b>${esc(teamToday.map(b => b.name).join(' & '))}</b>'s birthday — wish them!</div>`);
+  if (ridersToday.length) {
+    lines.push(`<div class="bd-sub">🏍️ ${ridersToday.length} rider${ridersToday.length === 1 ? '' : 's'} from our community ${ridersToday.length === 1 ? 'has a birthday' : 'have their birthday'} today:</div>` +
+      `<div class="bd-list">${ridersToday.map(r => {
+        const link = birthdayWishLink(r);
+        return `<div class="bd-rider"><span><b>${esc(r.name)}</b>${r.bike ? ` · ${esc(r.bike)}` : ''}${r.city ? ` · ${esc(r.city)}` : ''}</span>` +
+          (link ? `<a class="bd-wish" href="${link}" target="_blank" rel="noopener">🎂 Wish on WhatsApp</a>` : '') + `</div>`;
+      }).join('')}</div>`);
+  }
+  const soon = teamSoon.map(b => `${esc(b.name)} (${esc(whenText(b.inDays, b.month, b.day))})`)
+    .concat(ridersSoon.length ? [`${ridersSoon.length} rider${ridersSoon.length === 1 ? '' : 's'}`] : []);
+  if (soon.length) lines.push(`<div class="bd-soon">Coming up this week: ${soon.join(', ')}${ridersSoon.length ? ' — see the Riders tab' : ''}</div>`);
+  return `<div class="bd-card">${lines.join('')}</div>`;
+}
+function myBirthdayToday(){
+  if (!CURRENT_USER) return false;
+  const me = up(CURRENT_USER.name);
+  return teamBirthdaysSoon(0).some(b => up(b.name) === me);
+}
+// Riders tab: everyone with a birthday in the next 30 days, with a wish button.
+function renderRiderBirthdays(){
+  const el = document.getElementById('riderBirthdays');
+  if (!el) return;
+  const list = riderBirthdaysSoon(30);
+  const withDob = (STATE.riderReg || []).filter(r => asDate(r[10])).length;
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-note">No rider birthdays in the next 30 days${withDob ? '' : ' — the Date of Birth column of RIDER REGISTRATION is empty'}.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table class="data">
+    <thead><tr><th>When</th><th>Rider</th><th>Bike</th><th>City</th><th></th></tr></thead>
+    <tbody>${list.map(r => {
+      const link = birthdayWishLink(r);
+      return `<tr><td>${r.inDays === 0 ? '<b>🎂 Today</b>' : esc(whenText(r.inDays, r.month, r.day))}</td>
+        <td>${esc(r.name)}</td><td>${esc(r.bike)}</td><td>${esc(r.city)}</td>
+        <td>${link ? `<a class="bd-wish" href="${link}" target="_blank" rel="noopener">Wish on WhatsApp</a>` : ''}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
 const HOME_TILES = [
   // The four things used every day get big tiles. Everything else is one small link below —
   // a wall of ten equal tiles was the confusion: nothing stood out, so nothing was obvious.
@@ -7516,14 +8017,17 @@ function renderHome(){
     const d = new Date();
     const hour = d.getHours();
     const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const hi = myBirthdayToday() ? `🎂 Happy Birthday, ${esc(name)}!` : `${esc(part)}${name ? ', ' + esc(name) : ''}`;
     greet.innerHTML = `<div class="home-greet">
-      <div class="hg-hi">${esc(part)}${name ? ', ' + esc(name) : ''}</div>
+      <div class="hg-hi">${hi}</div>
       <div class="hg-date">${esc(d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' }))}</div>
     </div>`;
   }
 
   // the two or three things that actually need doing today, above the tiles
   const alerts = document.getElementById('homeAlerts');
+  const bdays = document.getElementById('homeBirthdays');
+  if (bdays) { try { bdays.innerHTML = STATE.initialized ? birthdayCardHtml() : ''; } catch (e) { bdays.innerHTML = ''; } }
   if (alerts && !STATE.initialized) alerts.innerHTML = '';
   else if (alerts) {
     const items = (typeof computeTodayPriorities === 'function' ? computeTodayPriorities() : [])
@@ -7764,11 +8268,14 @@ function renderStatus(st){
     { fn: 'sendDailySummary',   label: 'Night summary' },
     { fn: 'sendMorningCallList',label: 'Morning call list' },
     { fn: 'backupSheet',        label: 'Weekly backup' },
+    { fn: 'warmDashboardCache', label: 'Keep data ready (every 10 min)' },
   ];
   const have = st.triggers || [];
   const trigRows = want.map(w => have.indexOf(w.fn) >= 0
     ? line(w.label, '✅ scheduled', 'good')
-    : line(w.label, '⚠️ no trigger', 'bad', `Add a time-driven trigger for ${w.fn} in Apps Script`)
+    : line(w.label, '⚠️ no trigger', 'bad', w.fn === 'warmDashboardCache'
+        ? 'In Apps Script, select setupFastDashboard and press Run once'
+        : `Add a time-driven trigger for ${w.fn} in Apps Script`)
   ).join('');
 
   // last runs — anything older than about a day and a half has probably stopped
@@ -7796,6 +8303,9 @@ function renderStatus(st){
       ${runRow('Last summary sent', st.lastTeamSend || st.lastSummary, st.lastSummaryError)}
       ${runRow('Last call list sent', st.lastCallList, st.lastCallListError)}
       ${runRow('Last backup', st.lastBackup, st.lastBackupError)}
+      ${st.lastDataBuild !== undefined ? line('Last data build', esc(st.lastDataBuild || '— not yet'),
+        /kept last good|read errors/.test(st.lastDataBuild || '') ? 'bad' : 'muted',
+        /kept last good/.test(st.lastDataBuild || '') ? 'A tab was empty or half-pasted when it was read, so its last complete copy was shown instead.' : null) : ''}
       ${line('Sheets found', `${Object.keys(st.sheets || {}).length - missing.length} of ${Object.keys(st.sheets || {}).length}`,
         missing.length ? 'bad' : 'good', missing.length ? 'Missing: ' + missing.join(', ') : (empty.length ? 'Empty: ' + empty.join(', ') : null))}
     </div>
@@ -10081,7 +10591,7 @@ function computeSmartSuggestions(){
     return gaps.length ? `${name} (${gaps.join(', ')})` : null;
   }).filter(Boolean);
   if (weakExecs.length) {
-    items.push({ icon: '🛡️', text: `Attach-rate coaching chahiye: ${weakExecs.join('; ')} — billing ke time in items ko actively pitch karne ki yaad dilao, ye easy extra revenue hai.` });
+    items.push({ icon: '🛡️', text: `Attach-rate coaching needed: ${weakExecs.join('; ')} — remind them to pitch these items at billing; it is easy extra revenue.` });
   }
 
   // 3. Model families sitting in Open KN stock with zero pending bookings against them —
@@ -10108,7 +10618,7 @@ function computeSmartSuggestions(){
   // 4. Aged stock — same 60-day threshold as the Stock tab.
   const agedCount = STATE.stock.filter(r => up(r[17]) === 'OPEN' && up(r[7]) === 'KN' && num(r[16]) >= AGED_STOCK_DAYS).length;
   if (agedCount) {
-    items.push({ icon: '⏳', text: `${fmtInt(agedCount)} bike${agedCount === 1 ? '' : 's'} ${AGED_STOCK_DAYS}+ din se stock mein khadi hai — Stock tab mein dekh kar in par pehle push karo, naye stock se pehle.` });
+    items.push({ icon: '⏳', text: `${fmtInt(agedCount)} bike${agedCount === 1 ? '' : 's'} ${AGED_STOCK_DAYS}+ days in stock — check the Stock tab and push these before newer stock.` });
   }
 
   // 5. Most common reason enquiries are being lost, across the whole team (RE Portal data).
@@ -10388,7 +10898,7 @@ const TAB_GROUPS = {
   myday:     ['myday'],
   overview:  ['overview', 'analytics'],    // Business — targets, leaderboard AND the funnel
   sales:     ['delivery', 'booking'],      // one bike's story, start to finish
-  stock:     ['pending', 'stock'],         // what's booked against what's on the floor
+  stock:     ['festive', 'pending', 'stock'],   // festive shield (in season), then booked vs floor
   pricelist: ['pricelist'],
   // QR codes belong with customers, not in the odds-and-ends drawer: the review code, the rider
   // group code and the One Ride code are all things a sales person hands to a customer at
