@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610061235';
+  window.__BUILD = '202610081430';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2329,7 +2329,9 @@
     <div class="table-wrap"><table class="data" id="mydayLeaderboard"></table></div>
   </section>
 
-  <section class="tabpanel active" id="tab-dashboard">
+  <!-- Race Control retired: the Home cockpit (twin meters + the GT) shows the same figures, and
+       Deepak asked for each figure to live in one place only. Kept hidden so old ids still exist. -->
+  <section class="tabpanel" id="tab-dashboard" hidden style="display:none !important">
     <!-- Race Control header: checkered flag + title + LAP (day of month) counter -->
     <div class="rc-head">
       <div class="rc-left">
@@ -3292,6 +3294,18 @@ function api(params, timeoutMs){
 }
 
 let CURRENT_USER = null;
+// The role comes from the USERS tab exactly as typed. "SALES", "sales" or "Admin " must still
+// count as Sales / Admin — every check in this page compares against the proper spelling.
+const KNOWN_ROLES = ['Admin', 'Sales', 'CRT', 'Walkin', 'DP', 'Billing'];
+function normalizeUser(u){
+  if (!u) return u;
+  const r = String(u.role || '').replace(/[^A-Za-z]/g, '').toLowerCase();
+  const hit = KNOWN_ROLES.find(k => k.toLowerCase() === r) ||
+    (r.indexOf('walk') === 0 ? 'Walkin' : r.indexOf('sales') === 0 ? 'Sales' : r.indexOf('admin') === 0 ? 'Admin' : '');
+  if (hit) u.role = hit;
+  if (u.execKeyRaw === undefined) u.execKeyRaw = String(u.execKey || '');
+  return u;
+}
 // Tabs a non-Admin login should NOT see at all — 'riders' stays CRT+Admin only (Harsh's job, not
 // a sales person's). Funnel used to be here too but Deepak now wants a Sales login to see it
 // directly (competition/context), so it's open to everyone.
@@ -3922,7 +3936,7 @@ function trySavedSession(){
     clearSession(); return false;
   }
   AUTH = saved;
-  CURRENT_USER = saved.user;
+  CURRENT_USER = normalizeUser(saved.user);
   // Straight to the dashboard — but not synchronously. This function runs part-way down the
   // script, before STATE and the renderers further below have been created; opening the
   // dashboard right here threw "Cannot access 'STATE' before initialization" for anyone who
@@ -3973,7 +3987,7 @@ async function attemptLogin(){
     }
     errEl.textContent = '';
     AUTH = { token: res.token, user: res.user, expires: res.expires || 0 };
-    CURRENT_USER = res.user;
+    CURRENT_USER = normalizeUser(res.user);
     saveSession();
     prefetchData();
     enterDashboard();
@@ -5127,13 +5141,35 @@ function populateFilters(){
   execSel.innerHTML = '<option value="ALL">All Executives</option>' +
     STATE.execList.map(e => `<option value="${esc(e)}">${esc(e)}</option>`).join('');
   if (CURRENT_USER && CURRENT_USER.role !== 'Admin') {
-    // non-admin: always locked to their own executive code, even on periodic auto-refresh
-    execSel.value = CURRENT_USER.execKey || 'ALL';
+    // non-admin: always locked to their own executive code, even on periodic auto-refresh.
+    // The ExecKey in USERS is typed by hand ("Aslam Khan", "aslam", "#ASLAM", or blank). It used
+    // to be used as-is: anything that wasn't exactly one of the names in this list left the filter
+    // empty, and every report showed nothing. It is now matched to the right person first, and a
+    // blank ExecKey falls back to the login name — never to "All Executives".
+    const me = resolveMyExecKey();
+    CURRENT_USER.execKey = me;
+    if (me && ![...execSel.options].some(o => o.value === me)) {
+      execSel.insertAdjacentHTML('beforeend', `<option value="${esc(me)}">${esc(me)}</option>`);
+    }
+    execSel.value = me || 'ALL';
     execSel.disabled = true;
   } else if ([...execSel.options].some(o => o.value === prevExec)) {
     execSel.value = prevExec;
   }
   STATE.filterExec = execSel.value;
+}
+
+// Which name in the sales-person list this login belongs to.
+function resolveMyExecKey(){
+  if (!CURRENT_USER) return '';
+  const raw = str(CURRENT_USER.execKeyRaw !== undefined ? CURRENT_USER.execKeyRaw : CURRENT_USER.execKey) || str(CURRENT_USER.name);
+  if (!raw) return '';
+  const list = STATE.execList || [];
+  const u = up(raw).replace(/^#+/, '').trim();
+  const c = up(canonName(raw));
+  return list.find(e => e === u) || list.find(e => e === c) ||
+         list.find(e => e === u.split(/\s+/)[0]) ||
+         list.find(e => execMatches(e, raw)) || c || u;
 }
 
 document.getElementById('monthFilter').addEventListener('change', e => {
@@ -5383,7 +5419,7 @@ function ownerInFilter(owner){
 // straight away; the rest follow in small batches a moment later, so the phone shows something
 // immediately instead of freezing until all thirty panels are built.
 const RENDER_FIRST = [renderHome, renderFindBox, renderMyDay, renderMyAttach, renderCallList, renderTodayPriorities, renderPersonalTarget];
-const RENDER_REST = [renderFestiveShield, renderRiderBirthdays, renderDashboard, renderStorePerformance, renderSalesConsole, renderFunnelSteps, renderSpotlight, renderPipeline, renderChampions, renderEmployeeTable, renderFunnel, renderReviews, renderWalkinChecks, renderDelivery, renderPending, renderStock, renderRiders, renderModelSpecs, renderAnalytics, renderWalkinLog, renderPaymentMode, renderPriceList, renderTargetVsActual];
+const RENDER_REST = [renderFestiveShield, renderRiderBirthdays, renderStorePerformance, renderSalesConsole, renderFunnelSteps, renderSpotlight, renderPipeline, renderChampions, renderEmployeeTable, renderFunnel, renderReviews, renderWalkinChecks, renderDelivery, renderPending, renderStock, renderRiders, renderModelSpecs, renderAnalytics, renderWalkinLog, renderPaymentMode, renderPriceList, renderTargetVsActual];
 let _renderGen = 0;
 function runRenderers(list){
   list.forEach(f => {
@@ -9160,7 +9196,6 @@ function renderCockpit(){
       <span class="ck-gearline">Gear ${esc(String(D.gear))} — ${esc(gearMsg)}</span></div>
     ${ckCluster(D, lamps)}
     <div class="gt-key">Orange bar = month target · ▸ = where you should be today</div>
-    ${legend ? `<div class="gt-legend">${legend}</div>` : ''}
     ${gtLiveHtml(D)}
     ${team}
     <div class="ck-foot">Tap a dial, a warning light or any number for the full list.</div>
