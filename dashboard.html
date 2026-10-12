@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610081430';
+  window.__BUILD = '202610130010';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -1246,6 +1246,20 @@
   .hg-hi { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
   .hg-date { font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
   .home-alerts { margin-bottom: 18px; display: grid; gap: 8px; }
+  /* Admin sheet check */
+  .sc-banner { display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 12px; padding: 12px 14px; text-align: left;
+    border-radius: 14px; border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+    background: color-mix(in srgb, var(--warning) 12%, transparent); color: var(--text-primary); font: inherit; cursor: pointer; }
+  .sc-banner.sc-ok { border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 8%, transparent);
+    font-size: 13px; color: var(--text-secondary); padding: 9px 14px; }
+  .sc-banner .sc-n { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; color: var(--warning); line-height: 1; }
+  .sc-banner .sc-t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; font-size: 14px; }
+  .sc-banner .sc-t small { color: var(--text-secondary); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-banner .sc-go { font-size: 13px; font-weight: 700; color: var(--gold-light); white-space: nowrap; }
+  .sc-group { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+  .sc-group summary { cursor: pointer; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+  .sc-count { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); border-radius: 10px; padding: 1px 9px; font-weight: 700; font-size: 12.5px; }
+  .sc-fix { font-size: 12.5px; color: var(--text-secondary); margin: 8px 0; }
   .ha-row { background: color-mix(in srgb, var(--critical) 13%, transparent);
     border: 1px solid color-mix(in srgb, var(--critical) 36%, transparent);
     border-radius: 11px; padding: 12px 15px; font-size: 13.5px; line-height: 1.55; }
@@ -1430,6 +1444,14 @@
   .call-note { font-size: 13px; color: var(--text-secondary); }
   .call-row.urgent .call-note { color: var(--critical); font-weight: 600; }
   .call-num { font-size: 13.5px; color: var(--text-secondary); white-space: nowrap; }
+  .wa-pick-list { display: grid; gap: 8px; }
+  .wa-pick { display: flex; flex-direction: column; gap: 4px; padding: 11px 13px; border-radius: 12px; text-decoration: none;
+    border: 1px solid var(--border); color: var(--text-primary); background: color-mix(in srgb, var(--text-primary) 3%, transparent); }
+  .wa-pick:hover { border-color: #25D366; }
+  .wa-pick b { font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .wa-pick b span { font-size: 11px; font-weight: 700; color: #06331a; background: #25D366; border-radius: 6px; padding: 1px 6px; }
+  .wa-pick small { font-size: 12.5px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .wa-pick-def { border-color: color-mix(in srgb, #25D366 60%, transparent); }
   .wa-btn { display: inline-flex; align-items: center; gap: 6px; background: #25D366; color: #06331a;
     font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 9px; text-decoration: none;
     white-space: nowrap; transition: filter .15s; }
@@ -2273,6 +2295,7 @@
       <div class="find-chips" id="findChips"></div>
     </div>
     <div id="findResult"></div>
+    <div id="homeSheetCheck"></div>
     <div id="homeAlerts"></div>
     <div id="homeBirthdays"></div>
     <div class="tile-grid" id="homeTiles"></div>
@@ -3982,7 +4005,7 @@ async function attemptLogin(){
     if (!res || !res.ok) {
       errEl.textContent = (res && (res.message || res.error)) === 'TIMEOUT'
         ? 'Server is not responding. Check your internet and try again.'
-        : (res && res.error) || 'Wrong name or password.';
+        : (res && (res.message || res.error)) || 'Wrong name or password.';
       return;
     }
     errEl.textContent = '';
@@ -4944,6 +4967,8 @@ function applyData(res, silent, meta){
 
   STATE.booking = booking.slice(1).filter(r => str(r[1]));
   STATE.delivery = delivery.slice(1).filter(r => str(r[3]));
+  // Rows the dashboard skips for lack of a receipt number — listed by the Admin sheet check.
+  STATE.bookingNoSlip = booking.slice(1).filter(r => !str(r[1]) && (str(r[5]) || str(r[6])));
   // Keep any row that carries identifying data. (Column A is sometimes blank in exports, so
   // requiring it silently dropped whole sheets and left reports empty.)
   STATE.enquiryHeader = enquiry[0] || [];
@@ -5048,6 +5073,7 @@ function applyData(res, silent, meta){
     const hasEmpNums = (r) => { for (let c = 10; c <= 17; c++) { const v = r && r[c]; if (v !== '' && v != null && isFinite(Number(v))) return true; } return false; };
     const isDataRow = (r) => !!normMonthKey(r && r[0]) || hasEmpNums(r);
     STATE.monthlyTargets = mtAll.filter(isDataRow);
+    STATE.mtSheetKeys = STATE.monthlyTargets.map(r => normMonthKey(r[0]));   // before any browser backup is merged in
     STATE.monthlyTargetsHeader = mtAll.find(r => !isDataRow(r)) || [];
     _EMP_TARGET_MAP = null; // rebuild per-employee target map on next use
   }
@@ -7859,7 +7885,9 @@ function renderTddTable(rows){
     { key:'slipNo', label:'Slip / Receipt No' },
     { key:'customer', label:'Customer Name', raw:true, fmt: (v, row) =>
         esc(v) + (row.carried ? ` <span class="carried-tag" title="Booked ${esc(row.carried)} — carried over from an earlier month">carried over</span>` : '') },
-    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) },
+    { key:'mobile', label:'Mobile No', raw:true, fmt: (v, row) => maskMobile(v, row.exec) +
+        ' ' + waBtn(v, row.exec, row.days != null && row.days < 0 ? 'overdue' : 'deliveryReminder',
+          { name: row.customer, model: row.model, colour: row.colour, tdd: row.days != null ? row.tdd : '' }) },
     { key:'model', label:'Model' },
     { key:'colour', label:'Colour' },
     { key:'exec', label:'Executive' },
@@ -8472,7 +8500,7 @@ function teamBirthdaysSoon(maxDays){
   return (STATE.teamBirthdays || []).map(b => {
     const [m, d] = String(b.md || '').split('-').map(Number);
     if (!m || !d) return null;
-    return { name: b.name, month: m, day: d, inDays: daysUntilBirthday(m, d) };
+    return { name: b.name, role: b.role || '', month: m, day: d, inDays: daysUntilBirthday(m, d) };
   }).filter(b => b && b.inDays <= maxDays).sort((a, b) => a.inDays - b.inDays);
 }
 function riderBirthdaysSoon(maxDays){
@@ -8499,17 +8527,24 @@ function birthdayWishLink(rider){
   return `https://wa.me/91${digits}?text=${encodeURIComponent(msg)}`;
 }
 // Home card. Returns '' when there is nothing to celebrate in the coming week.
+// The employee list in USERS has full names ("DEEPAK KUMAR") while a login is often just the first
+// name ("Deepak"), so "is this me?" also accepts a first-name match.
+function isMyName(name){
+  if (!CURRENT_USER) return false;
+  const me = up(CURRENT_USER.name), n = up(name);
+  return n === me || n.split(/\s+/)[0] === me.split(/\s+/)[0];
+}
+const bdayLabel = b => b.name + (b.role ? ` (${b.role})` : '');
 function birthdayCardHtml(){
-  const me = CURRENT_USER ? up(CURRENT_USER.name) : '';
   const team = teamBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS);
   const riders = canSeeRiders() ? riderBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS) : [];
-  const teamToday = team.filter(b => b.inDays === 0 && up(b.name) !== me);
+  const teamToday = team.filter(b => b.inDays === 0 && !isMyName(b.name));
   const teamSoon = team.filter(b => b.inDays > 0);
   const ridersToday = riders.filter(b => b.inDays === 0);
   const ridersSoon = riders.filter(b => b.inDays > 0);
   if (!teamToday.length && !teamSoon.length && !ridersToday.length && !ridersSoon.length) return '';
   const lines = [];
-  if (teamToday.length) lines.push(`<div class="bd-big">🎉 Today is <b>${esc(teamToday.map(b => b.name).join(' & '))}</b>'s birthday — wish them!</div>`);
+  if (teamToday.length) lines.push(`<div class="bd-big">🎉 Today is <b>${esc(teamToday.map(bdayLabel).join(' & '))}</b>'s birthday — wish them!</div>`);
   if (ridersToday.length) {
     lines.push(`<div class="bd-sub">🏍️ ${ridersToday.length} rider${ridersToday.length === 1 ? '' : 's'} from our community ${ridersToday.length === 1 ? 'has a birthday' : 'have their birthday'} today:</div>` +
       `<div class="bd-list">${ridersToday.map(r => {
@@ -8518,15 +8553,14 @@ function birthdayCardHtml(){
           (link ? `<a class="bd-wish" href="${link}" target="_blank" rel="noopener">🎂 Wish on WhatsApp</a>` : '') + `</div>`;
       }).join('')}</div>`);
   }
-  const soon = teamSoon.map(b => `${esc(b.name)} (${esc(whenText(b.inDays, b.month, b.day))})`)
+  const soon = teamSoon.map(b => `${esc(bdayLabel(b))} — ${esc(whenText(b.inDays, b.month, b.day))}`)
     .concat(ridersSoon.length ? [`${ridersSoon.length} rider${ridersSoon.length === 1 ? '' : 's'}`] : []);
   if (soon.length) lines.push(`<div class="bd-soon">Coming up this week: ${soon.join(', ')}${ridersSoon.length ? ' — see the Riders tab' : ''}</div>`);
   return `<div class="bd-card">${lines.join('')}</div>`;
 }
 function myBirthdayToday(){
   if (!CURRENT_USER) return false;
-  const me = up(CURRENT_USER.name);
-  return teamBirthdaysSoon(0).some(b => up(b.name) === me);
+  return teamBirthdaysSoon(0).some(b => isMyName(b.name));
 }
 // Riders tab: everyone with a birthday in the next 30 days, with a wish button.
 function renderRiderBirthdays(){
@@ -8705,7 +8739,7 @@ function cockpitData(){
   const transit = pool.filter(p => !p.open).length;
   const walk = n.walkins ? n.walkins.length : 0;
   const me = CURRENT_USER ? up(CURRENT_USER.name) : '';
-  const bdayToday = teamBirthdaysSoon(0).filter(b => up(b.name) !== me).length + (canSeeRiders() ? riderBirthdaysSoon(0).length : 0);
+  const bdayToday = teamBirthdaysSoon(0).filter(b => !isMyName(b.name)).length + (canSeeRiders() ? riderBirthdaysSoon(0).length : 0);
   let fest = null;
   try {
     const nx = FESTIVE_DATES.map(f => ({ name: f.name, d: festiveDate(f.key) })).filter(f => f.d && f.d >= today).sort((a, b) => a.d - b.d)[0];
@@ -9239,6 +9273,8 @@ function renderHome(){
   const alerts = document.getElementById('homeAlerts');
   const bdays = document.getElementById('homeBirthdays');
   if (bdays) { try { bdays.innerHTML = STATE.initialized ? birthdayCardHtml() : ''; } catch (e) { bdays.innerHTML = ''; } }
+  const sc = document.getElementById('homeSheetCheck');
+  if (sc) sc.innerHTML = sheetCheckBannerHtml();
   if (alerts && !STATE.initialized) alerts.innerHTML = '';
   else if (alerts) {
     const items = (typeof computeTodayPriorities === 'function' ? computeTodayPriorities() : [])
@@ -9286,6 +9322,127 @@ document.addEventListener('click', (e) => {
   const t = e.target.closest('.tile[data-go], .hm-link[data-go]');
   if (t) switchToTab(t.dataset.go);
 });
+
+// ═══════════════ Sheet check (Admin) ═══════════════
+// Mistakes in the sheet quietly make reports and emails wrong: a booking with no TDD never shows
+// as "due today", a 9-digit mobile breaks WhatsApp, a misspelt colour hides a bike that is in
+// stock. This lists every such problem it can see in the data already on this phone, so they can
+// be fixed in the sheet. Nothing here leaves the phone. Admin only.
+const last10 = v => { let d = String(v == null ? '' : v).replace(/\D/g, ''); if (d.length === 12 && d.startsWith('91')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = d.slice(1); return d; };
+const mobileOk = v => String(v == null ? '' : v).split(/[\/,;]|\bor\b/i).map(last10).filter(Boolean).every(d => d.length === 10) && last10(v).length > 0;
+const colLetter = i => { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+
+function computeSheetCheck(){
+  const groups = [];
+  const add = (key, title, fix, rows) => { if (rows.length) groups.push({ key, title, fix, rows }); };
+  const open = (STATE.booking || []).filter(r => !isBookingClosedForSales(r[9]));
+  const who = r => ({ customer: str(r[5]) || '—', slip: str(r[1]) || '—', exec: str(r[7]) || '—' });
+
+  // ── Bookings ──
+  add('notdd', 'Pending booking without a delivery date (TDD)',
+    'Fill the TDD column in ACTUL BOOKING — the manager\'s morning email and "due today" depend on it.',
+    open.filter(r => !str(r[8]) && !str(r[10])).map(r => Object.assign(who(r), { detail: `${str(r[3])} ${str(r[4])}`.trim() })));
+  add('mobile', 'Wrong mobile number in a booking',
+    'A mobile number must have 10 digits. Calls and WhatsApp will not work until it is fixed.',
+    open.filter(r => !mobileOk(r[6])).map(r => Object.assign(who(r), { detail: str(r[6]) || 'blank' })));
+  const known = new Set((STATE.execList || []).map(up));
+  add('exec', 'Booking without a known sales person',
+    'The sales person column is blank or the name is not one of the names in MONTHLY TARGETS — nobody gets this customer in their list or email.',
+    open.filter(r => { const e = str(r[7]); if (!e) return true; if (!known.size) return false;
+      const c = up(canonName(e)).replace(/^#+\s*/, '');
+      return !known.has(c) && !EX_EMPLOYEES.has(c) && !(STATE.execList || []).some(x => execMatches(e, x)); })
+      .map(r => Object.assign(who(r), { detail: str(r[7]) ? `"${str(r[7])}" not recognised` : 'blank' })));
+  add('bdate', 'Pending booking without a readable booking date',
+    'First-booked-first-served needs the booking date. Type it as a date (for example 07/10/2026).',
+    open.filter(r => !asDate(r[2])).map(r => Object.assign(who(r), { detail: str(r[2]) || 'blank' })));
+  add('model', 'Pending booking without model or colour',
+    'Without the model and colour no bike can be held for this customer.',
+    open.filter(r => !str(r[3]) || !str(r[4])).map(r => Object.assign(who(r), { detail: !str(r[3]) ? 'model blank' : 'colour blank' })));
+  try {
+    const { bookings } = festiveAllocate();
+    add('colour', 'Colour spelt differently from the stock sheet',
+      'The bike was still matched, but correct the spelling in ACTUL BOOKING so every report agrees.',
+      bookings.filter(b => b.typo).map(b => ({ customer: b.customer || '—', slip: b.slip || '—', exec: b.exec || '—', detail: `"${b.colour}" → stock says ${b.typo}` })));
+  } catch (e) {}
+  const seen = {};
+  (STATE.booking || []).filter(r => !/CANCEL/.test(up(r[9]))).forEach(r => { const k = str(r[1]); if (k) (seen[k] = seen[k] || []).push(r); });
+  add('dup', 'Same receipt number on two bookings',
+    'Each booking needs its own receipt number, or one of them will be matched to the wrong bill.',
+    Object.keys(seen).filter(k => seen[k].length > 1).flatMap(k => seen[k].map(r => Object.assign(who(r), { detail: `receipt ${k} × ${seen[k].length}` }))));
+  add('noslip', 'Booking row without a receipt number',
+    'Rows without a receipt number are skipped by the whole dashboard. Add the receipt number in column B.',
+    (STATE.bookingNoSlip || []).map(r => ({ customer: str(r[5]) || '—', slip: '—', exec: str(r[7]) || '—', detail: `${str(r[3])} ${str(r[4])}`.trim() || '—' })));
+
+  // ── Billed, but the booking still says pending ──
+  const billed = (STATE.delivery || []).filter(r => !/CANCEL/.test(up(r[9])));
+  const bySlip = {}, byMob = {};
+  billed.forEach(r => {
+    [str(r[16]), str(r[3])].filter(Boolean).forEach(k => { bySlip[up(k)] = r; });
+    const m = last10(r[5]); if (m.length === 10) (byMob[m] = byMob[m] || []).push(r);
+  });
+  add('billedopen', 'Billed, but the booking is still open',
+    'This customer has a bill in DELIVERY SHEET but the booking in ACTUL BOOKING is not marked BILLED or DELIVERED — the pending count is too high until it is.',
+    open.map(r => {
+      let bill = bySlip[up(str(r[1]))] || null;
+      if (!bill) { const m = last10(r[6]); bill = (byMob[m] || []).find(d => modelFamilyKey(str(d[6])) === modelFamilyKey(str(r[3]))) || null; }
+      if (!bill) return null;
+      const bd = asDate(bill[2]);
+      return Object.assign(who(r), { detail: `billed ${bd ? fmtDate(bd) : ''} · booking says "${str(r[9]) || 'blank'}"` });
+    }).filter(Boolean));
+
+  // ── Delivery sheet ──
+  add('dexec', 'Bill without a sales person',
+    'The Executive column of DELIVERY SHEET is blank — this sale counts for nobody.',
+    (STATE.delivery || []).filter(r => !str(r[18])).map(r => ({ customer: str(r[4]) || '—', slip: str(r[3]) || '—', exec: '—', detail: `${str(r[6])} ${str(r[7])}`.trim() })));
+  add('dmobile', 'Wrong mobile number in a bill',
+    'A mobile number must have 10 digits.',
+    (STATE.delivery || []).filter(r => !mobileOk(r[5])).map(r => ({ customer: str(r[4]) || '—', slip: str(r[3]) || '—', exec: str(r[18]) || '—', detail: str(r[5]) || 'blank' })));
+
+  // ── Whole-sheet problems ──
+  const sheetRows = [];
+  const mk = currentMonthKey();
+  if (!(STATE.mtSheetKeys || []).includes(mk)) sheetRows.push({ customer: 'MONTHLY TARGETS', slip: '—', exec: '—', detail: `No row for ${mk} — targets show as 0` });
+  ['ACTUL BOOKING', 'DELIVERY SHEET', 'Stock', 'PRICE'].forEach(n => { if (LAST_SHEET_ERROR[n]) sheetRows.push({ customer: n === 'Stock' ? 'STOCK' : n, slip: '—', exec: '—', detail: 'Tab is empty or could not be read' }); });
+  const scan = (name, rows) => {
+    const cols = {};
+    (rows || []).forEach(r => (r || []).forEach((c, i) => { if (/^#(REF|N\/A|ERROR|VALUE|DIV\/0|NAME)/i.test(str(c))) cols[i] = (cols[i] || 0) + 1; }));
+    Object.keys(cols).forEach(i => sheetRows.push({ customer: name, slip: '—', exec: '—', detail: `Column ${colLetter(+i)}: ${cols[i]} cell${cols[i] === 1 ? '' : 's'} show a formula error (#REF! etc.)` }));
+  };
+  scan('ACTUL BOOKING', STATE.booking); scan('DELIVERY SHEET', STATE.delivery); scan('STOCK', STATE.stock); scan('walkin report', STATE.walkin);
+  add('sheet', 'Problems with a whole tab', 'Fix these in the sheet itself.', sheetRows);
+
+  return { groups, total: groups.reduce((n, g) => n + g.rows.length, 0) };
+}
+
+function sheetCheckBannerHtml(){
+  if (!STATE.initialized || !CURRENT_USER || CURRENT_USER.role !== 'Admin') return '';
+  let res;
+  try { res = computeSheetCheck(); } catch (e) { console.error('sheet check', e); return ''; }
+  STATE.sheetCheck = res;
+  if (!res.total) return `<button type="button" class="sc-banner sc-ok" data-sheet-check>✅ Sheet check — nothing to fix</button>`;
+  const top = res.groups.slice(0, 3).map(g => `${g.rows.length} ${esc(g.title.toLowerCase())}`).join(' · ');
+  return `<button type="button" class="sc-banner" data-sheet-check>
+    <span class="sc-n">${fmtInt(res.total)}</span>
+    <span class="sc-t"><b>things to fix in the sheet</b><small>${top}${res.groups.length > 3 ? ' · …' : ''}</small></span>
+    <span class="sc-go">See list ›</span></button>`;
+}
+
+function openSheetCheck(){
+  const res = STATE.sheetCheck || computeSheetCheck();
+  const body = !res.total ? '<div class="empty-note">Nothing to fix — every booking and bill looks complete.</div>' :
+    `<p class="empty-note" style="text-align:left;padding:0 0 10px;">Fix these in the Google Sheet; the list updates by itself on the next refresh. Search a customer in the sheet with Ctrl+F.</p>` +
+    res.groups.map(g => `<details class="sc-group" ${res.groups.length <= 3 ? 'open' : ''}>
+      <summary><b>${esc(g.title)}</b> <span class="sc-count">${fmtInt(g.rows.length)}</span></summary>
+      <div class="sc-fix">${esc(g.fix)}</div>
+      <div class="table-wrap"><table class="data"><thead><tr><th>Customer / tab</th><th>Receipt</th><th>Sales person</th><th>What is wrong</th></tr></thead><tbody>
+      ${g.rows.slice(0, 200).map(r => `<tr><td>${esc(r.customer)}</td><td>${esc(r.slip)}</td><td>${esc(r.exec)}</td><td style="white-space:normal;">${esc(r.detail)}</td></tr>`).join('')}
+      </tbody></table></div>${g.rows.length > 200 ? `<div class="empty-note">+${fmtInt(g.rows.length - 200)} more</div>` : ''}</details>`).join('');
+  document.getElementById('modalTitle').textContent = '🧹 Sheet check';
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('detailModal').classList.add('open');
+}
+document.addEventListener('click', (e) => { if (e.target.closest('[data-sheet-check]')) openSheetCheck(); });
+
 
 // ═══════════════ Find — every answer in one place ═══════════════
 // "There are so many tabs that I get confused — let me type something and get all the data in one
@@ -10875,31 +11032,66 @@ function canMessage(ownerField){
   const ownsIt = CURRENT_USER && CURRENT_USER.execKey && execMatches(ownerField, CURRENT_USER.execKey);
   return isAdmin || ownsIt;
 }
+// Names in the sheet are mostly typed in capitals; a message reads better as "Rohit".
+const niceCase = w => (w && w === w.toUpperCase() && /[A-Z]/.test(w)) ? w.charAt(0) + w.slice(1).toLowerCase() : w;
 function firstName(full){
   const n = str(full).replace(/\s+/g, ' ').trim();
-  return n ? n.split(' ')[0] : 'Sir/Madam';
+  return n ? niceCase(n.split(' ')[0]) : 'Sir/Madam';
 }
 // Ready-made messages. Kept short and polite — a sales person can edit before sending.
+const bikeOf = (c) => `${c.model || 'Royal Enfield'}${c.colour ? ' (' + c.colour + ')' : ''}`;
+const REVIEW_LINK = 'https://amarauto87-source.github.io/amar-autos-review/';
 const WA_TEMPLATES = {
-  stockArrived: (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${c.model}${c.colour ? ' (' + c.colour + ')' : ''} has arrived at the showroom. When would suit you for delivery? Thank you.`,
-  overdue:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. The promised delivery date for your ${c.model} has passed. I wanted to give you an update — could we speak? Thank you.`,
+  stockArrived: (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${bikeOf(c)} has arrived at the showroom. When would suit you for delivery? Thank you.`,
+  deliveryReminder: (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. A reminder that the delivery of your ${bikeOf(c)} is planned ${c.tdd ? 'for ' + c.tdd : 'soon'}. Please confirm a time that suits you. Thank you.`,
+  documents:    (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. For the delivery and registration of your ${c.model || 'motorcycle'}, please bring your Aadhaar card, PAN card and 2 passport-size photographs. Thank you.`,
+  overdue:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. The promised delivery date for your ${c.model || 'motorcycle'} has passed. I wanted to give you an update — could we speak? Thank you.`,
+  booking:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${bikeOf(c)} booking is confirmed. Let me know if you need any update. Thank you.`,
+  thankYou:     (c) => `Hello ${firstName(c.name)}, thank you for choosing Royal Enfield with Amar Autos! Wishing you many happy miles on your ${c.model || 'new motorcycle'}. If you liked our service, a Google review would mean a lot to us: ${REVIEW_LINK}`,
   followUp:     (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. You had enquired about the ${c.model || 'Royal Enfield'}. If you have any questions or would like a test ride, do let me know — happy to help. Thank you.`,
-  booking:      (c) => `Hello ${firstName(c.name)}, this is ${c.from} from Amar Autos. Your ${c.model} booking is confirmed. Let me know if you need any update. Thank you.`,
 };
+// The choices offered when the WhatsApp button is tapped; the one that fits the list it was
+// tapped from comes first.
+const WA_CHOICES = [
+  ['stockArrived', 'Bike has arrived'], ['deliveryReminder', 'Delivery reminder'], ['documents', 'Documents to bring'],
+  ['overdue', 'Delivery delayed — update'], ['booking', 'Booking confirmed'], ['thankYou', 'Thank you + Google review'],
+  ['followUp', 'Enquiry follow-up'],
+];
 // Renders the little green WhatsApp button, or nothing when the number isn't visible to this user.
 function waBtn(mobileValue, ownerField, template, ctx){
   if (!canMessage(ownerField)) return '';
   const num = waNumber(mobileValue);
   if (!num) return '';
-  const me = (CURRENT_USER && CURRENT_USER.name) || 'Amar Autos';
+  const me = niceCase((CURRENT_USER && CURRENT_USER.name) || 'Amar Autos');
   const build = WA_TEMPLATES[template] || WA_TEMPLATES.followUp;
   const text = build(Object.assign({ from: me, name: '', model: '', colour: '' }, ctx || {}));
   const href = 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
-  return `<a class="wa-btn" href="${href}" target="_blank" rel="noopener" title="Send a WhatsApp message" onclick="event.stopPropagation();">
+  const pickCtx = JSON.stringify({ num, def: template, name: (ctx || {}).name || '', model: (ctx || {}).model || '', colour: (ctx || {}).colour || '', tdd: (ctx || {}).tdd || '' });
+  return `<a class="wa-btn" href="${href}" target="_blank" rel="noopener" title="Send a WhatsApp message" data-wa="${esc(pickCtx)}" onclick="event.stopPropagation(); return openWaPicker(this);">
     <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.4.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
     WhatsApp</a>`;
 }
 
+// Tapping WhatsApp offers every ready-made message with the text shown, so the right one is one
+// tap away. The message opens in the phone's own WhatsApp to edit and send — nothing is sent from
+// here and no outside service sees it.
+function openWaPicker(el){
+  let c;
+  try { c = JSON.parse(el.getAttribute('data-wa') || '{}'); } catch (e) { return true; }
+  if (!c.num) return true;
+  const me = niceCase((CURRENT_USER && CURRENT_USER.name) || 'Amar Autos');
+  const ctx = { from: me, name: c.name, model: c.model, colour: c.colour, tdd: c.tdd };
+  const order = WA_CHOICES.slice().sort((a, b) => (b[0] === c.def) - (a[0] === c.def));
+  document.getElementById('modalTitle').textContent = 'WhatsApp — ' + (firstName(c.name) || 'customer');
+  document.getElementById('modalBody').innerHTML = `<div class="wa-pick-list">${order.map(([k, label]) => {
+    const text = WA_TEMPLATES[k](ctx);
+    return `<a class="wa-pick${k === c.def ? ' wa-pick-def' : ''}" href="https://wa.me/${esc(c.num)}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener"
+      onclick="document.getElementById('detailModal').classList.remove('open');">
+      <b>${esc(label)}${k === c.def ? ' <span>suggested</span>' : ''}</b><small>${esc(text)}</small></a>`;
+  }).join('')}</div><p class="empty-note" style="text-align:left;padding:10px 0 0;">The message opens in WhatsApp — you can change it before sending.</p>`;
+  document.getElementById('detailModal').classList.add('open');
+  return false;
+}
 
 // ═══════════════ Mode of payment — bank wise ═══════════════
 // Column I of the delivery sheet holds either "CASH" or the financier's name. It's read as
