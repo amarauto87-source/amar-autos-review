@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610130010';
+  window.__BUILD = '202610131130';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2150,6 +2150,172 @@
     .cockpit .gtl-card.open { display: block; }
     .gtl-card-v { font-size: 30px; }
   }
+
+  /* ══════════ Five-tab layout (build 202610130100) ══════════ */
+  nav.tabs button { display: inline-flex; align-items: center; gap: 8px; }
+  nav.tabs .tab-ic { display: inline-flex; }
+  nav.tabs .tab-ic svg { width: 19px; height: 19px; }
+  #mydayHero, #mydayShortcuts { display: none !important; }
+  body:not([data-tab="home"]) #findChips { display: none; }
+  #findBox { margin-bottom: 14px; }
+  /* sub-tabs: one kind of report at a time */
+  .subtabs { display: flex; gap: 6px; margin: 0 0 18px; padding: 4px; border-radius: 14px; overflow-x: auto;
+    background: var(--surface-1); border: 1px solid var(--border); width: fit-content; max-width: 100%; }
+  .subtab { flex: 0 0 auto; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 13.5px;
+    font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+  .subtab:hover { color: var(--gold-light); }
+  .subtab.active { background: var(--gold); color: #0B0909; }
+  .seg-n { display: inline-block; min-width: 18px; padding: 0 6px; margin-left: 4px; border-radius: 9px; font-size: 11px;
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent); }
+  .tdd-chips { margin: 0 0 10px; flex-wrap: wrap; }
+
+  /* Today: four numbers of the day */
+  .td-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+  .td-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border-radius: 16px;
+    background: var(--surface-1); border: 1px solid var(--border); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+  .td-tile:hover { border-color: var(--gold-dim); }
+  .td-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--text-muted); }
+  .td-num { font-family: var(--font-head); font-size: 36px; font-weight: 700; line-height: 1; margin-top: 4px; }
+  .td-lb { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); line-height: 1.2; }
+  .td-gold .td-dot { background: var(--gold); } .td-gold .td-num { color: var(--gold-light); }
+  .td-gold:not(.td-zero) { border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
+  .td-red .td-dot { background: var(--critical); } .td-red:not(.td-zero) .td-num { color: var(--critical); }
+  .td-red:not(.td-zero) { border-color: color-mix(in srgb, var(--critical) 45%, transparent); }
+  .td-teal .td-dot { background: var(--good); }
+  .td-zero .td-num { color: var(--text-muted); }
+  /* Today: the month in one line */
+  .td-month { display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 0 0 16px; padding: 12px 14px; border-radius: 16px;
+    background: var(--surface-1); border: 1px solid var(--border); color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
+  .tdm-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .tdm-k { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .tdm-v { font-size: 14px; color: var(--text-secondary); white-space: nowrap; }
+  .tdm-v b { font-family: var(--font-head); font-size: 24px; color: var(--text-primary); }
+  .tdm-bar { position: relative; height: 7px; border-radius: 4px; background: color-mix(in srgb, var(--text-primary) 12%, transparent); }
+  .tdm-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--gold); }
+  .tdm-bar em { position: absolute; top: -4px; width: 2px; height: 15px; background: var(--text-primary); }
+  .tdm-note { font-size: 12px; font-weight: 600; } .tdm-note.good { color: var(--good); } .tdm-note.bad { color: var(--warning); }
+  /* Today: who is coming for delivery */
+  .td-due { margin: 0 0 16px; }
+  .td-due-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .td-due-head h2 { margin: 0; font-family: var(--font-head); font-size: 21px; font-weight: 700; letter-spacing: .3px; color: var(--text-primary); }
+  .td-link { border: 0; background: transparent; color: var(--gold-light); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .td-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+  .td-who { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .td-who b { font-size: 14.5px; } .td-who small { font-size: 12.5px; color: var(--text-secondary); }
+  .td-call { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); color: var(--text-primary); }
+  .td-row .wa-btn { flex: 0 0 auto; }
+  .td-empty { font-size: 13.5px; color: var(--text-secondary); padding: 8px 0; }
+  /* Today: birthdays */
+  .bd-card2 { margin: 0 0 14px; padding: 12px 14px 6px; border-radius: 18px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 24%, var(--page)) 0%, color-mix(in srgb, var(--gold) 10%, var(--page)) 100%);
+    border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); }
+  .bd-card2.bd-quiet { padding: 10px 14px; background: var(--surface-1); border-color: var(--border); }
+  .bd-head { display: flex; align-items: center; gap: 10px; padding-bottom: 6px; }
+  .bd-ic { font-size: 20px; }
+  .bd-title { flex: 1; font-family: var(--font-head); font-size: 21px; font-weight: 700; color: var(--gold-light); }
+  .bd-n { font-size: 12px; font-weight: 800; color: #0B0909; background: var(--gold-light); border-radius: 10px; padding: 1px 9px; }
+  .bd-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid color-mix(in srgb, var(--gold) 22%, transparent); }
+  .bd-av { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 19px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold-light); }
+  .bd-who { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .bd-who b { font-size: 14.5px; } .bd-who small { font-size: 12px; color: var(--text-secondary); }
+  .bd-wish2 { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px;
+    background: #1F7A4D; color: #fff; font-weight: 700; font-size: 13px; text-decoration: none; }
+  .bd-soon2 { font-size: 12.5px; color: var(--text-secondary); padding: 8px 0 6px; }
+  .bd-card2.bd-quiet .bd-soon2 { padding: 0; }
+  :root[data-theme="light"] .subtab.active, :root[data-theme="light"] .bd-n { color: #fff; }
+
+  @media (max-width: 760px) {
+    /* the tab bar moves to the bottom of the screen, under the thumb */
+    nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 230; display: flex; gap: 0; overflow: visible;
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); background: var(--page); border-top: 1px solid var(--border); border-bottom: 0;
+      box-shadow: 0 -8px 24px -12px rgba(0,0,0,0.5); }
+    nav.tabs button { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 3px; padding: 4px 2px; border: 0; border-radius: 0;
+      font-family: inherit; font-size: 11px; font-weight: 600; letter-spacing: .2px; text-transform: none; background: transparent; }
+    nav.tabs button.active { background: transparent; color: var(--gold-light); font-weight: 700; }
+    nav.tabs .tab-ic { width: 56px; height: 30px; align-items: center; justify-content: center; border-radius: 15px; }
+    nav.tabs button.active .tab-ic { background: color-mix(in srgb, var(--gold) 22%, transparent); }
+    nav.tabs .tab-ic svg { width: 21px; height: 21px; }
+    #appShell { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+    .td-tiles { gap: 7px; }
+    .td-tile { padding: 10px 9px 11px; border-radius: 14px; }
+    .td-num { font-size: 30px; }
+    .td-lb { font-size: 11px; }
+    .subtabs { width: auto; }
+    .subtab { padding: 9px 13px; font-size: 13px; }
+  }
+
+  .td-more { display: block; width: 100%; margin: 8px 0 0; padding: 11px; border-radius: 12px; border: 1px dashed var(--border);
+    background: transparent; color: var(--gold-light); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+  .td-row .wa-btn { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 20px; font-size: 0; gap: 0; }
+  .td-row .wa-btn svg { width: 18px; height: 18px; }
+  @media (max-width: 760px) {
+    header.top .top-row { flex-wrap: nowrap; }
+    header.top .menu-toggle { margin-left: auto; flex: 0 0 auto; }
+  }
+
+  /* Phone header: one slim line. The festival greeting moves onto the Today photo. */
+  .hg-fest { display: inline-block; margin-bottom: 8px; padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 700;
+    letter-spacing: .6px; text-transform: uppercase; color: #fff; background: linear-gradient(90deg, #C2185B, #E8743B); }
+  /* Bookings as cards (phone) */
+  .tdd-cards { display: none; }
+  .bk-card { padding: 12px 14px; margin-bottom: 9px; border-radius: 14px; background: var(--surface-1); border: 1px solid var(--border); }
+  .bk-card.bk-bad { border-color: color-mix(in srgb, var(--critical) 40%, transparent); }
+  .bk-card.bk-gold { border-color: color-mix(in srgb, var(--gold) 50%, transparent); }
+  .bk-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .bk-name { font-size: 15px; }
+  .bk-when { flex: 0 0 auto; font-size: 11.5px; font-weight: 800; padding: 3px 9px; border-radius: 9px; }
+  .bk-w-bad { color: var(--critical); background: color-mix(in srgb, var(--critical) 14%, transparent); }
+  .bk-w-gold { color: #0B0909; background: var(--gold); }
+  .bk-w-soon { color: var(--gold-light); background: color-mix(in srgb, var(--gold) 15%, transparent); }
+  .bk-w-muted { color: var(--text-secondary); background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+  .bk-bike { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+  .bk-date { color: var(--text-muted); }
+  .bk-info { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--text-secondary); align-items: center; }
+  .bk-stock { font-weight: 700; } .bk-s-good { color: var(--good); } .bk-s-warn { color: var(--warning); } .bk-s-bad { color: var(--critical); }
+  .bk-act { display: flex; align-items: center; gap: 8px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border); }
+  .bk-mob { flex: 1; font-size: 13px; font-family: ui-monospace, monospace; color: var(--text-secondary); }
+  .bk-act .wa-btn { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 20px; font-size: 0; gap: 0; }
+  .bk-act .wa-btn svg { width: 18px; height: 18px; }
+  /* Month → target bars */
+  .mb-card { margin: 14px 0 6px; padding: 6px 14px 4px; border-radius: 16px; background: var(--surface-1); border: 1px solid var(--border); }
+  .mb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 0 4px;
+    font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .mb-head span { font-family: inherit; font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
+  .mb-row { display: flex; flex-direction: column; gap: 7px; width: 100%; padding: 11px 0; border: 0; border-top: 1px solid var(--border);
+    background: transparent; color: var(--text-primary); font: inherit; text-align: left; cursor: pointer;
+    border-radius: 0 !important; box-shadow: none !important; min-height: 0; }
+  .mb-row:first-of-type { border-top: 0; }
+  .mb-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .mb-k { font-size: 14px; font-weight: 600; }
+  .mb-v { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .mb-v b { font-family: var(--font-head); font-size: 20px; color: var(--text-primary); }
+  .mb-bar { position: relative; height: 7px; border-radius: 4px; background: color-mix(in srgb, var(--text-primary) 11%, transparent); }
+  .mb-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+  .mb-bar i.ok { background: var(--good); } .mb-bar i.low { background: var(--warning); }
+  .mb-bar em { position: absolute; top: -4px; width: 2px; height: 15px; background: var(--text-primary); }
+  @media (max-width: 760px) {
+    header.top { padding: 9px 14px !important; }
+    header.top .h1-more, header.top .festival-banner { display: none !important; }
+    header.top .brand .logo { width: 32px !important; height: 32px !important; font-size: 16px !important; }
+    header.top .brand h1 { font-size: 17px !important; letter-spacing: 1.5px !important; }
+    header.top .status-line { display: none; }
+    .tdd-table { display: none; }
+    .tdd-cards { display: block; }
+  }
+
+  /* Sections that open and close */
+  h2.sec-toggle { cursor: pointer; user-select: none; padding-right: 34px; position: relative; }
+  h2.sec-toggle { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D9A441' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-size: 20px 20px; background-position: right 4px center; }
+  h2.sec-toggle.sec-shut { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D9A441' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+  h2.sec-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+  .sec-body.sec-closed { display: none !important; }
+  @media (max-width: 900px) {
+    h2.sec-toggle.sec-shut { margin-top: 22px !important; margin-bottom: 4px !important; }
+    h2.sec-toggle.sec-shut + .sec-body + h2.sec-toggle.sec-shut { margin-top: 0 !important; }
+  }
 </style>
 </head>
 <body>
@@ -2195,7 +2361,7 @@
     <div class="brand">
       <div class="logo">🏍️</div>
       <div>
-        <h1>AMAR AUTOS · ROYAL ENFIELD · EAST DELHI</h1>
+        <h1>AMAR AUTOS<span class="h1-more"> · ROYAL ENFIELD · EAST DELHI</span></h1>
         <div class="sub">Command Console — Live Sales Intelligence</div>
         <div class="tagline">Pure Motorcycling Since 1901</div>
         <div class="festival-banner" id="festivalBanner" style="display:none;"></div>
@@ -2214,6 +2380,7 @@
       <span class="drawer-label">Tools</span>
       <button id="quickSearchBtn" title="Find anything — a customer, mobile, model, sales person or report">🔎 Find</button>
       <button id="refreshBtn" class="primary" title="Pulls fresh data — press this if data looks stuck or out of date">↻ Force Refresh</button>
+      <button id="adminPanelBtn" type="button" style="display:none" title="Targets, emails, privacy, sign-in log">⚙️ Admin panel</button>
       <!-- Everything below is occasional (forms, one-off reports, theme, logout) — tucked into a
            menu so the always-visible header stays down to just filters + search + refresh.
            Previously all 16 controls sat inline and wrapped onto two crowded rows. -->
@@ -2258,21 +2425,32 @@
   <div class="data-health-banner" id="dataHealthBanner"></div>
 </header>
 
-<nav class="tabs" id="tabs">
-  <button data-tab="home" class="active">🏠 Home</button>
-  <button type="button" id="findTabBtn" class="find-tab-btn" title="Find anything — one place for every report">🔎 Find</button>
-  <button data-tab="myday">🌟 My Day</button>
-  <button data-tab="overview">📊 Business</button>
-  <button data-tab="sales">🏍️ Sales</button>
-  <button data-tab="stock">📦 Stock</button>
-  <button data-tab="pricelist">💰 Price List</button>
-  <button data-tab="customers">👥 Customers</button>
-  <button data-tab="leads">📲 Follow-up</button>
-  <button data-tab="control">⚙️ Admin</button>
+<!-- Five tabs, each answering one question: Today (what needs doing), Month (how the month is
+     going), Bookings (what is still pending), Bikes (what we have, at what price), Customers (tools
+     for the customer in front of you). On a phone the bar sits at the bottom, under the thumb.
+     Admin settings and the sign-in log open from the menu. -->
+<nav class="tabs" id="tabs" aria-label="Main">
+  <button data-tab="home" class="active"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><span class="tab-lb">Today</span></button>
+  <button data-tab="month"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16V11M11 16V7M16 16v-4M20 16V5"/></svg></span><span class="tab-lb">Month</span></button>
+  <button data-tab="bookings"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4"/></svg></span><span class="tab-lb">Bookings</span></button>
+  <button data-tab="bikes"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5L9 9h5l4.5 7.5M9 9l3 7.5h6.5M14 9l1-3h3"/></svg></span><span class="tab-lb">Bikes</span></button>
+  <button data-tab="customers"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.2.3 3.6 1.9 4 4.3"/></svg></span><span class="tab-lb">Customers</span></button>
 </nav>
 
 <main>
   <div id="errorBox"></div>
+  <!-- Find sits on every tab (on Today it moves under the greeting — see placeFindBox()). -->
+  <!-- Find: one box for every question. Runs on this phone only — see runFind(). -->
+  <div class="find-box" id="findBox">
+      <form id="findForm" class="find-form" autocomplete="off" role="search">
+        <input id="findInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false"
+          placeholder="Type a name, model, mobile or “aaj”…" aria-label="Find" />
+        <button type="submit">🔎 Find</button>
+      </form>
+      <div class="find-chips" id="findChips"></div>
+  </div>
+  <div id="findResult"></div>
+  <div class="subtabs" id="subTabs" role="tablist" aria-label="Section"></div>
 
   <!-- "My Day" — a single simple screen for one sales executive: today's tip, their action list,
        their target progress, and their standing vs the team. This is what a Sales/CRT login lands
@@ -2284,21 +2462,13 @@
        screen is useful to look at even before anything is tapped. ══ -->
   <section class="tabpanel active" id="tab-home">
     <div id="homeGreet"></div>
-    <div id="homeCockpit"></div>
-    <!-- Find: one box for every question. Runs on this phone only — see runFind(). -->
-    <div class="find-box" id="findBox">
-      <form id="findForm" class="find-form" autocomplete="off" role="search">
-        <input id="findInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false"
-          placeholder="Type a name, model, mobile or “aaj”…" aria-label="Find" />
-        <button type="submit">🔎 Find</button>
-      </form>
-      <div class="find-chips" id="findChips"></div>
-    </div>
-    <div id="findResult"></div>
     <div id="homeSheetCheck"></div>
-    <div id="homeAlerts"></div>
     <div id="homeBirthdays"></div>
-    <div class="tile-grid" id="homeTiles"></div>
+    <div id="todayTiles"></div>
+    <div id="todayMonth"></div>
+    <div id="todayDue"></div>
+    <div id="homeAlerts"></div>
+    <div class="tile-grid" id="homeTiles" hidden></div>
   </section>
 
   <section class="tabpanel" id="tab-myday">
@@ -2325,6 +2495,13 @@
     </div>
     <div id="callList"></div>
 
+  </section>
+
+  <!-- Month → "My month": the GT meters and the GT bike, then this person's own target, standing,
+       attach rates and the team retail table. Moved here from Home and My Day. -->
+  <section class="tabpanel" id="tab-mymonth">
+    <div id="homeCockpit"></div>
+    <div id="monthBars"></div>
     <div class="panel-row-2col" style="margin-top:20px;">
       <div class="panel">
         <div class="panel-bar">🎯 My Target — This Month</div>
@@ -2477,8 +2654,9 @@
       </div>
     </div>
 
-    <h2 class="section-title">🤖 Today's Priorities</h2>
-    <div class="chat-panel" id="todayPriorities"></div>
+    <!-- Today's Priorities now live on the Today tab (to-do list); kept hidden so the id exists. -->
+    <h2 class="section-title" style="display:none">🤖 Today's Priorities</h2>
+    <div class="chat-panel" id="todayPriorities" style="display:none"></div>
 
     <!-- Target vs Actual — shows this month's admin-set targets against the live actuals. -->
     <h2 class="section-title" id="tvaTitle">🎯 Target vs Actual — This Month</h2>
@@ -2590,16 +2768,16 @@
   </section>
 
   <section class="tabpanel" id="tab-booking">
-    <h2 class="section-title">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
-    <div class="kpi-grid" id="kpiPending"></div>
-
-    <h2 class="section-title" id="atRiskTitle">🚨 At Risk — due soon &amp; bike NOT in stock</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
-    <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
-
-    <h2 class="section-title">⏰ Deliveries by TDD — overdue &amp; upcoming</h2>
-    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
-      Every open booking with its TDD, in one list. <b>Days column is negative when a delivery is past due</b> (−2 = two days late) and positive when it's still ahead. Text TDDs are handled by priority: <b>ASAP</b> sorts with the most urgent (top when Old→New), <b>HOLD</b> always sits at the very bottom. Admin sees the whole team; a sales login sees only their own.
+    <h2 class="section-title" id="tddTitle">⏰ Pending bookings by delivery date (TDD)</h2>
+    <div class="seg-wrap tdd-chips" id="tddChips" role="group" aria-label="Show">
+      <button type="button" class="seg active" data-tdd="all">All</button>
+      <button type="button" class="seg" data-tdd="today">Today</button>
+      <button type="button" class="seg" data-tdd="late">Late</button>
+      <button type="button" class="seg" data-tdd="week">This week</button>
+      <button type="button" class="seg" data-tdd="nodate">No date</button>
+    </div>
+    <div class="empty-note" style="padding:4px 0 8px; text-align:left; font-size:12px;">
+      Every open booking in one list. <b>Days</b> is negative when the delivery is late (−2 = two days late). <b>ASAP</b> sits with the most urgent, <b>HOLD</b> at the bottom. Admin sees the whole team; a sales login sees only their own.
     </div>
     <div class="toolbar" style="margin-bottom:10px;">
       <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);">
@@ -2611,7 +2789,15 @@
       </label>
       <button id="exportTddBtn" title="Download this table as a CSV you can open in Excel">⬇ Export CSV</button>
     </div>
-    <div class="table-wrap"><table class="data" id="tblTdd"></table></div>
+    <div class="table-wrap tdd-table"><table class="data" id="tblTdd"></table></div>
+    <div class="tdd-cards" id="tddCards"></div>
+
+    <h2 class="section-title" style="margin-top:30px;">📦 Pending Delivery Plan — this month's bookings not yet delivered</h2>
+    <div class="kpi-grid" id="kpiPending"></div>
+
+    <h2 class="section-title" id="atRiskTitle">🚨 At Risk — due soon &amp; bike NOT in stock</h2>
+    <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;" id="atRiskNote"></div>
+    <div class="table-wrap"><table class="data" id="tblAtRisk"></table></div>
 
     <details class="section-collapse">
       <summary>📄 Pending Bookings — Full List (customer name, model, TDD/expected delivery)</summary>
@@ -2621,6 +2807,40 @@
           <button id="exportPending">⬇ Export CSV</button>
         </div>
         <div class="table-wrap"><table class="data" id="tblPendingAll"></table></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="tabpanel" id="tab-stock">
+    <h2 class="section-title">🏬 Daily Stock — KN &amp; VM</h2>
+    <div class="kpi-grid" id="kpiStock"></div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Store-wise Split</h3>
+        <div id="stockStoreBars"></div>
+      </div>
+      <div class="card">
+        <h3>Status (Open vs In-Transit)</h3>
+        <div id="stockStatusBars"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🏍️ Model-wise Stock</h2>
+    <div class="table-wrap"><table class="data" id="tblStockModel"></table></div>
+
+    <h2 class="section-title">⏳ Aged Stock — Open 60+ Days</h2>
+    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Sitting as available stock for a while — worth pushing before they tie up more capital.</p>
+    <div class="table-wrap"><table class="data" id="tblAgedStock"></table></div>
+
+    <details class="section-collapse">
+      <summary>📄 Full Stock List</summary>
+      <div class="details-body">
+        <div class="toolbar">
+          <input type="text" id="searchStock" placeholder="Search model, chassis no, store…" />
+          <button id="exportStock">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tblStockAll"></table></div>
       </div>
     </details>
   </section>
@@ -2719,39 +2939,6 @@
     <div class="table-wrap"><table class="data" id="tblBvsSummary"></table></div>
   </section>
 
-  <section class="tabpanel" id="tab-stock">
-    <h2 class="section-title">🏬 Daily Stock — KN &amp; VM</h2>
-    <div class="kpi-grid" id="kpiStock"></div>
-
-    <div class="grid-2" style="margin-top:16px;">
-      <div class="card">
-        <h3>Store-wise Split</h3>
-        <div id="stockStoreBars"></div>
-      </div>
-      <div class="card">
-        <h3>Status (Open vs In-Transit)</h3>
-        <div id="stockStatusBars"></div>
-      </div>
-    </div>
-
-    <h2 class="section-title">🏍️ Model-wise Stock</h2>
-    <div class="table-wrap"><table class="data" id="tblStockModel"></table></div>
-
-    <h2 class="section-title">⏳ Aged Stock — Open 60+ Days</h2>
-    <p class="empty-note" style="text-align:left;padding:0 0 10px;">Sitting as available stock for a while — worth pushing before they tie up more capital.</p>
-    <div class="table-wrap"><table class="data" id="tblAgedStock"></table></div>
-
-    <details class="section-collapse">
-      <summary>📄 Full Stock List</summary>
-      <div class="details-body">
-        <div class="toolbar">
-          <input type="text" id="searchStock" placeholder="Search model, chassis no, store…" />
-          <button id="exportStock">⬇ Export CSV</button>
-        </div>
-        <div class="table-wrap"><table class="data" id="tblStockAll"></table></div>
-      </div>
-    </details>
-  </section>
 
   <section class="tabpanel" id="tab-riders">
     <h2 class="section-title">🎂 Rider Birthdays — next 30 days</h2>
@@ -4075,10 +4262,11 @@ function applyRoleRestrictions(){
     document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
       btn.style.display = btn.dataset.tab === 'customers' ? '' : 'none';
     });
-    const fBtn = document.getElementById('findTabBtn'); if (fBtn) fBtn.style.display = 'none';
     const qBtn = document.getElementById('quickSearchBtn'); if (qBtn) qBtn.style.display = 'none';
-    const cBtn = document.querySelector('#tabs button[data-tab="customers"]');
-    if (cBtn) { cBtn.textContent = '🔁 Walk-in Check'; cBtn.classList.add('active'); }
+    ['findBox', 'findResult', 'subTabs'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    document.body.classList.add('walkin-only');
+    const cBtn = document.querySelector('#tabs button[data-tab="customers"] .tab-lb');
+    if (cBtn) cBtn.textContent = 'Walk-in Check';
     // The walk-in desk gets the check tool and today's log only — not QR codes or rider data.
     ALLOWED_PANELS = new Set(['walkin', 'walkinlog']);
     switchToTab('customers');
@@ -4102,46 +4290,29 @@ function applyRoleRestrictions(){
   // hide tabs that show company-wide / other-people's data from non-admin logins.
   // Riders (registration + feedback, merged into one tab) is the one exception: Deepak wants CRT
   // logins (Harsh handles riders) to see it too, alongside Admin — everyone else (Sales) still doesn't.
-  const isSales = CURRENT_USER.role === 'Sales';
-  // With eight tabs the rule is simple enough to state outright: everyone gets their own day,
-  // the funnel, sales, stock and the price list. Company-wide business figures and the odds and
-  // ends behind "More" stay with Admin (and CRT, who looks after riders).
-  const SALES_TABS = ['home', 'myday', 'sales', 'stock', 'pricelist', 'customers'];
-  // The control tab holds settings and the sign-in log — Admin only, for everyone else it and
-  // its panels are removed outright rather than merely hidden.
-  // Who may see the lead follow-up tab. The server enforces this too (action=leads checks the
-  // same list) — this only keeps the tab from appearing for someone who would be refused.
+  // Every login gets the five tabs. What differs is which panels inside them it may open:
+  //   • settings and the sign-in log — Admin only (removed outright for everyone else);
+  //   • the team-wide Business panels (Month → Team) — Admin and CRT;
+  //   • lead follow-up — Admin and whoever is named in leads.access (the server checks too).
   const leadsAllowed = isAdmin ||
     String(STATE.settings && STATE.settings.leadsAccess || 'SHAISTA')
       .split(',').map(x => up(x.trim()))
       .filter(Boolean)
       .some(n => n === up(CURRENT_USER.name) || n === up(CURRENT_USER.execKey || ''));
-
-  function tabHidden(tab){
-    if (tab === 'control') return !isAdmin;
-    if (tab === 'leads') return !leadsAllowed;
-    if (isAdmin) return false;
-    if (CURRENT_USER.role === 'CRT') return false;      // CRT sees everything except Admin-only bits
-    return SALES_TABS.indexOf(tab) < 0;
-  }
-  document.querySelectorAll('#tabs button[data-tab]').forEach(btn => {
-    btn.style.display = tabHidden(btn.dataset.tab) ? 'none' : '';
-  });
-  // "More" holds the sign-in log and the control panel, both Admin-only — remove those panels
-  // outright for anyone else rather than relying on the tab being hidden.
+  HIDDEN_PANELS = new Set();
+  if (!isAdmin) ['settings', 'loginlog'].forEach(p => HIDDEN_PANELS.add(p));
+  if (!leadsAllowed) HIDDEN_PANELS.add('leads');
+  if (!isAdmin && CURRENT_USER.role !== 'CRT') ['overview', 'analytics'].forEach(p => HIDDEN_PANELS.add(p));
+  const adminBtn = document.getElementById('adminPanelBtn');
+  if (adminBtn) adminBtn.style.display = isAdmin ? '' : 'none';
   if (!isAdmin) {
     ['tab-loginlog', 'tab-settings'].forEach(id => { const p = document.getElementById(id); if (p) p.remove(); });
   }
-  // Same rule for the Dashboard / My Day quick-jump shortcut buttons — hide any that jump to a
-  // tab this user can't open directly any more, so a sales login doesn't get a "Delivery" button
-  // that leads to a tab with no visible nav entry to get back from (they still have "More Data").
   document.querySelectorAll('#dashShortcuts button[data-jump], #mydayShortcuts button[data-jump]').forEach(btn => {
-    btn.style.display = tabHidden(tabHolding(btn.dataset.jump)) ? 'none' : '';
+    btn.style.display = panelAllowed(btn.dataset.jump) ? '' : 'none';
   });
   if (!isAdmin) {
-    // Everyone lands on Home now — the tile grid shows the whole dashboard at once, so there is
-    // no reason to drop a sales login straight into one section. This used to force My Day and
-    // left the Home panel rendered but hidden.
+    // Everyone lands on Today.
     switchToTab('home');
     // lock the executive filter to their own name so every KPI/table only shows their own numbers
     const execSel = document.getElementById('execFilter');
@@ -7877,10 +8048,61 @@ function sortTddRows(rows, order){
     return str(a.customer).localeCompare(str(b.customer));
   });
 }
+// On a phone the same list is shown as cards — one booking per card, with Call and WhatsApp —
+// instead of a wide table that has to be swiped sideways.
+let TDD_CARDS_ALL = false;
+function renderTddCards(rows){
+  const el = document.getElementById('tddCards');
+  if (!el) return;
+  if (!rows.length) { el.innerHTML = '<div class="empty-note" style="text-align:left;">No booking in this filter.</div>'; return; }
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const callIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
+  const shown = TDD_CARDS_ALL ? rows : rows.slice(0, 30);
+  el.innerHTML = shown.map(r => {
+    let when, tone;
+    if (r.priorityClass === 'asap') { when = 'ASAP'; tone = 'bad'; }
+    else if (r.priorityClass === 'hold') { when = 'HOLD'; tone = 'muted'; }
+    else if (r.days == null) { when = 'No date'; tone = 'muted'; }
+    else if (r.days < 0) { when = `${-r.days} day${r.days === -1 ? '' : 's'} late`; tone = 'bad'; }
+    else if (r.days === 0) { when = 'Today'; tone = 'gold'; }
+    else { when = r.days === 1 ? 'Tomorrow' : `In ${r.days} days`; tone = r.days <= 7 ? 'soon' : 'muted'; }
+    const num = canMessage(r.exec) ? waNumber(r.mobile) : '';
+    const stockTone = /^✅/.test(r.stockText) ? 'good' : /^🟡/.test(r.stockText) ? 'warn' : 'bad';
+    return `<div class="bk-card bk-${tone}">
+      <div class="bk-top"><b class="bk-name">${esc(r.customer || 'Customer')}</b><span class="bk-when bk-w-${tone}">${esc(when)}</span></div>
+      <div class="bk-bike">${esc(`${r.model} · ${r.colour}`.replace(/^ · | · $/g, ''))}${r.tdd && r.priorityClass === 'date' ? ` <span class="bk-date">· TDD ${esc(r.tdd)}</span>` : ''}</div>
+      <div class="bk-info"><span class="bk-stock bk-s-${stockTone}">${esc(r.stockText.replace(/^(✅|🟡|❌)\s*/, ''))}</span>
+        <span>Receipt ${esc(r.slipNo || '—')}</span>${isAdmin && r.exec ? `<span>${esc(canonName(r.exec).replace(/^#+\s*/, ''))}</span>` : ''}
+        ${r.carried ? '<span class="carried-tag">carried over</span>' : ''}</div>
+      <div class="bk-act"><span class="bk-mob">${maskMobile(r.mobile, r.exec)}</span>
+        ${num ? `<a class="td-call" href="tel:+${esc(num)}" aria-label="Call ${esc(r.customer)}">${callIcon}</a>` : ''}
+        ${waBtn(r.mobile, r.exec, r.days != null && r.days < 0 ? 'overdue' : 'deliveryReminder', { name: r.customer, model: r.model, colour: r.colour, tdd: r.days != null ? r.tdd : '' })}</div>
+    </div>`;
+  }).join('') + (rows.length > shown.length ? `<button type="button" class="td-more" data-tdd-all>Show all ${fmtInt(rows.length)}</button>` : '');
+}
+document.addEventListener('click', (e) => { if (e.target.closest('[data-tdd-all]')) { TDD_CARDS_ALL = true; renderTddTable(TDD_ROWS_CACHE); } });
+
+// One-tap filters above the TDD list: Today, Late, This week (next 7 days), No date.
+let TDD_FILTER = 'all';
+function tddFilterOk(r){
+  if (TDD_FILTER === 'today') return r.days === 0;
+  if (TDD_FILTER === 'late') return r.days != null && r.days < 0;
+  if (TDD_FILTER === 'week') return r.days != null && r.days >= 0 && r.days <= 7;
+  if (TDD_FILTER === 'nodate') return r.days == null;
+  return true;
+}
 function renderTddTable(rows){
   TDD_ROWS_CACHE = rows;
   const order = (document.getElementById('tddSortOrder') || {}).value || 'oldToNew';
-  const sorted = sortTddRows(rows, order);
+  const chips = document.getElementById('tddChips');
+  if (chips) chips.querySelectorAll('[data-tdd]').forEach(b => {
+    const was = TDD_FILTER; TDD_FILTER = b.dataset.tdd;
+    const n = rows.filter(tddFilterOk).length; TDD_FILTER = was;
+    b.innerHTML = `${esc(b.textContent.replace(/\s*\d+$/, ''))} <span class="seg-n">${fmtInt(n)}</span>`;
+    b.classList.toggle('active', b.dataset.tdd === TDD_FILTER);
+  });
+  const sorted = sortTddRows(rows.filter(tddFilterOk), order);
+  try { renderTddCards(sorted); } catch (e) { console.error('tdd cards', e); }
   renderStaticTable('tblTdd', [
     { key:'slipNo', label:'Slip / Receipt No' },
     { key:'customer', label:'Customer Name', raw:true, fmt: (v, row) =>
@@ -7910,6 +8132,11 @@ function renderTddTable(rows){
 }
 // Wire the sort dropdown + CSV export once, after first render. Guarded so we don't stack
 // listeners on every re-render.
+{ const chips = document.getElementById('tddChips');
+  if (chips) chips.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tdd]'); if (!b) return;
+    TDD_FILTER = b.dataset.tdd; renderTddTable(TDD_ROWS_CACHE);
+  }); }
 function wireTddControls(){
   const sortSel = document.getElementById('tddSortOrder');
   if (sortSel && !sortSel.dataset.wired) {
@@ -8535,6 +8762,13 @@ function isMyName(name){
   return n === me || n.split(/\s+/)[0] === me.split(/\s+/)[0];
 }
 const bdayLabel = b => b.name + (b.role ? ` (${b.role})` : '');
+function bdayInitials(name){
+  const w = str(name).replace(/[^A-Za-z ]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  return ((w[0] || '?')[0] + (w[1] ? w[1][0] : '')).toUpperCase();
+}
+// Today card. Everyone whose birthday is today — staff (with their role) and, for Admin/CRT,
+// riders from the community — each with a Wish button. Upcoming ones this week as one line.
+// Returns '' when there is nothing to celebrate in the coming week.
 function birthdayCardHtml(){
   const team = teamBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS);
   const riders = canSeeRiders() ? riderBirthdaysSoon(BIRTHDAY_UPCOMING_DAYS) : [];
@@ -8543,20 +8777,26 @@ function birthdayCardHtml(){
   const ridersToday = riders.filter(b => b.inDays === 0);
   const ridersSoon = riders.filter(b => b.inDays > 0);
   if (!teamToday.length && !teamSoon.length && !ridersToday.length && !ridersSoon.length) return '';
-  const lines = [];
-  if (teamToday.length) lines.push(`<div class="bd-big">🎉 Today is <b>${esc(teamToday.map(bdayLabel).join(' & '))}</b>'s birthday — wish them!</div>`);
-  if (ridersToday.length) {
-    lines.push(`<div class="bd-sub">🏍️ ${ridersToday.length} rider${ridersToday.length === 1 ? '' : 's'} from our community ${ridersToday.length === 1 ? 'has a birthday' : 'have their birthday'} today:</div>` +
-      `<div class="bd-list">${ridersToday.map(r => {
-        const link = birthdayWishLink(r);
-        return `<div class="bd-rider"><span><b>${esc(r.name)}</b>${r.bike ? ` · ${esc(r.bike)}` : ''}${r.city ? ` · ${esc(r.city)}` : ''}</span>` +
-          (link ? `<a class="bd-wish" href="${link}" target="_blank" rel="noopener">🎂 Wish on WhatsApp</a>` : '') + `</div>`;
-      }).join('')}</div>`);
-  }
+  const wishIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19.3L4 20z"/></svg>';
+  const staffWish = (b) => {
+    const msg = `Happy Birthday, ${niceCase(firstName(b.name))}! 🎂 Wishing you a wonderful year ahead. — Team Amar Autos`;
+    return `<a class="bd-wish2" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" title="Choose the contact in WhatsApp">${wishIcon}Wish</a>`;
+  };
+  const rows = teamToday.map(b => `<div class="bd-row"><span class="bd-av">${esc(bdayInitials(b.name))}</span>
+      <span class="bd-who"><b>${esc(b.name)}</b><small>Staff${b.role ? ' · ' + esc(b.role) : ''}</small></span>${staffWish(b)}</div>`)
+    .concat(ridersToday.map(r => {
+      const link = birthdayWishLink(r);
+      return `<div class="bd-row"><span class="bd-av">${esc(bdayInitials(r.name))}</span>
+        <span class="bd-who"><b>${esc(r.name)}</b><small>Rider${r.bike ? ' · ' + esc(r.bike) : ''}${r.city ? ' · ' + esc(r.city) : ''}</small></span>` +
+        (link ? `<a class="bd-wish2" href="${link}" target="_blank" rel="noopener">${wishIcon}Wish</a>` : '') + `</div>`;
+    }));
   const soon = teamSoon.map(b => `${esc(bdayLabel(b))} — ${esc(whenText(b.inDays, b.month, b.day))}`)
     .concat(ridersSoon.length ? [`${ridersSoon.length} rider${ridersSoon.length === 1 ? '' : 's'}`] : []);
-  if (soon.length) lines.push(`<div class="bd-soon">Coming up this week: ${soon.join(', ')}${ridersSoon.length ? ' — see the Riders tab' : ''}</div>`);
-  return `<div class="bd-card">${lines.join('')}</div>`;
+  const soonHtml = soon.length ? `<div class="bd-soon2">Coming up this week: ${soon.join(', ')}</div>` : '';
+  if (!rows.length) return `<div class="bd-card2 bd-quiet">${soonHtml}</div>`;
+  return `<div class="bd-card2">
+    <div class="bd-head"><span class="bd-ic" aria-hidden="true">🎂</span><span class="bd-title">Birthdays today</span><span class="bd-n">${rows.length}</span></div>
+    ${rows.join('')}${soonHtml}</div>`;
 }
 function myBirthdayToday(){
   if (!CURRENT_USER) return false;
@@ -9261,62 +9501,133 @@ function renderHome(){
     const hour = d.getHours();
     const part = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
     const hi = myBirthdayToday() ? `🎂 Happy Birthday, ${esc(name)}!` : `${esc(part)}${name ? ', ' + esc(name) : ''}`;
+    // The festival greeting sits on the photo (on a phone the header is one slim line).
+    let fest = null; try { fest = resolveFestivalTheme(); } catch (e) {}
     greet.innerHTML = `<div class="home-greet gt-hero" role="img" aria-label="Royal Enfield Continental GT 650">
       <div class="gt-hero-txt">
+        ${fest ? `<div class="hg-fest">${fest.emoji} ${esc(fest.greet || fest.name)}</div>` : ''}
         <div class="hg-hi">${hi}</div>
         <div class="hg-date">${esc(d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' }))}</div>
       </div>
     </div>`;
   }
 
-  // the two or three things that actually need doing today, above the tiles
-  const alerts = document.getElementById('homeAlerts');
   const bdays = document.getElementById('homeBirthdays');
   if (bdays) { try { bdays.innerHTML = STATE.initialized ? birthdayCardHtml() : ''; } catch (e) { bdays.innerHTML = ''; } }
   const sc = document.getElementById('homeSheetCheck');
   if (sc) sc.innerHTML = sheetCheckBannerHtml();
+  const put = (id, fn) => { const el = document.getElementById(id); if (!el) return;
+    try { el.innerHTML = STATE.initialized ? fn() : ''; } catch (e) { console.error(id, e); el.innerHTML = ''; } };
+  put('todayTiles', todayTilesHtml);
+  put('todayMonth', todayMonthHtml);
+  put('todayDue', todayDueHtml);
+  // the most urgent items from the to-do list, under the day's numbers
+  const alerts = document.getElementById('homeAlerts');
   if (alerts && !STATE.initialized) alerts.innerHTML = '';
   else if (alerts) {
-    const items = (typeof computeTodayPriorities === 'function' ? computeTodayPriorities() : [])
-      .filter(x => x && x.cls === 'urgent').slice(0, 3);
-    alerts.innerHTML = items.length
-      ? `<div class="home-alerts">${items.map(x => `<div class="ha-row">${x.html || esc(x.text || '')}</div>`).join('')}</div>`
-      : '';
+    // The to-do list right below holds the urgent items, so they are not repeated here.
+    alerts.innerHTML = '';
   }
-
+  // The GT meters and the GT bike now live on Month → My month; they are still drawn here so
+  // they are ready the moment that tab opens.
   try { renderCockpit(); } catch (e) { console.error('cockpit', e); }
-  const visible = (tab) => {
-    const btn = document.querySelector(`#tabs button[data-tab="${tab}"]`);
-    return btn && btn.style.display !== 'none';
-  };
-  // Before the first data arrives the tiles are shown without numbers — a "0" there would be wrong.
-  const count = (t) => { if (!STATE.initialized) return null; try { return t.count ? t.count() : null; } catch (e) { return null; } };
-  const shown = HOME_TILES.filter(t => visible(t.tab));
-  const big = shown.filter(t => t.primary);
-  const small = shown.filter(t => !t.primary);
-
-  grid.innerHTML = big.map(t => {
-    const n = count(t);
-    const warn = n !== null && t.warn && t.warn(n);
-    return `<button class="tile${warn ? ' tile-warn' : ''}" data-go="${t.tab}">
-      <div class="tile-icon">${t.icon}</div>
-      <div class="tile-title">${esc(t.title)}</div>
-      <div class="tile-blurb">${esc(t.blurb)}</div>
-      ${n !== null ? `<div class="tile-count">${fmtInt(n)} <span>${esc(t.unit || '')}</span></div>` : ''}
-    </button>`;
-  }).join('');
-
-  // the rest, as one quiet row of links — reachable, but not competing for attention
-  let row = document.getElementById('homeMore');
-  if (!row) { row = document.createElement('div'); row.id = 'homeMore'; grid.after(row); }
-  row.className = 'home-more';
-  row.innerHTML = small.map(t => {
-    const n = count(t);
-    const warn = n !== null && t.warn && t.warn(n);
-    return `<button class="hm-link${warn ? ' hm-warn' : ''}" data-go="${t.tab}">
-      ${t.icon} ${esc(t.title)}${n ? ` <b>${fmtInt(n)}</b>` : ''}</button>`;
-  }).join('');
+  put('monthBars', monthBarsHtml);
 }
+
+// ═══════════════ Month → target bars ═══════════════
+// Under the GT meters: each figure against its target, with a mark for where the month should be
+// today. Green = on or ahead, amber = behind. A sales login sees its own figures.
+function monthBarsHtml(){
+  const D = cockpitData();
+  const n = D.n, bills = n.bills.length;
+  const tEw = monthlyTargetVal(3) || PERF_THRESHOLDS.ewPct * 100;
+  const tRsa = monthlyTargetVal(4) || PERF_THRESHOLDS.rsaPct * 100;
+  const tGma = monthlyTargetVal(5) || PERF_THRESHOLDS.gmaPerBike;
+  const pace = D.isCurrent ? D.dayFrac : 1;
+  const row = (label, valueTxt, ofTxt, frac, paceFrac, ok, find) => `
+    <button type="button" class="mb-row" data-find-q="${esc(find)}">
+      <span class="mb-top"><span class="mb-k">${esc(label)}</span><span class="mb-v"><b>${valueTxt}</b> ${ofTxt ? `<small>${ofTxt}</small>` : ''}</span></span>
+      <span class="mb-bar"><i class="${ok ? 'ok' : 'low'}" style="width:${(Math.max(0, Math.min(1, frac)) * 100).toFixed(1)}%"></i>${paceFrac ? `<em style="left:${(Math.min(1, paceFrac) * 100).toFixed(1)}%"></em>` : ''}</span>
+    </button>`;
+  const rows = [];
+  if (D.target) rows.push(row('Bikes billed', fmtInt(D.billed), `of ${fmtInt(D.target)}`, D.billed / D.target, pace, D.billed >= D.target * pace, 'report'));
+  if (D.bookTarget) rows.push(row('Bookings', fmtInt(D.booked), `of ${fmtInt(D.bookTarget)}`, D.booked / D.bookTarget, pace, D.booked >= D.bookTarget * pace, 'booking'));
+  if (bills) {
+    const ew = n.ew / bills * 100, rsa = n.rsa / bills * 100, gma = n.gma / bills;
+    rows.push(row('Extended warranty', Math.round(ew) + '%', `target ${Math.round(tEw)}%`, ew / tEw, 0, ew >= tEw, 'ew'));
+    rows.push(row('Roadside assistance', Math.round(rsa) + '%', `target ${Math.round(tRsa)}%`, rsa / tRsa, 0, rsa >= tRsa, 'rsa'));
+    rows.push(row('Accessories per bike', fmtMoney(gma), `target ${fmtMoney(tGma)}`, gma / tGma, 0, gma >= tGma, 'gma'));
+  }
+  if (D.walk) rows.push(row('Walk-ins that booked', fmtPct(D.booked / D.walk), `${fmtInt(D.walk)} walk-ins`, D.booked / D.walk, 0, D.booked / D.walk >= 0.2, 'walkin'));
+  if (!rows.length) return '';
+  return `<div class="mb-card"><div class="mb-head">Targets this month${D.who ? '' : ' · whole team'}<span>White mark = where you should be today</span></div>${rows.join('')}</div>`;
+}
+
+// ═══════════════ Today ═══════════════
+// The four numbers of the day, the month in one line, and who is coming for delivery today.
+function todayCounts(){
+  const today = todayMidnight();
+  const open = allPendingRowsFor(null);
+  let due = 0, late = 0;
+  open.forEach(r => { const t = findTdd(r); if (!t) return; const d = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+    if (d.getTime() === today.getTime()) due++; else if (d < today) late++; });
+  let calls = 0;
+  try { calls = callListStock().length + callListOverdue().length + callListFollowup().length; } catch (e) {}
+  const role = CURRENT_USER ? CURRENT_USER.role : '';
+  const me = CURRENT_USER ? up(CURRENT_USER.name) : '';
+  const todayStr = fmtYmd(new Date());
+  let walk = (STATE.walkinEntry || []).filter(r => str(r[1]) === todayStr);
+  if (role === 'Sales' || role === 'CRT') walk = walk.filter(r => up(str(r[4])) === me);
+  return { due, late, calls, walk: walk.length };
+}
+function todayTilesHtml(){
+  const n = todayCounts();
+  const tile = (key, num, label, tone) => `<button type="button" class="td-tile td-${tone}${num ? '' : ' td-zero'}" data-today="${key}">
+      <span class="td-dot" aria-hidden="true"></span><span class="td-num">${fmtInt(num)}</span><span class="td-lb">${esc(label)}</span></button>`;
+  return `<div class="td-tiles">${tile('due', n.due, 'Deliveries today', 'gold')}${tile('late', n.late, 'Late', 'red')}` +
+    `${tile('calls', n.calls, 'Calls to make', 'teal')}${tile('walk', n.walk, 'Walk-ins', 'grey')}</div>`;
+}
+function todayMonthHtml(){
+  const D = cockpitData();
+  const monthName = new Date().toLocaleDateString('en-IN', { month: 'long' });
+  const pct = D.target ? Math.min(100, D.billed / D.target * 100) : 0;
+  const pacePct = D.target && D.pace ? Math.min(100, D.pace / D.target * 100) : 0;
+  const diff = D.pace ? D.billed - D.pace : 0;
+  const note = !D.target ? 'No target set for this month' : !D.pace ? '' :
+    diff >= 0 ? `${fmtInt(diff)} ahead of today's pace` : `${fmtInt(-diff)} behind today's pace`;
+  return `<button type="button" class="td-month" data-today="month">
+    <span class="tdm-top"><span class="tdm-k">${esc(monthName)} · bikes billed${D.who ? '' : ' · whole team'}</span>
+      <span class="tdm-v"><b>${fmtInt(D.billed)}</b>${D.target ? ` / ${fmtInt(D.target)}` : ''}</span></span>
+    ${D.target ? `<span class="tdm-bar"><i style="width:${pct.toFixed(1)}%"></i>${pacePct ? `<em style="left:${pacePct.toFixed(1)}%" title="Where you should be today"></em>` : ''}</span>` : ''}
+    ${note ? `<span class="tdm-note ${diff >= 0 ? 'good' : 'bad'}">${esc(note)}</span>` : ''}
+  </button>`;
+}
+function todayDueHtml(){
+  const today = todayMidnight();
+  const isAdmin = !CURRENT_USER || CURRENT_USER.role === 'Admin';
+  const rows = allPendingRowsFor(null).filter(r => { const t = findTdd(r); return t && new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime() === today.getTime(); });
+  const callIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
+  const list = rows.slice(0, 8).map(r => {
+    const num = canMessage(r[7]) ? waNumber(r[6]) : '';
+    return `<div class="td-row"><span class="bd-av td-av">${esc(bdayInitials(r[5]))}</span>
+      <span class="td-who"><b>${esc(str(r[5]) || 'Customer')}</b><small>${esc(`${str(r[3])} · ${str(r[4])}`.replace(/^ · | · $/g, ''))}${isAdmin && str(r[7]) ? ' · ' + esc(canonName(r[7]).replace(/^#+\s*/, '')) : ''}</small></span>
+      ${num ? `<a class="td-call" href="tel:+${esc(num)}" aria-label="Call ${esc(str(r[5]))}">${callIcon}</a>` : ''}
+      ${waBtn(r[6], r[7], 'deliveryReminder', { name: str(r[5]), model: str(r[3]), colour: str(r[4]), tdd: 'today' })}</div>`;
+  }).join('');
+  return `<div class="td-due"><div class="td-due-head"><h2>Coming for delivery today</h2>
+      ${rows.length ? `<button type="button" class="td-link" data-today="due">See all ${fmtInt(rows.length)}</button>` : ''}</div>
+    ${list || '<div class="td-empty">No delivery is due today. Bookings without a delivery date (TDD) cannot show here.</div>'}</div>`;
+}
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-today]');
+  if (!t) return;
+  const k = t.dataset.today;
+  if (k === 'due' || k === 'late') { TDD_FILTER = k === 'due' ? 'today' : 'late'; switchToTab('booking', 'tddChips');
+    try { renderTddTable(TDD_ROWS_CACHE); } catch (err) {} }
+  else if (k === 'calls') switchToTab('myday', 'callListTitle');
+  else if (k === 'walk') switchToTab('walkinlog');
+  else if (k === 'month') switchToTab('mymonth');
+});
 
 document.addEventListener('click', (e) => {
   const t = e.target.closest('.tile[data-go], .hm-link[data-go]');
@@ -9680,8 +9991,9 @@ function findPeriod(f){
 
 function findTdd(r){ return parseTddDate(r[8], r[2]) || parseTddDate(r[10], r[2]); }
 function findTabVisible(panel){
-  const btn = document.querySelector(`#tabs button[data-tab="${tabHolding(panel)}"]`);
-  return !!btn && btn.style.display !== 'none';
+  const t = tabHolding(panel);
+  if (!TAB_GROUPS[t]) return false;
+  return TAB_GROUPS[panel] ? panelsForTab(panel).length > 0 : panelAllowed(panel);
 }
 const FIND_ROW_LIMIT = 25;
 function findTable(head, rows){
@@ -10118,7 +10430,9 @@ function openFind(){
   try { toggleControlsDrawer(false); } catch (e) {}
   const modal = document.getElementById('detailModal');
   if (modal) modal.classList.remove('open');
-  switchToTab('home');
+  // Find is on every tab now — just bring it into view.
+  const box = document.getElementById('findBox');
+  if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   setTimeout(() => { const inp = document.getElementById('findInput'); if (inp) inp.focus(); }, 80);
 }
 async function findLoadMonth(key){
@@ -10152,7 +10466,9 @@ function renderFindBox(){
     });
     inp.addEventListener('keydown', (e) => { if (e.key === 'Escape') clearFind(); });
   }
-  const home = document.getElementById('tab-home');
+  // Find, its chips and its answers now sit above every tab, and the GT meters that open Find
+  // live on Month — so the clicks are listened for on the whole page body, not just on Home.
+  const home = document.querySelector('main');
   if (home) home.addEventListener('click', (e) => {
     const q = e.target.closest('[data-find-q]');
     if (q) { if (inp) inp.value = q.dataset.findQ; runFind(q.dataset.findQ); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -10171,8 +10487,6 @@ function renderFindBox(){
              try { document.execCommand('copy'); done(); } catch (er) {} ta.remove(); }
     }
   });
-  const tabBtn = document.getElementById('findTabBtn');
-  if (tabBtn) tabBtn.addEventListener('click', openFind);
 }
 
 // ═══════════════ Meta lead follow-up ═══════════════
@@ -10366,16 +10680,16 @@ function renderStatus(st){
   // triggers
   const want = [
     { fn: 'sendDailySummary',   label: 'Night summary' },
-    { fn: 'sendMorningCallList',label: 'Morning call list' },
+    { fn: 'sendMorningEmail',   label: 'Morning email (10:00–10:30)', alt: 'sendMorningCallList', hint: 'In Apps Script, select setupMorningEmailTrigger and press Run once' },
     { fn: 'backupSheet',        label: 'Weekly backup' },
     { fn: 'warmDashboardCache', label: 'Keep data ready (every 10 min)' },
   ];
   const have = st.triggers || [];
-  const trigRows = want.map(w => have.indexOf(w.fn) >= 0
+  const trigRows = want.map(w => (have.indexOf(w.fn) >= 0 || (w.alt && have.indexOf(w.alt) >= 0))
     ? line(w.label, '✅ scheduled', 'good')
-    : line(w.label, '⚠️ no trigger', 'bad', w.fn === 'warmDashboardCache'
+    : line(w.label, '⚠️ no trigger', 'bad', w.hint || (w.fn === 'warmDashboardCache'
         ? 'In Apps Script, select setupFastDashboard and press Run once'
-        : `Add a time-driven trigger for ${w.fn} in Apps Script`)
+        : `Add a time-driven trigger for ${w.fn} in Apps Script`))
   ).join('');
 
   // last runs — anything older than about a day and a half has probably stopped
@@ -10401,7 +10715,7 @@ function renderStatus(st){
       ${line('Server time', esc(st.now), 'muted')}
       ${trigRows}
       ${runRow('Last summary sent', st.lastTeamSend || st.lastSummary, st.lastSummaryError)}
-      ${runRow('Last call list sent', st.lastCallList, st.lastCallListError)}
+      ${runRow('Last morning email sent', st.lastCallList, st.lastCallListError)}
       ${runRow('Last backup', st.lastBackup, st.lastBackupError)}
       ${st.lastDataBuild !== undefined ? line('Last data build', esc(st.lastDataBuild || '— not yet'),
         /kept last good|read errors/.test(st.lastDataBuild || '') ? 'bad' : 'muted',
@@ -10884,7 +11198,9 @@ function renderCallList(){
     wrap.innerHTML = `<div class="empty-note" style="text-align:left;padding:14px 0;">✅ ${esc(msg)}</div>`;
     return;
   }
-  wrap.innerHTML = `<div class="call-list">${rows.slice(0, 60).map(c => `
+  // On Today the list starts short (the most important first) and opens fully on request.
+  const shown = CALL_SHOW_ALL ? 60 : 5;
+  wrap.innerHTML = `<div class="call-list">${rows.slice(0, shown).map(c => `
     <div class="call-row${c.urgent ? ' urgent' : ''}">
       <div class="call-who">
         <span class="call-name">${esc(c.name || 'Customer')}</span>
@@ -10894,8 +11210,12 @@ function renderCallList(){
       <div class="call-num">${maskMobile(c.mobile, c.owner)}</div>
       <div class="call-act">${waBtn(c.mobile, c.owner, c.tmpl, { name: c.name, model: c.model, colour: c.colour })}</div>
     </div>`).join('')}</div>
-    ${rows.length > 60 ? `<div class="empty-note" style="text-align:left;padding:10px 0;">+${rows.length - 60} more — clear these first.</div>` : ''}`;
+    ${rows.length > shown ? (shown < 60
+      ? `<button type="button" class="td-more" data-call-all>Show all ${fmtInt(rows.length)}</button>`
+      : `<div class="empty-note" style="text-align:left;padding:10px 0;">+${rows.length - 60} more — clear these first.</div>`) : ''}`;
 }
+let CALL_SHOW_ALL = false;
+document.addEventListener('click', (e) => { if (e.target.closest('[data-call-all]')) { CALL_SHOW_ALL = true; renderCallList(); } });
 (function wireCallList(){
   const seg = document.getElementById('callSeg');
   if (seg) seg.addEventListener('click', (e) => {
@@ -13025,64 +13345,188 @@ function exportCsv(filename, headers, rows, maskOpt){
 }
 
 /* ---------------- tabs ---------------- */
-// Sixteen tabs was too many to hold in your head, and several said the same thing twice. The
-// panels themselves are untouched — a tab now simply shows a GROUP of them, stacked. That keeps
-// every render function, id and report working exactly as before while cutting the tab bar in half.
+// Five tabs, each answering one question. The panels themselves are untouched — a tab simply
+// shows a GROUP of them, and a tab with several kinds of report has a row of sub-tabs (Bikes:
+// Stock / Price list / Specs) so only one kind shows at a time. Every render function, id and old
+// link keeps working: an old tab or panel name is mapped to wherever that panel now lives.
 const TAB_GROUPS = {
-  home:      ['home'],                  // the launcher — every section as a tile
-  myday:     ['myday'],
-  overview:  ['overview', 'analytics'],    // Business — targets, leaderboard AND the funnel
-  sales:     ['delivery', 'booking'],      // one bike's story, start to finish
-  stock:     ['festive', 'pending', 'stock'],   // festive shield (in season), then booked vs floor
-  pricelist: ['pricelist'],
-  // QR codes belong with customers, not in the odds-and-ends drawer: the review code, the rider
-  // group code and the One Ride code are all things a sales person hands to a customer at
-  // delivery. Sitting behind an Admin-only tab, they were unreachable by the people who use them.
-  customers: ['walkin', 'walkinlog', 'qrcodes', 'riders'],
-  more:      ['specs', 'moredata'],
-  leads:     ['leads'],                 // Admin + whoever is named in leads.access
-  control:   ['settings', 'loginlog'],   // Admin only — see applyRoleRestrictions
+  home:      ['home', 'myday'],                                   // Today: what needs doing
+  month:     ['mymonth', 'overview', 'analytics', 'delivery'],    // how the month is going
+  bookings:  ['booking'],                                         // what is still pending
+  bikes:     ['stock', 'festive', 'pending', 'pricelist', 'specs'],// what we have, at what price
+  customers: ['walkin', 'walkinlog', 'leads', 'riders', 'qrcodes'],// tools for the customer
+  control:   ['settings', 'loginlog'],                            // Admin — opened from the menu
 };
+const SUBTABS = {
+  month:     [{ id: 'me', label: 'My month', panels: ['mymonth'] },
+              { id: 'team', label: 'Team', panels: ['overview', 'analytics'] },
+              { id: 'deliveries', label: 'Deliveries', panels: ['delivery'] }],
+  bikes:     [{ id: 'stock', label: 'Stock', panels: ['stock', 'festive', 'pending'] },
+              { id: 'price', label: 'Price list', panels: ['pricelist'] },
+              { id: 'specs', label: 'Specs', panels: ['specs'] }],
+  customers: [{ id: 'walkin', label: 'Walk-in', panels: ['walkin', 'walkinlog'] },
+              { id: 'leads', label: 'Follow-up', panels: ['leads'] },
+              { id: 'riders', label: 'Riders', panels: ['riders'] },
+              { id: 'qr', label: 'QR codes', panels: ['qrcodes'] }],
+};
+// Names of the old tabs, still used by shortcut buttons, Find and report links.
+const TAB_ALIASES = { myday: 'home', overview: 'month', sales: 'bookings', stock: 'bikes', pricelist: 'bikes',
+                      more: 'bikes', leads: 'customers', dashboard: 'month' };
 // Some logins are limited to part of a group. The walk-in desk, for instance, gets the check
 // tool and today's log but not the rest of the Customers tab.
 let ALLOWED_PANELS = null;      // null = no restriction
+let HIDDEN_PANELS = new Set();  // panels this login may not see (set in applyRoleRestrictions)
+const SUBTAB_PICK = {};         // tab -> sub-tab id last opened
+function panelAllowed(p){
+  if (HIDDEN_PANELS.has(p)) return false;
+  return !ALLOWED_PANELS || ALLOWED_PANELS.has(p);
+}
 function panelsForTab(tabName){
   const g = TAB_GROUPS[tabName] || [tabName];
-  return ALLOWED_PANELS ? g.filter(p => ALLOWED_PANELS.has(p)) : g;
+  return g.filter(panelAllowed);
 }
-// Old tab names are still used by shortcut buttons and report links all over the file. Map them
-// to whichever tab now holds that panel, so nothing needs rewiring.
 function tabHolding(panelName){
   if (TAB_GROUPS[panelName]) return panelName;
   for (const t in TAB_GROUPS) if (TAB_GROUPS[t].indexOf(panelName) >= 0) return t;
+  if (TAB_ALIASES[panelName]) return TAB_ALIASES[panelName];
   return panelName;
+}
+function visibleSubtabs(tabName){
+  return (SUBTABS[tabName] || []).filter(st => st.panels.some(panelAllowed));
+}
+let CURRENT_TAB = 'home';
+// Find lives at the top of every tab; on Today it sits under the greeting photo instead.
+function placeFindBox(tabName){
+  const box = document.getElementById('findBox'), res = document.getElementById('findResult');
+  if (!box || !res) return;
+  const greet = document.getElementById('homeGreet');
+  if (tabName === 'home' && greet) { greet.after(box); box.after(res); }
+  else { const sub = document.getElementById('subTabs'); if (sub) { sub.before(box); box.after(res); } }
+}
+function renderSubtabs(tabName, active){
+  const bar = document.getElementById('subTabs');
+  if (!bar) return;
+  const list = visibleSubtabs(tabName);
+  if (list.length < 2) { bar.innerHTML = ''; bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  bar.innerHTML = list.map(st => `<button type="button" role="tab" aria-selected="${st.id === active ? 'true' : 'false'}"
+    class="subtab${st.id === active ? ' active' : ''}" data-subtab="${esc(st.id)}">${esc(st.label)}</button>`).join('');
 }
 
 function switchToTab(tabName, scrollToId){
+  const asked = tabName;
+  tabName = tabHolding(tabName);                 // accepts an old tab or panel name too
+  let group = panelsForTab(tabName);
+  // A tab with sub-tabs shows one sub-tab: the one holding the panel that was asked for, else the
+  // one last opened, else the first.
+  const subs = visibleSubtabs(tabName);
+  let activeSub = null;
+  if (subs.length) {
+    activeSub = subs.find(st => st.panels.indexOf(asked) >= 0) ||
+      (scrollToId && subs.find(st => st.panels.some(p => { const sec = document.getElementById('tab-' + p); return sec && sec.querySelector('#' + CSS.escape(scrollToId)); }))) ||
+      subs.find(st => st.id === SUBTAB_PICK[tabName]) || subs[0];
+    SUBTAB_PICK[tabName] = activeSub.id;
+    group = group.filter(p => activeSub.panels.indexOf(p) >= 0);
+  }
+  CURRENT_TAB = tabName;
+  document.body.dataset.tab = tabName;
   // Sign-in activity is fetched fresh each time it's opened rather than on every refresh —
   // it's an occasional check, not something to pull down with the main data.
-  tabName = tabHolding(tabName);                 // accepts an old panel name too
-  const group = panelsForTab(tabName);
   if (group.indexOf('loginlog') >= 0) setTimeout(loadLoginLog, 0);
   if (group.indexOf('settings') >= 0) { setTimeout(loadSettings, 0); setTimeout(loadStatus, 0); }
   if (group.indexOf('leads') >= 0) setTimeout(loadLeads, 0);
-  const btn = document.querySelector(`#tabs button[data-tab="${tabName}"]`);
-  if (btn) document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('#tabs button[data-tab]').forEach(b => {
+    const on = b.dataset.tab === tabName;
+    b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.tabpanel').forEach(p =>
     p.classList.toggle('active', group.indexOf(p.id.replace('tab-','')) >= 0));
+  renderSubtabs(tabName, activeSub && activeSub.id);
+  placeFindBox(tabName);
   if (scrollToId) {
     // let the panel become visible first, then scroll the target section into view
     setTimeout(() => {
       const el = document.getElementById(scrollToId);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el) { openSectionHolding(el); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     }, 60);
   } else {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+// ── Sections that open and close ──
+// Long screens are split at each section title. Tapping a title opens or closes what is under it.
+// On a phone only the first section of each screen starts open, so a screen fits in a few swipes;
+// on a computer everything starts open. Closing uses a class, so the code that hides a section
+// when its sheet tab is missing (setBlockVisible) still works as before.
+const SEC_SKIP = ['home', 'myday', 'mymonth', 'dashboard', 'walkin', 'walkinlog', 'moredata'];
+function initCollapsibleSections(){
+  const phone = window.matchMedia('(max-width: 900px)').matches;
+  // The first panel of each screen (a sub-tab can show several panels one under another).
+  const lead = new Set();
+  Object.keys(TAB_GROUPS).forEach(t => {
+    const subs = SUBTABS[t];
+    if (subs) subs.forEach(st => lead.add(st.panels[0])); else lead.add(TAB_GROUPS[t][0]);
+  });
+  document.querySelectorAll('section.tabpanel').forEach(panel => {
+    const id = panel.id.replace('tab-', '');
+    if (SEC_SKIP.indexOf(id) >= 0 || panel.dataset.secDone) return;
+    panel.dataset.secDone = '1';
+    let opened = !lead.has(id);             // panels that are not first on their screen start closed
+    Array.from(panel.children).forEach(h => {
+      if (!(h.tagName === 'H2' && h.classList.contains('section-title'))) return;
+      const body = document.createElement('div');
+      body.className = 'sec-body';
+      let n = h.nextElementSibling;
+      while (n && !(n.tagName === 'H2' && n.classList.contains('section-title'))) {
+        const next = n.nextElementSibling; body.appendChild(n); n = next;
+      }
+      h.after(body);
+      h.classList.add('sec-toggle');
+      h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
+      const hiddenTitle = h.style.display === 'none';
+      const open = !phone || (!opened && !hiddenTitle);
+      if (!hiddenTitle && !open) setSectionOpen(h, false); else h.setAttribute('aria-expanded', 'true');
+      if (!hiddenTitle) opened = true;
+    });
+  });
+}
+function setSectionOpen(h, open){
+  const body = h.nextElementSibling;
+  if (!body || !body.classList.contains('sec-body')) return;
+  body.classList.toggle('sec-closed', !open);
+  h.classList.toggle('sec-shut', !open);
+  h.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function openSectionHolding(el){
+  if (el.classList && el.classList.contains('sec-toggle')) { setSectionOpen(el, true); return; }
+  const body = el.closest && el.closest('.sec-body');
+  if (body && body.previousElementSibling) setSectionOpen(body.previousElementSibling, true);
+}
+document.addEventListener('click', (e) => {
+  const h = e.target.closest('h2.sec-toggle'); if (!h) return;
+  setSectionOpen(h, h.getAttribute('aria-expanded') === 'false');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const h = e.target.closest && e.target.closest('h2.sec-toggle'); if (!h) return;
+  e.preventDefault(); setSectionOpen(h, h.getAttribute('aria-expanded') === 'false');
+});
+try { initCollapsibleSections(); } catch (e) { console.error('sections', e); }
+
+document.getElementById('subTabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-subtab]');
+  if (!b) return;
+  SUBTAB_PICK[CURRENT_TAB] = b.dataset.subtab;
+  switchToTab(CURRENT_TAB);
+});
+{ const ab = document.getElementById('adminPanelBtn');
+  if (ab) ab.addEventListener('click', () => { try { toggleControlsDrawer(false); } catch (e) {} switchToTab('control'); }); }
 document.getElementById('tabs').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-tab]');
   if (!btn) return;
+  // Opening a tab leaves the search: clear an old Find answer so it doesn't sit above the tab.
+  try { if (FIND_Q) clearFind(); } catch (err) {}
   switchToTab(btn.dataset.tab);
 });
 // Dashboard + My Day quick-jump shortcuts (Kaam 4) — same delegated behaviour on both rows.
