@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610131130';
+  window.__BUILD = '202610141215';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2316,6 +2316,27 @@
     h2.sec-toggle.sec-shut { margin-top: 22px !important; margin-bottom: 4px !important; }
     h2.sec-toggle.sec-shut + .sec-body + h2.sec-toggle.sec-shut { margin-top: 0 !important; }
   }
+
+  /* Bookings: model and colour chips */
+  .tdd-models { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; }
+  .mchip-lb { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-right: 2px; }
+  .mchip { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 17px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .mchip:hover { color: var(--text-primary); }
+  .mchip.active { background: linear-gradient(180deg, var(--gold-light), var(--gold)); color: var(--on-gold); border-color: transparent; }
+  .mchip .seg-n { font-size: 11px; opacity: .8; }
+  .tdd-colours .mchip { height: 30px; font-size: 12.5px; }
+  .tdd-model-sum { font-size: 13px; color: var(--text-secondary); margin: 2px 0 10px; line-height: 1.6; }
+  .tdd-model-sum b { color: var(--text-primary); }
+  .tdd-model-sum .link-btn { color: var(--gold-light); margin-left: 4px; }
+  @media (max-width: 760px) {
+    /* one swipeable line each, so the list stays near the top */
+    .tdd-models { flex-wrap: nowrap; overflow-x: auto; margin-left: -16px; margin-right: -16px; padding: 0 16px 2px; scrollbar-width: none; }
+    .tdd-models::-webkit-scrollbar { display: none; }
+    .mchip-lb { flex: 0 0 auto; }
+    .mchip { flex: 0 0 auto; }
+  }
+  h2.section-title, #tddChips { scroll-margin-top: 72px; }
 </style>
 </head>
 <body>
@@ -2776,6 +2797,9 @@
       <button type="button" class="seg" data-tdd="week">This week</button>
       <button type="button" class="seg" data-tdd="nodate">No date</button>
     </div>
+    <div class="tdd-models" id="tddModels" role="group" aria-label="Model"></div>
+    <div class="tdd-models tdd-colours" id="tddColours" role="group" aria-label="Colour"></div>
+    <div class="tdd-model-sum" id="tddModelSum"></div>
     <div class="empty-note" style="padding:4px 0 8px; text-align:left; font-size:12px;">
       Every open booking in one list. <b>Days</b> is negative when the delivery is late (−2 = two days late). <b>ASAP</b> sits with the most urgent, <b>HOLD</b> at the bottom. Admin sees the whole team; a sales login sees only their own.
     </div>
@@ -2894,7 +2918,7 @@
   </section>
 
   <section class="tabpanel" id="tab-pending">
-    <h2 class="section-title">🔎 Book vs Stock — Select a Model</h2>
+    <h2 class="section-title" id="bvsTitle">🔎 Book vs Stock — Select a Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Pick a model to see the stock of every colour (free or not) and whose booking is on it. Bookings are in <b>FIFO</b> order (first to book is first in line) — when a bike arrives, the customer at the top gets it. Every sales person's bookings are visible to everyone; customer mobiles stay hidden.
     </div>
@@ -8091,8 +8115,74 @@ function tddFilterOk(r){
   if (TDD_FILTER === 'nodate') return r.days == null;
   return true;
 }
-function renderTddTable(rows){
-  TDD_ROWS_CACHE = rows;
+// Model filter: one chip per model (family, e.g. "Classic 350"), with how many open bookings it
+// has; picking a model also offers its colours. Works together with the date chips above.
+let TDD_MODEL = '';    // modelFamilyKey, '' = all models
+let TDD_COLOUR = '';   // upper-case colour, '' = all colours
+function tddModelOk(r){
+  if (TDD_MODEL && modelFamilyKey(r.model) !== TDD_MODEL) return false;
+  if (TDD_COLOUR && up(r.colour) !== TDD_COLOUR) return false;
+  return true;
+}
+// "CLASSIC 350" -> "Classic 350", "STEALTH BLACK" -> "Stealth Black"; short words such as GT or INT stay in capitals.
+function tddTitle(v){ return str(v).replace(/\S+/g, w => w.length <= 3 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()); }
+function tddModelLabel(raw){
+  return tddTitle(str(raw).split(/\s+/).slice(0, 2).join(' ')) || 'No model';
+}
+function renderTddModelChips(rows){
+  const box = document.getElementById('tddModels'), cbox = document.getElementById('tddColours');
+  const sum = document.getElementById('tddModelSum');
+  if (!box) return;
+  const fams = {};   // key -> { label, n }
+  rows.forEach(r => {
+    const k = modelFamilyKey(r.model), l = tddModelLabel(r.model);
+    const f = fams[k] || (fams[k] = { label: l, n: 0 });
+    f.n++; if (l.length < f.label.length) f.label = l;
+  });
+  if (TDD_MODEL && !fams[TDD_MODEL]) { TDD_MODEL = ''; TDD_COLOUR = ''; }
+  const list = Object.entries(fams).sort((a, b) => b[1].n - a[1].n || a[1].label.localeCompare(b[1].label));
+  const chip = (attr, val, label, n, on) =>
+    `<button type="button" class="mchip${on ? ' active' : ''}" ${attr}="${esc(val)}" aria-pressed="${on}">${esc(label)} <span class="seg-n">${fmtInt(n)}</span></button>`;
+  box.innerHTML = '<span class="mchip-lb">Model</span>' + chip('data-tdd-model', '', 'All models', rows.length, !TDD_MODEL) +
+    list.map(([k, f]) => chip('data-tdd-model', k, f.label, f.n, k === TDD_MODEL)).join('');
+  if (!TDD_MODEL) { cbox.innerHTML = ''; cbox.style.display = 'none'; if (sum) sum.innerHTML = ''; return; }
+  const mine = rows.filter(r => modelFamilyKey(r.model) === TDD_MODEL);
+  const cols = {};
+  mine.forEach(r => { const c = up(r.colour) || ''; (cols[c] || (cols[c] = { label: tddTitle(r.colour) || 'No colour', n: 0 })).n++; });
+  if (TDD_COLOUR && !cols[TDD_COLOUR]) TDD_COLOUR = '';
+  const clist = Object.entries(cols).sort((a, b) => b[1].n - a[1].n || a[1].label.localeCompare(b[1].label));
+  cbox.style.display = '';
+  cbox.innerHTML = '<span class="mchip-lb">Colour</span>' + chip('data-tdd-colour', '', 'All colours', mine.length, !TDD_COLOUR) +
+    clist.map(([k, c]) => chip('data-tdd-colour', k, c.label, c.n, k === TDD_COLOUR)).join('');
+  if (sum) {
+    const shown = mine.filter(tddModelOk);
+    const late = shown.filter(r => r.days != null && r.days < 0).length;
+    const inStock = shown.filter(r => /^✅/.test(r.stockText)).length;
+    const name = fams[TDD_MODEL].label + (TDD_COLOUR ? ' · ' + cols[TDD_COLOUR].label : '');
+    sum.innerHTML = `<b>${esc(name)}</b>: ${fmtInt(shown.length)} open booking${shown.length === 1 ? '' : 's'}` +
+      ` · ${fmtInt(late)} late · ${fmtInt(inStock)} with a bike in stock, ${fmtInt(shown.length - inStock)} without` +
+      ` <button type="button" class="link-btn" data-bvs-open="${esc(TDD_MODEL)}">Stock &amp; queue for this model ›</button>`;
+  }
+}
+document.addEventListener('click', (e) => {
+  const m = e.target.closest('[data-tdd-model]'), c = e.target.closest('[data-tdd-colour]');
+  if (m) { TDD_MODEL = m.dataset.tddModel; TDD_COLOUR = ''; TDD_CARDS_ALL = false; renderTddTable(TDD_ROWS_CACHE); }
+  else if (c) { TDD_COLOUR = c.dataset.tddColour; TDD_CARDS_ALL = false; renderTddTable(TDD_ROWS_CACHE); }
+  const b = e.target.closest('[data-bvs-open]');
+  if (b) {
+    // Open the older "Book vs Stock — Select a Model" view (Bikes → Stock) on the same model.
+    const sel = document.getElementById('bvsModelSelect');
+    if (sel) {
+      const opt = [...sel.options].find(o => modelFamilyKey(o.value) === b.dataset.bvsOpen);
+      if (opt) { sel.value = opt.value; try { renderBvsModel(BVS_ALL_BOOKINGS); } catch (err) {} }
+    }
+    switchToTab('pending', 'bvsTitle');
+  }
+});
+function renderTddTable(allRows){
+  TDD_ROWS_CACHE = allRows;
+  try { renderTddModelChips(allRows); } catch (e) { console.error('tdd models', e); }
+  const rows = allRows.filter(tddModelOk);
   const order = (document.getElementById('tddSortOrder') || {}).value || 'oldToNew';
   const chips = document.getElementById('tddChips');
   if (chips) chips.querySelectorAll('[data-tdd]').forEach(b => {
@@ -8148,7 +8238,7 @@ function wireTddControls(){
     btn.dataset.wired = '1';
     btn.addEventListener('click', () => {
       const order = (document.getElementById('tddSortOrder') || {}).value || 'oldToNew';
-      const sorted = sortTddRows(TDD_ROWS_CACHE, order);
+      const sorted = sortTddRows(TDD_ROWS_CACHE.filter(r => tddModelOk(r) && tddFilterOk(r)), order);
       if (!sorted.length) { alert('Nothing to export for the current filter.'); return; }
       const header = ['Slip/Receipt No', 'Customer', 'Mobile', 'Model', 'Colour', 'Executive', 'TDD', 'Days (negative = overdue)', 'Stock Status', 'Booking Status'];
       const csvCell = v => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
@@ -9622,7 +9712,7 @@ document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-today]');
   if (!t) return;
   const k = t.dataset.today;
-  if (k === 'due' || k === 'late') { TDD_FILTER = k === 'due' ? 'today' : 'late'; switchToTab('booking', 'tddChips');
+  if (k === 'due' || k === 'late') { TDD_FILTER = k === 'due' ? 'today' : 'late'; TDD_MODEL = ''; TDD_COLOUR = ''; switchToTab('booking', 'tddChips');
     try { renderTddTable(TDD_ROWS_CACHE); } catch (err) {} }
   else if (k === 'calls') switchToTab('myday', 'callListTitle');
   else if (k === 'walk') switchToTab('walkinlog');
