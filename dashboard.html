@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610141215';
+  window.__BUILD = '202610171200';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2337,6 +2337,34 @@
     .mchip { flex: 0 0 auto; }
   }
   h2.section-title, #tddChips { scroll-margin-top: 72px; }
+
+  /* Month → incentive */
+  .inc-card { margin: 14px 0 6px; padding: 6px 14px 12px; border-radius: 16px; background: var(--surface-1); border: 1px solid var(--border); }
+  .inc-card.inc-done { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+  .inc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 0 6px;
+    font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .inc-head span { font-family: var(--font-ui, inherit); font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
+  .inc-team, .inc-me { padding: 10px 0; border-top: 1px solid var(--border); }
+  .inc-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 14px; font-weight: 600; margin-bottom: 7px; }
+  .inc-top b { font-family: var(--font-head); font-size: 20px; }
+  .inc-top .inc-amt { font-size: 24px; color: var(--gold-light); }
+  .inc-note { font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; }
+  .inc-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .inc-chip { font-size: 11.5px; padding: 3px 9px; border-radius: 10px; background: color-mix(in srgb, var(--text-primary) 8%, transparent); color: var(--text-secondary); white-space: nowrap; }
+  .inc-table .inc-chips { margin-top: 0; }
+  .inc-table tr.inc-total td { font-weight: 700; border-top: 2px solid var(--border); }
+  .inc-list { display: none; }
+  .inc-of { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+  .inc-row { padding: 10px 0; border-top: 1px solid var(--border); }
+  .inc-row .inc-top { margin-bottom: 0; }
+  .inc-row small { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 6px; }
+  .inc-row.inc-sum .inc-top b { color: var(--gold-light); }
+  @media (max-width: 760px) { .inc-card .table-wrap { display: none; } .inc-list { display: block; } }
+  .inc-warn { margin-top: 10px; font-size: 12.5px; color: var(--warning); }
+  .inc-rates { margin-top: 10px; }
+  .inc-rates summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--gold-light); }
+  .inc-rate-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 18px; margin-top: 8px; font-size: 13px; }
+  .inc-rate-list div { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -2523,6 +2551,7 @@
   <section class="tabpanel" id="tab-mymonth">
     <div id="homeCockpit"></div>
     <div id="monthBars"></div>
+    <div id="incentiveCard"></div>
     <div class="panel-row-2col" style="margin-top:20px;">
       <div class="panel">
         <div class="panel-bar">🎯 My Target — This Month</div>
@@ -9622,6 +9651,132 @@ function renderHome(){
   // they are ready the moment that tab opens.
   try { renderCockpit(); } catch (e) { console.error('cockpit', e); }
   put('monthBars', monthBarsHtml);
+  put('incentiveCard', incentiveHtml);
+}
+
+// ═══════════════ Month → sales incentive ═══════════════
+// The month's per-bike incentive. Nothing is paid unless the whole showroom bills the target number
+// of bikes in the month; each sales person earns the model rate for every bike they billed.
+// The plan below is the default; the Admin panel (incentive.* settings) can change it without a
+// new upload.
+const INCENTIVE_DEFAULT = {
+  show: true, month: '2026-10', target: 361,
+  rates: { bullet: 100, hunter: 200, classic: 150, classicStealth: 300, classicGunGrey: 400,
+           meteor: 200, goan: 200, mid: 600, big: 750 },
+};
+const INCENTIVE_LABELS = {
+  bullet: 'Bullet 350', hunter: 'Hunter 350', classic: 'Classic 350 (regular colours)',
+  classicStealth: 'Classic 350 Stealth Black', classicGunGrey: 'Classic 350 Gun Grey',
+  meteor: 'Meteor 350', goan: 'Goan Classic 350', mid: '440 / 450 (Scram, Himalayan, Guerrilla)', big: '650 range (all 650 models)',
+};
+function incentivePlan(){
+  const s = (STATE.settings && STATE.settings.incentive) || {};
+  const rates = Object.assign({}, INCENTIVE_DEFAULT.rates);
+  Object.keys(rates).forEach(k => { const v = Number(s.rates && s.rates[k]); if (s.rates && s.rates[k] !== undefined && !isNaN(v)) rates[k] = v; });
+  const t = Number(s.target);
+  return { show: s.show === undefined ? INCENTIVE_DEFAULT.show : !!s.show,
+           month: s.month === undefined ? INCENTIVE_DEFAULT.month : str(s.month),
+           target: s.target !== undefined && t > 0 ? t : INCENTIVE_DEFAULT.target, rates };
+}
+// Which rate a billed bike earns, from its model and colour text.
+function incentiveCat(model, colour){
+  const t = up(`${str(model)} ${str(colour)}`);
+  if (/650|INTERCEPTOR|CONTINENTAL|SUPER\s*METEOR|SHOTGUN|\bBEAR\b/.test(t)) return 'big';
+  if (/440|450|SCRAM|HIMALAYAN|GUERRIL/.test(t)) return 'mid';
+  if (/GOAN/.test(t)) return 'goan';
+  if (/CLASSIC/.test(t)) {
+    if (/STEALTH/.test(t)) return 'classicStealth';
+    if (/GUN\s*-?\s*GR[AE]Y/.test(t)) return 'classicGunGrey';
+    return 'classic';
+  }
+  if (/METEOR/.test(t)) return 'meteor';
+  if (/HUNTER/.test(t)) return 'hunter';
+  if (/BULLET/.test(t)) return 'bullet';
+  return null;
+}
+function incentiveData(){
+  const plan = incentivePlan();
+  const c = findContext(parseFind(''));
+  if (!plan.show || !c.per.month || (plan.month && c.per.month !== plan.month)) return null;
+  // the whole showroom, whoever is signed in — the target is shared
+  const bills = STATE.delivery.filter(r => billedOk(r[9]) && c.inPer(r[2]));
+  const people = {};
+  const notInPlan = [];
+  bills.forEach(r => {
+    const who = canonName(r[18]).replace(/^#+\s*/, '') || str(r[18]) || '(no sales person)';
+    const p = people[who] || (people[who] = { name: who, bikes: 0, amount: 0, cats: {}, raw: r[18] });
+    p.bikes++;
+    const cat = incentiveCat(r[6], r[7]);
+    if (!cat) { notInPlan.push(r); return; }
+    p.cats[cat] = (p.cats[cat] || 0) + 1;
+    p.amount += plan.rates[cat] || 0;
+  });
+  const list = Object.values(people).sort((a, b) => b.amount - a.amount || b.bikes - a.bikes);
+  // Admin sees every sales person; a sales login sees only its own figure; other roles (CRT, DP,
+  // Billing) see the showroom progress only.
+  const role = CURRENT_USER ? CURRENT_USER.role : 'Admin';
+  const view = role === 'Admin' ? 'all' : role === 'Sales' ? 'me' : 'team';
+  const me = view === 'me' && c.lock ? list.find(p => execMatches(p.raw, c.lock) || execMatches(p.name, c.lock)) || { name: c.lock, bikes: 0, amount: 0, cats: {} } : null;
+  const today = todayMidnight();
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const daysLeft = c.per.month === currentMonthKey() ? lastDay - today.getDate() + 1 : 0;
+  // The showroom target is the month's retail target in MONTHLY TARGETS (column B); the
+  // incentive.target setting is used only when that row is missing.
+  const sheetTarget = c.per.isLoadedMonth ? monthlyTargetVal(1) : null;
+  if (sheetTarget > 0) plan.target = sheetTarget;
+  plan.fromSheet = sheetTarget > 0;
+  // each person's own retail target (MONTHLY TARGETS, columns K onwards)
+  list.forEach(p => { p.target = c.per.isLoadedMonth ? (targetFor(p.name) || 0) : 0; });
+  if (me) me.target = c.per.isLoadedMonth ? (targetFor(me.name) || 0) : 0;
+  return { plan, c, view, total: bills.length, list, me, notInPlan, daysLeft,
+           payout: list.reduce((s, p) => s + p.amount, 0) };
+}
+function incentiveHtml(){
+  const D = incentiveData();
+  if (!D) return '';
+  const { plan, total } = D;
+  const left = Math.max(0, plan.target - total), done = total >= plan.target;
+  const monthName = D.c.per.label || plan.month;
+  const perDay = !done && D.daysLeft > 0 ? Math.ceil(left / D.daysLeft) : 0;
+  const breakdown = (p) => Object.keys(INCENTIVE_LABELS).filter(k => p.cats[k])
+    .map(k => `<span class="inc-chip">${esc(INCENTIVE_LABELS[k].replace(/ \(.*\)$/, ''))} × ${fmtInt(p.cats[k])} · ${fmtMoney(p.cats[k] * plan.rates[k])}</span>`).join('');
+  let h = `<div class="inc-card${done ? ' inc-done' : ''}">
+    <div class="inc-head">Incentive · ${esc(monthName)}<span>${done ? 'Unlocked — the showroom reached the target' : `Paid only if the showroom bills ${fmtInt(plan.target)} bikes this month`}</span></div>
+    <div class="inc-team">
+      <div class="inc-top"><span>Showroom bikes billed</span><span><b>${fmtInt(total)}</b> of ${fmtInt(plan.target)}</span></div>
+      <div class="mb-bar"><i class="${done ? 'ok' : 'low'}" style="width:${Math.min(100, total / plan.target * 100).toFixed(1)}%"></i></div>
+      <div class="inc-note">${done ? '✅ Target reached — every bike billed earns its rate.'
+        : `${fmtInt(left)} more bike${left === 1 ? '' : 's'} to unlock${perDay ? ` · about ${fmtInt(perDay)} a day for the ${fmtInt(D.daysLeft)} day${D.daysLeft === 1 ? '' : 's'} left` : ''}.`}</div>
+    </div>`;
+  if (D.view === 'team') {
+    // nothing personal to show
+  } else if (D.view === 'me') {
+    const me = D.me || { bikes: 0, amount: 0, cats: {} };
+    D.me = me;
+    h += `<div class="inc-me">
+      <div class="inc-top"><span>Your incentive so far</span><span><b class="inc-amt">${fmtMoney(D.me.amount)}</b></span></div>
+      <div class="inc-note">${fmtInt(me.bikes)} bike${me.bikes === 1 ? '' : 's'} billed${me.target ? ` of your ${fmtInt(me.target)} target` : ''}${done ? '' : ' · locked until the showroom reaches the target'}</div>
+      <div class="inc-chips">${breakdown(me) || '<span class="inc-note">No bike billed yet this month.</span>'}</div>
+    </div>`;
+  } else {
+    h += `<div class="table-wrap"><table class="data inc-table"><thead><tr><th>Sales person</th><th class="num">Bikes billed</th><th class="num">Incentive</th><th>Model-wise</th></tr></thead><tbody>
+      ${D.list.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${fmtInt(p.bikes)}${p.target ? ` <small class="inc-of">of ${fmtInt(p.target)}</small>` : ''}</td><td class="num"><b>${fmtMoney(p.amount)}</b></td><td><div class="inc-chips">${breakdown(p)}</div></td></tr>`).join('')}
+      <tr class="inc-total"><td>Total</td><td class="num">${fmtInt(total)}</td><td class="num"><b>${fmtMoney(D.payout)}</b></td><td>${done ? 'To be paid' : 'Payable only if the target is reached'}</td></tr>
+      </tbody></table></div>`;
+    // phone: one block per sales person instead of a wide table
+    h += `<div class="inc-list">${D.list.map(p => `<div class="inc-row">
+        <div class="inc-top"><span>${esc(p.name)} <small>${fmtInt(p.bikes)}${p.target ? ` of ${fmtInt(p.target)}` : ''} bike${p.bikes === 1 && !p.target ? '' : 's'}</small></span><b>${fmtMoney(p.amount)}</b></div>
+        <div class="inc-chips">${breakdown(p)}</div></div>`).join('')}
+      <div class="inc-row inc-sum"><div class="inc-top"><span>Total <small>${fmtInt(total)} bikes · ${done ? 'to be paid' : 'payable only if the target is reached'}</small></span><b>${fmtMoney(D.payout)}</b></div></div>
+    </div>`;
+    if (D.notInPlan.length) {
+      h += `<div class="inc-warn">⚠️ ${fmtInt(D.notInPlan.length)} billed bike${D.notInPlan.length === 1 ? ' does' : 's do'} not match any rate (counted in the showroom total, no incentive): ${
+        esc([...new Set(D.notInPlan.map(r => `${str(r[6])} ${str(r[7])}`.trim() || 'no model'))].slice(0, 8).join(', '))}</div>`;
+    }
+  }
+  h += `<details class="inc-rates"><summary>Rates per bike</summary><div class="inc-rate-list">${
+    Object.keys(INCENTIVE_LABELS).map(k => `<div><span>${esc(INCENTIVE_LABELS[k])}</span><b>${fmtMoney(plan.rates[k])}</b></div>`).join('')}</div></details>`;
+  return h + '</div>';
 }
 
 // ═══════════════ Month → target bars ═══════════════
@@ -10864,6 +11019,7 @@ const SETTINGS_GROUPS = [
   { key: 'backup',   title: '💾 Backup',            help: 'The weekly copy of the whole spreadsheet.' },
   { key: 'showroom', title: '🏍️ Printed on quotations', help: 'Appears on the price list and every customer quotation.' },
   { key: 'bank',     title: '🏦 Bank details',      help: 'Printed at the bottom of each quotation.' },
+  { key: 'incentive', title: '💰 Sales incentive', help: 'The per-bike incentive shown on Month \u2192 My month. Change the month, the showroom target and the rates here each month.' },
 ];
 const settingsMsg = (text, good) => {
   const el = document.getElementById('settingsMsg');
