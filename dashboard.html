@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610171200';
+  window.__BUILD = '202610171230';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2354,6 +2354,10 @@
   .inc-table .inc-chips { margin-top: 0; }
   .inc-table tr.inc-total td { font-weight: 700; border-top: 2px solid var(--border); }
   .inc-list { display: none; }
+  .inc-chip.inc-award { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold-light); font-weight: 700; }
+  .inc-bonus { padding: 8px 0 4px; border-top: 1px solid var(--border); }
+  .inc-race { display: flex; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap; padding: 5px 0; font-size: 13px; color: var(--text-secondary); }
+  .inc-race-k { font-weight: 700; color: var(--text-primary); }
   .inc-of { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
   .inc-row { padding: 10px 0; border-top: 1px solid var(--border); }
   .inc-row .inc-top { margin-bottom: 0; }
@@ -9663,6 +9667,9 @@ const INCENTIVE_DEFAULT = {
   show: true, month: '2026-10', target: 361,
   rates: { bullet: 100, hunter: 200, classic: 150, classicStealth: 300, classicGunGrey: 400,
            meteor: 200, goan: 200, mid: 600, big: 750 },
+  // bonuses: the sales person with the most bikes billed, and the one with the most 650s
+  // (only if that is more than top650Min)
+  bonus: { topRetail: 5100, top650: 2100, top650Min: 5 },
 };
 const INCENTIVE_LABELS = {
   bullet: 'Bullet 350', hunter: 'Hunter 350', classic: 'Classic 350 (regular colours)',
@@ -9673,8 +9680,10 @@ function incentivePlan(){
   const s = (STATE.settings && STATE.settings.incentive) || {};
   const rates = Object.assign({}, INCENTIVE_DEFAULT.rates);
   Object.keys(rates).forEach(k => { const v = Number(s.rates && s.rates[k]); if (s.rates && s.rates[k] !== undefined && !isNaN(v)) rates[k] = v; });
+  const bonus = Object.assign({}, INCENTIVE_DEFAULT.bonus);
+  Object.keys(bonus).forEach(k => { const v = Number(s.bonus && s.bonus[k]); if (s.bonus && s.bonus[k] !== undefined && !isNaN(v)) bonus[k] = v; });
   const t = Number(s.target);
-  return { show: s.show === undefined ? INCENTIVE_DEFAULT.show : !!s.show,
+  return { bonus, show: s.show === undefined ? INCENTIVE_DEFAULT.show : !!s.show,
            month: s.month === undefined ? INCENTIVE_DEFAULT.month : str(s.month),
            target: s.target !== undefined && t > 0 ? t : INCENTIVE_DEFAULT.target, rates };
 }
@@ -9720,6 +9729,23 @@ function incentiveData(){
   const today = todayMidnight();
   const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const daysLeft = c.per.month === currentMonthKey() ? lastDay - today.getDate() + 1 : 0;
+  // Bonuses. A tie is shown as a tie and not added to anyone, so the owner decides.
+  const real = list.filter(p => p.name !== '(no sales person)');
+  real.forEach(p => { p.n650 = p.cats.big || 0; p.bonus = 0; p.awards = []; });
+  const topBikes = Math.max(0, ...real.map(p => p.bikes));
+  const topLead = topBikes > 0 ? real.filter(p => p.bikes === topBikes) : [];
+  const top650 = Math.max(0, ...real.map(p => p.n650));
+  const lead650 = top650 > plan.bonus.top650Min ? real.filter(p => p.n650 === top650) : [];
+  const award = (leaders, amount, label) => {
+    if (!amount || !leaders.length) return;
+    leaders.forEach(p => p.awards.push({ label, amount, tie: leaders.length > 1 }));
+    if (leaders.length === 1) leaders[0].bonus += amount;
+  };
+  award(topLead, plan.bonus.topRetail, 'Top retail');
+  award(lead650, plan.bonus.top650, 'Most 650s');
+  list.forEach(p => { p.total = p.amount + (p.bonus || 0); });
+  list.sort((a, b) => b.total - a.total || b.bikes - a.bikes);
+  const bonusInfo = { topBikes, topLead, top650, lead650 };
   // The showroom target is the month's retail target in MONTHLY TARGETS (column B); the
   // incentive.target setting is used only when that row is missing.
   const sheetTarget = c.per.isLoadedMonth ? monthlyTargetVal(1) : null;
@@ -9728,8 +9754,8 @@ function incentiveData(){
   // each person's own retail target (MONTHLY TARGETS, columns K onwards)
   list.forEach(p => { p.target = c.per.isLoadedMonth ? (targetFor(p.name) || 0) : 0; });
   if (me) me.target = c.per.isLoadedMonth ? (targetFor(me.name) || 0) : 0;
-  return { plan, c, view, total: bills.length, list, me, notInPlan, daysLeft,
-           payout: list.reduce((s, p) => s + p.amount, 0) };
+  return { plan, c, view, total: bills.length, list, me, notInPlan, daysLeft, bonusInfo,
+           payout: list.reduce((s, p) => s + (p.total || p.amount), 0) };
 }
 function incentiveHtml(){
   const D = incentiveData();
@@ -9739,7 +9765,21 @@ function incentiveHtml(){
   const monthName = D.c.per.label || plan.month;
   const perDay = !done && D.daysLeft > 0 ? Math.ceil(left / D.daysLeft) : 0;
   const breakdown = (p) => Object.keys(INCENTIVE_LABELS).filter(k => p.cats[k])
-    .map(k => `<span class="inc-chip">${esc(INCENTIVE_LABELS[k].replace(/ \(.*\)$/, ''))} × ${fmtInt(p.cats[k])} · ${fmtMoney(p.cats[k] * plan.rates[k])}</span>`).join('');
+    .map(k => `<span class="inc-chip">${esc(INCENTIVE_LABELS[k].replace(/ \(.*\)$/, ''))} × ${fmtInt(p.cats[k])} · ${fmtMoney(p.cats[k] * plan.rates[k])}</span>`).join('') +
+    (p.awards || []).map(a => `<span class="inc-chip inc-award">🏆 ${esc(a.label)} · ${fmtMoney(a.amount)}${a.tie ? ' (tie — not added)' : ''}</span>`).join('');
+  // The two bonus races. Admin sees names; others see only the numbers they are racing against.
+  const B = D.bonusInfo, showNames = D.view === 'all';
+  const who = (arr, n, unit) => arr.length ? (showNames ? arr.map(p => esc(p.name)).join(' & ') + ` (${fmtInt(n)} ${unit})` : `${fmtInt(n)} ${unit}`) : '';
+  const mine = D.view === 'me' ? (D.me || {}) : null;
+  const meIn = (arr) => mine && arr.indexOf(mine) >= 0;
+  const youLead = (arr, n, unit) => `🥇 You are leading (${fmtInt(n)} ${unit})${arr.length > 1 ? ' — tied' : ''}`;
+  const races = (plan.bonus.topRetail || plan.bonus.top650) ? `<div class="inc-bonus">
+      ${plan.bonus.topRetail ? `<div class="inc-race"><span class="inc-race-k">🏆 Top retail · ${fmtMoney(plan.bonus.topRetail)}</span>
+        <span>${meIn(B.topLead) ? youLead(B.topLead, B.topBikes, 'bikes') : B.topLead.length ? `Leading: ${who(B.topLead, B.topBikes, 'bikes')}${B.topLead.length > 1 ? ' — tie' : ''}` : 'No bike billed yet'}${mine && !meIn(B.topLead) ? ` · you: ${fmtInt(mine.bikes || 0)}` : ''}</span></div>` : ''}
+      ${plan.bonus.top650 ? `<div class="inc-race"><span class="inc-race-k">🏍️ Most 650s · ${fmtMoney(plan.bonus.top650)}</span>
+        <span>${meIn(B.lead650) ? youLead(B.lead650, B.top650, '650s') : B.lead650.length ? `Leading: ${who(B.lead650, B.top650, '650s')}${B.lead650.length > 1 ? ' — tie' : ''}`
+          : `Needs more than ${fmtInt(plan.bonus.top650Min)} — best so far ${fmtInt(B.top650)}`}${mine && !meIn(B.lead650) ? ` · you: ${fmtInt(mine.n650 || 0)}` : ''}</span></div>` : ''}
+    </div>` : '';
   let h = `<div class="inc-card${done ? ' inc-done' : ''}">
     <div class="inc-head">Incentive · ${esc(monthName)}<span>${done ? 'Unlocked — the showroom reached the target' : `Paid only if the showroom bills ${fmtInt(plan.target)} bikes this month`}</span></div>
     <div class="inc-team">
@@ -9747,25 +9787,25 @@ function incentiveHtml(){
       <div class="mb-bar"><i class="${done ? 'ok' : 'low'}" style="width:${Math.min(100, total / plan.target * 100).toFixed(1)}%"></i></div>
       <div class="inc-note">${done ? '✅ Target reached — every bike billed earns its rate.'
         : `${fmtInt(left)} more bike${left === 1 ? '' : 's'} to unlock${perDay ? ` · about ${fmtInt(perDay)} a day for the ${fmtInt(D.daysLeft)} day${D.daysLeft === 1 ? '' : 's'} left` : ''}.`}</div>
-    </div>`;
+    </div>` + races;
   if (D.view === 'team') {
     // nothing personal to show
   } else if (D.view === 'me') {
-    const me = D.me || { bikes: 0, amount: 0, cats: {} };
+    const me = D.me || { bikes: 0, amount: 0, cats: {}, total: 0 };
     D.me = me;
     h += `<div class="inc-me">
-      <div class="inc-top"><span>Your incentive so far</span><span><b class="inc-amt">${fmtMoney(D.me.amount)}</b></span></div>
+      <div class="inc-top"><span>Your incentive so far</span><span><b class="inc-amt">${fmtMoney(me.total != null ? me.total : me.amount)}</b></span></div>
       <div class="inc-note">${fmtInt(me.bikes)} bike${me.bikes === 1 ? '' : 's'} billed${me.target ? ` of your ${fmtInt(me.target)} target` : ''}${done ? '' : ' · locked until the showroom reaches the target'}</div>
       <div class="inc-chips">${breakdown(me) || '<span class="inc-note">No bike billed yet this month.</span>'}</div>
     </div>`;
   } else {
     h += `<div class="table-wrap"><table class="data inc-table"><thead><tr><th>Sales person</th><th class="num">Bikes billed</th><th class="num">Incentive</th><th>Model-wise</th></tr></thead><tbody>
-      ${D.list.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${fmtInt(p.bikes)}${p.target ? ` <small class="inc-of">of ${fmtInt(p.target)}</small>` : ''}</td><td class="num"><b>${fmtMoney(p.amount)}</b></td><td><div class="inc-chips">${breakdown(p)}</div></td></tr>`).join('')}
+      ${D.list.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${fmtInt(p.bikes)}${p.target ? ` <small class="inc-of">of ${fmtInt(p.target)}</small>` : ''}</td><td class="num"><b>${fmtMoney(p.total != null ? p.total : p.amount)}</b></td><td><div class="inc-chips">${breakdown(p)}</div></td></tr>`).join('')}
       <tr class="inc-total"><td>Total</td><td class="num">${fmtInt(total)}</td><td class="num"><b>${fmtMoney(D.payout)}</b></td><td>${done ? 'To be paid' : 'Payable only if the target is reached'}</td></tr>
       </tbody></table></div>`;
     // phone: one block per sales person instead of a wide table
     h += `<div class="inc-list">${D.list.map(p => `<div class="inc-row">
-        <div class="inc-top"><span>${esc(p.name)} <small>${fmtInt(p.bikes)}${p.target ? ` of ${fmtInt(p.target)}` : ''} bike${p.bikes === 1 && !p.target ? '' : 's'}</small></span><b>${fmtMoney(p.amount)}</b></div>
+        <div class="inc-top"><span>${esc(p.name)} <small>${fmtInt(p.bikes)}${p.target ? ` of ${fmtInt(p.target)}` : ''} bike${p.bikes === 1 && !p.target ? '' : 's'}</small></span><b>${fmtMoney(p.total != null ? p.total : p.amount)}</b></div>
         <div class="inc-chips">${breakdown(p)}</div></div>`).join('')}
       <div class="inc-row inc-sum"><div class="inc-top"><span>Total <small>${fmtInt(total)} bikes · ${done ? 'to be paid' : 'payable only if the target is reached'}</small></span><b>${fmtMoney(D.payout)}</b></div></div>
     </div>`;
@@ -9775,7 +9815,9 @@ function incentiveHtml(){
     }
   }
   h += `<details class="inc-rates"><summary>Rates per bike</summary><div class="inc-rate-list">${
-    Object.keys(INCENTIVE_LABELS).map(k => `<div><span>${esc(INCENTIVE_LABELS[k])}</span><b>${fmtMoney(plan.rates[k])}</b></div>`).join('')}</div></details>`;
+    Object.keys(INCENTIVE_LABELS).map(k => `<div><span>${esc(INCENTIVE_LABELS[k])}</span><b>${fmtMoney(plan.rates[k])}</b></div>`).join('')}${
+    plan.bonus.topRetail ? `<div><span>Bonus: most bikes billed (top retail)</span><b>${fmtMoney(plan.bonus.topRetail)}</b></div>` : ''}${
+    plan.bonus.top650 ? `<div><span>Bonus: most 650s, if more than ${fmtInt(plan.bonus.top650Min)}</span><b>${fmtMoney(plan.bonus.top650)}</b></div>` : ''}</div></details>`;
   return h + '</div>';
 }
 
