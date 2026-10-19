@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610171630';
+  window.__BUILD = '202610200015';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -2435,6 +2435,42 @@
   @media (max-width: 640px) { .ckd-panel { padding: 12px 6px 8px; } .ckd-k { font-size: 9.5px; letter-spacing: .6px; } }
   :root[data-theme="light"] .cockpit .ckd { background: transparent !important; border: 0 !important; box-shadow: none !important; color: #EEE !important; }
   :root[data-theme="light"] .ckd-k { color: #A8A8A3 !important; text-transform: uppercase !important; }
+
+  /* ── Every report in one list (start screen) + one report per page ── */
+  body.rp-open #subTabs { display: none !important; }
+  .rp-bar { display: none; }
+  body.rp-open .rp-bar { display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 60; margin: 0 -16px 12px; padding: 10px 16px;
+    background: var(--bg, #0B0909); border-bottom: 1px solid var(--border); }
+  .rp-back { flex: 0 0 auto; height: 38px; padding: 0 14px; border-radius: 19px; border: 1px solid var(--border) !important; background: var(--surface-2) !important;
+    color: var(--text-primary) !important; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; box-shadow: none !important; }
+  .rp-title { font-size: 16px; font-weight: 800; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.rp-open #findBox, body.rp-open #findResult, body.rp-open .mini-bar { display: none !important; }
+  body.rp-open .rp-path > :not(.rp-show):not(.rp-path) { display: none !important; }
+  body.rp-open .rp-show { display: revert; }
+  .rp-list { max-width: 760px; margin: 0 auto; padding-bottom: 10px; }
+  .rp-g { margin: 18px 6px 7px; font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-muted); scroll-margin-top: 70px; }
+  .rp-box { border-radius: 14px; overflow: hidden; background: var(--surface-1); box-shadow: inset 0 0 0 1px var(--border); }
+  .rp-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; margin: 0; border: 0 !important; border-top: 1px solid var(--border) !important;
+    border-radius: 0 !important; background: transparent !important; box-shadow: none !important; color: var(--text-primary) !important; font: inherit; text-align: left; cursor: pointer; }
+  .rp-box .rp-row:first-child { border-top: 0 !important; }
+  .rp-row:hover { background: color-mix(in srgb, var(--text-primary) 5%, transparent) !important; }
+  .rp-row:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+  .rp-ic { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    background: color-mix(in srgb, var(--text-primary) 7%, transparent); }
+  .rp-t { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.3; text-transform: none !important; letter-spacing: 0 !important; }
+  .rp-t small { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
+  .rp-n { flex: 0 0 auto; font-family: 'Barlow Condensed', 'Roboto Condensed', 'Arial Narrow', sans-serif; font-size: 19px; font-weight: 700; color: var(--text-primary); }
+  .rp-n.bad { color: #FF7A6E; } .rp-n.good { color: #5BE39A; } .rp-n.gold { color: var(--gold-light); }
+  .rp-ch { flex: 0 0 auto; font-size: 22px; color: var(--text-muted); line-height: 1; }
+  :root[data-theme="light"] .rp-row { color: #1A1A1A !important; }
+  :root[data-theme="light"] .rp-n { color: #1A1A1A; }
+
+  /* six options in the phone tab bar */
+  @media (max-width: 760px) {
+    nav.tabs button[data-tab] { flex: 1 1 0 !important; min-width: 0 !important; padding-left: 0 !important; padding-right: 0 !important; }
+    nav.tabs .tab-lb { font-size: 10.5px !important; letter-spacing: 0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    nav.tabs .tab-ic { width: 48px !important; }
+  }
 </style>
 </head>
 <body>
@@ -2554,6 +2590,7 @@
   <button data-tab="bookings"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4"/></svg></span><span class="tab-lb">Bookings</span></button>
   <button data-tab="bikes"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5L9 9h5l4.5 7.5M9 9l3 7.5h6.5M14 9l1-3h3"/></svg></span><span class="tab-lb">Bikes</span></button>
   <button data-tab="customers"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.2.3 3.6 1.9 4 4.3"/></svg></span><span class="tab-lb">Customers</span></button>
+  <button data-tab="reports"><span class="tab-ic"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg></span><span class="tab-lb">Reports</span></button>
 </nav>
 
 <main>
@@ -2579,6 +2616,10 @@
   <!-- ══ Home. Opens on a grid of tiles, one per section, so nothing has to be hunted for in a
        tab strip that scrolls off the side of a phone. Each tile carries a live number, so the
        screen is useful to look at even before anything is tapped. ══ -->
+  <div class="rp-bar" id="rpBar"><button type="button" class="rp-back" id="rpBack" aria-label="Back to all reports">‹ Back</button><span class="rp-title" id="rpTitle"></span></div>
+  <section class="tabpanel" id="tab-reports">
+    <div id="rpList" class="rp-list"></div>
+  </section>
   <section class="tabpanel active" id="tab-home">
     <div id="homeGreet"></div>
     <div id="homeSheetCheck"></div>
@@ -4391,7 +4432,7 @@ function applyRoleRestrictions(){
     const cBtn = document.querySelector('#tabs button[data-tab="customers"] .tab-lb');
     if (cBtn) cBtn.textContent = 'Walk-in Check';
     // The walk-in desk gets the check tool and today's log only — not QR codes or rider data.
-    ALLOWED_PANELS = new Set(['walkin', 'walkinlog']);
+    ALLOWED_PANELS = new Set(['reports', 'walkin', 'walkinlog']);
     switchToTab('customers');
     // hide the whole filter/control bar — Ajeet doesn't need month/exec filters
     const ctrls = document.querySelector('.controls'); if (ctrls) ctrls.style.display = 'none';
@@ -9615,6 +9656,7 @@ function renderHome(){
   try { renderCockpit(); } catch (e) { console.error('cockpit', e); }
   put('monthBars', monthBarsHtml);
   put('incentiveCard', incentiveHtml);
+  try { if (!RP_OPEN) renderReportList(); } catch (e) { console.error('report list', e); }
 }
 
 // ═══════════════ Month → sales incentive ═══════════════
@@ -10724,7 +10766,7 @@ function renderFindBox(){
   const home = document.querySelector('main');
   if (home) home.addEventListener('click', (e) => {
     const q = e.target.closest('[data-find-q]');
-    if (q) { if (inp) inp.value = q.dataset.findQ; runFind(q.dataset.findQ); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (q) { if (RP_OPEN) closeReportView(); if (inp) inp.value = q.dataset.findQ; runFind(q.dataset.findQ); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-find-close]')) { clearFind(); return; }
     const more = e.target.closest('[data-find-more]');
     if (more) { const sec = more.closest('.find-sec'); if (sec) sec.classList.add('show-all'); more.remove(); return; }
@@ -13604,6 +13646,7 @@ function exportCsv(filename, headers, rows, maskOpt){
 // Stock / Price list / Specs) so only one kind shows at a time. Every render function, id and old
 // link keeps working: an old tab or panel name is mapped to wherever that panel now lives.
 const TAB_GROUPS = {
+  reports:   ['reports'],                                         // the list of every report
   home:      ['home', 'myday'],                                   // Today: what needs doing
   month:     ['mymonth', 'overview', 'analytics', 'delivery'],    // how the month is going
   bookings:  ['booking'],                                         // what is still pending
@@ -13654,7 +13697,9 @@ function placeFindBox(tabName){
   const box = document.getElementById('findBox'), res = document.getElementById('findResult');
   if (!box || !res) return;
   const greet = document.getElementById('homeGreet');
-  if (tabName === 'home' && greet) { greet.after(box); box.after(res); }
+  const rl = document.getElementById('rpList');
+  if (tabName === 'reports' && rl) { rl.before(box); box.after(res); }
+  else if (tabName === 'home' && greet) { greet.after(box); box.after(res); }
   else { const sub = document.getElementById('subTabs'); if (sub) { sub.before(box); box.after(res); } }
 }
 function renderSubtabs(tabName, active){
@@ -13667,7 +13712,7 @@ function renderSubtabs(tabName, active){
     class="subtab${st.id === active ? ' active' : ''}" data-subtab="${esc(st.id)}">${esc(st.label)}</button>`).join('');
 }
 
-function switchToTab(tabName, scrollToId){
+function switchToTabRaw(tabName, scrollToId){
   const asked = tabName;
   tabName = tabHolding(tabName);                 // accepts an old tab or panel name too
   let group = panelsForTab(tabName);
@@ -13767,6 +13812,172 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault(); setSectionOpen(h, h.getAttribute('aria-expanded') === 'false');
 });
 try { initCollapsibleSections(); } catch (e) { console.error('sections', e); }
+
+// ═══════════════ Every report in one list ═══════════════
+// Deepak: "jitni report hai un sab ka list hona chahiye, jisko jo dekhna wo wo dekhe". The start
+// screen is a list of every report; tapping one opens that report alone on its own page with a
+// Back button (the phone's own Back works too). The tabs are hidden. Every old link that asked for
+// a tab or a section (tiles, Find, "See all") now opens the matching report page instead.
+const RP_GROUPS = [['bookings', 'Bookings'], ['home', 'Today'], ['month', 'Month'], ['bikes', 'Bikes & stock'],
+                   ['customers', 'Customers'], ['control', 'Admin']];
+// Reports that are not under a section title: [key, panel, title with icon, element ids/selectors]
+const RP_BLOCKS = [
+  ['todayDue', 'home', '🚚 Coming for delivery today', ['#todayDue']],
+  ['todayGlance', 'home', '📊 Today at a glance', ['#todayTiles', '#todayMonth']],
+  ['birthdays', 'home', '🎂 Birthdays', ['#homeBirthdays']],
+  ['sheetCheck', 'home', '🧾 Sheet check — things to fix', ['#homeSheetCheck']],
+  ['meters', 'mymonth', '🏁 Month meters', ['#homeCockpit']],
+  ['monthBars', 'mymonth', '🎯 Targets this month', ['#monthBars']],
+  ['incentive', 'mymonth', '🏆 Incentive & leaderboard', ['#incentiveCard']],
+  ['myTarget', 'mymonth', '🎯 My target & standing', ['#tab-mymonth > .panel-row-2col']],
+  ['setTargets', 'overview', '🎯 Set monthly targets', ['#targetSetterWrap']],
+  ['walkinCheck', 'walkin', '🔍 Walk-in check', ['#tab-walkin > .wc-wrap']],
+];
+const RP_SKIP_PANELS = ['reports', 'dashboard', 'moredata'];
+let RP_LIST = [], RP_OPEN = null, RP_PUSHED = false, RP_LIST_Y = 0;
+function rpGroupOf(panel){ for (const t in TAB_GROUPS) if (t !== 'reports' && TAB_GROUPS[t].indexOf(panel) >= 0) return t; return 'customers'; }
+function rpSplitTitle(t){
+  const m = String(t).trim().match(/^([^\w\s₹(]+)\s*(.*)$/u);
+  return m ? { icon: m[1], text: m[2] } : { icon: '•', text: String(t).trim() };
+}
+function rpPanelVisible(sec){ return sec && !sec.hidden && sec.style.display !== 'none'; }
+function buildReports(){
+  const list = [];
+  const hasContent = (els) => els.some(e => e && e.innerHTML.trim() !== '' && e.style.display !== 'none');
+  RP_BLOCKS.forEach(([key, panel, title, sels]) => {
+    if (!panelAllowed(panel)) return;
+    const els = sels.map(q => document.querySelector(q)).filter(Boolean);
+    if (!els.length || !hasContent(els)) return;
+    list.push({ key, panel, title, targets: els });
+  });
+  document.querySelectorAll('section.tabpanel').forEach(sec => {
+    const panel = sec.id.replace('tab-', '');
+    if (RP_SKIP_PANELS.indexOf(panel) >= 0 || !panelAllowed(panel) || !rpPanelVisible(sec)) return;
+    Array.from(sec.children).forEach((h, i) => {
+      if (!(h.tagName === 'H2' && h.classList.contains('section-title')) || h.style.display === 'none') return;
+      let targets;
+      const body = h.nextElementSibling;
+      if (body && body.classList.contains('sec-body')) targets = [body];
+      else { targets = []; let n = h.nextElementSibling; while (n && n.tagName !== 'H2') { targets.push(n); n = n.nextElementSibling; } }
+      list.push({ key: h.id || (panel + '-' + i), panel, title: h.textContent, targets, h2: h });
+    });
+  });
+  const RENAME = { 'riders|By Bike Model': 'Riders by bike model', 'riders|Rider Registration': 'Rider registration' };
+  list.forEach(r => {
+    r.group = rpGroupOf(r.panel);
+    const t = rpSplitTitle(r.title), full = RENAME[r.panel + '|' + t.text] || t.text;
+    const cut = full.indexOf(' — ');
+    r.icon = t.icon; r.text = cut > 0 ? full.slice(0, cut) : full; r.sub = cut > 0 ? full.slice(cut + 3) : '';
+  });
+  RP_LIST = list;
+  return list;
+}
+// A small figure next to some reports, so the list itself already answers the common questions.
+function rpBadge(r){
+  try {
+    const k = r.key;
+    if (k === 'tddTitle') { const n = allPendingRowsFor(null).length, l = todayCounts().late; return { v: fmtInt(n) + (l ? ` · ${fmtInt(l)} late` : ''), t: l ? 'bad' : '' }; }
+    if (k === 'todayDue' || k === 'todayGlance') { const c = todayCounts(); return k === 'todayDue' ? { v: fmtInt(c.due), t: c.due ? 'gold' : '' } : { v: c.late ? fmtInt(c.late) + ' late' : '', t: c.late ? 'bad' : '' }; }
+    if (k === 'callListTitle') return { v: fmtInt(todayCounts().calls), t: '' };
+    if (k === 'walkinLogTitle') return { v: fmtInt(todayCounts().walk), t: '' };
+    if (k === 'atRiskTitle') { const n = document.querySelectorAll('#tblAtRisk tbody tr').length; return { v: n ? fmtInt(n) : '', t: n ? 'bad' : '' }; }
+    if (k === 'meters' || k === 'monthBars') { const D = cockpitData(); return { v: D.target ? `${fmtInt(D.billed)}/${fmtInt(D.target)}` : fmtInt(D.billed), t: D.pace && D.billed < D.pace ? 'bad' : 'good' }; }
+    if (k === 'incentive') { const D = incentiveData(); return D ? { v: fmtMoney(D.payout), t: 'gold' } : null; }
+    if (k === 'sheetCheck') { const n = (STATE.sheetCheck || computeSheetCheck()).total || 0; return n ? { v: fmtInt(n), t: 'bad' } : null; }
+  } catch (e) {}
+  return null;
+}
+function renderReportList(){
+  const el = document.getElementById('rpList');
+  if (!el) return;
+  const list = buildReports();
+  el.innerHTML = RP_GROUPS.map(([g, label]) => {
+    const items = list.filter(r => r.group === g);
+    if (!items.length) return '';
+    return `<div class="rp-g" id="rpg-${g}">${esc(label)}</div><div class="rp-box">${items.map(r => {
+      const b = rpBadge(r);
+      return `<button type="button" class="rp-row" data-rp="${esc(r.key)}"><span class="rp-ic">${esc(r.icon)}</span>
+        <span class="rp-t">${esc(r.text)}${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</span>${b && b.v ? `<span class="rp-n${b.t ? ' ' + b.t : ''}">${esc(b.v)}</span>` : ''}<span class="rp-ch" aria-hidden="true">›</span></button>`;
+    }).join('')}</div>`;
+  }).join('');
+}
+function rpClearMarks(){
+  document.querySelectorAll('.rp-show, .rp-path').forEach(e => e.classList.remove('rp-show', 'rp-path'));
+}
+// Show one report (or, with no report, a whole panel) on its own page.
+function rpShow(panel, r, title){
+  RP_LIST_Y = RP_OPEN ? RP_LIST_Y : window.scrollY;
+  try { if (FIND_Q) clearFind(); } catch (e) {}
+  rpClearMarks();
+  switchToTabRaw(rpGroupOf(panel));
+  document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + panel));
+  const sec = document.getElementById('tab-' + panel);
+  if (r && sec) {
+    if (r.h2) try { setSectionOpen(r.h2, true); } catch (e) {}
+    r.targets.forEach(t => {
+      t.classList.add('rp-show');
+      for (let a = t.parentElement; a && a !== sec.parentElement; a = a.parentElement) { a.classList.add('rp-path'); if (a === sec) break; }
+    });
+  }
+  RP_OPEN = r ? r.key : panel;
+  CURRENT_TAB = 'reports'; document.body.dataset.tab = 'reports';
+  document.querySelectorAll('#tabs button[data-tab]').forEach(b => {
+    const on = b.dataset.tab === 'reports'; b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  document.getElementById('rpTitle').textContent = title;
+  document.body.classList.add('rp-open');
+  if (!RP_PUSHED) { try { history.pushState({ rp: RP_OPEN }, ''); RP_PUSHED = true; } catch (e) {} }
+  window.scrollTo(0, 0);
+}
+function openReport(key, scrollToId){
+  const r = (RP_LIST.length ? RP_LIST : buildReports()).find(x => x.key === key) || buildReports().find(x => x.key === key);
+  if (!r) return false;
+  rpShow(r.panel, r, r.text);
+  if (scrollToId) setTimeout(() => { const el = document.getElementById(scrollToId); if (el && !el.closest('.rp-show') !== true) el.scrollIntoView({ block: 'start' }); }, 60);
+  return true;
+}
+function openPanelPage(panel){
+  const sec = document.getElementById('tab-' + panel);
+  if (!sec || !panelAllowed(panel)) return showReportList();
+  const own = RP_LIST.filter(r => r.panel === panel);
+  if (own.length === 1) return openReport(own[0].key);
+  const g = RP_GROUPS.find(x => x[0] === rpGroupOf(panel));
+  rpShow(panel, null, own.length ? (rpSplitTitle(own[0].title).text + (own.length > 1 ? ' and more' : '')) : (g ? g[1] : 'Report'));
+}
+function closeReportView(){
+  rpClearMarks();
+  RP_OPEN = null; RP_PUSHED = false;
+  document.body.classList.remove('rp-open');
+  switchToTabRaw('reports');
+  renderReportList();
+  window.scrollTo(0, RP_LIST_Y || 0);
+}
+function showReportList(group){
+  if (RP_OPEN) { if (RP_PUSHED) { try { history.back(); } catch (e) { closeReportView(); } } else closeReportView(); }
+  else { switchToTabRaw('reports'); renderReportList(); }
+  if (group) setTimeout(() => { const h = document.getElementById('rpg-' + group); if (h) h.scrollIntoView({ block: 'start' }); }, 80);
+}
+// The tabs work exactly as before. Leaving a report page through any tab or link just drops the
+// one-report view first.
+function rpReset(){
+  if (!RP_OPEN) return;
+  rpClearMarks();
+  RP_OPEN = null; RP_PUSHED = false;
+  document.body.classList.remove('rp-open');
+}
+function switchToTab(tabName, scrollToId){
+  rpReset();
+  const r = switchToTabRaw(tabName, scrollToId);
+  if (tabHolding(tabName) === 'reports') { try { renderReportList(); } catch (e) { console.error('report list', e); } }
+  return r;
+}
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('[data-rp]');
+  if (row) { openReport(row.dataset.rp); return; }
+  if (e.target.closest('#rpBack')) { showReportList(); }
+});
+window.addEventListener('popstate', () => { if (RP_OPEN) closeReportView(); });
 
 document.getElementById('subTabs').addEventListener('click', (e) => {
   const b = e.target.closest('[data-subtab]');
