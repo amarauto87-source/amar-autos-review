@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610201300';
+  window.__BUILD = '202610201345';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -3353,7 +3353,7 @@
 </main>
 
 <footer id="mainFooter">
-  Data pulled live from your Google Sheet on every refresh (auto-refreshes every 15 minutes) · Built for Amar Autos<br/>
+  Data pulled live from your Google Sheet — updates within seconds of a change in the sheet · Built for Amar Autos<br/>
   Overview figures replicate the Excel Dashboard tab's logic (Delivery = "BILLED"/"P DONE" status, filtered by Bill Date &amp; Executive).
 </footer>
 
@@ -4206,6 +4206,9 @@ function enterDashboard(){
   // 5, so it stops interrupting. It also skips refreshing while the tab is hidden and instead
   // refreshes once when the user comes back, so a backgrounded tab isn't hammering the sheet.
   setInterval(() => { if (!document.hidden) loadAll(true); }, AUTO_REFRESH_MS);
+  // Instant sync: every few seconds ask the server only "has the sheet changed?" (a tiny answer),
+  // and fetch the data the moment it has.
+  setInterval(checkSheetChanged, SYNC_EVERY_MS);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && STATE.lastLoaded && (Date.now() - STATE.lastLoaded.getTime()) > AUTO_REFRESH_MS) {
       loadAll(true);
@@ -5074,7 +5077,36 @@ function printFestiveHoldList(){
 { const pb = document.getElementById('fsPrint'); if (pb) pb.addEventListener('click', printFestiveHoldList); }
 
 /* ---------------- data loading ---------------- */
+// ── Instant sync ──
+// The server keeps a version number that changes whenever the sheet is edited (Apps Script 6.5,
+// setupInstantSync). The dashboard asks for that number every 20 seconds while it is on screen
+// and reloads the data — silently, keeping the scroll position — as soon as it changes. It waits
+// while someone is typing in a box or has a window open, so nothing they are doing is lost.
+const SYNC_EVERY_MS = 20 * 1000;
+let SYNC_BUSY = false, LOAD_BUSY = false;
+function syncWouldInterrupt(){
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.id !== 'findInput') return true;
+  if (document.querySelector('.modal-backdrop.open')) return true;
+  return false;
+}
+async function checkSheetChanged(){
+  if (SYNC_BUSY || LOAD_BUSY || document.hidden || !AUTH || !AUTH.token || !STATE.lastLoaded || STATE.dataGen == null) return;
+  SYNC_BUSY = true;
+  try {
+    const r = await api({ action: 'ver', token: AUTH.token }, 10000);
+    if (r && r.ok && r.gen && String(r.gen) !== String(STATE.dataGen)) {
+      if (syncWouldInterrupt()) return;          // try again on the next round
+      await loadAll(true);
+    }
+  } catch (e) {} finally { SYNC_BUSY = false; }
+}
+
 async function loadAll(silent, opts){
+  LOAD_BUSY = true;
+  try { return await loadAllInner(silent, opts); } finally { LOAD_BUSY = false; }
+}
+async function loadAllInner(silent, opts){
   // Called straight from an event listener, the first argument is the event — not a flag.
   if (silent && typeof silent === 'object') silent = false;
   opts = opts || {};
@@ -5110,6 +5142,7 @@ async function loadAll(silent, opts){
       throw new Error((res && (res.message || res.error)) || 'Could not load data');
     }
     guardAgainstBlank(res, monthParam);
+    STATE.dataGen = res.gen != null ? String(res.gen) : null;   // older Apps Script: no instant sync
     applyData(res, silent);
     saveDataCopy(monthParam, res);
     showPatchedNote(res);
@@ -5647,7 +5680,7 @@ function updateStatusLine(){
     ? `Saved copy from ${STATE.lastLoaded.toLocaleString('en-IN', { day:'numeric', month:'short', hour:'numeric', minute:'2-digit' })} — updating…`
     : `Last refreshed ${STATE.lastLoaded.toLocaleTimeString('en-IN')}`;
   document.getElementById('statusLine').textContent =
-    [when, 'auto-refreshes every 15 min', filterText,
+    [when, STATE.dataGen != null ? 'updates within seconds of a sheet change' : 'auto-refreshes every 15 min', filterText,
      `${STATE.booking.length} bookings`, `${STATE.delivery.length} deliveries`,
      STATE.enquiry.length ? `${STATE.enquiry.length} enquiries` : '',
      (STATE.walkin || []).length ? `${STATE.walkin.length} walk-ins` : '',
@@ -10994,6 +11027,7 @@ function renderStatus(st){
     { fn: 'sendMorningEmail',   label: 'Morning email (10:00–10:30)', alt: 'sendMorningCallList', hint: 'In Apps Script, select setupMorningEmailTrigger and press Run once' },
     { fn: 'backupSheet',        label: 'Weekly backup' },
     { fn: 'warmDashboardCache', label: 'Keep data ready (every 10 min)' },
+    { fn: 'aa_onSheetChange',   label: 'Instant sync (sheet changes)', hint: 'In Apps Script, select setupInstantSync and press Run once' },
   ];
   const have = st.triggers || [];
   const trigRows = want.map(w => (have.indexOf(w.fn) >= 0 || (w.alt && have.indexOf(w.alt) >= 0))
