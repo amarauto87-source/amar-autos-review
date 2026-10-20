@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610200015';
+  window.__BUILD = '202610201300';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -9943,21 +9943,44 @@ function computeSheetCheck(){
   const add = (key, title, fix, rows) => { if (rows.length) groups.push({ key, title, fix, rows }); };
   const open = (STATE.booking || []).filter(r => !isBookingClosedForSales(r[9]));
   const who = r => ({ customer: str(r[5]) || '—', slip: str(r[1]) || '—', exec: str(r[7]) || '—' });
+  // A booking on HOLD (customer has not yet decided when to take the bike) needs no delivery date.
+  const onHold = r => /HOLD/.test(up(str(r[8]) + ' ' + str(r[9]) + ' ' + str(r[10])));
+  // Bills, to tell a booking that is really still waiting from one already billed whose status
+  // was simply never updated.
+  const billed = (STATE.delivery || []).filter(r => !/CANCEL/.test(up(r[9])));
+  const bySlip = {}, byMob = {};
+  billed.forEach(r => {
+    [str(r[16]), str(r[3])].filter(Boolean).forEach(k => { bySlip[up(k)] = r; });
+    const m = last10(r[5]); if (m.length === 10) (byMob[m] = byMob[m] || []).push(r);
+  });
+  const billFor = r => {
+    let bill = bySlip[up(str(r[1]))] || null;
+    if (!bill) { const m = last10(r[6]); bill = (byMob[m] || []).find(d => modelFamilyKey(str(d[6])) === modelFamilyKey(str(r[3]))) || null; }
+    return bill;
+  };
+  const reallyPending = r => !billFor(r) && !/CANCEL|CANCLE|REFUND|DELIVER|BILL|P[\s-]*DONE/.test(up(r[9]));
 
   // ── Bookings ──
   add('notdd', 'Pending booking without a delivery date (TDD)',
     'Fill the TDD column in ACTUL BOOKING — the manager\'s morning email and "due today" depend on it.',
-    open.filter(r => !str(r[8]) && !str(r[10])).map(r => Object.assign(who(r), { detail: `${str(r[3])} ${str(r[4])}`.trim() })));
+    open.filter(r => !str(r[8]) && !str(r[10]) && !onHold(r)).map(r => Object.assign(who(r), { detail: `${str(r[3])} ${str(r[4])}`.trim() })));
   add('mobile', 'Wrong mobile number in a booking',
     'A mobile number must have 10 digits. Calls and WhatsApp will not work until it is fixed.',
     open.filter(r => !mobileOk(r[6])).map(r => Object.assign(who(r), { detail: str(r[6]) || 'blank' })));
   const known = new Set((STATE.execList || []).map(up));
-  add('exec', 'Booking without a known sales person',
-    'The sales person column is blank or the name is not one of the names in MONTHLY TARGETS — nobody gets this customer in their list or email.',
-    open.filter(r => { const e = str(r[7]); if (!e) return true; if (!known.size) return false;
+  // Only bookings still really waiting for a bike: a sales person who has left matters only while
+  // one of their customers is still pending — then someone else must take that customer over.
+  add('exec', 'Pending booking without a working sales person',
+    'The sales person is blank, has left the company, or is not one of the names in MONTHLY TARGETS — nobody follows up this customer. Give the booking to a current sales person in ACTUL BOOKING.',
+    open.filter(reallyPending).map(r => {
+      const e = str(r[7]);
+      if (!e) return Object.assign(who(r), { detail: 'blank' });
       const c = up(canonName(e)).replace(/^#+\s*/, '');
-      return !known.has(c) && !EX_EMPLOYEES.has(c) && !(STATE.execList || []).some(x => execMatches(e, x)); })
-      .map(r => Object.assign(who(r), { detail: str(r[7]) ? `"${str(r[7])}" not recognised` : 'blank' })));
+      if (EX_EMPLOYEES.has(c) || EX_EMPLOYEES.has(up(e).replace(/^#+\s*/, ''))) return Object.assign(who(r), { detail: `"${e}" has left the company` });
+      if (!known.size) return null;
+      if (known.has(c) || (STATE.execList || []).some(x => execMatches(e, x))) return null;
+      return Object.assign(who(r), { detail: `"${e}" not recognised` });
+    }).filter(Boolean));
   add('bdate', 'Pending booking without a readable booking date',
     'First-booked-first-served needs the booking date. Type it as a date (for example 07/10/2026).',
     open.filter(r => !asDate(r[2])).map(r => Object.assign(who(r), { detail: str(r[2]) || 'blank' })));
@@ -9980,17 +10003,10 @@ function computeSheetCheck(){
     (STATE.bookingNoSlip || []).map(r => ({ customer: str(r[5]) || '—', slip: '—', exec: str(r[7]) || '—', detail: `${str(r[3])} ${str(r[4])}`.trim() || '—' })));
 
   // ── Billed, but the booking still says pending ──
-  const billed = (STATE.delivery || []).filter(r => !/CANCEL/.test(up(r[9])));
-  const bySlip = {}, byMob = {};
-  billed.forEach(r => {
-    [str(r[16]), str(r[3])].filter(Boolean).forEach(k => { bySlip[up(k)] = r; });
-    const m = last10(r[5]); if (m.length === 10) (byMob[m] = byMob[m] || []).push(r);
-  });
   add('billedopen', 'Billed, but the booking is still open',
     'This customer has a bill in DELIVERY SHEET but the booking in ACTUL BOOKING is not marked BILLED or DELIVERED — the pending count is too high until it is.',
     open.map(r => {
-      let bill = bySlip[up(str(r[1]))] || null;
-      if (!bill) { const m = last10(r[6]); bill = (byMob[m] || []).find(d => modelFamilyKey(str(d[6])) === modelFamilyKey(str(r[3]))) || null; }
+      const bill = billFor(r);
       if (!bill) return null;
       const bd = asDate(bill[2]);
       return Object.assign(who(r), { detail: `billed ${bd ? fmtDate(bd) : ''} · booking says "${str(r[9]) || 'blank'}"` });
