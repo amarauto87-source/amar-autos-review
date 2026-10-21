@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610201345';
+  window.__BUILD = '202610211330';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -939,6 +939,9 @@
     letter-spacing: 1.5px; font-weight: 700;
   }
   .empty-note { color: var(--text-muted); font-size: 13px; padding: 28px; text-align: center; }
+  .emx .emx-pct { font-size: 10.5px; font-weight: 600; color: inherit; opacity: .78; margin-top: 1px; }
+  .emx td.emx-share { text-align: center; font-weight: 800; color: var(--brand-red); white-space: nowrap; }
+  .emx tr.emx-share-row td { border-top: 2px solid var(--border, #333); }
   .card > .empty-note, .table-wrap .empty-note, #perfHeatmap > .empty-note, #execModelMatrix > .empty-note {
     border: 1px dashed var(--border); border-radius: 10px; padding: 26px 20px;
     background: color-mix(in srgb, var(--gold) 3%, transparent);
@@ -2913,6 +2916,7 @@
     <h2 class="section-title">👤 Sales Person-wise Model Sales — Who Sold Which Model</h2>
     <div class="empty-note" style="padding:8px 0; text-align:left; font-size:12px;">
       Units billed per executive per model — darker gold means more of that model sold by that person.
+      Small % in a cell = that model's part of the person's own sales. Share = the person's (or model's) part of all bikes in this filter.
     </div>
     <div id="execModelMatrix"></div>
 
@@ -8103,22 +8107,29 @@ function renderExecModelMatrix(rows){
   if (!execs.length || !models.length) { el.innerHTML = '<div class="empty-note">No deliveries for this filter</div>'; return; }
 
   const max = Math.max(1, ...execs.flatMap(e => Object.values(grid[e])));
+  const all = rows.length;
+  // "16.7%" — one decimal, same rounding as the manager's morning email
+  const pct = (n, of) => of ? (Math.round(n * 1000 / of) / 10) + '%' : '0%';
+  const small = (t) => `<div class="emx-pct">${t}</div>`;
   const body = execs.map(e => {
     const total = Object.values(grid[e]).reduce((s,v) => s+v, 0);
     const cells = models.map(m => {
       const v = grid[e][m] || 0;
       const bg = v ? `color-mix(in srgb, var(--gold) ${Math.round((v/max) * 75)}%, transparent)` : 'transparent';
-      return `<td style="background:${bg};text-align:center;font-weight:700;">${v || ''}</td>`;
+      return `<td style="background:${bg};text-align:center;font-weight:700;">${v ? v + small(pct(v, total)) : ''}</td>`;
     }).join('');
-    return `<tr><td>${esc(e)}</td>${cells}<td style="text-align:center;font-weight:800;">${total}</td></tr>`;
+    return `<tr><td>${esc(e)}</td>${cells}<td style="text-align:center;font-weight:800;">${total}</td><td class="emx-share">${pct(total, all)}</td></tr>`;
   }).join('');
   const totalRow = `<tr><td style="font-weight:800;">TOTAL</td>${
     models.map(m => `<td style="text-align:center;font-weight:800;">${modelTotals[m]}</td>`).join('')
-  }<td style="text-align:center;font-weight:800;">${rows.length}</td></tr>`;
+  }<td style="text-align:center;font-weight:800;">${all}</td><td class="emx-share">100%</td></tr>`;
+  const shareRow = `<tr class="emx-share-row"><td style="font-weight:800;">SHARE</td>${
+    models.map(m => `<td class="emx-share">${pct(modelTotals[m], all)}</td>`).join('')
+  }<td class="emx-share">100%</td><td></td></tr>`;
 
-  el.innerHTML = `<div class="table-wrap"><table class="data">
-    <thead><tr><th>Executive</th>${models.map(m => `<th>${esc(m)}</th>`).join('')}<th>Total</th></tr></thead>
-    <tbody>${body}${totalRow}</tbody>
+  el.innerHTML = `<div class="table-wrap"><table class="data emx">
+    <thead><tr><th>Executive</th>${models.map(m => `<th>${esc(m)}</th>`).join('')}<th>Total</th><th>Share</th></tr></thead>
+    <tbody>${body}${totalRow}${shareRow}</tbody>
   </table></div>`;
 }
 
