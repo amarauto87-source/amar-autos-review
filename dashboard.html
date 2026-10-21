@@ -15,7 +15,7 @@
   // The page is served from the phone's cache for speed, which meant a freshly uploaded version
   // only appeared on the SECOND open — staff kept seeing a build that no longer existed. Here the
   // page checks the live copy once, quietly, and reloads a single time if it is out of date.
-  window.__BUILD = '202610211330';
+  window.__BUILD = '202610211345';
   (function () {
     if (location.protocol === 'file:') return;
     var KEY = 'amarAutosReloadedFor';
@@ -942,6 +942,24 @@
   .emx .emx-pct { font-size: 10.5px; font-weight: 600; color: inherit; opacity: .78; margin-top: 1px; }
   .emx td.emx-share { text-align: center; font-weight: 800; color: var(--brand-red); white-space: nowrap; }
   .emx tr.emx-share-row td { border-top: 2px solid var(--border, #333); }
+  /* Who Sold Which Model — fit the whole grid on one screen, no sideways or inner scroll */
+  .emx-wrap { max-height: none; overflow: visible; }
+  table.data.emx { table-layout: fixed; width: 100%; }
+  table.data.emx col.emx-c-name { width: 108px; }
+  table.data.emx col.emx-c-tot { width: 58px; }
+  table.data.emx th { white-space: normal; line-height: 1.25; letter-spacing: 0; font-size: 9.5px; padding: 8px 3px; text-align: center; vertical-align: bottom; position: static; overflow-wrap: break-word; hyphens: none; }
+  table.data.emx th:first-child { text-align: left; padding-left: 10px; }
+  table.data.emx td { padding: 6px 3px; font-size: 13px; }
+  table.data.emx td:first-child { padding-left: 10px; font-size: 12.5px; white-space: normal; overflow-wrap: anywhere; }
+  .emx .emx-pct { font-size: 10px; }
+  .emx-list { display: none; }
+  .emx-card { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; background: var(--surface-1); }
+  .emx-card-top { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 14px; }
+  .emx-red { color: var(--brand-red); }
+  .emx-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .emx-chip { font-size: 12px; padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--text-primary); }
+  @media (max-width: 1200px) { table.data.emx th { font-size: 8.5px; } }
+  @media (max-width: 760px) { .emx-wrap { display: none; } .emx-list { display: block; } }
   .card > .empty-note, .table-wrap .empty-note, #perfHeatmap > .empty-note, #execModelMatrix > .empty-note {
     border: 1px dashed var(--border); border-radius: 10px; padding: 26px 20px;
     background: color-mix(in srgb, var(--gold) 3%, transparent);
@@ -8111,6 +8129,8 @@ function renderExecModelMatrix(rows){
   // "16.7%" — one decimal, same rounding as the manager's morning email
   const pct = (n, of) => of ? (Math.round(n * 1000 / of) / 10) + '%' : '0%';
   const small = (t) => `<div class="emx-pct">${t}</div>`;
+  // Long model words are shortened only in the narrow column headings (full name on hover).
+  const shortHead = (m) => String(m).replace(/CONTINENTAL/i, 'CONT.').replace(/INTERCEPTOR/i, 'INTERCEPT.');
   const body = execs.map(e => {
     const total = Object.values(grid[e]).reduce((s,v) => s+v, 0);
     const cells = models.map(m => {
@@ -8127,10 +8147,21 @@ function renderExecModelMatrix(rows){
     models.map(m => `<td class="emx-share">${pct(modelTotals[m], all)}</td>`).join('')
   }<td class="emx-share">100%</td><td></td></tr>`;
 
-  el.innerHTML = `<div class="table-wrap"><table class="data emx">
-    <thead><tr><th>Executive</th>${models.map(m => `<th>${esc(m)}</th>`).join('')}<th>Total</th><th>Share</th></tr></thead>
+  // Laptop: one compact table that fits the screen width with no scrolling (header names wrap,
+  // columns share the width). Phone: one block per sales person instead of a wide grid.
+  const cards = execs.map(e => {
+    const total = Object.values(grid[e]).reduce((s,v) => s+v, 0);
+    const chips = models.filter(m => grid[e][m]).sort((a,b) => grid[e][b] - grid[e][a])
+      .map(m => `<span class="emx-chip"><b>${esc(m)}</b> ${grid[e][m]} · ${pct(grid[e][m], total)}</span>`).join('');
+    return `<div class="emx-card"><div class="emx-card-top"><span>${esc(e)}</span><span><b>${total}</b> bike${total === 1 ? '' : 's'} · <b class="emx-red">${pct(total, all)}</b></span></div><div class="emx-chips">${chips}</div></div>`;
+  }).join('');
+  const modelShare = `<div class="emx-card"><div class="emx-card-top"><span>Model share</span><span><b>${all}</b> bikes</span></div><div class="emx-chips">${
+    models.map(m => `<span class="emx-chip"><b>${esc(m)}</b> ${modelTotals[m]} · <b class="emx-red">${pct(modelTotals[m], all)}</b></span>`).join('')}</div></div>`;
+  el.innerHTML = `<div class="table-wrap emx-wrap"><table class="data emx">
+    <colgroup><col class="emx-c-name">${models.map(() => '<col>').join('')}<col class="emx-c-tot"><col class="emx-c-tot"></colgroup>
+    <thead><tr><th>Executive</th>${models.map(m => `<th title="${esc(m)}">${esc(shortHead(m))}</th>`).join('')}<th>Total</th><th>Share</th></tr></thead>
     <tbody>${body}${totalRow}${shareRow}</tbody>
-  </table></div>`;
+  </table></div><div class="emx-list">${modelShare}${cards}</div>`;
 }
 
 function renderDelivery(){
